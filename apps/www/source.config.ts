@@ -1,6 +1,7 @@
 import {
   defineConfig,
   defineDocs,
+  defineCollections,
   frontmatterSchema,
   metaSchema,
 } from 'fumadocs-mdx/config';
@@ -29,7 +30,26 @@ export const docs = defineDocs({
   },
 });
 
+export const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blogs',
+  schema: frontmatterSchema.extend({
+    date: z.coerce.date(),
+    author: z
+      .object({
+        name: z.string(),
+        url: z.string().optional(),
+        avatar: z.string().optional(),
+      })
+      .optional(),
+    image: z.string().optional(),
+    tags: z.array(z.string()).default([]),
+  }),
+});
+
 export default defineConfig({
   lastModifiedTime: 'git',
-  mdxOptions: {},
+  mdxOptions: {
+    rehypePlugins: [],
+  },
 });

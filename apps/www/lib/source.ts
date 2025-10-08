@@ -1,4 +1,4 @@
-import { docs } from '@/.source';
+import { docs, blog } from '@/.source';
 import { LucideIcons } from '@/components/icons/lucide-icons';
 import { attachFile } from '@/lib/attach-file';
 import { attachSeparator } from '@/lib/attach-separator';
@@ -8,6 +8,7 @@ import {
   type InferMetaType,
   type InferPageType,
 } from 'fumadocs-core/source';
+import { createMDXSource } from 'fumadocs-mdx';
 import { icons } from 'lucide-react';
 import { createElement } from 'react';
 
@@ -26,5 +27,21 @@ export const source = loader({
   },
 });
 
+export const blogs = loader({
+  baseUrl: '/blog',
+  source: createMDXSource(blog),
+});
+
+// Helper to get blog posts sorted by date (newest first)
+export const getSortedBlogPosts = () => {
+  return blogs
+    .getPages()
+    .sort(
+      (a, b) =>
+        new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+    );
+};
+
 export type Page = InferPageType<typeof source>;
 export type Meta = InferMetaType<typeof source>;
+export type BlogPage = InferPageType<typeof blogs>;

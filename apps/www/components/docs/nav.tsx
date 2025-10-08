@@ -30,6 +30,10 @@ export const NAV_ITEMS = [
     title: 'Icons',
     url: '/docs/icons',
   },
+  {
+    title: 'Blog',
+    url: '/blog',
+  },
 ];
 
 const NavItem = ({ title, url }: { title: string; url: string }) => {
