@@ -6,15 +6,15 @@ export const Footer = () => {
           <p className="text-center truncate">
             Built by{' '}
             <a
-              href="https://x.com/imskyleen"
+              href="https://x.com/richard2wang"
               rel="noopener noreferrer"
               target="_blank"
             >
-              Skyleen
+              Richard Wang
             </a>
             . The source code is available on{' '}
             <a
-              href="https://github.com/imskyleen/animate-ui"
+              href="https://github.com/i-richardwang/animate-blog"
               rel="noopener noreferrer"
               target="_blank"
             >

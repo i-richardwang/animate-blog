@@ -10,20 +10,17 @@ import { cn } from '@workspace/ui/lib/utils';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s - Animate UI',
-    default: 'Animate UI - Animated React Components',
+    template: "%s - Richard's Page",
+    default: "Richard's Page - Learning, Building, Sharing",
   },
   description:
-    'Fully animated, open-source component distribution built with React, TypeScript, Tailwind CSS, Motion and Shadcn CLI. Browse a list of components you can install, modify, and use in your projects.',
+    'A personal blog and knowledge base for learning, exploration, and sharing insights.',
   keywords: [
-    'Animate UI',
-    'React',
-    'TypeScript',
-    'Tailwind CSS',
-    'Framer Motion',
-    'Open-source components',
-    'Animated UI components',
-    'UI library',
+    'Personal Blog',
+    'Knowledge Base',
+    'Learning Notes',
+    'Tech Blog',
+    'Digital Garden',
   ],
   icons: [
     {
@@ -46,23 +43,23 @@ export const metadata: Metadata = {
   ],
   authors: [
     {
-      name: 'imskyleen',
-      url: 'https://github.com/imskyleen',
+      name: 'Richard Wang',
+      url: 'https://github.com/i-richardwang',
     },
   ],
-  publisher: 'Animate UI',
+  publisher: "Richard's Page",
   openGraph: {
-    title: 'Animate UI',
+    title: "Richard's Page",
     description:
-      'Fully animated, open-source component distribution built with React, TypeScript, Tailwind CSS, Motion and Shadcn CLI. Browse a list of components you can install, modify, and use in your projects.',
-    url: 'https://animate-ui.com',
-    siteName: 'Animate UI',
+      'A personal blog and knowledge base for learning, exploration, and sharing insights.',
+    url: 'https://richardwang.me',
+    siteName: "Richard's Page",
     images: [
       {
-        url: 'https://animate-ui.com/og-image.png',
+        url: 'https://richardwang.me/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Animate UI',
+        alt: "Richard's Page",
       },
     ],
     locale: 'en_US',
@@ -70,16 +67,16 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@animate_ui',
-    title: 'Animate UI',
+    site: '@richard2wang',
+    title: "Richard's Page",
     description:
-      'Fully animated, open-source component distribution built with React, TypeScript, Tailwind CSS, Motion and Shadcn CLI. Browse a list of components you can install, modify, and use in your projects.',
+      'A personal blog and knowledge base for learning, exploration, and sharing insights.',
     images: [
       {
-        url: 'https://animate-ui.com/og-image.png',
+        url: 'https://richardwang.me/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Animate UI',
+        alt: "Richard's Page",
       },
     ],
   },

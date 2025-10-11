@@ -1,0 +1,20 @@
+{
+  "title": "Data Science",
+  "description": "Data Science Learning & Practice",
+  "icon": "BarChart3",
+  "root": true,
+  "pages": [
+    "---Analysis---",
+    "analysis/exploratory-data-analysis",
+    "analysis/data-cleaning",
+    "analysis/feature-engineering",
+    "---Visualization---",
+    "visualization/charts",
+    "visualization/dashboards",
+    "visualization/interactive-viz",
+    "---Statistics---",
+    "statistics/descriptive",
+    "statistics/inferential",
+    "statistics/probability"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "title": "Development",
+  "description": "Development Journey & Best Practices",
+  "icon": "Code",
+  "root": true,
+  "pages": [
+    "---Frontend---",
+    "frontend/react",
+    "frontend/nextjs",
+    "frontend/ui-design",
+    "---Backend---",
+    "backend/nodejs",
+    "backend/databases",
+    "backend/apis",
+    "---DevOps---",
+    "devops/deployment",
+    "devops/ci-cd",
+    "devops/monitoring"
+  ]
+}

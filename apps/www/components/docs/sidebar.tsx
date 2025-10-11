@@ -152,7 +152,7 @@ export function SidebarPageTree(props: {
 
     return (
       // @ts-ignore
-      <Fragment key={root.$id}>{renderSidebarList(root.children, 1)}</Fragment>
+      <Fragment key={root.$id}>{renderSidebarList(root.children)}</Fragment>
     );
   }, [props.components, root, hoveredItem, pathname]);
 }
@@ -295,10 +295,17 @@ export const DocsSidebar = ({
   );
   const pathname = usePathname();
   const links = getLinks(props.links ?? [], props.githubUrl);
+
+  // Original path check (commented out for upstream sync)
+  // const isMenu =
+  //   !pathname.startsWith('/docs/primitives') &&
+  //   !pathname.startsWith('/docs/components') &&
+  //   !pathname.startsWith('/docs/icons');
+
   const isMenu =
-    !pathname.startsWith('/docs/primitives') &&
-    !pathname.startsWith('/docs/components') &&
-    !pathname.startsWith('/docs/icons');
+    !pathname.startsWith('/docs/ai') &&
+    !pathname.startsWith('/docs/data-science') &&
+    !pathname.startsWith('/docs/development');
   const isMobile = useIsMobile();
 
   return (

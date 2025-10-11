@@ -3,24 +3,24 @@ export const jsonLd = {
   '@graph': [
     {
       '@type': 'WebSite',
-      '@id': 'https://animate-ui.com/#website',
-      url: 'https://animate-ui.com',
-      name: 'Animate UI',
+      '@id': 'https://richardwang.me/#website',
+      url: 'https://richardwang.me',
+      name: "John Doe's Page",
       description:
-        'Fully animated, open-source component distribution built with React, TypeScript, Tailwind CSS, Motion and Shadcn CLI. Browse a list of components you can install, modify, and use in your projects.',
+        'A personal blog and knowledge base for learning, exploration, and sharing insights.',
       inLanguage: 'en',
       publisher: {
-        '@id': 'https://animate-ui.com/#organization',
+        '@id': 'https://richardwang.me/#organization',
       },
     },
     {
       '@type': 'Organization',
-      '@id': 'https://animate-ui.com/#organization',
-      name: 'Animate UI',
-      url: 'https://animate-ui.com',
+      '@id': 'https://richardwang.me/#organization',
+      name: "John Doe's Page",
+      url: 'https://richardwang.me',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://animate-ui.com/icon-logo.png',
+        url: 'https://richardwang.me/icon-logo.png',
         width: 512,
         height: 512,
       },

@@ -1,0 +1,243 @@
+---
+title: Building a Personal Site with Animate UI
+description: How I transformed an open-source component library into a personal blog and knowledge base, and how you can do the same.
+date: 2024-01-15
+author:
+  name: Richard Wang
+  url: https://github.com/i-richardwang
+tags:
+  - Web Development
+  - Open Source
+  - Personal Site
+---
+
+When I decided to build my personal website, I wanted something more than just a basic blog template. I needed a space that could serve as both a digital garden for my notes and a showcase for my work—all while looking beautiful and feeling modern.
+
+That's when I discovered [Animate UI](https://animate-ui.com).
+
+## Why Animate UI?
+
+Animate UI is an open-source React component distribution built with Tailwind CSS and Motion. What caught my attention wasn't just the gorgeous animations—it was the philosophy behind it.
+
+Unlike typical npm packages, Animate UI follows the "copy and customize" approach popularized by shadcn/ui. You don't install it as a dependency; you copy the source code directly into your project. This means **complete control** over every component, every animation, and every design decision.
+
+The original project is designed as a component library documentation site, showcasing animated primitives, components, and icons. But I saw potential for something different.
+
+## The Transformation Journey
+
+### From Component Library to Digital Garden
+
+The beauty of Animate UI's architecture is its flexibility. The site is built with:
+
+- **Next.js 15** for the framework
+- **Fumadocs** for documentation structure
+- **Tailwind CSS** for styling
+- **Motion** (Framer Motion) for animations
+
+I realized this tech stack was perfect for a personal site. The documentation structure could easily become a knowledge base, the component showcase could transform into a blog, and those beautiful animations would make the whole experience delightful.
+
+### The Core Changes
+
+I approached the transformation with a simple philosophy: **preserve the original structure, customize the content**.
+
+**Navigation & Structure**: The original site had sections for Components, Primitives, and Icons. I replaced these with my content pillars: AI Exploration, Data Science, and Development. But I didn't stop there—I also added a dedicated Blog section, something the original project didn't have. The beauty is that Fumadocs already supported blog collections; I just needed to wire it up and add it to the navigation.
+
+**Homepage Evolution**: The hero section's animated logo and text effects were too good to lose. I kept all the animations but changed the messaging from "Animate your UI" to "Learning, Building, Sharing"—a better fit for a personal site. The CTA buttons now point to "Explore Notes" and "Read Blog" instead of component documentation.
+
+**Content Architecture**: Instead of component documentation, I created a dual content system:
+
+- **Knowledge Base** (`/docs`): A three-tier structure with main modules (AI, Data Science, Development), sub-categories, and detailed notes
+- **Blog** (`/blog`): For sharing thoughts, tutorials, and project updates—more narrative, less structured than the knowledge base
+
+The existing meta.json system for organizing docs worked beautifully for both the structured notes and the chronological blog posts.
+
+### Design Decisions
+
+One thing I was careful about: **maintaining the original design language**. The animations, the spacing, the typography—these were all thoughtfully crafted. Rather than reinventing the wheel, I focused on adapting the content to fit the existing aesthetic.
+
+The result? A personal site that feels cohesive, professional, and uniquely animated.
+
+## Making It Your Own
+
+If you want to use this as a starting point for your own site, here's what you'll need to customize. I've designed the changes to be straightforward—mostly configuration and content updates.
+
+### Site Identity
+
+The first step is making it yours—branding, metadata, and links.
+
+**Update site metadata** in `apps/www/app/layout.tsx`:
+
+```tsx
+export const metadata: Metadata = {
+  title: {
+    template: '%s - Your Name',
+    default: 'Your Name - Your Tagline',
+  },
+  description: 'Your site description...',
+  // Update keywords, authors, publisher, etc.
+};
+```
+
+**Replace the domain** in both `layout.tsx` and `lib/json-ld.ts`:
+
+```tsx
+// Find and replace
+url: 'https://richardwang.me';
+// with
+url: 'https://yourdomain.com';
+```
+
+**Update social links** - GitHub and Twitter/X appear in multiple files:
+
+- `components/header.tsx`
+- `components/docs/nav.tsx`
+- `components/footer.tsx`
+- `app/docs/layout.tsx`
+
+Just search for `i-richardwang` and `richard2wang` and replace with your handles.
+
+### Visual Identity
+
+**Logo**: If you want to keep the animated SVG logo (recommended—it's beautiful!), you'll need to create your text as an SVG path.
+
+The easiest way:
+
+1. Open Figma, create your text
+2. Select font and size
+3. Right-click → "Outline Stroke"
+4. Export as SVG
+5. Copy the path data into `components/logo.tsx`
+
+The logo component uses Motion to animate the path drawing—super smooth effect.
+
+**Favicon**: Replace the files in `/public`:
+
+- `favicon-16x16.png`
+- `favicon-32x32.png`
+- `apple-touch-icon.png`
+- `og-image.png` (for social sharing)
+
+### Content & Navigation
+
+**Homepage hero** (`components/hero.tsx`):
+
+```tsx
+const TITLE = 'Your Tagline Here';
+
+// Update the badge/announcement
+<Link href="/blog">Latest thoughts and notes</Link>
+
+// Update the description
+<p>Your personal introduction...</p>
+
+// Update CTA buttons
+<Link href="/docs">Explore Notes</Link>
+<Link href="/blog">Read Blog</Link>
+```
+
+**Header navigation** (`components/docs/nav.tsx`):
+
+```tsx
+export const NAV_ITEMS = [
+  { title: 'Your Section 1', url: '/docs/section-1' },
+  { title: 'Your Section 2', url: '/docs/section-2' },
+  { title: 'Blog', url: '/blog' },
+];
+```
+
+**Sidebar tabs** (`lib/sidebar.tsx`):
+
+```tsx
+export const SIDEBAR_TABS = [
+  {
+    title: 'Your Section',
+    description: <TabsDescription title="Description" count={0} />,
+    icon: <YourIcon />,
+    url: '/docs/your-section',
+  },
+  // Add more sections for your knowledge base
+];
+```
+
+**Guide links** in sidebar (`app/layout.config.tsx`):
+
+```tsx
+links: [
+  {
+    type: 'separator',
+    name: 'Guide',
+    icon: <BookOpen />,
+  },
+  {
+    text: 'Your Link',
+    url: '/your-url',
+  },
+];
+```
+
+### Content Organization
+
+The site supports two types of content, each with its own purpose:
+
+**Knowledge Base** (`/content/docs/`): Structured, hierarchical notes organized by topic. Each section needs:
+
+- `index.mdx` - landing page with Cards to sub-sections
+- `meta.json` - defines navigation structure and ordering
+- Individual `.mdx` files for detailed notes
+
+Example `meta.json`:
+
+```json
+{
+  "title": "Your Section",
+  "pages": ["---Category Name---", "category/article-1", "category/article-2"]
+}
+```
+
+**Blog** (`/content/blogs/`): Time-based posts for sharing thoughts, tutorials, and updates. Each post is a standalone `.mdx` file with frontmatter:
+
+```mdx
+---
+title: Your Post Title
+description: Brief description
+date: 2024-01-15
+tags: ['tag1', 'tag2']
+---
+```
+
+This dual structure gives you flexibility—use `/docs` for evergreen, structured content and `/blog` for timely, narrative pieces.
+
+### A Note on Code Preservation
+
+Throughout the codebase, you'll see comments like:
+
+```tsx
+// Original ... (commented out for upstream sync)
+```
+
+I've kept all the original Animate UI code in comments. This makes it easy to:
+
+- See what changed
+- Sync with upstream updates
+- Reference the original implementation
+
+Feel free to keep this pattern or remove the comments once you're comfortable with the codebase.
+
+## The Result
+
+What started as a component library is now a personal digital space. The animations that once showcased UI components now guide visitors through my thoughts and projects. The documentation structure that explained primitives now organizes my knowledge.
+
+And the best part? Because everything is customizable at the source level, I can continue to evolve it. Want to add a new section? Create a new module. Need a different layout? Modify the components. The possibilities are endless.
+
+If you build something with this, I'd love to see it. Feel free to reach out and share what you create!
+
+## Credits
+
+Huge thanks to the [Animate UI](https://animate-ui.com) team for building such an incredible foundation. The component library, the animations, the documentation structure—it's all open source and beautifully crafted.
+
+If you haven't checked out Animate UI for your projects, I highly recommend it. And if you're building a personal site, well, you know where to start now.
+
+---
+
+**GitHub Repository**: [animate-blog](https://github.com/i-richardwang/animate-blog)  
+**Built with**: [Animate UI](https://animate-ui.com), Next.js, Tailwind CSS, Motion

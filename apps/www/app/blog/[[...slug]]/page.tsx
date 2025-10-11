@@ -36,7 +36,7 @@ export default async function Page(props: {
         <DocsPage toc={[]}>
           <DocsTitle className="font-medium">Blog</DocsTitle>
           <DocsDescription className="mb-1 font-normal">
-            Latest updates, tutorials, and insights from Animate UI
+            Thoughts, learnings, and experiences from my journey
           </DocsDescription>
 
           <DocsBody id="docs-body" className="pb-10 pt-4">
@@ -121,12 +121,12 @@ export async function generateMetadata(props: {
     return {
       title: 'Blog',
       description:
-        'Latest updates, tutorials, and insights from Animate UI. Learn about animated components, Motion API, and best practices.',
+        'Thoughts, learnings, and experiences from my journey. Sharing insights and knowledge along the way.',
       openGraph: {
-        title: 'Blog - Animate UI',
-        description: 'Latest updates, tutorials, and insights from Animate UI',
-        url: 'https://animate-ui.com/blog',
-        siteName: 'Animate UI',
+        title: 'Blog',
+        description: 'Thoughts, learnings, and experiences from my journey',
+        url: 'https://richardwang.me/blog',
+        siteName: "Richard's Page",
         type: 'website',
         locale: 'en_US',
       },
@@ -155,8 +155,8 @@ export async function generateMetadata(props: {
     openGraph: {
       title: page.data.title,
       description: page.data.description,
-      url: `https://animate-ui.com${page.url}`,
-      siteName: 'Animate UI',
+      url: `https://richardwang.me${page.url}`,
+      siteName: "Richard's Page",
       type: 'article',
       publishedTime: new Date(page.data.date).toISOString(),
       locale: 'en_US',
@@ -164,7 +164,7 @@ export async function generateMetadata(props: {
     },
     twitter: {
       card: 'summary_large_image',
-      site: '@animate_ui',
+      site: '@richard2wang',
       title: page.data.title,
       description: page.data.description,
       images: page.data.image || image,

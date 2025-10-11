@@ -14,21 +14,36 @@ import { GithubStarsLogo } from '@/registry/primitives/animate/github-stars';
 import { Menu } from '@/registry/icons/menu';
 
 export const NAV_ITEMS = [
+  // Original navigation items (commented out for upstream sync)
+  // {
+  //   title: 'Docs',
+  //   url: '/docs',
+  // },
+  // {
+  //   title: 'Components',
+  //   url: '/docs/components',
+  // },
+  // {
+  //   title: 'Primitives',
+  //   url: '/docs/primitives',
+  // },
+  // {
+  //   title: 'Icons',
+  //   url: '/docs/icons',
+  // },
+
+  // Personal blog navigation
   {
-    title: 'Docs',
-    url: '/docs',
+    title: 'AI Exploration',
+    url: '/docs/ai',
   },
   {
-    title: 'Components',
-    url: '/docs/components',
+    title: 'Data Science',
+    url: '/docs/data-science',
   },
   {
-    title: 'Primitives',
-    url: '/docs/primitives',
-  },
-  {
-    title: 'Icons',
-    url: '/docs/icons',
+    title: 'Development',
+    url: '/docs/development',
   },
   {
     title: 'Blog',
@@ -97,7 +112,7 @@ export const Nav = () => {
 
           <div className="flex items-center gap-1 max-md:hidden">
             <a
-              href="https://github.com/imskyleen/animate-ui"
+              href="https://github.com/i-richardwang/animate-blog"
               rel="noreferrer noopener"
               target="_blank"
               className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground size-8 [&_svg]:size-5 text-fd-muted-foreground"
@@ -107,7 +122,7 @@ export const Nav = () => {
             </a>
 
             <a
-              href="https://x.com/animate_ui"
+              href="https://x.com/richard2wang"
               rel="noreferrer noopener"
               target="_blank"
               className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground size-8 [&_svg]:size-5 text-fd-muted-foreground"

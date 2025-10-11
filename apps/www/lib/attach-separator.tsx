@@ -11,6 +11,14 @@ import {
   SparklesIcon,
   SquareMenu,
   TypeIcon,
+  BookOpen,
+  Wrench,
+  TrendingUp,
+  BarChart3,
+  Calculator,
+  Layout,
+  Server,
+  Rocket,
 } from 'lucide-react';
 import { LucideIcons } from '@/components/icons/lucide-icons';
 
@@ -103,6 +111,73 @@ export const attachSeparator: BuildPageTreeOptions['attachSeparator'] = (
       node.name = (
         <Separator icon={<SquareMenu strokeWidth={2} />} name="Menu" />
       );
+      break;
+    case 'Personal Notes':
+      node.name = (
+        <Separator icon={<Code strokeWidth={2.5} />} name="Personal Notes" />
+      );
+      break;
+    case 'AI Exploration':
+      node.name = (
+        <Separator
+          icon={<SparklesIcon fill="currentColor" />}
+          name="AI Exploration"
+        />
+      );
+      break;
+    case 'Data Science':
+      node.name = (
+        <Separator icon={<BarChart3 strokeWidth={2} />} name="Data Science" />
+      );
+      break;
+    case 'Development':
+      node.name = (
+        <Separator icon={<Code strokeWidth={2.5} />} name="Development" />
+      );
+      break;
+    case 'Fundamentals':
+      node.name = (
+        <Separator icon={<BookOpen strokeWidth={2} />} name="Fundamentals" />
+      );
+      break;
+    case 'Applications':
+      node.name = (
+        <Separator
+          icon={<SparklesIcon fill="currentColor" />}
+          name="Applications"
+        />
+      );
+      break;
+    case 'Tools':
+      node.name = <Separator icon={<Wrench strokeWidth={2} />} name="Tools" />;
+      break;
+    case 'Analysis':
+      node.name = (
+        <Separator icon={<TrendingUp strokeWidth={2} />} name="Analysis" />
+      );
+      break;
+    case 'Visualization':
+      node.name = (
+        <Separator icon={<BarChart3 strokeWidth={2} />} name="Visualization" />
+      );
+      break;
+    case 'Statistics':
+      node.name = (
+        <Separator icon={<Calculator strokeWidth={2} />} name="Statistics" />
+      );
+      break;
+    case 'Frontend':
+      node.name = (
+        <Separator icon={<Layout strokeWidth={2} />} name="Frontend" />
+      );
+      break;
+    case 'Backend':
+      node.name = (
+        <Separator icon={<Server strokeWidth={2} />} name="Backend" />
+      );
+      break;
+    case 'DevOps':
+      node.name = <Separator icon={<Rocket strokeWidth={2} />} name="DevOps" />;
       break;
   }
 

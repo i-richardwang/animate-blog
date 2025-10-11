@@ -58,17 +58,37 @@ export default async function Page(props: {
       } as const;
     }
 
-    if (page.url.startsWith('/docs/components/')) {
-      return { url: '/docs/components', name: 'Components' } as const;
+    // Original navigation logic (commented out for upstream sync)
+    // if (page.url.startsWith('/docs/components/')) {
+    //   return { url: '/docs/components', name: 'Components' } as const;
+    // }
+    // if (page.url.startsWith('/docs/primitives/')) {
+    //   return { url: '/docs/primitives', name: 'Primitives' } as const;
+    // }
+    //
+    // const isSectionRoot =
+    //   page.url === '/docs/components' ||
+    //   page.url === '/docs/primitives' ||
+    //   page.url === '/docs/icons/get-started';
+    // if (isSectionRoot && guideItems.length > 0) {
+    //   const last = guideItems[guideItems.length - 1];
+    //   return { url: last.url, name: last.text } as const;
+    // }
+
+    if (page.url.startsWith('/docs/ai/')) {
+      return { url: '/docs/ai', name: 'AI Exploration' } as const;
     }
-    if (page.url.startsWith('/docs/primitives/')) {
-      return { url: '/docs/primitives', name: 'Primitives' } as const;
+    if (page.url.startsWith('/docs/data-science/')) {
+      return { url: '/docs/data-science', name: 'Data Science' } as const;
+    }
+    if (page.url.startsWith('/docs/development/')) {
+      return { url: '/docs/development', name: 'Development' } as const;
     }
 
     const isSectionRoot =
-      page.url === '/docs/components' ||
-      page.url === '/docs/primitives' ||
-      page.url === '/docs/icons/get-started';
+      page.url === '/docs/ai' ||
+      page.url === '/docs/data-science' ||
+      page.url === '/docs/development';
     if (isSectionRoot && guideItems.length > 0) {
       const last = guideItems[guideItems.length - 1];
       return { url: last.url, name: last.text } as const;
@@ -84,7 +104,8 @@ export default async function Page(props: {
             url: guideItems[guideIndex + 1].url,
             name: guideItems[guideIndex + 1].text,
           }
-        : { url: '/docs/components', name: 'Components' }
+        : // Original: { url: '/docs/components', name: 'Components' }
+          { url: '/docs/ai', name: 'AI Exploration' }
       : nextPage
         ? { url: nextPage.url, name: String(nextPage.name ?? 'Suivant') }
         : undefined;
@@ -200,15 +221,15 @@ export async function generateMetadata(props: {
     openGraph: {
       title: page.data.title,
       description: page.data.description,
-      url: 'https://animate-ui.com',
-      siteName: 'Animate UI',
+      url: 'https://richardwang.me',
+      siteName: "Richard's Page",
       images: image,
       locale: 'en_US',
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      site: '@animate_ui',
+      site: '@richard2wang',
       title: page.data.title,
       description: page.data.description,
       images: image,

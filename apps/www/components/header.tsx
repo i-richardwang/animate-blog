@@ -59,7 +59,7 @@ export const Header = ({ transition }: { transition: boolean }) => {
             layoutId="logo"
             className="absolute z-110 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           >
-            <Logo size={isMobile ? 'lg' : 'xl'} draw />
+            <Logo size={isMobile ? 'lg' : '3xl'} draw />
           </motion.div>
         )}
 
@@ -87,13 +87,13 @@ export const Header = ({ transition }: { transition: boolean }) => {
         >
           <div className="hidden xs:flex items-center gap-x-1">
             <GithubStars
-              username="imskyleen"
-              repo="animate-ui"
+              username="i-richardwang"
+              repo="animate-blog"
               delay={2000}
               asChild
             >
               <a
-                href="https://github.com/imskyleen/animate-ui"
+                href="https://github.com/i-richardwang/animate-blog"
                 rel="noreferrer noopener"
                 target="_blank"
                 className="sm:mt-1 group cursor-pointer justify-center rounded-md text-sm group font-medium transition-colors duration-300 ease-in-out disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&_svg]:size-5 text-fd-muted-foreground sm:[&_svg]:size-5.5 flex items-center gap-x-2"
@@ -113,7 +113,7 @@ export const Header = ({ transition }: { transition: boolean }) => {
               </a>
             </GithubStars>
             <a
-              href="https://x.com/animate_ui"
+              href="https://x.com/richard2wang"
               rel="noreferrer noopener"
               target="_blank"
               className="inline-flex sm:mt-1 items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&_svg]:size-5 text-fd-muted-foreground sm:[&_svg]:size-5.5"

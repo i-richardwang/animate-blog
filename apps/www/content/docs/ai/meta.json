@@ -1,0 +1,20 @@
+{
+  "title": "AI Exploration",
+  "description": "AI Exploration & Practice",
+  "icon": "Brain",
+  "root": true,
+  "pages": [
+    "---Fundamentals---",
+    "fundamentals/machine-learning",
+    "fundamentals/deep-learning",
+    "fundamentals/neural-networks",
+    "---Applications---",
+    "applications/nlp",
+    "applications/computer-vision",
+    "applications/generative-ai",
+    "---Tools---",
+    "tools/frameworks",
+    "tools/libraries",
+    "tools/platforms"
+  ]
+}

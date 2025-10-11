@@ -15,7 +15,7 @@ const DOCS_LAYOUT_PROPS: DocsLayoutProps = {
     tabs: SIDEBAR_TABS,
   },
 
-  githubUrl: 'https://github.com/imskyleen/animate-ui',
+  githubUrl: 'https://github.com/i-richardwang/animate-blog',
   themeSwitch: {
     component: <ThemeSwitcher />,
   },
@@ -24,7 +24,7 @@ const DOCS_LAYOUT_PROPS: DocsLayoutProps = {
     ...(baseOptions.links || []),
     {
       icon: <XIcon />,
-      url: 'https://x.com/animate_ui',
+      url: 'https://x.com/richard2wang',
       text: 'X',
       type: 'icon',
     },
