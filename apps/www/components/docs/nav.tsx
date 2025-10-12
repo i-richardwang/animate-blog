@@ -46,6 +46,10 @@ export const NAV_ITEMS = [
     url: '/docs/development',
   },
   {
+    title: 'Projects',
+    url: '/projects',
+  },
+  {
     title: 'Blog',
     url: '/blog',
   },

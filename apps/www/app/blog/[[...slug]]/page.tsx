@@ -149,8 +149,8 @@ export async function generateMetadata(props: {
           },
         ]
       : {
-          name: 'imskyleen',
-          url: 'https://github.com/imskyleen',
+          name: 'Richard Wang',
+          url: 'https://github.com/i-richardwang',
         },
     openGraph: {
       title: page.data.title,

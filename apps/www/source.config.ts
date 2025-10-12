@@ -47,6 +47,25 @@ export const blog = defineCollections({
   }),
 });
 
+export const project = defineCollections({
+  type: 'doc',
+  dir: 'content/projects',
+  schema: frontmatterSchema.extend({
+    date: z.coerce.date(),
+    tech: z.array(z.string()).default([]),
+    links: z
+      .object({
+        github: z.string().optional(),
+        demo: z.string().optional(),
+        docs: z.string().optional(),
+      })
+      .optional(),
+    image: z.string().optional(),
+    logo: z.string().optional(),
+    featured: z.boolean().default(false),
+  }),
+});
+
 export default defineConfig({
   lastModifiedTime: 'git',
   mdxOptions: {

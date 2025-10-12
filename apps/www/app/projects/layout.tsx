@@ -5,21 +5,20 @@ import { Nav } from '@/components/docs/nav';
 import { baseOptions } from '@/app/layout.config';
 import { ThemeSwitcher } from '@/components/animate/theme-switcher';
 import XIcon from '@workspace/ui/components/icons/x-icon';
-import { getSortedBlogPosts } from '@/lib/source';
+import { getSortedProjects } from '@/lib/source';
 import type { PageTree } from 'fumadocs-core/server';
 
-// Build page tree sorted by date (newest first)
-const blogTree: PageTree.Root = {
-  name: 'Blog',
-  children: getSortedBlogPosts().map((post) => ({
+const projectTree: PageTree.Root = {
+  name: 'Projects',
+  children: getSortedProjects().map((project) => ({
     type: 'page',
-    name: post.data.title,
-    url: post.url,
+    name: project.data.title,
+    url: project.url,
   })),
 };
 
-const BLOG_LAYOUT_PROPS: DocsLayoutProps = {
-  tree: blogTree,
+const PROJECTS_LAYOUT_PROPS: DocsLayoutProps = {
+  tree: projectTree,
   githubUrl: 'https://github.com/i-richardwang/animate-blog',
   themeSwitch: {
     component: <ThemeSwitcher />,
@@ -39,10 +38,10 @@ const BLOG_LAYOUT_PROPS: DocsLayoutProps = {
   },
 };
 
-export default function BlogLayout({ children }: { children: ReactNode }) {
+export default function ProjectsLayout({ children }: { children: ReactNode }) {
   return (
     <DocsLayout
-      {...BLOG_LAYOUT_PROPS}
+      {...PROJECTS_LAYOUT_PROPS}
       nav={{
         component: <Nav />,
       }}

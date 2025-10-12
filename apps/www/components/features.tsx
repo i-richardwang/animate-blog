@@ -89,6 +89,7 @@ const COMPONENTS = [
   },
   {
     name: 'Projects',
+    href: '/projects',
     icon: <Projects />,
   },
   {

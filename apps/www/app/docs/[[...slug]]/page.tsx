@@ -171,12 +171,12 @@ export default async function Page(props: {
       <div className="flex flex-row gap-2 items-center">
         <EditOnGitHub
           className="border-0 [&_svg]:text-fd-muted-foreground"
-          href={`https://github.com/imskyleen/animate-ui/blob/main/apps/www/content/docs/${params.slug ? `${params.slug.join('/')}.mdx` : 'index.mdx'}`}
+          href={`https://github.com/i-richardwang/animate-blog/blob/main/apps/www/content/docs/${params.slug ? `${params.slug.join('/')}.mdx` : 'index.mdx'}`}
         />
         <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptions
           markdownUrl={`${page.url}.mdx`}
-          githubUrl={`https://github.com/imskyleen/animate-ui/blob/main/apps/www/content/docs/${page.path}`}
+          githubUrl={`https://github.com/i-richardwang/animate-blog/blob/main/apps/www/content/docs/${page.path}`}
         />
       </div>
 
@@ -215,8 +215,8 @@ export async function generateMetadata(props: {
           },
         ]
       : {
-          name: 'imskyleen',
-          url: 'https://github.com/imskyleen',
+          name: 'Richard Wang',
+          url: 'https://github.com/i-richardwang',
         },
     openGraph: {
       title: page.data.title,
