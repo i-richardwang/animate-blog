@@ -35,18 +35,6 @@ export const NAV_ITEMS = [
 
   // Personal blog navigation
   {
-    title: 'AI 探索',
-    url: '/docs/ai',
-  },
-  {
-    title: '数据科学',
-    url: '/docs/data-science',
-  },
-  {
-    title: '开发实践',
-    url: '/docs/development',
-  },
-  {
     title: '项目',
     url: '/projects',
   },
