@@ -7,6 +7,7 @@ import { ThemeSwitcher } from '@/components/animate/theme-switcher';
 import XIcon from '@workspace/ui/components/icons/x-icon';
 import { getSortedBlogPosts } from '@/lib/source';
 import type { PageTree } from 'fumadocs-core/server';
+import { DocsSidebar } from '@/components/docs/sidebar';
 
 // Build page tree sorted by date (newest first)
 const blogTree: PageTree.Root = {
@@ -34,20 +35,24 @@ const BLOG_LAYOUT_PROPS: DocsLayoutProps = {
       type: 'icon',
     },
   ],
-  sidebar: {
-    enabled: false,
-  },
 };
 
 export default function BlogLayout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout
-      {...BLOG_LAYOUT_PROPS}
-      nav={{
-        component: <Nav />,
-      }}
-    >
-      {children}
-    </DocsLayout>
+    <>
+      <DocsLayout
+        {...BLOG_LAYOUT_PROPS}
+        nav={{
+          component: <Nav />,
+        }}
+        sidebar={{
+          enabled: false,
+        }}
+      >
+        {children}
+      </DocsLayout>
+      {/* Mobile-only sidebar overlay for Blog routes */}
+      <DocsSidebar {...BLOG_LAYOUT_PROPS} />
+    </>
   );
 }

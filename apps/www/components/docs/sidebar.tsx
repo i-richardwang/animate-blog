@@ -305,31 +305,39 @@ export const DocsSidebar = ({
   const isMenu =
     !pathname.startsWith('/docs/ai') &&
     !pathname.startsWith('/docs/data-science') &&
-    !pathname.startsWith('/docs/development');
+    !pathname.startsWith('/docs/development') &&
+    !pathname.startsWith('/blog') &&
+    !pathname.startsWith('/projects');
   const isMobile = useIsMobile();
+  const isBlogOrProjects =
+    pathname.startsWith('/blog') || pathname.startsWith('/projects');
 
   return (
     <>
       <Sidebar
         collapsible={false}
-        className="md:mt-20 3xl:!absolute"
+        className={cn(
+          'md:mt-20 3xl:!absolute',
+          isBlogOrProjects && 'md:hidden',
+        )}
         {...sidebarProps}
       >
         <SidebarViewport className="md:[&_[data-radix-scroll-area-viewport]]:pb-14 [&_[data-radix-scroll-area-viewport]]:pb-4 max-md:pt-2">
-          {links
-            .filter((v) => v.type !== 'icon')
-            .map((item, i, list) => (
-              <SidebarLinkItem
-                key={i}
-                item={item}
-                className={cn(
-                  item.type !== 'custom' && sidebarItemClassName,
-                  i === list.length - 1 && 'mb-4',
-                )}
-              />
-            ))}
+          {!isBlogOrProjects &&
+            links
+              .filter((v) => v.type !== 'icon')
+              .map((item, i, list) => (
+                <SidebarLinkItem
+                  key={i}
+                  item={item}
+                  className={cn(
+                    item.type !== 'custom' && sidebarItemClassName,
+                    i === list.length - 1 && 'mb-4',
+                  )}
+                />
+              ))}
 
-          {isMobile && (
+          {isBlogOrProjects && isMobile ? (
             <div>
               {MENU_ITEMS.map((item, i) => (
                 <SidebarLinkItem
@@ -343,39 +351,58 @@ export const DocsSidebar = ({
                 />
               ))}
             </div>
+          ) : (
+            !isMenu &&
+            isMobile && (
+              <div>
+                {MENU_ITEMS.map((item, i) => (
+                  <SidebarLinkItem
+                    key={i}
+                    item={item as LinkItemType}
+                    className={cn(
+                      sidebarItemClassName,
+                      i === 0 && 'mt-4',
+                      i === MENU_ITEMS.length - 1 && 'mb-4',
+                    )}
+                  />
+                ))}
+              </div>
+            )
           )}
 
-          {((!isMenu && isMobile) || !isMobile) && (
+          {!isBlogOrProjects && (
             <SidebarPageTree components={sidebarComponents} />
           )}
         </SidebarViewport>
 
-        <HideIfEmpty>
-          <SidebarFooter className="data-[empty=true]:hidden md:hidden border-0">
-            <div className="flex items-center justify-end empty:hidden">
-              {links
-                .filter((item) => item.type === 'icon')
-                .map((item, i, arr) => (
-                  // @ts-ignore
-                  <BaseLinkItem
-                    key={i}
-                    item={item}
-                    className={cn(
-                      buttonVariants({ size: 'icon', color: 'ghost' }),
-                      'text-fd-muted-foreground md:[&_svg]:size-4.5',
-                      i === arr.length - 1 && 'me-auto',
-                    )}
-                    aria-label={item.label}
-                  >
-                    {item.icon}
-                  </BaseLinkItem>
-                ))}
+        {!isBlogOrProjects && (
+          <HideIfEmpty>
+            <SidebarFooter className="data-[empty=true]:hidden md:hidden border-0">
+              <div className="flex items-center justify-end empty:hidden">
+                {links
+                  .filter((item) => item.type === 'icon')
+                  .map((item, i, arr) => (
+                    // @ts-ignore
+                    <BaseLinkItem
+                      key={i}
+                      item={item}
+                      className={cn(
+                        buttonVariants({ size: 'icon', color: 'ghost' }),
+                        'text-fd-muted-foreground md:[&_svg]:size-4.5',
+                        i === arr.length - 1 && 'me-auto',
+                      )}
+                      aria-label={item.label}
+                    >
+                      {item.icon}
+                    </BaseLinkItem>
+                  ))}
 
-              <ThemeSwitcher />
-            </div>
-            {sidebarFooter}
-          </SidebarFooter>
-        </HideIfEmpty>
+                <ThemeSwitcher />
+              </div>
+              {sidebarFooter}
+            </SidebarFooter>
+          </HideIfEmpty>
+        )}
       </Sidebar>
     </>
   );

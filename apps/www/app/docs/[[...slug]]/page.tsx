@@ -130,34 +130,34 @@ export default async function Page(props: {
         <DocsTitle className="font-medium">{page.data.title}</DocsTitle>
         {(prevNav || nextNav) && (
           <div className="flex flex-row gap-1.5 items-center pt-0.5">
-            <Link
-              href={prevNav?.url ?? page.url}
-              aria-disabled={!prevNav}
-              className={
-                !prevNav ? 'pointer-events-none opacity-50' : undefined
-              }
-              aria-label={
-                prevNav ? `Aller à ${prevNav.name}` : 'Pas de page précédente'
-              }
-            >
-              <Button variant="accent" size="icon-sm">
+            <Button variant="accent" size="icon-sm" asChild>
+              <Link
+                href={prevNav?.url ?? page.url}
+                aria-disabled={!prevNav}
+                className={
+                  !prevNav ? 'pointer-events-none opacity-50' : undefined
+                }
+                aria-label={
+                  prevNav ? `Aller à ${prevNav.name}` : 'Pas de page précédente'
+                }
+              >
                 <ArrowLeft />
-              </Button>
-            </Link>
-            <Link
-              href={nextNav?.url ?? page.url}
-              aria-disabled={!nextNav}
-              className={
-                !nextNav ? 'pointer-events-none opacity-50' : undefined
-              }
-              aria-label={
-                nextNav ? `Aller à ${nextNav.name}` : 'Pas de page suivante'
-              }
-            >
-              <Button variant="accent" size="icon-sm">
+              </Link>
+            </Button>
+            <Button variant="accent" size="icon-sm" asChild>
+              <Link
+                href={nextNav?.url ?? page.url}
+                aria-disabled={!nextNav}
+                className={
+                  !nextNav ? 'pointer-events-none opacity-50' : undefined
+                }
+                aria-label={
+                  nextNav ? `Aller à ${nextNav.name}` : 'Pas de page suivante'
+                }
+              >
                 <ArrowRight />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         )}
       </div>

@@ -7,6 +7,7 @@ import { ThemeSwitcher } from '@/components/animate/theme-switcher';
 import XIcon from '@workspace/ui/components/icons/x-icon';
 import { getSortedProjects } from '@/lib/source';
 import type { PageTree } from 'fumadocs-core/server';
+import { DocsSidebar } from '@/components/docs/sidebar';
 
 const projectTree: PageTree.Root = {
   name: 'Projects',
@@ -33,20 +34,24 @@ const PROJECTS_LAYOUT_PROPS: DocsLayoutProps = {
       type: 'icon',
     },
   ],
-  sidebar: {
-    enabled: false,
-  },
 };
 
 export default function ProjectsLayout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout
-      {...PROJECTS_LAYOUT_PROPS}
-      nav={{
-        component: <Nav />,
-      }}
-    >
-      {children}
-    </DocsLayout>
+    <>
+      <DocsLayout
+        {...PROJECTS_LAYOUT_PROPS}
+        nav={{
+          component: <Nav />,
+        }}
+        sidebar={{
+          enabled: false,
+        }}
+      >
+        {children}
+      </DocsLayout>
+      {/* Mobile-only sidebar overlay for Projects routes */}
+      <DocsSidebar {...PROJECTS_LAYOUT_PROPS} />
+    </>
   );
 }

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { MotionEffect } from '@/components/effects/motion-effect';
 import { motion } from 'motion/react';
+import { TechStackIcons } from '@/components/tech-stack-icons';
 
 interface Project {
   url: string;
@@ -12,8 +13,7 @@ interface Project {
   tech?: string[];
   links?: {
     github?: string;
-    demo?: string;
-    docs?: string;
+    url?: string;
   };
   image?: string;
   logo?: string;
@@ -74,21 +74,7 @@ export function ProjectList({ projects }: ProjectListProps) {
                 )}
 
                 {project.tech && project.tech.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {project.tech.slice(0, 4).map((tech) => (
-                      <span
-                        key={tech}
-                        className="text-xs px-2 py-1 rounded-md bg-background/50 text-foreground/80 border border-border/50"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                    {project.tech.length > 4 && (
-                      <span className="text-xs px-2 py-1 text-muted-foreground">
-                        +{project.tech.length - 4} more
-                      </span>
-                    )}
-                  </div>
+                  <TechStackIcons tech={project.tech} maxDisplay={5} />
                 )}
               </div>
             </motion.div>

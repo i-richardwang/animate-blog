@@ -4,13 +4,11 @@ description: A modern, scalable e-commerce solution with advanced features for o
 date: 2023-11-10
 tech:
   - Next.js
-  - Node.js
-  - MongoDB
-  - Stripe
-  - AWS
+  - TypeScript
+  - React
+  - Tailwind CSS
 links:
-  demo: https://shop.example.com
-  docs: https://docs.example.com
+  url: https://shop.example.com
 featured: false
 ---
 
@@ -21,12 +19,14 @@ A full-featured e-commerce platform designed for modern online retail. Built wit
 ## Core Features
 
 ### For Customers
+
 - **Smart Search**: AI-powered product recommendations
 - **Secure Checkout**: Integrated Stripe payment processing
 - **Order Tracking**: Real-time shipment updates
 - **Wishlists**: Save items for later
 
 ### For Merchants
+
 - **Inventory Management**: Track stock levels in real-time
 - **Analytics Dashboard**: Sales insights and metrics
 - **Product Management**: Easy product creation and editing
@@ -35,20 +35,26 @@ A full-featured e-commerce platform designed for modern online retail. Built wit
 ## Architecture
 
 ### Frontend
+
 Built with Next.js for optimal SEO and performance:
+
 - Server-side rendering for product pages
 - Static generation for marketing pages
 - API routes for backend integration
 
 ### Backend
+
 Node.js microservices architecture:
+
 - User service (authentication, profiles)
 - Product service (catalog, inventory)
 - Order service (cart, checkout, fulfillment)
 - Payment service (Stripe integration)
 
 ### Infrastructure
+
 Deployed on AWS with:
+
 - EC2 for compute
 - S3 for media storage
 - CloudFront for CDN
@@ -63,8 +69,8 @@ Deployed on AWS with:
 ## Lessons Learned
 
 Building a production-ready e-commerce platform taught me the importance of:
+
 - Proper error handling and monitoring
 - Database query optimization
 - Security best practices (PCI compliance)
 - Scalable architecture design
-

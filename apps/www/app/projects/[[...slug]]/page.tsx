@@ -10,11 +10,12 @@ import { getMDXComponents } from '@/mdx-components';
 import { Metadata } from 'next';
 import { Footer } from '@/components/footer';
 import { Button } from '@/registry/components/buttons/button';
-import { ArrowLeft, Github, Globe, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Github, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { ProjectList } from '@/components/docs/project-list';
+import { TechStackIcons } from '@/components/tech-stack-icons';
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -86,12 +87,12 @@ export default async function Page(props: {
         <div className="flex flex-row gap-2 items-start w-full justify-between">
           <DocsTitle className="font-medium">{page.data.title}</DocsTitle>
           <div className="flex flex-row gap-1.5 items-center pt-0.5">
-            <Link href="/projects">
-              <Button variant="accent" size="sm">
+            <Button variant="accent" size="sm" asChild>
+              <Link href="/projects">
                 <ArrowLeft />
                 Back to Projects
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
         <DocsDescription className="mb-1 font-normal">
@@ -106,57 +107,37 @@ export default async function Page(props: {
             {format(date, 'MMM d, yyyy', { locale: enUS })}
           </time>
 
-          {page.data.links?.demo && (
-            <a
-              href={page.data.links.demo}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="default" size="sm">
-                <Globe className="size-4" />
-                Live Demo
-              </Button>
-            </a>
+          {page.data.links?.url && (
+            <Button variant="default" size="sm" asChild>
+              <a
+                href={page.data.links.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="size-4" />
+                Visit
+              </a>
+            </Button>
           )}
 
           {page.data.links?.github && (
-            <a
-              href={page.data.links.github}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="accent" size="sm">
+            <Button variant="accent" size="sm" asChild>
+              <a
+                href={page.data.links.github}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Github className="size-4" />
                 View Code
-              </Button>
-            </a>
-          )}
-
-          {page.data.links?.docs && (
-            <a
-              href={page.data.links.docs}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="ghost" size="sm">
-                <ExternalLink className="size-4" />
-                Documentation
-              </Button>
-            </a>
+              </a>
+            </Button>
           )}
         </div>
 
         {page.data.tech && page.data.tech.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex items-center gap-3 mb-4">
             <span className="text-sm text-muted-foreground">Tech Stack:</span>
-            {page.data.tech.map((tech) => (
-              <span
-                key={tech}
-                className="text-xs px-2 py-1 rounded-md bg-primary/10 text-primary"
-              >
-                {tech}
-              </span>
-            ))}
+            <TechStackIcons tech={page.data.tech} maxDisplay={8} />
           </div>
         )}
 

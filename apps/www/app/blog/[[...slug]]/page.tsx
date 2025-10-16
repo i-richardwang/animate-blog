@@ -60,12 +60,12 @@ export default async function Page(props: {
         <div className="flex flex-row gap-2 items-start w-full justify-between">
           <DocsTitle className="font-medium">{page.data.title}</DocsTitle>
           <div className="flex flex-row gap-1.5 items-center pt-0.5">
-            <Link href="/blog">
-              <Button variant="accent" size="sm">
+            <Button variant="accent" size="sm" asChild>
+              <Link href="/blog">
                 <ArrowLeft />
                 Back to Blog
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
         <DocsDescription className="mb-1 font-normal">

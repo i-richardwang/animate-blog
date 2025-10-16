@@ -56,8 +56,7 @@ export const project = defineCollections({
     links: z
       .object({
         github: z.string().optional(),
-        demo: z.string().optional(),
-        docs: z.string().optional(),
+        url: z.string().optional(),
       })
       .optional(),
     image: z.string().optional(),
