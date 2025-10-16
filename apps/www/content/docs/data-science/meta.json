@@ -1,20 +1,22 @@
 {
-  "title": "Data Science",
-  "description": "Data Science Learning & Practice",
+  "title": "数据科学",
+  "description": "数据分析与可视化",
   "icon": "BarChart3",
   "root": true,
   "pages": [
-    "---Analysis---",
-    "analysis/exploratory-data-analysis",
-    "analysis/data-cleaning",
-    "analysis/feature-engineering",
-    "---Visualization---",
-    "visualization/charts",
-    "visualization/dashboards",
-    "visualization/interactive-viz",
-    "---Statistics---",
-    "statistics/descriptive",
-    "statistics/inferential",
-    "statistics/probability"
+    "---数据集构造---",
+    "analysis/mock-employee-promotion-data",
+    "---员工流失预测项目实战---",
+    "analysis/employee-attrition-data-quality",
+    "analysis/employee-attrition-eda",
+    "---Tableau 可视化---",
+    "visualization/tableau-structured-dashboard-containers",
+    "visualization/tableau-dynamic-zone-visibility",
+    "visualization/tableau-parameters-interactive-analysis",
+    "visualization/tableau-dashboard-actions",
+    "visualization/tableau-custom-palette",
+    "---Python 可视化---",
+    "visualization/python-plotly-sankey-diagram",
+    "visualization/plotly-boxplot-violinplot"
   ]
 }

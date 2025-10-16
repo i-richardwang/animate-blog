@@ -1,20 +1,14 @@
 {
-  "title": "Development",
-  "description": "Development Journey & Best Practices",
+  "title": "开发实践",
+  "description": "独立开发与自托管",
   "icon": "Code",
   "root": true,
   "pages": [
-    "---Frontend---",
-    "frontend/react",
-    "frontend/nextjs",
-    "frontend/ui-design",
-    "---Backend---",
-    "backend/nodejs",
-    "backend/databases",
-    "backend/apis",
-    "---DevOps---",
-    "devops/deployment",
-    "devops/ci-cd",
-    "devops/monitoring"
+    "---Self Hosted---",
+    "self-hosted/pve-installation-pcie-passthrough",
+    "self-hosted/pve-vm-gpu-passthrough-cuda-setup",
+    "self-hosted/datalore-deployment-overview",
+    "---独立开发---",
+    "indie-hacking/simplelogin-custom-domain-email"
   ]
 }

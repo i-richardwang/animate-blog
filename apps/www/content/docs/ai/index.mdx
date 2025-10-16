@@ -1,27 +1,30 @@
 ---
-title: AI Exploration
-description: AI Exploration & Practice
+title: AI 探索
+description: AI 技术与应用实践
 ---
 
-import { Code, Sparkles, Wrench } from 'lucide-react';
+import { Zap, Cpu, Sparkles } from 'lucide-react';
 
 <Cards>
   <Card
-    icon={<Code strokeWidth={2} />}
-    href="/docs/ai/fundamentals/machine-learning"
-    title="Fundamentals"
+    icon={<Zap strokeWidth={2} />}
+    href="/docs/ai/fundamentals/understanding-vector-embedding"
+    title="AI技术解码"
+    description="深入理解 AI 核心技术概念"
+    accent
+  />
+  <Card
+    icon={<Cpu strokeWidth={2} />}
+    href="/docs/ai/applications/practical-llm-fine-tuning"
+    title="AI深度实践"
+    description="高级 AI 项目实战与深度探索"
     accent
   />
   <Card
     icon={<Sparkles fill="currentColor" strokeWidth={0} />}
-    href="/docs/ai/applications/nlp"
-    title="Applications"
-    accent
-  />
-  <Card
-    icon={<Wrench strokeWidth={2} />}
-    href="/docs/ai/tools/frameworks"
-    title="Tools"
+    href="/docs/ai/applications/skills-knowledge-graph"
+    title="LLM 应用实践"
+    description="大语言模型实际应用案例"
     accent
   />
 </Cards>

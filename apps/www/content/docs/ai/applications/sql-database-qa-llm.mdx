@@ -1,0 +1,196 @@
+---
+title: 基于LLM的SQL自然语言问答
+description: 了解如何使用大语言模型（LLM）为 SQL 数据库构建一个基础的自然语言问答系统。通过一个概念验证展示了将用户问题转换为 SQL 查询并生成回答的过程
+releaseDate: 2024-03-17
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+image: https://imrichard.com/wp-content/uploads/2025/04/build-simple-sql-database-qa-with-llm-cover.avif
+---
+
+在日常工作中，SQL 数据库是存储和管理企业数据的常用方式。虽然 SQL 提供了强大的数据查询能力，但其使用需要特定的语言技能，这对于组织内许多非技术背景的业务角色（如 HR、运营分析师等）来说，形成了一道获取数据时的壁垒。直接的数据访问受限，往往意味着信息获取不够及时，或需依赖技术团队支持，影响了决策效率。
+
+我们尝试利用大语言模型（LLM）的能力，构建一个面向 SQL 数据库的基础自然语言问答接口。**其核心设想是，让 LLM 理解用户的自然语言问题，自动将其转化为 SQL 查询，执行查询后，再将结果以自然语言形式反馈给用户。** 目的是简化数据交互过程，探索让更广泛的团队成员能够便捷地从数据库中直接获取所需信息的可行性。
+
+**需要强调的是，** 本文记录的仅为一次**概念验证（Proof of Concept）**。将此类方案投入生产环境，仍需面对并解决一系列关键问题，例如数据库连接的安全性、生成 SQL 的准确性与效率、对大数据量的处理能力，以及如何实现更自然的连续对话支持等。这些复杂性将在后续的实践中进一步探讨。
+
+## 核心实现思路
+
+我们将大语言模型定位为用户自然语言与数据库 SQL 查询之间的"转换器"和"解释器"。具体的实现路径分解为以下几个关键步骤，并通过示例截图直观展示：
+
+### 1. 数据库连接建立
+
+首先确保应用程序能够通过标准接口安全地连接到目标 SQL 数据库。
+
+### 2. 表结构理解
+
+向大模型提供目标数据表的结构信息。这通常包括表的 DDL 语句和少量数据样例，帮助模型理解可查询的字段及其内容。
+
+例如，对于我们的虚构员工表 `emp_data`，提供给模型的信息如下：
+
+<Callout type="info">
+  本文示例使用一个虚构的员工数据集 `emp_data`，字段包括员工
+  ID、姓名、性别、职级、年龄、部门、入职日期、是否离职、离职日期等。
+</Callout>
+
+![示例数据库表 emp_data 的结构定义及前3行数据预览](https://imrichard.com/wp-content/uploads/2025/04/sql-table-schema-info.avif)
+
+### 3. 自然语言到 SQL 的转换
+
+这是核心环节。LLM 根据用户问题（如："请问员工的平均年龄是多少岁?"）和它理解的表结构，生成相应的 SQL 查询。
+
+模型生成的 SQL 可能如下所示：
+
+![大模型根据"查询员工平均年龄"问题生成的 SQL 查询语句](https://imrichard.com/wp-content/uploads/2025/04/llm-generated-sql-query.avif)
+
+### 4. SQL 查询执行
+
+将生成的 SQL 语句通过数据库连接执行，获取原始结果集。
+
+数据库返回的结果通常是结构化的原始数据：
+
+![执行 SQL 查询员工平均年龄后，数据库返回的原始结果](https://imrichard.com/wp-content/uploads/2025/04/raw-sql-query-result.avif)
+
+### 5. 查询结果解释与格式化
+
+最后，再次调用 LLM，结合用户原始问题、生成的 SQL 及查询结果，生成用户友好的自然语言回答。
+
+最终呈现给用户的回答：
+
+![大模型将查询结果处理后生成的关于"员工平均年龄"的最终中文回答](https://imrichard.com/wp-content/uploads/2025/04/llm-natural-language-answer.avif)
+
+## 技术实现路径与示例代码
+
+<Callout type="info">
+  **非技术背景读者提示：**下方代码块展示了实现上述思路的 Python
+  代码。如果您对编程细节不关注，可以跳过此代码块，理解文字部分的逻辑即可。
+</Callout>
+
+以下 Python 代码整合了整个问答流程的实现，关键部分添加了注释说明。
+
+````python
+# --- 0. 引入所需库 ---
+from langchain_community.utilities import SQLDatabase
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
+# 假设 `model` 是一个已配置好的大模型实例
+# 例如: from langchain_openai import ChatOpenAI
+# model = ChatOpenAI() # 请替换为实际使用的模型
+
+# --- 1. 配置数据库连接 ---
+# 替换为您的数据库 URI
+db_uri = "mysql+pymysql://root:password@0.0.0.0:3306/database"
+db = SQLDatabase.from_uri(db_uri)
+print("数据库连接已建立。")
+
+# --- 2. 定义表信息获取函数 ---
+# 指定需要查询的表名
+target_table_names = ["emp_data"]
+# 此函数用于动态获取表结构和示例数据，供模型参考
+def get_table_info_func(_):
+    return db.get_table_info(table_names=target_table_names)
+
+# --- 3. 定义 SQL 生成提示模板 ---
+# 该模板指导模型如何根据问题和表信息生成 SQL
+sql_prompt_template = """
+### Instructions:
+Your task is to convert a question into a SQL query, given a database schema.
+Adhere to these rules:
+- **Deliberately go through the question and database schema word by word** to appropriately answer the question.
+- **Use Table Aliases** to prevent ambiguity. For example, `SELECT t1.col1, t2.col1 FROM table1 AS t1 JOIN table2 AS t2 ON t1.id = t2.id`.
+- When creating a ratio, always cast the numerator as float.
+
+### Input:
+Generate a SQL query that answers the question `{question}`.
+This query will run on a database whose schema is represented in this string:
+{table_info}
+
+### Response:
+Based on your instructions, here is the SQL query I have generated to answer the question `{question}`:
+```sql
+"""
+sql_prompt = PromptTemplate.from_template(sql_prompt_template)
+
+# --- 4. 定义自然语言回答生成提示模板 ---
+# 该模板指导模型如何结合问题、SQL 和结果生成最终答案
+answer_prompt_template = """Given the following user question, corresponding SQL query, and SQL result, answer the user question in Chinese.
+
+Question: {question}
+SQL Query: {query}
+SQL Result: {result}
+Answer:
+"""
+answer_prompt = PromptTemplate.from_template(answer_prompt_template)
+
+# --- 5. 构建完整的处理链 ---
+# 使用 LangChain 的 Runnable 接口编排处理流程
+
+# 步骤 1: SQL 生成链
+#   - 动态注入表信息 (RunnablePassthrough.assign)
+#   - 应用 SQL 生成提示模板 (sql_prompt)
+#   - 调用模型生成 SQL (model.bind(stop=["```"]))
+#   - 解析输出为字符串 (StrOutputParser)
+sql_generation_chain = (
+    RunnablePassthrough.assign(table_info=get_table_info_func)
+    | sql_prompt
+    | model.bind(stop=["```"])
+    | StrOutputParser()
+)
+
+# 步骤 2: 完整问答链
+#   - 从包含 "question" 的字典开始
+#   - 添加 "query" 键，其值由 sql_generation_chain 生成
+#   - 添加 "result" 键，其值为执行 query 后从数据库获取的结果 (db.run)
+#   - 将 "question", "query", "result" 输入到最终的回答生成环节
+#   - 应用回答生成提示模板 (answer_prompt)
+#   - 调用模型生成中文回答 (model)
+#   - 解析输出为字符串 (StrOutputParser)
+full_chain = (
+    RunnablePassthrough.assign(
+        query=sql_generation_chain
+    ).assign(
+        result=lambda x: db.run(x["query"])
+    )
+    | answer_prompt
+    | model
+    | StrOutputParser()
+)
+
+# --- 6. 执行测试 ---
+test_question = "请问员工的平均年龄是多少岁?"
+print(f"\n接收到问题: {test_question}")
+
+try:
+    final_answer = full_chain.invoke({"question": test_question})
+    print("\n模型生成的回答:")
+    print(final_answer)
+except Exception as e:
+    print(f"\n处理过程中发生错误: {e}")
+````
+
+**代码实现概要：**
+
+代码利用 `langchain` 库搭建处理流程。`SQLDatabase` 用于连接数据库并获取表信息。核心是两个精心设计的提示模板 (`PromptTemplate`)，分别指导 LLM 生成 SQL 和最终的自然语言回答。通过 `Runnable` 链式调用，`sql_generation_chain` 负责将问题转化为 SQL，`full_chain` 则串接了 SQL 生成、数据库执行 (`db.run`) 以及最终答案生成这几个步骤。`.invoke()` 方法启动整个问答过程。
+
+## 提示工程的关键考量（针对 SQL 生成）
+
+在本次初步探索中，我们观察到针对 SQL 生成任务的提示工程（Prompt Engineering）对最终效果有比较直接的影响，有几点值得注意：
+
+- **指令语言的选择：** 实践中发现，即便最终目标是中文问答，在提示中用英文明确表述关于 SQL 语法、格式等技术性指令时，模型生成的 SQL 代码往往更加规范，符合预期。
+- **明确 SQL 编写规范：** 在提示中包含具体的 SQL 编写建议（例如，要求使用表别名以避免歧义，或者在特定场景下进行数据类型转换），能够有效提升生成查询的准确性和鲁棒性，特别是当数据库本身存在一些特殊的约定或数据类型存储方式时。
+- **结构化输出控制：** 利用特定格式（如 Markdown 的代码块标记 ` ```sql ... ``` `）来引导模型输出 SQL，并设置停止标记，有助于程序更可靠地提取生成的代码片段，简化后续处理。
+
+## 总结与讨论
+
+本次探索展示了利用大语言模型打通自然语言到 SQL 查询路径的基础方法，验证了其在**简化数据交互、降低非技术用户数据访问门槛方面的潜力**。
+
+然而，从当前的概念验证到构建一个稳定、安全、高效的企业级应用，**仍需解决诸多关键挑战**：
+
+1. **安全性问题：** 这是最重要的考量。如何确保系统能有效防御 SQL 注入等攻击，防止用户输入被转化为恶意的数据库操作，需要设计周密的安全策略，包括输入过滤、查询语句审计、最小权限原则等。
+2. **SQL 生成的准确性与复杂性处理：** 当前模型对于简单查询尚能应对，但处理涉及多表连接、复杂逻辑判断、子查询乃至更高级的分析函数时，生成正确且高效 SQL 的能力仍有较大提升空间。这是技术上的核心难点之一。
+3. **查询性能与成本：** 模型自动生成的 SQL 可能并非最优查询计划，在大数据量场景下可能导致性能问题。同时，调用大模型 API 本身也涉及服务成本和响应延迟，需要在效果、效率和成本间进行权衡。
+4. **语义理解的精确度：** 自然语言的模糊性和多义性是固有挑战。模型可能错误理解用户意图，或对数据库字段的业务含义产生偏差。如何提高语义理解的准确性，甚至在必要时进行澄清式交互，是提升用户体验的关键。
+5. **交互的连贯性：** 实际应用场景往往涉及多轮对话，用户可能基于前一次查询结果继续提问。如何有效管理对话状态，理解上下文依赖，是构建实用问答系统的重要方向。
+
+尽管挑战存在，通过自然语言与数据库交互无疑是一个值得持续关注和投入的方向。希望本文记录的初步尝试能为相关探索提供有价值的参考。

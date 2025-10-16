@@ -50,8 +50,7 @@ export const metadata: Metadata = {
   publisher: "Richard's Page",
   openGraph: {
     title: "Richard's Page",
-    description:
-      'A personal blog and knowledge base for learning, exploration, and sharing insights.',
+    description: '数字花园，记录技术探索的点滴',
     url: 'https://richardwang.me',
     siteName: "Richard's Page",
     images: [
@@ -62,15 +61,14 @@ export const metadata: Metadata = {
         alt: "Richard's Page",
       },
     ],
-    locale: 'en_US',
+    locale: 'zh_CN',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     site: '@richard2wang',
     title: "Richard's Page",
-    description:
-      'A personal blog and knowledge base for learning, exploration, and sharing insights.',
+    description: '数字花园，记录技术探索的点滴',
     images: [
       {
         url: 'https://richardwang.me/og-image.png',

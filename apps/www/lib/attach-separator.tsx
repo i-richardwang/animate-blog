@@ -11,14 +11,16 @@ import {
   SparklesIcon,
   SquareMenu,
   TypeIcon,
-  BookOpen,
-  Wrench,
-  TrendingUp,
   BarChart3,
-  Calculator,
-  Layout,
-  Server,
   Rocket,
+  Database,
+  Cpu,
+  Lightbulb,
+  HardDrive,
+  Hammer,
+  PieChart,
+  LineChart,
+  Zap,
 } from 'lucide-react';
 import { LucideIcons } from '@/components/icons/lucide-icons';
 
@@ -112,72 +114,56 @@ export const attachSeparator: BuildPageTreeOptions['attachSeparator'] = (
         <Separator icon={<SquareMenu strokeWidth={2} />} name="Menu" />
       );
       break;
-    case 'Personal Notes':
+    case 'AI技术解码':
       node.name = (
-        <Separator icon={<Code strokeWidth={2.5} />} name="Personal Notes" />
+        <Separator icon={<Zap strokeWidth={2} />} name="AI技术解码" />
       );
       break;
-    case 'AI Exploration':
+    case 'AI深度实践':
       node.name = (
-        <Separator
-          icon={<SparklesIcon fill="currentColor" />}
-          name="AI Exploration"
-        />
+        <Separator icon={<Cpu strokeWidth={2} />} name="AI深度实践" />
       );
       break;
-    case 'Data Science':
-      node.name = (
-        <Separator icon={<BarChart3 strokeWidth={2} />} name="Data Science" />
-      );
-      break;
-    case 'Development':
-      node.name = (
-        <Separator icon={<Code strokeWidth={2.5} />} name="Development" />
-      );
-      break;
-    case 'Fundamentals':
-      node.name = (
-        <Separator icon={<BookOpen strokeWidth={2} />} name="Fundamentals" />
-      );
-      break;
-    case 'Applications':
+    case 'LLM 应用实践':
       node.name = (
         <Separator
           icon={<SparklesIcon fill="currentColor" />}
-          name="Applications"
+          name="LLM 应用实践"
         />
       );
       break;
-    case 'Tools':
-      node.name = <Separator icon={<Wrench strokeWidth={2} />} name="Tools" />;
-      break;
-    case 'Analysis':
+    case '数据集构造':
       node.name = (
-        <Separator icon={<TrendingUp strokeWidth={2} />} name="Analysis" />
+        <Separator icon={<Database strokeWidth={2} />} name="数据集构造" />
       );
       break;
-    case 'Visualization':
+    case '员工流失预测项目实战':
       node.name = (
-        <Separator icon={<BarChart3 strokeWidth={2} />} name="Visualization" />
+        <Separator
+          icon={<Rocket strokeWidth={2} />}
+          name="员工流失预测项目实战"
+        />
       );
       break;
-    case 'Statistics':
+    case 'Self Hosted':
       node.name = (
-        <Separator icon={<Calculator strokeWidth={2} />} name="Statistics" />
+        <Separator icon={<HardDrive strokeWidth={2} />} name="Self Hosted" />
       );
       break;
-    case 'Frontend':
+    case 'Tableau 可视化':
       node.name = (
-        <Separator icon={<Layout strokeWidth={2} />} name="Frontend" />
+        <Separator icon={<PieChart strokeWidth={2} />} name="Tableau 可视化" />
       );
       break;
-    case 'Backend':
+    case 'Python 可视化':
       node.name = (
-        <Separator icon={<Server strokeWidth={2} />} name="Backend" />
+        <Separator icon={<LineChart strokeWidth={2} />} name="Python 可视化" />
       );
       break;
-    case 'DevOps':
-      node.name = <Separator icon={<Rocket strokeWidth={2} />} name="DevOps" />;
+    case '独立开发':
+      node.name = (
+        <Separator icon={<Hammer strokeWidth={2} />} name="独立开发" />
+      );
       break;
   }
 

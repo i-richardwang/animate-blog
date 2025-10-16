@@ -1,20 +1,24 @@
 {
-  "title": "AI Exploration",
-  "description": "AI Exploration & Practice",
+  "title": "AI 探索",
+  "description": "AI 技术与应用实践",
   "icon": "Brain",
   "root": true,
   "pages": [
-    "---Fundamentals---",
-    "fundamentals/machine-learning",
-    "fundamentals/deep-learning",
-    "fundamentals/neural-networks",
-    "---Applications---",
-    "applications/nlp",
-    "applications/computer-vision",
-    "applications/generative-ai",
-    "---Tools---",
-    "tools/frameworks",
-    "tools/libraries",
-    "tools/platforms"
+    "---AI技术解码---",
+    "fundamentals/understanding-vector-embedding",
+    "fundamentals/guide-to-building-llms-from-scratch",
+    "fundamentals/llm-data-prep-stages-and-formats",
+    "---AI深度实践---",
+    "applications/practical-llm-fine-tuning",
+    "applications/building-ai-research-agent",
+    "applications/building-llm-resume-recommender",
+    "---LLM 应用实践---",
+    "applications/skills-knowledge-graph",
+    "applications/employee-sentiment-analysis-llm",
+    "applications/model-scale-text-classification",
+    "applications/sql-database-qa-llm",
+    "applications/rag-pdf-qa",
+    "applications/scraping-industry-news-with-llms",
+    "applications/structured-performance-data-extraction"
   ]
 }

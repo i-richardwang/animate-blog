@@ -62,12 +62,12 @@ export const baseOptions: BaseLayoutProps = {
   links: [
     {
       type: 'separator',
-      name: 'Guide',
+      name: '指南',
       icon: <BookOpen fill="currentColor" strokeWidth={2.5} />,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
     {
-      text: 'Welcome',
+      text: '欢迎',
       url: '/docs',
       secondary: false,
     },

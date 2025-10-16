@@ -1,0 +1,262 @@
+---
+title: 使用桑基图可视化员工绩效流向
+description: 通过 Python plotly 库演示如何构建并绘制桑基图，展示员工绩效从第一年到第二年的流动情况
+releaseDate: 2024-03-17
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+image: https://imrichard.com/wp-content/uploads/2024/04/python-plotly-sankey-diagram-cover.avif
+---
+
+在数据分析工作中，我们经常需要展示数据在不同类别或阶段之间的流转情况。例如：用户在网页间如何跳转？资金在部门间如何分配？员工的绩效等级如何随时间变化？对于这类问题，桑基图（Sankey Diagram）是一种理想的可视化方式。
+
+桑基图使用节点（Nodes）表示不同的类别或状态，并用连接带（Links）将节点相连。连接带的宽度反映了数据从一个节点流向另一个节点的数量，让数据的流向和流量一目了然。
+
+Python 提供了多个绘制桑基图的库，其中 Plotly 因其交互效果和优雅的样式而广受欢迎。本文将详细介绍如何使用 Plotly 库绘制桑基图。我们将以一个模拟的员工两年绩效数据为例，从数据准备到最终可视化，逐步讲解整个过程，帮助大家掌握这个实用的可视化技巧。
+
+## 准备流动数据
+
+画桑基图前，首先要准备好流动数据。这份数据需要包含三个关键信息：数据**从哪里来（源）**，**到哪里去（目标）**，以及**具体数量（值）**。通常，我们会将这些信息整理成一个包含三列的表格或 DataFrame：
+
+- **源（Source）**：数据流动的起点类别或名称。
+- **目标（Target）**：数据流动的终点类别或名称。
+- **值（Value）**：从源流向目标的具体数量或权重。
+
+在实际应用中，我们往往拥有更详细的原始记录。比如在员工绩效场景中，可能是每位员工不同年份的绩效评级。我们需要先对这些原始数据进行处理和汇总，得到包含源、目标、值这三要素的统计结果。
+
+如果你还没有合适的数据，或想快速跟着教程学习，可以使用下面的方法创建模拟数据。
+
+**1. 模拟原始数据集**
+
+我们先创建一个包含1000名员工连续两年绩效评级的模拟数据。
+
+```python
+import pandas as pd
+import numpy as np
+from tabulate import tabulate
+
+# 设置随机种子，这样每次运行生成的数据都一样，方便复现
+np.random.seed(1994)
+
+# 创建一个空的 DataFrame，用来存放1000个员工的数据
+employees = pd.DataFrame(index=range(1, 1001))
+employees.index.name = '员工ID' # 给索引起个名字
+
+# --- 生成第一年的绩效 ---
+# 假设绩效有 '高', '中', '低' 三档
+performance_choices_year1 = ['高', '中', '低']
+# 假设第一年这三档的比例是 20%, 70%, 10%
+performance_prob_year1 = [0.2, 0.7, 0.1]
+# 根据上面的比例，随机生成1000个员工的第一年绩效
+employees['第一年绩效'] = np.random.choice(performance_choices_year1, size=1000, p=performance_prob_year1)
+
+# --- 生成第二年的绩效（包括离职） ---
+# 写一个函数，根据第一年的绩效，按照不同的概率随机决定第二年的状态
+def second_year_performance(first_year_perf):
+    if first_year_perf == '高':
+        # 第一年绩效高的：第二年大概率还是高或中，小概率变低或离职
+        return np.random.choice(['高', '中', '低', '离职'], p=[0.5, 0.3, 0.1, 0.1])
+    elif first_year_perf == '中':
+        # 第一年绩效中的：第二年情况比较多样，可能变好、保持、变差或离职
+        return np.random.choice(['高', '中', '低', '离职'], p=[0.25, 0.5, 0.05, 0.2])
+    elif first_year_perf == '低':
+        # 第一年绩效低的：第二年变好的概率不高，离职风险比较大
+        return np.random.choice(['高', '中', '低', '离职'], p=[0.05, 0.35, 0.1, 0.5])
+
+# 对每个员工应用这个函数，生成第二年的状态
+employees['第二年绩效'] = employees['第一年绩效'].apply(second_year_performance)
+
+# 可以打印看看生成的数据长什么样
+print("模拟员工数据 (前5行):\n", employees.head())
+```
+
+![使用 Python Pandas 创建的模拟员工原始绩效数据表格的前五行截图](https://imrichard.com/wp-content/uploads/2025/04/employee-performance-raw-data-head.avif)
+
+**2. 汇总数据得到流动统计表**
+
+有了原始的 `employees` 数据后，我们需要统计从第一年各个绩效等级流向第二年各个状态的人数。这就是桑基图所需的源、目标、值数据格式。
+
+```python
+# 使用 groupby 和 size().reset_index() 来统计每个路径的人数
+# 这就是我们画图需要的数据
+performance_transition_counts = employees.groupby(['第一年绩效', '第二年绩效']).size().reset_index(name='count')
+
+# 打印看看汇总后的统计数据
+print("\n汇总后的流动统计数据 (用于绘图):\n", performance_transition_counts)
+```
+
+![经过分组和计数汇总后的员工绩效流动统计数据表格，包含源、目标和计数列](https://imrichard.com/wp-content/uploads/2025/04/employee-performance-aggregated-flow-data.avif)
+
+现在，我们得到了一个名为 `performance_transition_counts` 的 Pandas DataFrame，它清晰地列出了源（第一年绩效）、目标（第二年绩效）以及对应的流量值（count）。有了这份数据，我们就可以开始下一步的绘图了。
+
+## 使用 Plotly 绘制桑基图
+
+### 创建节点和链接列表
+
+Plotly 的 `go.Sankey` 函数需要我们提供明确的节点和链接信息。由于 Plotly 使用索引来识别节点和链接，我们需要将类别名称（如"高"、"中"、"低"）转换为数字编号。
+
+```python
+# a. 定义所有不重复的节点标签，并最好加上年份/阶段信息以区分
+labels_year1 = ["第一年高", "第一年中", "第一年低"]
+labels_year2 = ["第二年高", "第二年中", "第二年低", "第二年离职"]
+all_labels = labels_year1 + labels_year2
+
+# b. 创建一个字典，方便查找每个标签对应的数字编号 (索引)
+label_to_index = {label: i for i, label in enumerate(all_labels)}
+
+# c. 初始化三个列表，用来存放 Plotly 需要的源节点编号、目标节点编号和流量值
+sources = []
+targets = []
+values = []
+
+# d. 遍历汇总好的数据，填充这三个列表
+for index, row in performance_transition_counts.iterrows():
+    # 构造源节点和目标节点的完整标签
+    source_label = f"第一年{row['第一年绩效']}"
+    target_label = f"第二年{row['第二年绩效']}"
+
+    # 查找标签对应的数字编号
+    source_index = label_to_index[source_label]
+    target_index = label_to_index[target_label]
+
+    # 将编号和流量值添加到相应的列表中
+    sources.append(source_index)
+    targets.append(target_index)
+    values.append(row['count'])
+
+# 可以打印出来检查一下
+print("所有节点标签:", all_labels)
+print("标签到索引映射:", label_to_index)
+print("源节点索引 (Sources):", sources)
+print("目标节点索引 (Targets):", targets)
+print("流量值 (Values):", values)
+```
+
+![桑基图数据准备步骤的打印输出结果（节点、链接、流量）](https://imrichard.com/wp-content/uploads/2025/04/plotly-sankey-node-link-data-preparation-output.avif)
+
+现在，我们已经准备好了绘制桑基图所需的四个关键列表：`all_labels`（节点标签）、`sources`（源节点）、`targets`（目标节点）和 `values`（流量值）。
+
+### 配置颜色（让图表更好看）
+
+颜色配置对桑基图的可读性很重要。合适的颜色搭配能帮助读者更快地看懂图表内容。
+
+**配色建议：**
+
+1. **保持一致**: 对于不同阶段但代表同类意思的节点（比如本例中的"高"、"中"、"低"绩效），用同一种基础颜色，这样更容易追踪变化。
+2. **善用透明度**: 用 `rgba` 格式来设置颜色，其中的 `a` (alpha) 值可以控制透明度（0表示完全透明，1表示完全不透明）。通常，链接的透明度可以设得比节点高一些（也就是更透明一点），这样即使有重叠也不会显得太乱。
+3. **区分特殊节点**: 像"离职"这样的终点状态或特殊类别，可以用中性色（比如灰色）来区分。
+4. **链接颜色**: 可以让链接的颜色跟它出发的节点（源节点）颜色保持一致或同色系，这样视觉上更统一。
+
+```python
+# a. 定义基础颜色 (用 rgba 格式，带透明度)
+base_colors_node = {
+    "高": "rgba(106, 90, 205, 0.8)", # 蓝紫色 (高绩效)
+    "中": "rgba(244, 164, 0, 0.8)",  # 橘黄色 (中绩效)
+    "低": "rgba(60, 179, 113, 0.8)"  # 海绿色 (低绩效)
+}
+special_color_node = "rgba(128, 128, 128, 0.8)" # 灰色 (离职)
+
+# b. 根据节点标签，生成一个节点颜色的列表
+node_colors = []
+for label in all_labels:
+    if "高" in label: node_colors.append(base_colors_node["高"])
+    elif "中" in label: node_colors.append(base_colors_node["中"])
+    elif "低" in label: node_colors.append(base_colors_node["低"])
+    elif "离职" in label: node_colors.append(special_color_node)
+
+# c. 同样地，为链接生成颜色列表 (可以跟源节点颜色一致，但更透明)
+base_colors_link = {
+    "高": "rgba(106, 90, 205, 0.3)",
+    "中": "rgba(255, 165, 0, 0.3)",
+    "低": "rgba(60, 179, 113, 0.3)"
+}
+# 注意：如果想让流向"离职"的链接也显示灰色，需要额外判断目标节点，或手动调整。
+# 这里我们简单地让链接颜色跟随源节点。
+link_colors = []
+for source_index in sources:
+    source_label = all_labels[source_index]
+    if "高" in source_label: link_colors.append(base_colors_link["高"])
+    elif "中" in source_label: link_colors.append(base_colors_link["中"])
+    elif "低" in source_label: link_colors.append(base_colors_link["低"])
+```
+
+### 用 Plotly 画出桑基图
+
+最后一步，我们把准备好的数据（节点标签、索引、流量值）和颜色信息交给 `go.Figure` 和 `go.Sankey` 函数，来创建图表对象。
+
+**常用参数说明：**
+
+- `go.Sankey()`: 这是创建桑基图的核心函数。
+  - `node`: 一个字典，用来设置节点的样子。
+    - `pad`: 节点之间的上下距离。
+    - `thickness`: 节点的宽度（左右方向的厚度）。
+    - `line`: 节点边框的样式（颜色、粗细）。
+    - `label`: 包含所有节点名称的列表 (`all_labels`)。
+    - `color`: 包含所有节点颜色的列表 (`node_colors`)。
+  - `link`: 一个字典，用来设置链接的样子。
+    - `source`: 源节点编号列表 (`sources`)。
+    - `target`: 目标节点编号列表 (`targets`)。
+    - `value`: 流量值列表 (`values`)。
+    - `color`: 链接颜色列表 (`link_colors`)。
+  - `arrangement`: 控制节点的布局方式，比如 `'snap'` 会尝试让节点对齐。
+- `fig.update_layout()`: 用来调整整个图表的布局，比如标题、字体大小、图的宽高等等。
+
+```python
+import plotly.graph_objects as go
+
+fig = go.Figure(data=[go.Sankey(
+    arrangement='snap', # 尝试让节点对齐
+    node=dict(
+      pad=25,                     # 节点上下间距
+      thickness=15,               # 节点厚度
+      line=dict(color="black", width=0.5), # 节点边框线
+      label=all_labels,           # 节点文字标签
+      color=node_colors           # 节点颜色
+    ),
+    link=dict(
+      source=sources,             # 链接的起点编号
+      target=targets,             # 链接的终点编号
+      value=values,               # 链接的宽度（流量值）
+      color=link_colors           # 链接的颜色
+  ))])
+
+# 设置图表的标题、字体、大小等
+fig.update_layout(
+    title_text="员工绩效流动桑基图（示例）",
+    font_size=12,
+    width=900,                     # 图表宽度
+    height=600,                    # 图表高度
+    # 也可以设置边距： margins=dict(l=50, r=50, t=100, b=50)
+)
+
+# 在 Jupyter Notebook 或类似环境中显示图表
+fig.show()
+```
+
+## 图表怎么看？效果展示
+
+运行上面的绘图代码后，就能看到一个交互式的桑基图了。
+
+![使用 Python Plotly 绘制的员工两年绩效流动桑基图，展示了从第一年绩效到第二年状态的人数流动情况](https://imrichard.com/wp-content/uploads/2025/04/python-plotly-employee-performance-sankey-chart.webp)
+
+<Callout type="info">
+  Plotly
+  会默认根据流量大小排列节点。如果你想让节点按特定顺序排列（比如"高-中-低"），只需用鼠标拖动节点调整位置即可。另外，当鼠标悬停在节点或连接带上时，会显示具体的人数。
+</Callout>
+
+**怎么看懂这张图？**
+
+- **节点的高度**: 代表这个状态的总人数。左边的节点显示第一年的分布，右边的显示第二年的分布。
+- **链接带的宽度**: 连接带越宽，表示从一个节点流向另一个节点的人数越多。
+- **看流向**:
+  - 从左边某个节点（比如"第一年高"）出发的带子，表示这部分员工第二年都去哪儿了。
+  - 流入右边某个节点（比如"第二年离职"）的带子，表示这个状态的人主要是从第一年哪些绩效等级过来的。
+- **看颜色**: 相同的颜色帮助你追踪同一类人（比如蓝色代表高绩效）的去向。特殊的颜色（比如灰色）则突出了像离职这样的特殊情况。
+
+通过观察这些部分，即使不了解具体的业务背景，也能大致看明白数据在不同类别之间的流动情况和相对数量。在这个例子里，我们可以大致了解员工绩效的变化情况、不同绩效水平员工的主要发展方向，以及哪些人更容易离职。
+
+## 总结
+
+这篇文章详细介绍了使用 Python 的 Plotly 库绘制桑基图的整个过程，包括了从理解桑基图是什么、准备数据，到具体的代码编写、颜色设置和图表调整。我们还用一个员工绩效流动的模拟例子，实际操作了这些步骤，并说明了如何看懂最后生成的图表。
+
+掌握桑基图的绘制不仅能让数据报告更加美观直观，还能帮助我们更好地发掘数据流动中的规律和关联。Plotly 丰富的交互功能和定制选项，让我们能轻松创建专业的桑基图。希望这篇教程能帮助你在数据分析工作中运用桑基图，实现更有效的数据沟通。

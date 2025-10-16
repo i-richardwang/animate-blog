@@ -1,27 +1,23 @@
 ---
-title: Development
-description: Development Journey & Best Practices
+title: 开发实践
+description: 独立开发与自托管
 ---
 
-import { Code, Server, Settings } from 'lucide-react';
+import { HardDrive, Hammer } from 'lucide-react';
 
 <Cards>
   <Card
-    icon={<Code strokeWidth={2} />}
-    href="/docs/development/frontend/react"
-    title="Frontend"
+    icon={<HardDrive strokeWidth={2} />}
+    href="/docs/development/self-hosted/pve-installation-pcie-passthrough"
+    title="Self Hosted"
+    description="自建服务与基础设施部署"
     accent
   />
   <Card
-    icon={<Server strokeWidth={2} />}
-    href="/docs/development/backend/nodejs"
-    title="Backend"
-    accent
-  />
-  <Card
-    icon={<Settings strokeWidth={2} />}
-    href="/docs/development/devops/deployment"
-    title="DevOps"
+    icon={<Hammer strokeWidth={2} />}
+    href="/docs/development/indie-hacking/simplelogin-custom-domain-email"
+    title="独立开发"
+    description="独立开发者工具与实践"
     accent
   />
 </Cards>

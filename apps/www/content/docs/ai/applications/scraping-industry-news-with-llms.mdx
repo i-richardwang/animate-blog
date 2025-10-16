@@ -1,0 +1,418 @@
+---
+title: 爬虫和大模型自动化信息获取
+description: 介绍如何配置Selenium进行网页数据抓取，并结合大语言模型理解文本，实现行业新闻的自动化收集与分析
+releaseDate: 2024-05-02
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+image: https://imrichard.com/wp-content/uploads/2025/06/scraping-industry-news-with-llms-cover.avif
+---
+
+在企业经营和战略研究中，持续追踪行业动态、对标竞品和头部公司至关重要。了解其组织架构变动、高层人事任免、重要政策调整等信息，能为企业决策提供有力支持。然而，传统的人工搜索和阅读大量新闻报告的方式，不仅耗时耗力，还容易遗漏关键信息。
+
+随着大语言模型（LLM）技术的发展，我们可以结合爬虫技术与大模型的文本理解能力，尝试将这一过程自动化，从而提升信息获取的效率和覆盖面。
+
+本文将分步介绍这一思路的实现过程：
+
+1. **数据抓取**：如何使用 Selenium 自动化工具爬取目标新闻网站（以"晚点LatePost"为例）的最新文章链接。
+2. **内容提取与分析**：如何从抓取的链接中提取正文内容，并借助大模型分析和标记关键信息。
+
+## 一、爬取新闻文章链接：以"晚点LatePost"为例
+
+"晚点LatePost"是一家关注商业和科技领域的深度报道媒体，其内容对了解行业动态很有价值。由于其网页内容是动态加载的，我们需要使用 Selenium 这类能够模拟浏览器行为的工具进行数据抓取。
+
+### 1. 环境准备
+
+首先，需要安装 Selenium 库，并下载对应你操作系统和 Chrome 浏览器版本的 ChromeDriver。
+
+- **安装 Selenium**: `pip install selenium`
+- **下载 ChromeDriver**: [ChromeDriver Download](https://sites.google.com/chromium.org/driver/home)  
+  下载后，将 ChromeDriver 可执行文件解压到项目当前路径，或一个你方便管理的指定目录。
+
+### 2. 初始化 WebDriver 并打开网页
+
+接下来，我们用 Selenium 初始化 WebDriver。为了不在前台显示浏览器窗口，可以设置 Chrome 为无头模式（headless mode），使其在后台静默运行。
+
+```python
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+import time # 用于后续等待页面加载
+from datetime import datetime, timedelta # 用于日期筛选
+
+# 设置 Chrome 选项
+chrome_options = Options()
+chrome_options.add_argument('--headless') # 无头模式
+chrome_options.add_argument('--disable-gpu') # 禁用GPU加速，某些环境下需要
+chrome_options.add_argument('--no-sandbox') # 解决DevToolsActivePort文件不存在的报错
+chrome_options.add_argument('--disable-dev-shm-usage') # 克服资源限制问题
+
+# 初始化 WebDriver
+# 注意：将 'path/to/your/chromedriver' 替换为你的 ChromeDriver 实际路径
+# 如果 ChromeDriver 就在当前目录下，可以直接使用 'chromedriver' (Windows 上是 'chromedriver.exe')
+webdriver_path = 'chromedriver' # 示例：假设 ChromeDriver 在当前路径或系统 PATH 中
+driver = webdriver.Chrome(service=Service(executable_path=webdriver_path), options=chrome_options)
+
+# 打开目标网页
+try:
+    driver.get('https://www.latepost.com/')
+    time.sleep(5) # 等待页面动态内容加载，根据网络情况调整
+    print("成功打开晚点LatePost首页")
+except Exception as e:
+    print(f"打开网页失败: {e}")
+    driver.quit()
+    exit()
+```
+
+**注意**：`webdriver_path` 需要正确指向你存放 ChromeDriver 的路径。`time.sleep(5)` 是一个简单的等待方式，更稳健的做法是使用 Selenium 的显式等待（`WebDriverWait`）。
+
+### 3. 定位并提取新闻链接
+
+通过浏览器的"检查元素"功能（通常是右键点击新闻标题，选择"检查"），我们可以观察到新闻链接在 HTML 中的结构。
+
+![浏览器开发者工具中显示的晚点LatePost网站新闻标题HTML结构，突出显示headlines-title类的定位。](https://imrichard.com/wp-content/uploads/2025/06/latepost-inspect-news-title-html-scaled.avif)
+
+在"晚点LatePost"首页，新闻通常分布在不同板块，例如头条、新闻报道、晚点早知道等。它们对应的 HTML class 可能有所不同，例如 `headlines-title`、`list-li-title`、`Newsletter-li`。我们需要构造一个合适的 CSS 选择器来同时选中这些元素下的链接。
+
+```python
+# 使用 CSS selector 提取特定新闻元素的链接
+# 这个选择器尝试匹配不同类型新闻标题下的 <a> 标签
+css_selector = ".headlines-title a, .list-li-title a, .Newsletter-li a"
+try:
+    news_elements = driver.find_elements(By.CSS_SELECTOR, css_selector)
+    print(f"初步定位到 {len(news_elements)} 个新闻元素")
+except Exception as e:
+    print(f"查找新闻元素失败: {e}")
+    news_elements = []
+```
+
+### 4. 整理新闻标题和链接
+
+为了方便后续处理，我们将提取到的新闻标题和链接存储在一个字典中，以链接为键，标题为值。
+
+```python
+articles = {}
+for element in news_elements:
+    try:
+        link_url = element.get_attribute('href')
+        title_text = element.text.strip()
+        if link_url and title_text: # 确保链接和标题都存在
+            articles[link_url] = title_text
+    except Exception as e:
+        print(f"提取链接或标题失败: {e}")
+
+# 打印部分结果，检查是否正确
+# print("提取到的文章链接和标题:")
+# for url, title in list(articles.items())[:5]: # 打印前5条
+# print(f"  链接: {url}\n  标题: {title}\n")
+```
+
+运行后，`articles` 字典将包含类似如下的数据：
+
+```python
+{'https://www.latepost.com/news/dj_detail?id=2250': '理想前总裁沈亚楠再创业，从给中产家庭造车到给中产家庭装修', ...}
+```
+
+### 5. 根据发布日期筛选新闻
+
+在实际应用中，我们通常只关心最近一段时间内发布的新闻。由于首页列表通常不直接显示完整日期，我们需要访问每篇文章的详情页去获取确切的发布日期，并进行筛选。假设我们希望获取最近10天的新闻。
+
+文章详情页的发布日期通常在一个特定 class（如 `article-header-date`）的 HTML 元素中。我们需要解析这个日期文本。
+
+```python
+filtered_articles = {}
+today = datetime.today()
+n_days_ago = today - timedelta(days=10) # 获取10天前的日期
+
+print(f"开始筛选最近10天的新闻，当前共有 {len(articles)} 篇文章待处理...")
+
+for url, title in articles.items():
+    try:
+        print(f"正在处理文章: {title[:30]}...") # 打印部分标题以跟踪进度
+        driver.get(url)
+        time.sleep(3) # 等待文章页面加载
+
+        date_element = driver.find_element(By.CLASS_NAME, "article-header-date")
+        date_text = date_element.text.split(' ')[0]  # 例如："04月29日" 或 "昨天" 或 "3小时前"
+
+        article_date_obj = None
+        # 尝试解析不同格式的日期
+        if "月" in date_text and "日" in date_text:
+            # 格式如 "04月29日"
+            date_formatted = f"{date_text.replace('月','-').replace('日','')}"
+            # 晚点文章似乎不直接标年份，我们假设是当年
+            article_date_obj = datetime.strptime(f"{today.year}-{date_formatted}", "%Y-%m-%d")
+        elif "昨天" in date_text:
+            article_date_obj = today - timedelta(days=1)
+        elif "小时前" in date_text or "分钟前" in date_text: # 当天发布的
+            article_date_obj = today
+        # 可以根据需要添加更多日期格式的判断
+
+        if article_date_obj and article_date_obj.date() >= n_days_ago.date():
+            filtered_articles[url] = title
+            print(f"  保留文章 (发布日期: {article_date_obj.strftime('%Y-%m-%d')})")
+        elif article_date_obj:
+            print(f"  忽略文章 (发布日期: {article_date_obj.strftime('%Y-%m-%d')}, 过旧)")
+        else:
+            print(f"  无法解析文章日期: {date_text}")
+
+    except Exception as e:
+        print(f"  处理文章 {url} 时发生错误: {e}")
+        # 可以在这里决定是否跳过此文章或重试
+
+articles = filtered_articles # 用筛选后的结果更新
+print(f"筛选完毕，保留最近10天的新闻共 {len(articles)} 篇。")
+
+# 示例输出筛选后的 articles 字典 (数量会减少)
+# {'https://www.latepost.com/news/dj_detail?id=2257': '晚点独家丨大众中国原 CTO 韩鸿铭将成为酷睿程的 CEO', ...}
+```
+
+经过这一步，`articles` 字典中就只剩下最近10天内发布的文章了。
+
+### 6. 关闭 WebDriver
+
+完成所有爬取操作后，务必关闭 WebDriver 以释放资源。
+
+```python
+driver.quit()
+print("WebDriver 已关闭。")
+```
+
+## 二、提取新闻内容与大模型分析
+
+获取到新闻链接后，下一步是从这些链接指向的网页中提取正文内容，并利用大语言模型进行关键信息提取。
+
+### 1. 应用场景设想
+
+借助大模型，我们可以从新闻内容中提取特定维度的信息，例如：
+
+- **竞对动态监控**：检查新闻中是否提及预设的竞争对手公司名单。
+- **行业管理趋势分析**：对于人力资源管理领域，可以关注新闻中是否提到其他公司的组织架构调整、高层人事任免、薪酬福利等相关政策变动。
+
+### 2. 提取网页正文内容
+
+直接从 HTML 中提取正文，需要处理掉导航栏、广告、页脚等无关信息。有多种工具可以辅助完成这一任务。
+
+**Html2Text**
+
+这是一个简单直接的库，可以将 HTML 转换为纯文本。但它通常不区分主要内容和辅助内容，可能会引入较多噪声。
+
+```python
+# 示例代码，需要安装 langchain_community
+# from langchain_community.document_loaders import AsyncHtmlLoader
+# from langchain_community.document_transformers import Html2TextTransformer
+
+# urls = ["https://www.latepost.com/news/dj_detail?id=2257"] # 以某一篇新闻为例
+# loader = AsyncHtmlLoader(urls)
+# docs = loader.load() # 异步加载
+
+# html2text_transformer = Html2TextTransformer()
+# docs_transformed = html2text_transformer.transform_documents(docs)
+# print(docs_transformed[0].page_content[:300])
+```
+
+输出可能包含许多导航和元信息，如：`'晚一点，好一点 **Later better**\n\n搜索晚点独家商业新闻...'`
+
+**Jina Reader API**
+
+Jina AI 提供了一个 Reader API (`https://r.jina.ai/`)，它可以智能地从网页中提取主要内容，并以 Markdown 或文本格式返回，效果通常比简单的 Html2Text 好很多。使用方法是在目标 URL 前加上 `https://r.jina.ai/`。
+
+```python
+import requests
+
+target_url = "https://www.latepost.com/news/dj_detail?id=2257"
+reader_url = f"https://r.jina.ai/{target_url}"
+
+try:
+    response = requests.get(reader_url, timeout=30) # 设置超时
+    response.raise_for_status() # 如果请求失败则抛出异常
+    content = response.text
+    # print(content[:500]) # 打印提取内容的前500字符
+except requests.exceptions.RequestException as e:
+    print(f"使用 Jina Reader 获取内容失败: {e}")
+    content = "" # 或者进行其他错误处理
+```
+
+Jina Reader 返回的内容通常更干净，例如：
+
+```
+Title: 晚点独家丨大众中国原 CTO 韩鸿铭将成为酷睿程的 CEO
+URL Source: https://www.latepost.com/news/dj_detail?id=2257
+Markdown Content:
+大众汽车集团（中国）前首席技术官韩鸿铭（Marcus Hafkemeyer）将加入酷睿程，担任 CEO。这个消息在今天酷睿程的一个会议中被宣布。
+2023 年成立的酷睿程是大众汽车在中国的核心智能驾驶系统供应商...
+```
+
+这种结构化的输出非常适合后续处理。
+
+### 3. 封装内容获取任务
+
+由于我们有一批筛选后的文章链接，可以将内容获取逻辑封装成一个函数，方便批量调用。
+
+```python
+def fetch_article_content_with_jina(url):
+    """使用 Jina Reader API 获取单个文章的纯净内容。"""
+    reader_api_url = f"https://r.jina.ai/{url}"
+    try:
+        response = requests.get(reader_api_url, timeout=30)
+        response.raise_for_status()
+        # Jina Reader 返回的内容通常包含 Title, URL Source, Markdown Content
+        # 我们可能只需要 Markdown Content 部分
+        full_text = response.text
+        # 简单的提取 Markdown Content 的方式 (可能需要根据实际返回格式调整)
+        if "Markdown Content:" in full_text:
+            return full_text.split("Markdown Content:", 1)[1].strip()
+        return full_text # 如果没有特定标记，返回全部
+    except requests.exceptions.RequestException as e:
+        print(f"Jina Reader 提取内容失败 for {url}: {e}")
+        return None # 返回 None 表示失败
+
+# 假设 articles 字典已通过爬虫和筛选步骤准备好
+# for url, title in articles.items():
+#     print(f"正在用 Jina Reader 提取文章: {title}")
+#     extracted_content = fetch_article_content_with_jina(url)
+#     if extracted_content:
+#         print(f"  成功提取内容，长度: {len(extracted_content)}")
+#         # 后续可以将 extracted_content 传递给大模型
+#     else:
+#         print(f"  未能提取内容。")
+#     time.sleep(1) # 避免请求过于频繁
+```
+
+### 4. 利用大模型进行信息提取
+
+获取到相对纯净的新闻正文后，我们就可以将其交给大语言模型，让它根据预设指令分析内容并提取关键信息。这里以判断文章是否涉及特定企业管理动向为例。
+
+#### a. 构建任务提示词 (Prompt)
+
+提示词的设计直接影响大模型的输出质量。我们需要清晰地定义任务、判断标准和输出格式。
+
+```python
+articles_analysis_prompt_template = """
+作为一名经验丰富的企业管理顾问，请仔细阅读以下新闻文章。
+你的任务是判断文章中是否明确提到了以下三个方面的公司管理内容：组织架构设计、高层人事任免、人力资源管理政策。
+
+定义：
+- **组织架构设计**：指公司内部组织或部门的设立、合并、拆分、调整职能，或部门间层级关系的显著变化。
+- **高层人事任免**：指公司副总裁及以上级别高管（或同级别重要业务负责人，如事业部总经理）的任命、离职、退休或内部职位调动。
+- **人力资源管理政策**：指公司层面推行的、影响员工整体的薪酬结构、福利方案、绩效考核标准、晋升机制等相关政策的制定或重大调整。**请注意**：不包括常规招聘、个别员工的薪酬调整、业务模式或产品策略的描述，除非它们直接引发了上述政策的调整。
+
+请针对每一方面，判断文章中"是否存在"相关描述，并"提供理由"。理由应直接引用原文中的关键句子或信息片段来支持你的判断。
+
+输出格式必须是 JSON，结构如下：
+{
+  "组织架构设计": {"是否存在": true/false, "理由": "引用的原文片段或基于原文的总结"},
+  "高层人事任免": {"是否存在": true/false, "理由": "引用的原文片段或基于原文的总结"},
+  "人力资源管理政策": {"是否存在": true/false, "理由": "引用的原文片段或基于原文的总结"}
+}
+
+以下是新闻文章内容：
+>>>
+{content}
+<<<
+
+请严格按照上述定义和JSON格式进行分析和输出。
+"""
+```
+
+#### b. 定义输出格式的结构化表示 (可选但推荐)
+
+如果使用 LangChain 或类似框架，可以定义一个 Pydantic模型来规范输出，便于解析和校验。
+
+```python
+from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.pydantic_v1 import BaseModel, Field # 使用 Pydantic V1
+
+class ManagementTopicAnalysis(BaseModel):
+    is_present: bool = Field(description="该管理方面的内容是否存在于文章中")
+    reason: str = Field(description="如果存在，提供原文引用或基于原文的总结作为理由；如果不存在，说明理由或留空")
+
+class ArticleAnalysisResult(BaseModel):
+    """定义公司管理分析的输出格式"""
+    组织架构设计: ManagementTopicAnalysis = Field(description="关于组织架构设计方面的内容分析")
+    高层人事任免: ManagementTopicAnalysis = Field(description="关于高层人事任免方面的内容分析")
+    人力资源管理政策: ManagementTopicAnalysis = Field(description="关于人力资源管理政策方面的内容分析")
+
+#  JsonOutputParser 可以根据 Pydantic 模型生成格式指令，并解析 LLM 的输出
+parser = JsonOutputParser(pydantic_object=ArticleAnalysisResult)
+```
+
+#### c. 构建处理链并调用 (以 LangChain 为例)
+
+```python
+# 假设已配置好大模型 llm_model (例如 ChatOpenAI, ChatZhipuAI 等)
+# from langchain.prompts import PromptTemplate
+# from langchain_openai import ChatOpenAI # 示例
+
+# llm_model = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0) # 示例模型
+
+# prompt = PromptTemplate(
+#     template=articles_analysis_prompt_template,
+#     input_variables=["content"],
+#     # 如果 parser 能自动注入格式指令，这里就不需要 partial_variables
+#     # partial_variables={"format_instructions": parser.get_format_instructions()}
+# )
+
+# analysis_chain = prompt | llm_model | parser
+
+# 假设 content 是通过 Jina Reader 获取的某篇文章内容
+# example_content = """
+# 大众汽车集团（中国）前首席技术官韩鸿铭（Marcus Hafkemeyer）将加入酷睿程，担任 CEO。
+# 这个消息在今天酷睿程的一个会议中被宣布。酷睿程是大众在中国的智能化转型的核心，
+# 2023年成立，负责大众在中国的智能电动车研发。VCTC（大众汽车（中国）科技有限公司）
+# 也于合肥成立，将负责本土电动汽车平台的开发。酷睿程原CEO楚力任职不到半年。
+# """
+
+# try:
+#     # result = analysis_chain.invoke({"content": example_content})
+#     # print(result)
+# except Exception as e:
+#     # print(f"大模型分析出错: {e}")
+#     # result = None
+# pass # 仅为结构示例，实际调用需要配置模型
+```
+
+#### d. 预期分析效果
+
+对于上述 `example_content`，大模型经过分析后，可能输出类似如下的 JSON 结果：
+
+```json
+{
+  "组织架构设计": {
+    "is_present": true,
+    "reason": "文章提到'VCTC（大众汽车（中国）科技有限公司）也于合肥成立，将负责本土电动汽车平台的开发'，以及'酷睿程是大众在中国的智能化转型的核心，2023年成立'，这些描述涉及新公司的设立和定位，属于组织架构层面。"
+  },
+  "高层人事任免": {
+    "is_present": true,
+    "reason": "文章明确指出'大众汽车集团（中国）前首席技术官韩鸿铭（Marcus Hafkemeyer）将加入酷睿程，担任 CEO'，以及'酷睿程原CEO楚力任职不到半年'，这些均属于高层人事任免。"
+  },
+  "人力资源管理政策": {
+    "is_present": false,
+    "reason": "文章内容主要集中在公司成立和高层人事变动，未提及公司层面的人力资源管理政策，如薪酬、福利、绩效考核或晋升机制的制定或调整。"
+  }
+}
+```
+
+可以看到，大模型能够按照要求进行判断，并给出基于原文的理由。这比人工阅读和判断要高效得多，尤其在处理大量文章时。
+
+## 总结与展望
+
+本文展示了一个结合 Selenium 爬虫和大型语言模型，自动化获取并分析行业动态信息的基本流程：
+
+1. **利用 Selenium 模拟浏览器行为**，从动态加载的网页（如"晚点LatePost"）抓取最新的新闻链接，并根据发布日期进行初步筛选。
+2. **借助 Jina Reader 等工具**，从新闻链接中提取相对纯净的正文内容，为后续分析做准备。
+3. **设计针对性的提示词 (Prompt)**，引导大语言模型对新闻内容进行深度分析，提取如组织变动、人事任免等关键的企业管理信息。
+
+这种自动化流程能够显著提升行业信息监测的效率和广度。
+
+当然，在实际应用中，还需要考虑以下几点以进一步完善：
+
+- **爬虫的稳定性与反爬策略**：目标网站结构可能变化，需要定期维护爬虫脚本；同时，要注意遵守网站的 `robots.txt` 协议，并采取合适的请求频率和策略，避免对目标网站造成过大负担。
+- **内容提取的准确性**：虽然 Jina Reader 等工具效果较好，但对于结构特别复杂的网页，可能仍需定制化的解析规则。
+- **大模型提示词的持续优化**：根据实际分析效果，不断迭代和优化提示词，以提高信息提取的准确度和召回率。
+- **成本与效率的平衡**：调用大模型 API 会产生费用，需要根据实际需求和预算，选择合适的模型和调用策略。
+- **信息的可信度**：自动化流程获取的信息仍需人工进行最终的核实和判断，尤其是在用于重要决策时。
+
+尽管存在挑战，但爬虫与大模型的结合为我们高效获取和理解海量行业信息提供了新的可能。随着技术的进步，这类自动化分析工具在企业情报、市场研究等领域的应用前景将更加广阔。
+

@@ -1,0 +1,157 @@
+---
+title: 箱线图和小提琴图描述数据分布
+description: 学习用Plotly绘制箱线图与小提琴图可视化数据，直观了解数据分布形态，展示中位数和异常值
+releaseDate: 2023-07-16
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+image: https://imrichard.com/wp-content/uploads/2025/04/plotly-boxplot-violinplot-distribution-cover.avif
+---
+
+在数据分析工作中，我们常常使用聚合指标，比如平均值，来了解特定特征的情况，像是员工的平均年龄、平均在职时间等。
+
+然而，仅依赖平均值有时会遇到局限。特别是在数据量不大或者存在极端值的情况下，平均值可能无法完全反映真实情况，甚至可能引导出不准确的结论。
+
+这时候，我们可以借助**箱线图（Box Plot）**和**小提琴图（Violin Plot）**。这两种图表能更清晰地展示数据的分布形态、集中趋势和离散程度，帮助我们发现数据中的异常值或分布偏态，从而获得更深入的理解。
+
+本文将介绍如何使用 Python 中的 Plotly 库来绘制这两种图表，并通过实例展示如何在实践中应用它们。
+
+## 准备模拟数据集
+
+为了演示，我们先构造一个模拟的企业员工年龄数据集。这里选用 Gamma 分布来模拟年龄的分布特征，并设定所有年龄值都大于 20 岁。
+
+```python
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
+
+# 使用Gamma分布模拟企业中员工年龄的分布
+np.random.seed(62390)
+# shape和scale控制分布形态，+20确保年龄基线
+age = np.random.gamma(shape=5, scale=2, size=1000) + 20
+
+# 将年龄取整，模拟实际情况
+age_rounded = np.round(age).astype(int)
+
+# 构建DataFrame数据集
+employee_dataset = pd.DataFrame({
+    "Employee ID": [f"E{str(i).zfill(4)}" for i in range(1, 1001)],
+    "Age": age_rounded
+})
+
+# 查看数据概览
+# print(employee_dataset.head())
+# print(employee_dataset['Age'].describe())
+```
+
+## 使用 Plotly 绘制分布图
+
+Plotly 提供了绘制箱线图和小提琴图的功能。下面我们介绍两种常用的实践方法。
+
+### 方法一：在同一图中组合箱线图与小提琴图
+
+将箱线图和小提琴图绘制在同一张图上，可以非常直观地对比两者展示数据分布侧重点的不同：箱线图明确标示了四分位数、中位数和异常值点，而小提琴图则更侧重于展示数据密度的分布形态。
+
+```python
+# 创建箱线图对象
+# boxpoints='outliers' 会显示异常值点
+box = go.Box(y=employee_dataset['Age'], name='箱线图', boxpoints='outliers',
+             marker_color='royalblue') # 可以指定颜色
+
+# 创建小提琴图对象
+# box_visible=True 在小提琴内部显示箱线图结构
+# meanline_visible=True 显示均值线（虚线）
+# points='outliers' 显示异常值点
+violin = go.Violin(y=employee_dataset['Age'], name='小提琴图',
+                   box_visible=True, meanline_visible=True, points='outliers',
+                   fillcolor='salmon', # 填充色
+                   line_color='firebrick') # 轮廓线颜色
+
+# 将两种图表数据放入列表
+data = [box, violin]
+
+# 定义图表布局
+layout = go.Layout(
+    title='年龄分布箱线图与小提琴图',
+    yaxis_title='年龄',
+    width=800,  # 图表宽度
+    height=600  # 图表高度
+)
+
+# 创建图表对象
+fig = go.Figure(data=data, layout=layout)
+
+# 显示图表
+fig.show()
+```
+
+**效果展示：**
+
+![并排对比展示员工年龄分布的箱线图（蓝色）与小提琴图（红色）](https://imrichard.com/wp-content/uploads/2025/04/age-distribution-boxplot-violin-comparison.avif)
+
+从图中可以看到：
+
+- 箱线图清晰地标出了中位数（约29岁）、上下四分位数（约27岁和33岁）以及一些高于上边缘的异常值点。
+- 小提琴图展示了整体数据的密度分布，可以看出大部分员工年龄集中在 25 到 35 岁之间，且分布略微右偏（尾部拖向高龄）。小提琴内部也嵌入了箱线图，方便对照。
+
+### 方法二：为图表添加关键统计值注释
+
+Plotly 生成的图表是交互式的，鼠标悬停时会显示详细信息。但在需要将图表导出为静态图片（如报告截图、PPT展示）时，这些交互信息就丢失了。为了让静态图表也能传递关键信息，我们可以手动添加注释，比如标出中位数、四分位数、最大最小值等。
+
+这里我们使用 `plotly.express` 来快速创建小提琴图，并演示如何添加注释。
+
+```python
+# 使用 Plotly Express 快速创建小提琴图
+fig = px.violin(employee_dataset, y='Age',
+                box=True, # 在小提琴内部显示箱线图
+                points="outliers", # 显示异常值
+                title='年龄分布小提琴图（含统计注释）',
+                labels={'Age':'年龄'}, # 自定义坐标轴标签
+                width=600, height=600)
+
+# 计算需要标注的关键统计值
+median = int(employee_dataset['Age'].median())
+q1 = int(employee_dataset['Age'].quantile(0.25))
+q3 = int(employee_dataset['Age'].quantile(0.75))
+max_value = int(employee_dataset['Age'].max())
+min_value = int(employee_dataset['Age'].min())
+
+# 定义注释内容和位置
+# x=0.07 表示注释在绘图区域水平方向7%的位置
+# y=value 表示注释在对应值的垂直位置
+# xanchor='left' 表示注释文本左对齐锚点
+# bgcolor 设置背景色使其更明显
+annotations = [
+    dict(x=0.07, y=median, text=f"中位数: {median}", showarrow=False, xanchor='left',
+         bgcolor='rgba(211,211,211,0.7)', font=dict(size=12)),
+    dict(x=0.07, y=q1, text=f"下四分位: {q1}", showarrow=False, xanchor='left',
+         bgcolor='rgba(211,211,211,0.7)', font=dict(size=12)),
+    dict(x=0.07, y=q3, text=f"上四分位: {q3}", showarrow=False, xanchor='left',
+         bgcolor='rgba(211,211,211,0.7)', font=dict(size=12)),
+    dict(x=0.07, y=max_value, text=f"最大值: {max_value}", showarrow=False, xanchor='left',
+         bgcolor='rgba(211,211,211,0.7)', font=dict(size=12)),
+    dict(x=0.07, y=min_value, text=f"最小值: {min_value}", showarrow=False, xanchor='left',
+         bgcolor='rgba(211,211,211,0.7)', font=dict(size=12))
+]
+
+# 循环添加注释到图表中
+for ann in annotations:
+    fig.add_annotation(ann)
+
+# 更新Y轴标签（如果使用px创建时未指定labels）
+# fig.update_yaxes(title_text='年龄')
+
+# 显示图表
+fig.show()
+```
+
+**效果展示：**
+
+![展示员工年龄分布的小提琴图，图中用文字注释标明了中位数、上下四分位数、最大值和最小值](https://imrichard.com/wp-content/uploads/2025/04/annotated-age-distribution-violin-plot.avif)
+
+这样处理后，即使是静态图片，也能清晰地看到数据的关键统计摘要信息，方便阅读和理解。
+
+## 总结
+
+相比于单一的平均值，箱线图和小提琴图能够提供更丰富的数据分布信息，帮助我们更准确地把握数据的形态、离散情况和潜在的异常点。Plotly 库为绘制这两种图表提供了便捷的方法，并且支持将它们组合展示或添加自定义注释，以满足不同的分析和展示需求。在日常数据分析工作中，适时运用这些可视化工具，有助于我们做出更可靠的判断和洞察。

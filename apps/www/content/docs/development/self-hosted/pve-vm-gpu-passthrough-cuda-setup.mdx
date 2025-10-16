@@ -1,0 +1,174 @@
+---
+title: 大模型实验CUDA环境搭建
+description: PVE虚拟机GPU直通配置Nvidia驱动与CUDA，搭建Ubuntu深度学习和大模型的测试环境
+releaseDate: 2024-06-09
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+image: https://imrichard.com/wp-content/uploads/2025/04/pve-vm-gpu-passthrough-cuda-setup-cover.avif
+---
+
+随着深度学习和大型模型应用的普及，在开发环境中高效利用 GPU 资源变得越来越重要。有时，出于环境隔离、资源管理或测试需求，我们希望在虚拟机（VM）内部署开发环境。本文将介绍如何在 Proxmox VE (PVE) 虚拟化平台上，通过 PCI 硬件直通技术，为虚拟机（以 Ubuntu 为例）配置 NVIDIA 显卡，并安装相应的驱动程序和 CUDA Toolkit，最终搭建起一个可用的 CUDA 开发基础环境。
+
+<Callout type="info">
+  Ubuntu 发行版在安装和管理 NVIDIA
+  驱动方面通常有较好的兼容性和相对简便的操作流程，因此本文推荐使用 Ubuntu
+  作为虚拟机的操作系统。
+</Callout>
+
+## 整体流程概览
+
+搭建过程主要包含以下几个关键步骤：
+
+1. **虚拟机创建与 GPU 直通设置**：在 PVE 中创建虚拟机，并将物理 GPU 设备直通给该虚拟机。
+2. **NVIDIA 显卡驱动安装**：在虚拟机内部安装正确的 NVIDIA 驱动，使操作系统能够识别并使用直通的 GPU。
+3. **CUDA Toolkit 安装**：安装 NVIDIA CUDA Toolkit，为深度学习框架和 CUDA 应用提供必要的库和工具。
+
+接下来，我们将详细介绍每个步骤的操作方法。
+
+## 一、虚拟机创建与 GPU 直通设置 (PVE 环境)
+
+**前提：** 确保你的 PVE 主机已根据官方文档或相关教程正确配置并**开启了硬件直通 (IOMMU) 功能**。这是实现 GPU 直通的基础。**具体的硬件直通配置步骤，可以参考我之前的笔记[《PVE 安装镜像加速与硬件直通配置实用指南》](/docs/development/self-hosted/pve-installation-pcie-passthrough)。**
+
+1. **创建虚拟机**：
+   - 在 PVE Web UI 中新建虚拟机。
+   - 在"硬件 (Hardware)" -> "Machine" 类型设置中，务必选择 **q35**。这是推荐用于 PCI-Express 设备直通的机器类型。
+
+2. **添加 PCI 直通设备 (关键步骤)**：
+   - 选中目标虚拟机，进入"硬件 (Hardware)" 菜单。
+   - 点击"添加 (Add)"，选择"PCI 设备 (PCI Device)"。
+   - 从设备列表中，精确找到并选择你的物理 NVIDIA 显卡。
+   - **务必勾选 "所有功能 (ALL FUNCTIONS)"** 选项。
+   - 根据需要，可以勾选"主 GPU (Primary GPU)"（如果希望将显示输出也绑定到这个 GPU，可能需要物理连接显示器）。
+   - 展开"高级 (Advanced)"设置，**务必勾选 "PCI-Express"** 选项。
+
+3. **配置显示选项**：
+   - 仍在"硬件 (Hardware)"菜单中，找到"显示 (Display)"设置。
+   - 将其类型从默认（如 `default (std)`) 更改为 **标准 VGA (Standard VGA)**。
+   - **重要提示：** 这一步是为了确保即使在 GPU 被直通后，你仍然可以通过 PVE 的 Web VNC 控制台访问虚拟机的命令行或基本图形界面。否则，一旦 GPU 驱动在虚拟机内加载，VNC 控制台可能会黑屏。
+
+完成以上设置后，启动虚拟机，进行 Ubuntu 操作系统的安装。
+
+## 二、安装 NVIDIA 显卡驱动 (Ubuntu 虚拟机内)
+
+虚拟机操作系统（如 Ubuntu Desktop）安装完成后，我们需要在虚拟机内部安装 NVIDIA 驱动。
+
+### 1. 确认显卡直通成功
+
+在安装驱动之前，务必先检查虚拟机是否已经正确识别到直通的 NVIDIA 显卡。打开虚拟机内的终端，执行以下命令：
+
+```bash
+lspci | grep -i nvidia
+```
+
+如果命令执行后能看到类似 NVIDIA Corporation [显卡型号] 的信息，说明 PVE 的 GPU 直通配置已生效，虚拟机成功识别了显卡。如果没有任何输出，你需要返回 PVE 检查虚拟机的硬件直通设置是否正确。
+
+### 2. 安装驱动程序
+
+Ubuntu 系统通常提供了一个工具来检测并推荐合适的驱动版本。
+
+**查看可用驱动**：
+
+```bash
+sudo ubuntu-drivers devices
+```
+
+这条命令会列出检测到的硬件以及推荐安装的驱动版本（通常会标记为 `recommended`）。
+
+**安装推荐驱动**：
+
+选择一个推荐的、或你确定兼容的驱动版本进行安装。例如，如果推荐的是 `nvidia-driver-535`，则执行：
+
+```bash
+sudo apt update
+sudo apt install nvidia-driver-535  # 注意：请替换为实际推荐或你需要的版本号
+```
+
+**提示：** 不要直接照搬示例中的 `nvidia-driver-495`，除非 `ubuntu-drivers devices` 明确推荐它或者你有特殊理由需要这个旧版本。优先使用系统推荐的稳定版本。
+
+**重启虚拟机**：
+
+驱动安装完成后，需要重启虚拟机才能使新的驱动生效。
+
+```bash
+sudo reboot
+```
+
+重启后，可以通过运行 `nvidia-smi` 命令来验证驱动是否成功加载并能与 GPU 通信。如果能看到 GPU 的信息（型号、温度、显存使用情况等），则驱动安装成功。
+
+## 三、安装 CUDA Toolkit (Ubuntu 虚拟机内)
+
+驱动安装成功后，我们就可以安装 CUDA Toolkit 了。CUDA Toolkit 包含了 CUDA 编译器 (nvcc)、CUDA 库、开发工具和运行时环境等，是进行 CUDA 编程和运行深度学习框架所必需的。
+
+### 1. 准备工作
+
+确保你已经成功安装了 NVIDIA 驱动，并且 `nvidia-smi` 命令可以正常工作。
+
+### 2. 安装步骤
+
+**访问 NVIDIA 官网**：
+
+前往 NVIDIA CUDA Toolkit 的官方下载页面 ([https://developer.nvidia.com/cuda-downloads](https://developer.nvidia.com/cuda-downloads))。
+
+**选择安装选项**：
+
+根据你的虚拟机操作系统（Linux -> x86_64 -> Ubuntu -> 你的 Ubuntu 版本）选择对应的 CUDA Toolkit 版本。网站会提供多种安装方式（如 deb [network], deb [local], runfile [local]），推荐使用 `deb (network)` 或 `deb (local)` 方式，这样便于后续通过 `apt` 进行管理。
+
+**根据官网指令安装**：
+
+NVIDIA 官网会给出详细的安装指令。通常，对于 `deb` 包方式，指令会类似下面这样（**请务必以官网页面提供的最新指令为准**）：
+
+```bash
+# 示例指令，请以官网为准！
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+sudo dpkg -i cuda-keyring_1.1-1_all.deb
+sudo apt-get update
+
+# 安装 CUDA Toolkit
+sudo apt-get -y install cuda-toolkit-12-8
+```
+
+**注意：** `<distro>` 需要替换为你的 Ubuntu 发行版代号（如 `ubuntu2204`），`<version>` 可能需要替换为具体的 CUDA 工具包版本号（如 `12-8`）。**强烈建议直接复制粘贴官网提供的准确命令序列**。
+
+### 3. 配置环境变量
+
+为了让系统能够找到 CUDA 的可执行文件和库文件，需要将 CUDA 的相关路径添加到环境变量中。编辑你的 shell 配置文件（如 `~/.bashrc` 或 `~/.profile`）：
+
+```bash
+nano ~/.bashrc  # 或者 nano ~/.profile
+```
+
+在文件末尾添加以下行：
+
+```bash
+# 注意：<version> 需要替换为你实际安装的 CUDA 版本号，例如 11.8 或 12.8
+export PATH=/usr/local/cuda-<version>/bin${PATH:+:${PATH}}
+export LD_LIBRARY_PATH=/usr/local/cuda-<version>/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+```
+
+保存文件后，执行以下命令使配置生效（或者关闭当前终端再重新打开一个新的终端，或者重新登录）：
+
+```bash
+source ~/.bashrc  # 如果你修改的是 .bashrc
+# source ~/.profile # 如果你修改的是 .profile
+```
+
+### 4. 验证安装
+
+最后，验证 CUDA Toolkit 是否安装成功：
+
+```bash
+nvcc --version
+```
+
+如果命令输出了 CUDA 编译器的版本信息（如 `nvcc: NVIDIA (R) Cuda compiler driver ... release 12.3 ...`），则表明 CUDA Toolkit 已成功安装并配置好。
+
+## 总结与后续
+
+至此，我们已经在 PVE 虚拟机中成功搭建了一个包含 NVIDIA 驱动和 CUDA Toolkit 的基础环境。这个环境可以用于：
+
+- 大语言模型和多模态等相关模型的推理
+- 大模型的开发和训练（配合安装 PyTorch 等框架）。
+- 进行 CUDA 并行计算编程。
+
+希望这份记录能为需要在虚拟化环境中进行深度学习和大型模型相关工作的同学提供一份清晰、可操作的参考。搭建过程中遇到细节问题时，查阅 PVE、NVIDIA 和 Ubuntu 的官方文档通常能找到解决方案。

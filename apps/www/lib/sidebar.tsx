@@ -101,10 +101,8 @@ const TabsDescription = ({
 
 export const SIDEBAR_TABS = [
   {
-    title: 'AI Exploration',
-    description: (
-      <TabsDescription title="AI Exploration & Practice" count={0} />
-    ),
+    title: 'AI 探索',
+    description: <TabsDescription title="AI 技术与应用实践" count={0} />,
     icon: (
       <div className="[&_svg]:size-full rounded-lg size-full text-muted-foreground max-md:bg-(--tab-color)/10 max-md:border max-md:p-1.5">
         <Brain />
@@ -113,8 +111,8 @@ export const SIDEBAR_TABS = [
     url: '/docs/ai',
   },
   {
-    title: 'Data Science',
-    description: <TabsDescription title="Data Science Learning" count={0} />,
+    title: '数据科学',
+    description: <TabsDescription title="数据分析与可视化" count={0} />,
     icon: (
       <div className="[&_svg]:size-full rounded-lg size-full text-muted-foreground max-md:bg-(--tab-color)/10 max-md:border max-md:p-1.5">
         <BarChart3 />
@@ -123,8 +121,8 @@ export const SIDEBAR_TABS = [
     url: '/docs/data-science',
   },
   {
-    title: 'Development',
-    description: <TabsDescription title="Development Journey" count={0} />,
+    title: '开发实践',
+    description: <TabsDescription title="独立开发与自托管" count={0} />,
     icon: (
       <div className="[&_svg]:size-full rounded-lg size-full text-muted-foreground max-md:bg-(--tab-color)/10 max-md:border max-md:p-1.5">
         <Code2 />

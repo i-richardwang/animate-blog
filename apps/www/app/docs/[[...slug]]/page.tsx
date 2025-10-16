@@ -79,13 +79,13 @@ export default async function Page(props: {
     // }
 
     if (page.url.startsWith('/docs/ai/')) {
-      return { url: '/docs/ai', name: 'AI Exploration' } as const;
+      return { url: '/docs/ai', name: 'AI 探索' } as const;
     }
     if (page.url.startsWith('/docs/data-science/')) {
-      return { url: '/docs/data-science', name: 'Data Science' } as const;
+      return { url: '/docs/data-science', name: '数据科学' } as const;
     }
     if (page.url.startsWith('/docs/development/')) {
-      return { url: '/docs/development', name: 'Development' } as const;
+      return { url: '/docs/development', name: '开发实践' } as const;
     }
 
     const isSectionRoot =
@@ -107,8 +107,8 @@ export default async function Page(props: {
             url: guideItems[guideIndex + 1].url,
             name: guideItems[guideIndex + 1].text,
           }
-        : // Original: { url: '/docs/components', name: 'Components' }
-          { url: '/docs/ai', name: 'AI Exploration' }
+      : // Original: { url: '/docs/components', name: 'Components' }
+        { url: '/docs/ai', name: 'AI 探索' }
       : nextPage
         ? { url: nextPage.url, name: String(nextPage.name ?? 'Suivant') }
         : undefined;
@@ -236,7 +236,7 @@ export async function generateMetadata(props: {
       url: 'https://richardwang.me',
       siteName: "Richard's Page",
       images: image,
-      locale: 'en_US',
+      locale: 'zh_CN',
       type: 'website',
     },
     twitter: {

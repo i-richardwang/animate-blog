@@ -34,9 +34,9 @@ export default async function Page(props: {
     return (
       <>
         <DocsPage toc={[]}>
-          <DocsTitle className="font-medium">Blog</DocsTitle>
+          <DocsTitle className="font-medium">博客</DocsTitle>
           <DocsDescription className="mb-1 font-normal">
-            Thoughts, learnings, and experiences from my journey
+            记录思考与探索的足迹
           </DocsDescription>
 
           <DocsBody id="docs-body" className="pb-10 pt-4">
@@ -63,7 +63,7 @@ export default async function Page(props: {
             <Button variant="accent" size="sm" asChild>
               <Link href="/blog">
                 <ArrowLeft />
-                Back to Blog
+                返回博客
               </Link>
             </Button>
           </div>
@@ -119,16 +119,15 @@ export async function generateMetadata(props: {
 
   if (slug.length === 0) {
     return {
-      title: 'Blog',
-      description:
-        'Thoughts, learnings, and experiences from my journey. Sharing insights and knowledge along the way.',
+      title: '博客',
+      description: '记录思考与探索的足迹',
       openGraph: {
-        title: 'Blog',
-        description: 'Thoughts, learnings, and experiences from my journey',
+        title: '博客',
+        description: '记录思考与探索的足迹',
         url: 'https://richardwang.me/blog',
         siteName: "Richard's Page",
         type: 'website',
-        locale: 'en_US',
+        locale: 'zh_CN',
       },
     };
   }
@@ -159,7 +158,7 @@ export async function generateMetadata(props: {
       siteName: "Richard's Page",
       type: 'article',
       publishedTime: new Date(page.data.date).toISOString(),
-      locale: 'en_US',
+      locale: 'zh_CN',
       images: page.data.image || image,
     },
     twitter: {

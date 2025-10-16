@@ -12,6 +12,24 @@ const config = {
       {
         hostname: 'ui.paceui.com',
       },
+      {
+        hostname: 'imrichard.com',
+      },
+      {
+        hostname: 'promptkeep.org',
+      },
+      {
+        hostname: 'agent-toolbox.vercel.app',
+      },
+      {
+        hostname: 'excelwhisper.com',
+      },
+      {
+        hostname: 'sitesnapper.app',
+      },
+      {
+        hostname: 'gitseek.dev',
+      },
     ],
   },
   reactStrictMode: false,

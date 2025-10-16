@@ -1,0 +1,117 @@
+---
+title: SimpleLogin搭建专属域名邮箱
+description: 讲解使用SimpleLogin为自定义域名配置邮箱，实现专业邮件收发与便捷管理
+releaseDate: 2025-03-23
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+image: https://imrichard.com/wp-content/uploads/2025/04/set-up-custom-domain-email-with-simplelogin.avif
+---
+
+对于独立开发者或小团队来说，给自己的产品或项目配一个专属的域名邮箱，不仅能提升专业形象，获取用户信任，也有助于分类管理邮件。另外，现在很多产品发布平台也要求用域名邮箱来验证身份或作为联系方式，所以拥有专属域名邮箱几乎成了产品上线的标配。
+
+市面上解决这个需求的方案有好几种。之前有朋友分享过 Resend+Cloudflare 的组合方案《[搭建免费的企业邮箱](https://javayhu.com/email/)》，如果你产品不多，想零成本起步，或者就喜欢自己折腾，那这个方案可以考虑。
+
+不过，要是你想要一个配置更简单、限制更少、功能更全面的选择，并且愿意花点小钱，那 SimpleLogin 也许是更合适的选择。下面就来分享一下我用 SimpleLogin 搭建自定义域名邮箱的实现过程。
+
+## 方案效果预览
+
+配置好之后，大概能实现这些效果：
+
+1. 给你的域名（比如 `example.com`）创建各种前缀的邮箱地址，像是 `support@mail.example.com` 这种。
+2. 别人给这些地址发邮件时，邮件会自动转发到你指定的一个或多个个人邮箱（比如你的 Gmail、Outlook、QQ 邮箱等）。
+3. 你收到邮件后，可以直接在你的个人邮箱里回复，对方看到的发出地址仍然是 `support@mail.example.com`，看起来很专业。
+
+## 核心优势
+
+SimpleLogin 本来是做邮箱别名服务的，主打隐私保护，但它的功能完全够中小团队用来做企业邮箱，而且还有些特别的好处：
+
+1. **性价比高：付费版（现在是 4 美元/月）可以绑定无限多个**你自己的域名，创建**无限多个**邮箱别名，收发邮件数量也没什么特别限制。相比之下，其他一些方案的免费版通常会限制域名数量（比如 Resend 免费版只能加 1 个域名）和发件数量。
+2. **跟个人邮箱无缝衔接：**继续使用你习惯的邮箱和客户端即可，SimpleLogin 会自动帮你收发域名邮箱的邮件。
+3. **方便团队协作：**可以把一个业务邮箱地址收到的邮件，同时转发给团队里好几个成员的个人邮箱。这样大家都能看到，不容易漏掉邮件，也避免了共享邮箱账号密码的麻烦和风险。
+4. **官方长期验证：**SimpleLogin 方案的可靠性已经得到验证 – 官方就在用这套服务处理所有企业邮件，包括税务和银行等重要业务往来的邮件。
+5. **管理功能更完善：**提供了邮件转发统计监控、拦截日志这些功能，方便你追踪和管理邮件情况。
+6. **邮箱别名与隐私追踪：**作为邮箱别名服务的老牌产品，SimpleLogin 提供无限别名功能特别实用。每个网站和服务都可以使用独立的邮箱地址，既保护了你的主邮箱不被泄露，又能精准定位垃圾邮件的来源渠道。
+
+![官方 FAQ 透露 SimpleLogin 自己的业务邮箱也基于别名实现](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-reliability-proof-faq-1.avif)
+
+![SimpleLogin 官方 FAQ 说明其可用于银行、政府等重要邮件的收发](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-reliability-proof-faq-2.avif)
+
+<Callout type="info">
+  此外，SimpleLogin
+  是**开源**的，这意味着代码完全透明，可信度更高。虽然它支持自托管部署，但考虑到邮件服务对服务器
+  IP 信誉、反垃圾邮件配置等要求较高，建议选择官方的付费服务以获得最佳体验。
+</Callout>
+
+## 配置步骤指南
+
+配置过程的核心在于设置域名的 DNS 记录，整体操作比较直接：
+
+### Step 1：添加收件邮箱 (Mailboxes)
+
+登录 SimpleLogin 后台，找到「Mailboxes」菜单。默认情况下，你注册 SimpleLogin 时使用的邮箱会自动被添加为个人邮箱。你也可以添加更多的邮箱地址来接收转发邮件，方便后面选用，也方便团队成员一起收邮件。
+
+![SimpleLogin后台添加收件邮箱界面截图，高亮显示输入新的个人邮箱地址以接收转发邮件](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-new-mailbox.avif)
+
+### Step 2：绑定域名 (Domains)
+
+进入「Domains」菜单，点击添加域名。你可以直接输入你的产品主域名（如 `example.com`），但我个人习惯为邮件服务设置一个子域名，例如 `mail.example.com`。输入后点击添加。
+
+![SimpleLogin后台添加自定义域名界面截图，高亮显示输入要绑定的域名信息。](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-add-custom-domain.avif)
+
+### Step 3：配置 DNS 记录
+
+添加域名后，SimpleLogin 会提供所需的 DNS 记录值。你需要前往你的域名服务商（如 Cloudflare、GoDaddy 等）后台添加 MX、SPF(TXT)、DKIM(CNAME) 和 DMARC(TXT) 这几类记录。以下是几个关键提示：
+
+![SimpleLogin后台展示绑定域名所需的DNS记录配置信息截图。](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-dns-configuration-records.avif)
+
+- **记录的 Name (名称/主机名) 字段：**
+  - 如果你的邮件域名是**子域名**（如 `mail.example.com`），配置 MX 和 SPF 时，`Name` 通常填写子域名部分 (`mail`)。
+  - 如果直接使用**主域名** (`example.com`)，`Name` 通常填写 `@` 或留空（具体规则看你的 DNS 服务商）。
+
+- **DKIM 和 DMARC 的 Name 字段：**需要特别注意前缀。
+  - DKIM 的 `Name` 通常是 `dkim._domainkey.你的子域名` 或 `dkim._domainkey` (主域名)。
+  - DMARC 的 `Name` 通常是 `_dmarc.你的子域名` 或 `_dmarc` (主域名)。
+
+- **Cloudflare 用户：**添加 DKIM (CNAME 类型) 记录时，务必将代理状态（Proxy status）设置为 `DNS Only`（灰色云朵）。
+
+请仔细按照 SimpleLogin 界面提供的具体记录值进行配置。配置完成后，等待 DNS 生效（几分钟）。
+
+### Step 4：验证与收尾设置
+
+回到 SimpleLogin 的「Domains」页面，刷新查看。当 DNS 配置正确并生效后，对应域名的状态会显示为 **`Verified`** 或 **`Domain ready`**。
+
+![SimpleLogin自定义域名界面截图，绑定成功的域名显示 Domain ready](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-verified-domains-list.avif)
+
+点击域名旁边的 **Details** 或管理按钮，进行最后的设置：
+
+1. **Catch All** (截图中的 `1`): 这个开关控制是否启用"捕获所有"或"动态创建"别名功能。建议保持开启（如图所示）。开启后，发往 `任意前缀@你的域名` (例如 `anything@example.com`) 的邮件都会被接收和处理，别名会在第一次收到邮件时自动创建。
+2. **Mailboxes** (截图中的 `2`): 在"Auto-created aliases are automatically owned by the following mailboxes"部分，勾选你在 Step 1 中添加的、希望接收该域名下邮件的个人邮箱。可以多选，方便团队成员共享，我这里就选择了两个邮箱。
+3. **Default display name** (截图中的 `3`): 在输入框中设置一个默认的发件人显示名称（例如截图中填写的 `Project Team`）。当你通过个人邮箱回复这些转发来的邮件时，收件人看到的发件人名称就是这个。如果需要为不同的邮箱前缀（如 `support@` 和 `hello@`）设置不同的显示名称，之后可以在「Aliases」菜单中单独为每个别名进行配置。
+
+![在 SimpleLogin 中为自定义域名配置Catch-All、设置转发收件邮箱和默认发件人显示名称的操作界面](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-custom-domain-auto-create-settings-scaled.avif)
+
+## 测试使用
+
+都设置好后，就可以试试了：
+
+1. 用你的另一个邮箱（不是第 1 步里加的收件邮箱）给你刚设置好的域名邮箱地址（比如 `support@mail.example.com` 或 `test@mail.example.com`）发封测试邮件。
+2. 去你第 1 步里设置的个人收件邮箱里看看，应该很快就能收到这封转发过来的邮件。
+3. 直接在你的个人邮箱里回复这封邮件。
+4. 再回到你发测试邮件的那个邮箱看看，收到的回复邮件，发件人应该显示的是你设置的 `Default Display Name`，并且发件地址是你配置的域名邮箱地址 (`support@mail.example.com`)。
+
+## 额外价值：SimpleLogin 的隐私保护
+
+除了企业邮箱功能，SimpleLogin 的核心邮件别名特性（类似 Apple Hide My Email）也是一大优势。你可以为不同服务（如用 `service-a@mail.example.com` 注册 A 网站）创建无限别名。
+
+好处很明显：
+
+- **隔离风险：** 万一哪个服务数据泄露了，你的真实邮箱不会暴露。
+- **追踪来源：** 如果你开始收到某个地址的垃圾邮件，就能知道是哪个服务把你卖了或者没保护好你的信息。
+- **精准控制：** 哪个别名不想要了，或者开始收到垃圾邮件了，随时可以在 SimpleLogin 后台把它禁用掉，彻底清净。
+
+这能给你的网上活动加一层重要的隐私和安全保护。
+
+以上就是我使用 SimpleLogin 配置和管理自定义域名邮箱的经验分享。总的来说，SimpleLogin 提供了一个功能完善、易于配置且性价比高的解决方案，非常适合独立开发者、小团队，以及注重隐私保护的个人用户。
+
+如果你在配置过程中碰到什么问题，或者有其他想法和经验，欢迎在评论区留言交流。

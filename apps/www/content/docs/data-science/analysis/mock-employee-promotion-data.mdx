@@ -1,0 +1,288 @@
+---
+title: 从零构建员工晋升模拟数据集
+description: 介绍如何使用 Pandas Numpy Faker 模拟真实逻辑，虚构员工晋升数据集，用于分享和演示
+releaseDate: 2023-02-05
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+image: https://imrichard.com/wp-content/uploads/2025/04/mock-employee-promotion-data-python-cover.avif
+---
+
+在数据分析和可视化的分享时，如何既能有效展示分析思路和成果，又能**保障真实数据的安全**，是演示时的必要考量。就如我常套用的人力资源场景，直接使用生产数据往往涉及隐私和合规风险，而完全随机的数据又缺乏真实业务场景的逻辑和复杂度，难以有效支撑演示或分析。
+
+一个有效的方法是**构造一个虚构（Synthetic）但贴近现实逻辑的模拟数据集**。这种方法既能保护真实数据的安全，又能提供一个"以假乱真"的沙盒环境，用于演示分析思路、工具特性或进行教学。
+
+本文中将详细介绍如何一步步构建一个用于演示员工晋升分析场景的模拟数据集。我们会用到 Python 中的 Pandas、Numpy 和 Faker 库。
+
+<Callout type="info">
+  本文构造数据集所使用的参数（比例、均值、阈值等）均基于常识性假设，旨在演示数据构造方法，**请勿将其视为任何真实情况的反映或分析结论**。
+</Callout>
+
+## 数据集设计思路
+
+在开始写代码之前，我们先明确这个模拟数据集需要具备哪些特征才能"以假乱真"，支撑起一个晋升分析场景：
+
+1. **时间跨度：** 数据应包含一定的时间跨度，以观察变化趋势。我们设定为 **2018 年至 2022 年**。
+2. **数据结构：** 采用面板数据（Panel Data）形式，即**每一年每个员工对应一行数据**。这种结构便于进行时间序列分析和追踪个体变化。
+3. **数据规模：** 需要一定的体量才能体现分析价值。我们设定**每年有 1000 名员工**，总计 5000 行数据。
+4. **核心字段：** 需要包含员工的基本信息、组织信息以及晋升相关的关键指标：
+   - **基本信息：** 年份、员工 ID（唯一标识）、员工姓名（随机生成）。
+   - **组织信息：** 所属业务、所属部门、具体岗位、人才来源（校招/社招）。这些信息需要模拟真实的分布不均，例如某些部门人数更多，社招比例可能更高。
+   - **晋升信息：**
+     - 晋升前级别：员工在当前年度开始时的职级。
+     - 当前级别停留时长：模拟员工在晋升前，已经在该级别工作了多久。
+     - 是否符合提名条件：根据停留时长等规则判断。
+     - 是否被提名：符合条件的不一定都被提名。
+     - 是否晋升成功：被提名的不一定都晋升成功。
+     - 晋升后级别：根据晋升结果确定。
+
+有了这些设计原则，我们就可以开始动手构造数据了。
+
+## 分步构造详解：从零到一的模拟过程
+
+我们将使用 Python 来完成整个构造过程。如果你还不熟悉这些库，可以简单理解：Pandas 用于处理表格数据，Numpy 用于高效的数值计算和随机选择，Faker 用于生成假的姓名等信息。
+
+### 步骤 1：初始化环境，构建基础框架
+
+首先，我们需要导入必要的库，并创建包含年份、员工 ID 和随机姓名的基础数据框（DataFrame），这是我们数据集的骨架。
+
+```python
+import pandas as pd
+from faker import Faker
+import numpy as np
+
+# 初始化Faker，用于生成随机姓名 (可指定中文 'zh_CN')
+fake = Faker('zh_CN')
+
+# 定义时间和员工范围
+years = [2018, 2019, 2020, 2021, 2022]
+employees = range(1, 1001)  # 每年1000名员工
+
+# 生成基础数据：每年、每员工一行
+data = []
+for year in years:
+    for emp_id in employees:
+        # 构造员工ID，格式为 E + 四位数字 (不足补零)
+        employee_id_str = f'E{emp_id:04d}'
+        # 生成随机姓名
+        employee_name = fake.name()
+        data.append((year, employee_id_str, employee_name))
+
+# 创建 Pandas DataFrame
+df = pd.DataFrame(data, columns=['年份', '员工ID', '员工姓名'])
+```
+
+这一步我们得到了一个包含 5000 行的基础表，每一行代表一个员工在特定年份的记录。
+
+![Python 生成的初始员工模拟数据预览，包含年份、员工ID和姓名。](https://imrichard.com/wp-content/uploads/2025/04/python-employee-basic-data-sample-scaled.avif)
+
+### 步骤 2：分配组织属性
+
+接下来，我们为员工填充组织归属和来源信息。这里运用了 `np.random.choice` 函数，它可以根据指定的概率分布（`p` 参数）来进行随机选择，从而模拟不同群体间的比例差异。
+
+```python
+# 定义业务线及其大致比例
+businesses = ['核心业务A', '创新业务B', '增长业务C', '平台业务D', '海外业务E']
+business_ratios = [0.35, 0.15, 0.2, 0.2, 0.1] # 比例加和需为 1
+
+# 定义部门及其大致比例
+departments = ['技术部', '销售部', '运营部', '人事部', '财务部']
+department_ratios = [0.4, 0.1, 0.3, 0.1, 0.1] # 比例加和需为 1
+
+# 使用 np.random.choice 根据指定比例随机分配
+df['所属业务'] = np.random.choice(businesses, p=business_ratios, size=len(df))
+df['所属部门'] = np.random.choice(departments, p=department_ratios, size=len(df))
+
+# 定义各部门下的具体岗位
+department_positions = {
+    '技术部': ['算法工程师', '大数据工程师', 'IT运维工程师', '软件开发工程师', '硬件工程师'],
+    '销售部': ['区域销售经理', '国际销售代表', '客户关系经理', '销售分析师', '商务拓展专员'],
+    '运营部': ['产品经理', '物流调度员', '供应链专员', '客户服务代表', '项目经理'],
+    '人事部': ['招聘专员', '培训发展专员', '薪酬福利专员', '员工关系专员', '人才发展经理'],
+    '财务部': ['会计师', '审计专员', '财务分析师', '风险控制专员', '结算管理专员']
+}
+
+# 定义一个函数：根据员工所在部门随机分配一个该部门下的岗位
+def assign_position(department):
+    # 从对应部门的岗位列表中随机选一个
+    return np.random.choice(department_positions[department])
+
+# 应用该函数到 '所属部门' 列，生成 '岗位名称' 列
+df['岗位名称'] = df['所属部门'].apply(assign_position)
+
+# 定义人才来源及其大致比例
+talent_sources = ['校园招聘', '社会招聘']
+source_ratios = [0.3, 0.7] # 例如，社招比例更高
+
+# 分配人才来源
+df['人才来源'] = np.random.choice(talent_sources, p=source_ratios, size=len(df))
+```
+
+通过比例控制和部门内岗位分配，我们让组织结构相关的字段看起来更加合理。
+
+现在，我们的数据集多了 4 列，模拟了员工的组织归属信息。
+
+![添加了组织信息（如部门、岗位）的员工模拟数据示例。](https://imrichard.com/wp-content/uploads/2025/04/python-employee-data-with-org-info-scaled.avif)
+
+### 步骤 3：模拟核心晋升要素：级别与停留时长
+
+这是模拟晋升逻辑的关键一步。我们需要设定员工的初始（晋升前）级别，并计算他们在这个级别上停留了多长时间。
+
+- **级别分配**：同样使用 `np.random.choice` 按比例分配，模拟职级金字塔。
+- **停留时长模拟**：这部分需要更精细的处理。
+  - **基础假设**：级别越高，达到晋升所需的平均停留时间越长。
+  - **分布选择**：我们不使用简单的均匀分布或正态分布。因为停留时长不能为负，且往往存在一定的右偏（少数人停留很久），**对数正态分布 (`np.random.lognormal`)** 是一个更合适的选择。它能模拟出大部分人集中在平均值附近，但允许少量较长停留时间的情况。
+  - **参数设定**：我们需要为每个级别设定一个期望的平均停留时长 (`mean`)，并设定一个标准差 (`sigma`) 来控制分布的离散程度。
+  - **边界处理**：为避免生成极端不合理的值（如停留时间过长或过短），我们增加了一个逻辑：如果生成的值超过平均值的两倍，则重新生成（这里改用正态分布生成，使其更靠近均值）；同时确保最小值不低于 0.1 年。
+
+```python
+# 定义级别及其大致比例 (低级别多，高级别少)
+levels = range(1, 7) # 1到6级
+level_ratios = [0.20, 0.30, 0.20, 0.15, 0.10, 0.05] # 比例加和为 1
+
+# 分配员工的晋升前级别
+df['员工晋升前级别'] = np.random.choice(levels, p=level_ratios, size=len(df))
+
+# 定义各级别晋升所需的平均停留时长 (年)
+level_duration_means = {1: 1.0, 2: 1.5, 3: 2.0, 4: 2.5, 5: 3.0, 6: 3.5} # 级别越高，平均越长
+
+# 定义函数：根据级别生成一个模拟的停留时长
+def generate_duration(level):
+    mean = level_duration_means[level]
+    sigma = 0.3 # 控制分布的分散程度，可调整
+
+    # 使用对数正态分布模拟停留时长
+    # 对数正态分布的 mu 和 sigma 参数可以通过均值和标准差反算
+    mu = np.log(mean) - (sigma**2) / 2
+    log_normal_value = np.random.lognormal(mean=mu, sigma=sigma)
+
+    # 增加一些控制，避免极端值 (例如，不允许超过均值的2倍太多)
+    # 这个控制逻辑可以根据需要调整或移除
+    retry_count = 0
+    while log_normal_value > mean + 2 * mean * sigma and retry_count < 5: # 限制重试次数
+        log_normal_value = np.random.lognormal(mean=mu, sigma=sigma)
+        retry_count += 1
+
+    # 保证停留时长至少为 0.1 年
+    return max(0.1, round(log_normal_value, 2)) # 保留两位小数
+
+# 应用该函数，生成停留时长
+df['员工晋升前在当前级别的停留时长'] = df['员工晋升前级别'].apply(generate_duration)
+```
+
+现在，我们有了模拟的级别和对应的、符合一定分布规律的停留时长。
+
+![增加了员工级别和当前级别停留时长信息的模拟数据预览。](https://imrichard.com/wp-content/uploads/2025/04/python-employee-data-with-level-tenure-scaled.avif)
+
+### 步骤 4：模拟晋升决策流程
+
+最后一步是模拟晋升的完整链条：是否满足基本条件 -> 是否被提名 -> 是否最终成功。
+
+- **符合提名条件判断**：
+  - 设定每个级别晋升所需的**最低停留时长门槛** (`nomination_conditions`)。只有超过这个门槛，员工才"有资格"被考虑。
+  - 注意：最高级别（Level 6）在此模型中无法再晋升，其提名条件设为无穷大 (`float('inf')`)。
+
+- **被提名判断**：
+  - 前提：必须先`符合提名条件`。
+  - 设定每个级别（除了最高级）**被提名的概率** (`nomination_ratios`)。级别越低，通常提名机会（比例）可能相对高一些（也可能相反，取决于模拟的策略）。
+  - 使用 `np.random.rand()` 生成一个 0 到 1 的随机数，与对应级别的提名概率比较，决定是否提名。
+
+- **晋升成功判断**：
+  - 前提：必须先`被提名作为候选人`。
+  - 设定每个级别（除了最高级）**提名后成功晋升的概率** (`promotion_ratios`)。通常级别越高，晋升难度越大，成功率可能越低。
+  - 同样使用 `np.random.rand()` 与晋升成功概率比较。
+
+- **更新晋升后级别**：
+  - 如果`本年度是否晋升成功`为"是"，则`员工晋升后级别`比`晋升前级别`高一级（注意最高级封顶）。
+  - 否则，`晋升后级别`与`晋升前级别`保持一致。
+
+```python
+# 定义各级别晋升的最低停留时长要求 (年)
+nomination_conditions = {
+    1: 0.8,  # 1级升2级，至少待0.8年
+    2: 1.3,  # 2级升3级，至少待1.3年
+    3: 1.8,  # 3级升4级，至少待1.8年
+    4: 2.3,  # 4级升5级，至少待2.3年
+    5: 2.8,  # 5级升6级，至少待2.8年
+    6: float('inf') # 6级是最高级，无法再晋升
+}
+
+# 判断是否符合提名条件
+df['本年度是否符合提名条件'] = df.apply(
+    lambda row: '是' if row['员工晋升前在当前级别的停留时长'] >= nomination_conditions[row['员工晋升前级别']] else '否',
+    axis=1 # 必须指定 axis=1，让函数能按行操作
+)
+
+# 定义各级别符合条件后，被提名的概率 (假设值)
+# 注意：键只包含可晋升的级别 (1到5)
+nomination_ratios = {1: 0.35, 2: 0.25, 3: 0.20, 4: 0.15, 5: 0.10}
+
+# 定义函数：判断是否被提名
+def nominate(row):
+    # 如果不符合条件，直接返回 '否'
+    if row['本年度是否符合提名条件'] == '否':
+        return '否'
+    else:
+        level = row['员工晋升前级别']
+        # 获取对应级别的提名概率，如果级别不存在于字典中 (如Level 6)，默认概率为0
+        nomination_prob = nomination_ratios.get(level, 0)
+        # 比较随机数和提名概率
+        return '是' if np.random.rand() < nomination_prob else '否'
+
+df['本年度是否被提名作为候选人'] = df.apply(nominate, axis=1)
+
+# 定义各级别被提名后，成功晋升的概率 (假设值)
+# 注意：键只包含可晋升的级别 (1到5)
+promotion_ratios = {1: 0.90, 2: 0.80, 3: 0.70, 4: 0.60, 5: 0.50} # 级别越高，成功率越低
+
+# 定义函数：判断是否晋升成功
+def promote(row):
+    # 如果未被提名，直接返回 '否'
+    if row['本年度是否被提名作为候选人'] == '否':
+        return '否'
+    else:
+        level = row['员工晋升前级别']
+        # 获取对应级别的晋升成功概率，默认0
+        promotion_prob = promotion_ratios.get(level, 0)
+        # 比较随机数和晋升概率
+        return '是' if np.random.rand() < promotion_prob else '否'
+
+df['本年度是否晋升成功'] = df.apply(promote, axis=1)
+
+# 计算员工晋升后的级别
+df['员工晋升后级别'] = df.apply(
+    lambda row: min(6, row['员工晋升前级别'] + 1) if row['本年度是否晋升成功'] == '是' else row['员工晋升前级别'],
+    axis=1
+)
+```
+
+![展示了模拟晋升流程各环节（如是否提名、是否成功）的数据示例。](https://imrichard.com/wp-content/uploads/2025/04/python-employee-promotion-decision-sample-scaled.avif)
+
+### 步骤 5：格式化与收尾
+
+最后，为了让级别字段在报告或可视化中更易读，我们给数字级别加上 "Level " 前缀。
+
+```python
+# 格式化级别显示
+df['员工晋升前级别'] = df['员工晋升前级别'].apply(lambda x: f'Level {x}')
+df['员工晋升后级别'] = df['员工晋升后级别'].apply(lambda x: f'Level {x}')
+
+# 可以将最终的 DataFrame 保存到 CSV 文件
+# df.to_csv('fictional_employee_promotion_data.csv', index=False)
+```
+
+至此，我们已经成功构建了一个包含 5000 条记录、结构和逻辑相对逼真的虚构员工晋升数据集。
+
+![最终完成格式化的员工晋升模拟数据集预览，可见级别已处理。](https://imrichard.com/wp-content/uploads/2025/04/final-formatted-employee-promotion-data-scaled.avif)
+
+## 总结与应用
+
+通过上述步骤，我们演示了如何运用 Python 和一些基本的概率统计知识，**系统性地构造出满足特定业务逻辑的虚构数据集**。
+
+1. **保障了绝对的数据安全**，使我们能在公开场合放心分享分析思路和可视化效果。
+2. **过程可控、可复现**，可以根据需要调整参数（如部门比例、晋升概率等）来模拟不同的组织情景。
+3. **有助于深入理解数据背后的业务逻辑**，因为构造的过程本身就是对业务规则的一次梳理和量化。
+
+核心思想是**抓住关键业务规则和数据特征，用合理的随机模拟方法将其再现**。
+
+希望这个详细的构造过程能为您在需要处理敏感数据分享时，提供一个实用、安全的参考方案。

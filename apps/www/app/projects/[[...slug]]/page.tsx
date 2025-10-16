@@ -33,39 +33,52 @@ export default async function Page(props: {
       image: project.data.image,
       logo: project.data.logo,
       featured: project.data.featured,
+      category: project.data.category,
     }));
 
-    const openSourceProjects = projectsData.filter(
-      (project) => project.links?.github,
+    const showcaseProjects = projectsData.filter(
+      (project) => project.category === 'showcase',
     );
-    const otherProjects = projectsData.filter(
-      (project) => !project.links?.github,
+    const openSourceProjects = projectsData.filter(
+      (project) => project.category === 'opensource',
+    );
+    const productProjects = projectsData.filter(
+      (project) => project.category === 'product',
     );
 
     return (
       <>
         <DocsPage toc={[]}>
-          <DocsTitle className="font-medium">Projects</DocsTitle>
+          <DocsTitle className="font-medium">项目</DocsTitle>
           <DocsDescription className="mb-1 font-normal">
-            A collection of projects I&apos;ve built and contributed to
+            探索技术，构建产品
           </DocsDescription>
 
           <DocsBody id="docs-body" className="pb-10 pt-4">
-            {openSourceProjects.length > 0 && (
+            {showcaseProjects.length > 0 && (
               <section className="mb-12">
                 <h2 className="text-xl font-medium mb-6 text-foreground">
-                  Open Source
+                  个人展示
                 </h2>
-                <ProjectList projects={openSourceProjects} />
+                <ProjectList projects={showcaseProjects} />
               </section>
             )}
 
-            {otherProjects.length > 0 && (
+            {productProjects.length > 0 && (
+              <section className="mb-12">
+                <h2 className="text-xl font-medium mb-6 text-foreground">
+                  独立开发产品
+                </h2>
+                <ProjectList projects={productProjects} />
+              </section>
+            )}
+
+            {openSourceProjects.length > 0 && (
               <section>
                 <h2 className="text-xl font-medium mb-6 text-foreground">
-                  Personal Projects
+                  开源项目
                 </h2>
-                <ProjectList projects={otherProjects} />
+                <ProjectList projects={openSourceProjects} />
               </section>
             )}
           </DocsBody>
@@ -90,7 +103,7 @@ export default async function Page(props: {
             <Button variant="accent" size="sm" asChild>
               <Link href="/projects">
                 <ArrowLeft />
-                Back to Projects
+                返回项目
               </Link>
             </Button>
           </div>
@@ -115,7 +128,7 @@ export default async function Page(props: {
                 rel="noopener noreferrer"
               >
                 <ExternalLink className="size-4" />
-                Visit
+                访问
               </a>
             </Button>
           )}
@@ -128,7 +141,7 @@ export default async function Page(props: {
                 rel="noopener noreferrer"
               >
                 <Github className="size-4" />
-                View Code
+                查看代码
               </a>
             </Button>
           )}
@@ -136,7 +149,7 @@ export default async function Page(props: {
 
         {page.data.tech && page.data.tech.length > 0 && (
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-sm text-muted-foreground">Tech Stack:</span>
+            <span className="text-sm text-muted-foreground">技术栈：</span>
             <TechStackIcons tech={page.data.tech} maxDisplay={8} />
           </div>
         )}
@@ -161,16 +174,15 @@ export async function generateMetadata(props: {
 
   if (slug.length === 0) {
     return {
-      title: 'Projects',
-      description:
-        "A collection of projects I've built and contributed to. Exploring ideas through code and design.",
+      title: '项目',
+      description: '探索技术，构建产品',
       openGraph: {
-        title: 'Projects',
-        description: "A collection of projects I've built and contributed to",
+        title: '项目',
+        description: '探索技术，构建产品',
         url: 'https://richardwang.me/projects',
         siteName: "Richard's Page",
         type: 'website',
-        locale: 'en_US',
+        locale: 'zh_CN',
       },
     };
   }
@@ -191,7 +203,7 @@ export async function generateMetadata(props: {
       siteName: "Richard's Page",
       type: 'article',
       publishedTime: new Date(page.data.date).toISOString(),
-      locale: 'en_US',
+      locale: 'zh_CN',
       images: image,
     },
     twitter: {

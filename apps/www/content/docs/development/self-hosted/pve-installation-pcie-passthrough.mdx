@@ -1,0 +1,132 @@
+---
+title: PVE镜像加速与硬件直通配置
+description: 记录 Proxmox VE (PVE) 安装优化及 PCIe 硬件直通配置，含 IOMMU 与 VFIO 设置步骤
+releaseDate: 2023-05-13
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+image: https://imrichard.com/wp-content/uploads/2025/04/pve-pcie-passthrough-configuration-cover.avif
+---
+
+Proxmox VE (Virtual Environment)，通常简称为 PVE，是一个基于 Debian Linux 的开源服务器虚拟化管理平台。它整合了 KVM 虚拟机和 LXC 容器，并提供了网页管理界面，常用于企业环境或个人 Home Lab 中搭建和管理虚拟化服务器。
+
+这篇文章主要记录一下 PVE 安装过程中的一些实用操作，特别是如何加速 ISO 镜像的下载，以及如何为虚拟机配置硬件直通（PCIe Passthrough）。
+
+## PVE 安装镜像下载优化
+
+在国内网络环境下，直接从 Proxmox 官网下载 ISO 安装镜像，速度有时可能不太理想。为了提高下载效率，我们可以利用国内的镜像站点。
+
+清华大学开源软件镜像站就提供了 Proxmox 的镜像服务，访问速度通常会快很多。
+
+- [清华大学镜像站 Proxmox ISO 下载地址](https://mirrors.tuna.tsinghua.edu.cn/proxmox/iso/)
+
+从这里选择需要的 PVE 版本进行下载即可。下载完成后，建议校验一下 ISO 文件的哈希值，确保文件完整性。之后就可以通过制作启动盘（如使用 Rufus 或 Ventoy）来开始 PVE 的安装流程了。具体的安装步骤比较直观，这里就不再赘述。
+
+## 配置硬件直通 (PCI(e) Passthrough)
+
+硬件直通允许我们将宿主机的物理硬件（如显卡、网卡、USB 控制器等）直接分配给虚拟机使用，让虚拟机能够接近原生性能地访问这些硬件。这对于需要高性能图形处理（如虚拟桌面、AI 计算）、特定网络功能（如软路由）或特殊 USB 设备的场景非常有用。
+
+配置硬件直通主要涉及以下几个步骤：
+
+### 1. 检查并开启 BIOS/UEFI 中的 IOMMU 支持
+
+首先，你需要确保你的主板和 CPU 支持 IOMMU 技术（Intel 平台称为 VT-d，AMD 平台称为 AMD-Vi），并且已经在 BIOS/UEFI 设置中启用。这是实现硬件直通的前提条件。具体选项名称可能因主板厂商而异，请查阅主板手册。
+
+### 2. 修改 GRUB 配置以启用 IOMMU
+
+接下来，需要编辑 PVE 的 GRUB 引导加载程序配置，告诉内核在启动时开启 IOMMU 功能。
+
+打开并编辑 `/etc/default/grub` 文件：
+
+```bash
+nano /etc/default/grub
+```
+
+找到 `GRUB_CMDLINE_LINUX_DEFAULT` 这一行，在引号内（通常默认是 `"quiet"`) 添加相应的 IOMMU 参数。
+
+**对于 Intel CPU:**
+
+```diff
+- GRUB_CMDLINE_LINUX_DEFAULT="quiet"
++ GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"
+```
+
+**对于 AMD CPU:**
+
+```diff
+- GRUB_CMDLINE_LINUX_DEFAULT="quiet"
++ GRUB_CMDLINE_LINUX_DEFAULT="quiet amd_iommu=on iommu=pt"
+```
+
+**说明：**
+
+- `intel_iommu=on` 或 `amd_iommu=on`: 强制开启对应平台的 IOMMU 功能。
+- `iommu=pt`: 启用 "Pass-Through" 模式，通常能获得更好的性能和兼容性，尤其是在不需要 SRIOV 的情况下。
+
+修改完成后，保存文件并退出编辑器（在 nano 中是 Ctrl+X，然后按 Y 确认）。
+
+### 3. 更新 GRUB 配置
+
+执行以下命令使刚才的修改生效：
+
+```bash
+update-grub
+```
+
+### 4. 加载必要的内核模块
+
+为了让系统能够处理 VFIO（Virtual Function I/O）直通，需要确保相关的内核模块在系统启动时自动加载。
+
+编辑 `/etc/modules` 文件：
+
+```bash
+nano /etc/modules
+```
+
+在文件末尾添加以下几行：
+
+```diff
++ vfio
++ vfio_iommu_type1
++ vfio_pci
+# vfio_virqfd  # 注意：PVE 8.0 及后续版本通常不再需要手动添加此模块
+```
+
+保存并关闭文件。
+
+### 5. 更新 initramfs 并重启
+
+执行以下命令来更新初始 RAM 文件系统，确保模块能在早期启动阶段加载：
+
+```bash
+update-initramfs -u -k all
+```
+
+完成以上所有步骤后，需要重启 PVE 主机以应用所有更改：
+
+```bash
+reboot
+```
+
+### 6. 验证配置（可选但推荐）
+
+重启后，可以通过 PVE 的 Web 界面或命令行来验证 IOMMU 是否已成功启用，以及硬件设备是否被正确识别并分组。常用的检查命令包括查看内核日志：
+
+```bash
+dmesg | grep -e DMAR -e IOMMU
+```
+
+如果看到关于 IOMMU Enabled 或 DMAR table 相关的信息，通常表示配置已生效。更详细的验证和后续将设备分配给虚拟机的步骤，可以参考 Proxmox VE 官方文档中关于 PCI(e) Passthrough 的说明。
+
+## 总结
+
+本文简要介绍了在安装 Proxmox VE 时如何通过国内镜像源加速下载 ISO 文件，以及配置硬件直通（PCIe Passthrough）的基础步骤，包括修改 GRUB 参数和加载必要的内核模块。
+
+这些是搭建和优化 PVE 环境中比较常见的操作，希望能对有需要的朋友提供一些参考。硬件直通的具体配置细节可能因硬件平台和 PVE 版本略有差异，建议同时查阅官方文档获取最准确的信息。
+
+---
+
+### 参考链接
+
+- [Proxmox VE 官方文档 – PCI(e) Passthrough](<https://pve.proxmox.com/wiki/PCI(e)_Passthrough>)
+- [清华大学开源软件镜像站](https://mirrors.tuna.tsinghua.edu.cn/)

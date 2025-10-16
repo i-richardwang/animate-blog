@@ -62,6 +62,7 @@ export const project = defineCollections({
     image: z.string().optional(),
     logo: z.string().optional(),
     featured: z.boolean().default(false),
+    category: z.enum(['showcase', 'opensource', 'product']).optional(),
   }),
 });
 

@@ -1,27 +1,37 @@
 ---
-title: Data Science
-description: Data Science Learning & Practice
+title: 数据科学
+description: 数据分析与可视化
 ---
 
-import { Code, BarChart3, TrendingUp } from 'lucide-react';
+import { Database, Rocket, PieChart, LineChart } from 'lucide-react';
 
 <Cards>
   <Card
-    icon={<Code strokeWidth={2} />}
-    href="/docs/data-science/analysis/exploratory-data-analysis"
-    title="Analysis"
+    icon={<Database strokeWidth={2} />}
+    href="/docs/data-science/analysis/mock-employee-promotion-data"
+    title="数据集构造"
+    description="构建模拟数据集与数据准备"
     accent
   />
   <Card
-    icon={<BarChart3 strokeWidth={2} />}
-    href="/docs/data-science/visualization/charts"
-    title="Visualization"
+    icon={<Rocket strokeWidth={2} />}
+    href="/docs/data-science/analysis/employee-attrition-data-quality"
+    title="员工流失预测项目实战"
+    description="机器学习项目完整实践"
     accent
   />
   <Card
-    icon={<TrendingUp strokeWidth={2} />}
-    href="/docs/data-science/statistics/descriptive"
-    title="Statistics"
+    icon={<PieChart strokeWidth={2} />}
+    href="/docs/data-science/visualization/tableau-structured-dashboard-containers"
+    title="Tableau 可视化"
+    description="Tableau 仪表板设计与实践"
+    accent
+  />
+  <Card
+    icon={<LineChart strokeWidth={2} />}
+    href="/docs/data-science/visualization/python-plotly-sankey-diagram"
+    title="Python 可视化"
+    description="Python 数据可视化技巧"
     accent
   />
 </Cards>
