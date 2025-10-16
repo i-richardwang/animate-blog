@@ -1,6 +1,5 @@
 'use client';
 
-import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@workspace/ui/lib/utils';
@@ -34,12 +33,11 @@ export const NotesMenu = () => {
             color: 'ghost',
             size: 'sm',
             className: cn(
-              '!text-sm !font-normal text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white !h-8 !px-3 transition-colors duration-200 ease-in-out group',
+              '!text-sm !font-normal text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white !h-8 !px-3 transition-colors duration-200 ease-in-out',
             ),
           })}
         >
           Notes
-          <ChevronDown className="size-3 ml-1 transition-transform duration-200 ease-in-out group-data-[state=open]:rotate-180" />
         </button>
       </HoverCardTrigger>
       <HoverCardContent align="start" sideOffset={8} className="w-48 p-2">
