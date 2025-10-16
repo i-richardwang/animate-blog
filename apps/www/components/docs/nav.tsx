@@ -12,6 +12,7 @@ import { ThemeSwitcher } from '../animate/theme-switcher';
 import XIcon from '@workspace/ui/components/icons/x-icon';
 import { GithubStarsLogo } from '@/registry/primitives/animate/github-stars';
 import { Menu } from '@/registry/icons/menu';
+import { NotesMenu } from './notes-menu';
 
 export const NAV_ITEMS = [
   // Original navigation items (commented out for upstream sync)
@@ -33,18 +34,6 @@ export const NAV_ITEMS = [
   // },
 
   // Personal blog navigation
-  {
-    title: 'AI Exploration',
-    url: '/docs/ai',
-  },
-  {
-    title: 'Data Science',
-    url: '/docs/data-science',
-  },
-  {
-    title: 'Development',
-    url: '/docs/development',
-  },
   {
     title: 'Projects',
     url: '/projects',
@@ -92,6 +81,7 @@ export const Nav = () => {
 
       <div className="flex items-center md:justify-between justify-end gap-2 flex-1">
         <div className="md:flex hidden items-center gap-1">
+          <NotesMenu />
           {NAV_ITEMS.map((item) => (
             <NavItem key={item.title} title={item.title} url={item.url} />
           ))}

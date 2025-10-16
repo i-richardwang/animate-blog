@@ -28,6 +28,7 @@ import { isActive } from 'fumadocs-ui/utils/is-active';
 import { AnimatePresence, motion } from 'motion/react';
 import { Separator } from '@/lib/attach-separator';
 import { NAV_ITEMS } from './nav';
+import { NOTES_ITEMS } from './notes-menu';
 import { SquareMenu } from 'lucide-react';
 import { useIsMobile } from '@workspace/ui/hooks/use-mobile';
 
@@ -37,6 +38,10 @@ const MENU_ITEMS = [
     type: 'separator',
     icon: <SquareMenu />,
   },
+  ...NOTES_ITEMS.map((item) => ({
+    text: item.title,
+    url: item.url,
+  })),
   ...NAV_ITEMS.filter((item) => item.title !== 'Docs').map((item) => ({
     text: item.title,
     url: item.url,
