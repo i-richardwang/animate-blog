@@ -11,15 +11,15 @@ import {
 
 export const NOTES_ITEMS = [
   {
-    title: 'AI Exploration',
+    title: 'AI 探索',
     url: '/docs/ai',
   },
   {
-    title: 'Data Science',
+    title: '数据科学',
     url: '/docs/data-science',
   },
   {
-    title: 'Development',
+    title: '开发实践',
     url: '/docs/development',
   },
 ];
@@ -37,7 +37,7 @@ export const NotesMenu = () => {
             ),
           })}
         >
-          Notes
+          笔记
         </button>
       </HoverCardTrigger>
       <HoverCardContent align="start" sideOffset={8} className="w-48 p-2">
