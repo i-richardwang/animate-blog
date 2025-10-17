@@ -19,7 +19,7 @@ image: https://imrichard.com/wp-content/uploads/2025/06/practical-guide-to-llm-f
 ![LLaMA-Factory大模型微调的可视化参数设置界面截图。](https://imrichard.com/wp-content/uploads/2025/06/llama-factory-fine-tuning-ui.avif)
 
 <Callout type="info">
-因此，当前模型微调的重心，已逐步转向**训练数据集的处理和质量提升**。
+  因此，当前模型微调的重心，已逐步转向**训练数据集的处理和质量提升**。
 </Callout>
 
 ## 一、训练集生成
@@ -78,7 +78,7 @@ prompt = """
 
 然后，我们构建一个简单的处理链（Chain），遍历每一页文档，调用大模型生成问答对。
 
-```python
+````python
 from langchain_core.output_parsers import StrOutputParser
 # 假设 model 和 ChatPromptTemplate 已正确导入和初始化
 # from langchain_openai import ChatOpenAI
@@ -115,7 +115,7 @@ for i in tqdm(range(0, 120)): # 实际页数应根据 len(data) 确定
     except Exception as e: # 捕获更具体的异常类型更佳
         print(f"Error processing page {i}: {e}")
         continue
-```
+````
 
 关于上述代码的几点说明：
 
@@ -129,12 +129,12 @@ for i in tqdm(range(0, 120)): # 实际页数应根据 len(data) 确定
 
 ```json
 [
-    {
-        "instruction": "Give three tips for staying healthy.",
-        "input": "",
-        "output": "1.Eat a balanced diet and make sure to include plenty of fruits and vegetables. \n2. Exercise regularly to keep your body active and strong. \n3. Get enough sleep and maintain a consistent sleep schedule."
-    },
-    // ...更多数据
+  {
+    "instruction": "Give three tips for staying healthy.",
+    "input": "",
+    "output": "1.Eat a balanced diet and make sure to include plenty of fruits and vegetables. \n2. Exercise regularly to keep your body active and strong. \n3. Get enough sleep and maintain a consistent sleep schedule."
+  }
+  // ...更多数据
 ]
 ```
 
@@ -160,7 +160,8 @@ with open('output.json', 'w', encoding='utf-8') as f:
 ```
 
 <Callout type="warn">
-在保存JSON文件时，务必设置 `ensure_ascii=False` 参数，以确保中文字符能被正确写入，而不是被转义为ASCII编码。
+  在保存JSON文件时，务必设置 `ensure_ascii=False`
+  参数，以确保中文字符能被正确写入，而不是被转义为ASCII编码。
 </Callout>
 
 ### 1.3 生成数据效果初探
@@ -178,13 +179,13 @@ with open('output.json', 'w', encoding='utf-8') as f:
     "instruction": "在无边界世界中，什么因素对于组织的成长特别重要？",
     "input": "",
     "output": "人类特有的能力，如同理心和好奇心，在无边界的工作环境中变得越来越重要。"
-  },
+  }
   // ...更多数据
 ]
 ```
 
 <Callout type="info">
-本次生成未进行深度优化，数据质量仅供演示流程。实际应用中，可能需要更精细的Prompt调优、多轮生成与筛选、或人工校验来提升数据质量。
+  本次生成未进行深度优化，数据质量仅供演示流程。实际应用中，可能需要更精细的Prompt调优、多轮生成与筛选、或人工校验来提升数据质量。
 </Callout>
 
 ## 二、模型微调：参数调整与训练
@@ -212,6 +213,7 @@ with open('output.json', 'w', encoding='utf-8') as f:
 - 学习率设置不当（如过大）可能导致模型训练效果不佳，甚至无法收敛。
 - 训练轮次（Num Train Epochs）不宜设置过大，一般建议从较小值（如3）开始尝试，以防过拟合。
 - 训练批次大小（Train Batch Size）也需谨慎设置，尤其是在显存有限的情况下，较小的值（如1或2）有助于避免OOM（Out Of Memory）错误。
+
 </Callout>
 
 ### 训练过程的迭代性
@@ -245,7 +247,7 @@ def compare_models(model_service_ids: List[str], model_names: List[str], openai_
         model = ChatOpenAI(
             temperature=0.0, # 控制生成文本的随机性，0表示更确定性
         )
-        
+
         print(f"Evaluating {model_name} (Service ID: {service_id})...")
         for question in tqdm(questions, desc=f"Querying {model_name}"):
             try:
@@ -430,14 +432,14 @@ Answer: 德勤是一家全球性的专业服务公司，提供审计、税务、
 - **过度训练的风险**：`15epoch-2e-5`（轮次最多）的模型在回答训练语料之外的问题时，出现了异常输出。这提示我们，过多的训练轮次，即使学习率较小，也可能导致模型在特定数据集上过拟合，甚至破坏其通用能力。
 - 这强调了**设置合理的训练轮次**以及**使用验证集进行早期停止 (Early Stopping)** 的重要性。同时，测试集应包含部分与训练领域无关的问题，以评估模型的通用性和鲁棒性。
 
-## 总结与思考
+## 微调的三个关键发现
 
-通过本次实践，我们可以看到：
+从实践中得到了几个重要的观察：
 
-1. **数据质量是关键**：高质量、与任务目标高度相关的问答对是微调成功的基础。利用大模型辅助生成数据是一种可行的方式，但生成数据的质量控制和迭代优化同样重要。
-2. **参数调优是迭代过程**：学习率、训练轮次等参数对模型效果影响显著。没有一劳永逸的参数配置，需要根据具体模型、数据和任务进行实验和调整。通常建议从较保守的参数开始，逐步探索。
-3. **多维度评估不可或缺**：不仅要评估模型在新学知识上的表现，还要关注其在泛化问题、以及原有知识范围外的表现，警惕"灾难性遗忘"或过拟合导致的异常行为。
-4. **平衡与取舍**：在特定领域知识增强和通用能力保持之间可能需要做出权衡。过多的训练轮次或不当的参数组合，有时反而会损害模型的整体表现。
+**数据质量决定了效果上限。** 用大模型生成问答对，确实能快速获得大量数据，但这些数据的质量直接影响微调效果。如果生成的数据本身就存在偏差或不准确，模型只会把这些问题放大。所以质量控制和迭代优化必不可少。
 
-大模型微调是一个涉及数据工程、模型训练和细致评估的系统工程。希望本次分享的思路和观察能为大家在实践中提供一些参考。微调并非银弹，但它确实为我们提供了一个在特定场景下提升模型表现的有效途径。
+**参数调优没有标准答案。** 不同的学习率和训练轮次组合会带来完全不同的结果。1e-5 学习率配合 5 个 epoch 效果不错，但 2e-5 配合 15 个 epoch 就出现了"胡言乱语"。参数配置必须针对具体场景实验，从保守的配置开始，逐步调整。
 
+**过拟合的代价很高。** 最典型的是 15epoch-2e-5 那个版本，在回答训练集外的问题时出现了重复无意义的文本。除了关注模型在新知识上的表现，还要测试它的通用能力有没有受损。设置验证集、使用早期停止（Early Stopping）都是避免过拟合的有效手段。
+
+微调不是万能的，但它是一个在特定场景下提升模型表现的有效途径。关键是要清楚自己的目标，愿意为数据质量和参数调优投入足够的时间。

@@ -56,7 +56,7 @@ MERGE (o:Occupation {conceptUri: row.conceptUri})
 ON CREATE SET o.preferredLabel = row.preferredLabel, o.description = row.description
 ```
 
-*解读：* 这段 Cypher 代码会读取 `occupations.csv` 文件。对于每一行数据，它会尝试找到一个 `Occupation` 类型的节点，该节点的 `conceptUri` 属性与 CSV 文件中 `row.conceptUri` 的值相同。如果找不到，就会创建一个新的 `Occupation` 节点，并设置其 `preferredLabel` (职业名称) 和 `description` (描述) 属性。`conceptUri` 在 ESCO 中是每个职业的唯一标识符。
+_解读：_ 这段 Cypher 代码会读取 `occupations.csv` 文件。对于每一行数据，它会尝试找到一个 `Occupation` 类型的节点，该节点的 `conceptUri` 属性与 CSV 文件中 `row.conceptUri` 的值相同。如果找不到，就会创建一个新的 `Occupation` 节点，并设置其 `preferredLabel` (职业名称) 和 `description` (描述) 属性。`conceptUri` 在 ESCO 中是每个职业的唯一标识符。
 
 ### 2. 导入技能数据 (Skill Nodes)
 
@@ -69,7 +69,7 @@ MERGE (s:Skill {conceptUri: row.conceptUri})
 ON CREATE SET s.preferredLabel = row.preferredLabel, s.description = row.description, s.skillType = row.skillType
 ```
 
-*解读：* 与导入职业数据类似，这段代码从 `skills.csv` 文件加载技能信息。同样使用 `conceptUri` 作为技能的唯一标识，创建 `Skill` 节点，并设置其 `preferredLabel` (技能名称)、`description` (描述) 和 `skillType` (技能类型) 等属性。
+_解读：_ 与导入职业数据类似，这段代码从 `skills.csv` 文件加载技能信息。同样使用 `conceptUri` 作为技能的唯一标识，创建 `Skill` 节点，并设置其 `preferredLabel` (技能名称)、`description` (描述) 和 `skillType` (技能类型) 等属性。
 
 ### 3. 建立技能与职业之间的关系
 
@@ -91,7 +91,7 @@ FOREACH (_ IN CASE WHEN row.relationType = 'optional' THEN [1] ELSE [] END |
 )
 ```
 
-*解读：* 这部分是构建图谱的核心。它读取包含职业和技能关联信息的 `occupationSkillRelations.csv` 文件。
+_解读：_ 这部分是构建图谱的核心。它读取包含职业和技能关联信息的 `occupationSkillRelations.csv` 文件。
 
 - `MATCH` 子句用于根据 `occupationUri` 和 `skillUri` 找到之前已导入的职业和技能节点。
 - `FOREACH` 和 `CASE WHEN` 结构用于根据 CSV 文件中 `relationType` 字段的值（"essential" 或 "optional"）来创建不同类型的关系。例如，如果一个技能对某个职业是核心的（essential），则在技能节点和职业节点之间创建一条 `ESSENTIAL_FOR` 的关系，方向从技能指向职业 (技能 `ESSENTIAL_FOR` 职业)。
@@ -198,9 +198,8 @@ RETURN o, r, s
 4. **精准招聘：** 基于详细的技能画像，更精确地定义招聘需求，筛选候选人。
 5. **组织能力盘点：** 从宏观层面了解组织整体的技能储备情况。
 
-## 总结与展望
+## 图谱只是开始
 
-本次实践展示了利用ESCO数据和Neo4j图数据库构建岗位技能知识图谱的基本流程和可行性。通过将岗位和技能及其关系以图的形式组织起来，我们能够更直观、更深入地洞察它们之间的联系。
+用 ESCO 数据和 Neo4j 构建技能知识图谱，技术上是可行的。通过图结构，能直观地看到岗位和技能之间的关系，也能通过查询语句（如找到"需要Python技能的所有岗位"）快速获取洞察。
 
-当然，这只是一个基础性的探索。在实际应用中，还可以进一步丰富数据维度（如技能熟练度、经验要求），融合企业内部数据，并结合更复杂的图算法进行分析，从而为人才管理和组织发展提供更有力的支持。
-
+要在企业中真正发挥价值，还需要做很多事情：补充技能熟练度、经验年限等维度，融合企业内部的岗位体系和人才数据，甚至可以结合图算法来分析技能演进路径、识别关键技能缺口。图数据库提供了技术基础，但如何用好它，还需要结合具体的业务场景不断探索。
