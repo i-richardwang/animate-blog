@@ -8,6 +8,7 @@ import { ThemeSwitcher } from '@/components/animate/theme-switcher';
 import XIcon from '@workspace/ui/components/icons/x-icon';
 import { SIDEBAR_TABS } from '@/lib/sidebar';
 import { Nav } from '@/components/docs/nav';
+import { Footer } from '@/components/footer';
 
 const DOCS_LAYOUT_PROPS: DocsLayoutProps = {
   tree: source.pageTree,
@@ -33,16 +34,19 @@ const DOCS_LAYOUT_PROPS: DocsLayoutProps = {
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout
-      {...DOCS_LAYOUT_PROPS}
-      sidebar={{
-        component: <DocsSidebar {...DOCS_LAYOUT_PROPS} />,
-      }}
-      nav={{
-        component: <Nav />,
-      }}
-    >
-      {children}
-    </DocsLayout>
+    <>
+      <DocsLayout
+        {...DOCS_LAYOUT_PROPS}
+        sidebar={{
+          component: <DocsSidebar {...DOCS_LAYOUT_PROPS} />,
+        }}
+        nav={{
+          component: <Nav />,
+        }}
+      >
+        {children}
+      </DocsLayout>
+      <Footer />
+    </>
   );
 }

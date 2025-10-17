@@ -12,7 +12,10 @@ import { getMDXComponents } from '@/mdx-components';
 import { Metadata } from 'next';
 import { DocsAuthor } from '@/components/docs/docs-author';
 import { ViewOptions, LLMCopyButton } from '@/components/docs/page-actions';
-import { Footer } from '@workspace/ui/components/docs/footer';
+// Original Footer with lastUpdate info (replaced with fumadocs built-in footer navigation)
+// import { Footer } from '@workspace/ui/components/docs/footer';
+// Footer moved to layout.tsx to center across entire page (including sidebar width)
+// import { Footer } from '@/components/footer';
 import { Button } from '@/registry/components/buttons/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -114,16 +117,25 @@ export default async function Page(props: {
     <DocsPage
       toc={page.data.toc}
       full={page.data.full}
+      // Original footer with lastUpdate info (replaced with built-in navigation)
+      // footer={{
+      //   component: (
+      //     <Footer
+      //       lastUpdate={
+      //         page.data.lastModified
+      //           ? new Date(page.data.lastModified)
+      //           : undefined
+      //       }
+      //     />
+      //   ),
+      // }}
       footer={{
-        component: (
-          <Footer
-            lastUpdate={
-              page.data.lastModified
-                ? new Date(page.data.lastModified)
-                : undefined
-            }
-          />
-        ),
+        items: {
+          previous: prevNav
+            ? { name: prevNav.name, url: prevNav.url }
+            : undefined,
+          next: nextNav ? { name: nextNav.name, url: nextNav.url } : undefined,
+        },
       }}
     >
       <div className="flex flex-row gap-2 items-start w-full justify-between">
