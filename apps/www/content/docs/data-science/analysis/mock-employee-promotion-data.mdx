@@ -5,7 +5,6 @@ releaseDate: 2023-02-05
 author:
   name: Richard Wang
   url: https://imrichard.com
-image: https://imrichard.com/wp-content/uploads/2025/04/mock-employee-promotion-data-python-cover.avif
 ---
 
 在数据分析和可视化的分享时，如何既能有效展示分析思路和成果，又能**保障真实数据的安全**，是演示时的必要考量。就如我常套用的人力资源场景，直接使用生产数据往往涉及隐私和合规风险，而完全随机的数据又缺乏真实业务场景的逻辑和复杂度，难以有效支撑演示或分析。
@@ -74,7 +73,7 @@ df = pd.DataFrame(data, columns=['年份', '员工ID', '员工姓名'])
 
 这一步我们得到了一个包含 5000 行的基础表，每一行代表一个员工在特定年份的记录。
 
-![Python 生成的初始员工模拟数据预览，包含年份、员工ID和姓名。](https://imrichard.com/wp-content/uploads/2025/04/python-employee-basic-data-sample-scaled.avif)
+![Python 生成的初始员工模拟数据预览，包含年份、员工ID和姓名。](/images/docs/data-science/python-employee-basic-data-sample-scaled.webp)
 
 ### 步骤 2：分配组织属性
 
@@ -122,7 +121,7 @@ df['人才来源'] = np.random.choice(talent_sources, p=source_ratios, size=len(
 
 现在，我们的数据集多了 4 列，模拟了员工的组织归属信息。
 
-![添加了组织信息（如部门、岗位）的员工模拟数据示例。](https://imrichard.com/wp-content/uploads/2025/04/python-employee-data-with-org-info-scaled.avif)
+![添加了组织信息（如部门、岗位）的员工模拟数据示例。](/images/docs/data-science/python-employee-data-with-org-info-scaled.webp)
 
 ### 步骤 3：模拟核心晋升要素：级别与停留时长
 
@@ -172,7 +171,7 @@ df['员工晋升前在当前级别的停留时长'] = df['员工晋升前级别'
 
 现在，我们有了模拟的级别和对应的、符合一定分布规律的停留时长。
 
-![增加了员工级别和当前级别停留时长信息的模拟数据预览。](https://imrichard.com/wp-content/uploads/2025/04/python-employee-data-with-level-tenure-scaled.avif)
+![增加了员工级别和当前级别停留时长信息的模拟数据预览。](/images/docs/data-science/python-employee-data-with-level-tenure-scaled.webp)
 
 ### 步骤 4：模拟晋升决策流程
 
@@ -256,7 +255,7 @@ df['员工晋升后级别'] = df.apply(
 )
 ```
 
-![展示了模拟晋升流程各环节（如是否提名、是否成功）的数据示例。](https://imrichard.com/wp-content/uploads/2025/04/python-employee-promotion-decision-sample-scaled.avif)
+![展示了模拟晋升流程各环节（如是否提名、是否成功）的数据示例。](/images/docs/data-science/python-employee-promotion-decision-sample-scaled.webp)
 
 ### 步骤 5：格式化与收尾
 
@@ -273,7 +272,7 @@ df['员工晋升后级别'] = df['员工晋升后级别'].apply(lambda x: f'Leve
 
 至此，我们已经成功构建了一个包含 5000 条记录、结构和逻辑相对逼真的虚构员工晋升数据集。
 
-![最终完成格式化的员工晋升模拟数据集预览，可见级别已处理。](https://imrichard.com/wp-content/uploads/2025/04/final-formatted-employee-promotion-data-scaled.avif)
+![最终完成格式化的员工晋升模拟数据集预览，可见级别已处理。](/images/docs/data-science/final-formatted-employee-promotion-data-scaled.webp)
 
 ## 数据准备完成
 

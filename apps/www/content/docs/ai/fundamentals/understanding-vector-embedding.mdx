@@ -5,7 +5,6 @@ releaseDate: 2024-02-24
 author:
   name: Richard Wang
   url: https://imrichard.com
-image: https://imrichard.com/wp-content/uploads/2025/04/understanding-vector-embedding-cover.avif
 ---
 
 随着人工智能（AI）在企业中的应用日益广泛，从智能客服到文档分析，从数据挖掘到知识管理，许多应用都依赖于让机器更有效处理人类语言、衡量内容间语义关联的**核心方法**。我们将探讨其中一项**关键手段**：**向量化（Vectorization）**，特别是**文本嵌入（Text Embedding）**。
@@ -40,17 +39,17 @@ image: https://imrichard.com/wp-content/uploads/2025/04/understanding-vector-emb
 
 以"国王"为例，它的向量可能包含上千个数字，这里仅展示开头和结尾的10个数字：
 
-![国王一词的向量化结果](https://imrichard.com/wp-content/uploads/2025/04/Example-of-Long-Word-Vector-Numbers.avif)
+![国王一词的向量化结果](/images/docs/ai/Example-of-Long-Word-Vector-Numbers.webp)
 
 由于向量通常包含几百甚至上千个数字，直接查看数字列表并不直观。我们可以使用热力图来可视化：将每个数字用一个色块表示，数值越大颜色越深，数值越小颜色越浅。这样，一长串数字就转化为一行彩色条带，更便于观察模式。下面是"国王"这个词的向量热力图示例：
 
-![国王一词向量的热力图可视化。每个色块代表向量中的一个数字，颜色深浅反映数值大小。](https://imrichard.com/wp-content/uploads/2025/04/Heatmap-Representation-of-Word-King-Vector.avif)
+![国王一词向量的热力图可视化。每个色块代表向量中的一个数字，颜色深浅反映数值大小。](/images/docs/ai/Heatmap-Representation-of-Word-King-Vector.webp)
 
 了解了向量的可视化方法后，让我们进行一个有趣的计算：用"国王"的向量减去"男人"的向量，再加上"女人"的向量。这个操作相当于在向量层面模拟：从"国王"所代表的语义中移除与"男性"相关的特征，再添加与"女性"相关的特征。
 
 理论上，这个计算结果的向量应该在语义上非常接近"女王"的向量。为了验证这一点，我们将计算结果向量和"女王"的向量用热力图表示出来，并排放在一起比较。
 
-![词向量计算可视化。最下方两行分别代表"国王-男人+女人"的计算结果向量和"女王"的向量。](https://imrichard.com/wp-content/uploads/2025/04/Semantic-Arithmetic-Vector-Visualization-Results.avif)
+![词向量计算可视化。最下方两行分别代表"国王-男人+女人"的计算结果向量和"女王"的向量。](/images/docs/ai/Semantic-Arithmetic-Vector-Visualization-Results.webp)
 
 观察热力图中最后两行（即"国王-男人+女人"的计算结果和"女王"），我们可以**直观地看到它们的模式（颜色分布）高度相似**。这种视觉上的一致性证明，向量运算确实捕捉到了预期的语义变化，表明 Embedding 向量在其数值结构中编码了性别、地位等复杂的语义关系。
 
@@ -62,9 +61,9 @@ image: https://imrichard.com/wp-content/uploads/2025/04/understanding-vector-emb
 
 这些向量维度很高，难以直观展示。为此，我们使用了一种数学降维方法（如 t-SNE 或 PCA，可以理解为一种"压缩"或"投影"技术），在降低维度的同时尽量保持向量之间的相对距离关系。这样，每个词语的向量就能在二维或三维空间中用一个点来表示。
 
-![词汇向量在二维空间的表示。不同颜色代表不同类别（水果、动物、建筑）。](https://imrichard.com/wp-content/uploads/2025/04/Two-Dimensional-Word-Vector-Clustering-Visualization.avif)
+![词汇向量在二维空间的表示。不同颜色代表不同类别（水果、动物、建筑）。](/images/docs/ai/Two-Dimensional-Word-Vector-Clustering-Visualization.webp)
 
-![词汇向量在三维空间的表示，可以更立体地观察聚类效果。](https://imrichard.com/wp-content/uploads/2025/04/Three-Dimensional-Word-Vector-Clustering-Visualization.avif)
+![词汇向量在三维空间的表示，可以更立体地观察聚类效果。](/images/docs/ai/Three-Dimensional-Word-Vector-Clustering-Visualization.webp)
 
 从图中可以清晰地看到**明显的聚类现象**：水果类词语自然聚在一起，动物类词语形成另一个群组，建筑类词语也各自成群。不同类别之间界限分明。这种基于语义的自然分组展示了 Embedding 的核心特征，让计算机能够**量化和识别**概念间的相似性，为语义搜索、信息分类和内容推荐等应用打下基础。
 
@@ -76,7 +75,7 @@ image: https://imrichard.com/wp-content/uploads/2025/04/understanding-vector-emb
 
 首先是处理信息源。在 HR 场景中，这指的是公司的各项规章制度文档。系统会预先读取这些文档，并将每条规章（或根据需要将文档拆分成更小的段落）作为独立的文本单元。
 
-![需要被向量化处理的规章制度文本片段](https://imrichard.com/wp-content/uploads/2025/04/Sample-HR-Regulations-Text-Snippets.avif)
+![需要被向量化处理的规章制度文本片段](/images/docs/ai/Sample-HR-Regulations-Text-Snippets.webp)
 
 接着，系统调用 Embedding 模型，将这些文本片段转换成各自的向量。这些包含文本语义信息的向量与其对应的原文一起存入专门的"向量数据库"或"向量索引库"，为后续快速查找做准备。
 
@@ -100,7 +99,7 @@ image: https://imrichard.com/wp-content/uploads/2025/04/understanding-vector-emb
 
 为了更直观地理解这个基于方向的相似性概念，我们可以看下面这个简化的三维空间示意图：
 
-![3D空间向量相似度示意：比较向量(绿、红)与参考向量(蓝)的夹角大小，展示了方向越接近，余弦相似度越高的原理。](https://imrichard.com/wp-content/uploads/2025/04/visualizing_cosine_similarity_3d_vectors.avif)
+![3D空间向量相似度示意：比较向量(绿、红)与参考向量(蓝)的夹角大小，展示了方向越接近，余弦相似度越高的原理。](/images/docs/ai/visualizing_cosine_similarity_3d_vectors.webp)
 
 ### 4. 执行语义检索与排序（查找匹配）：
 
@@ -112,7 +111,7 @@ image: https://imrichard.com/wp-content/uploads/2025/04/understanding-vector-emb
 
 下面的条形图展示了排序结果。当用户查询"我有多少天年假？什么情况下可以请假？"时，系统计算出的各规章制度与查询的余弦相似度得分如下：
 
-![查询与各规章制度的余弦相似度排名。得分越高表示语义越相关。](https://imrichard.com/wp-content/uploads/2025/04/Query-Document-Cosine-Similarity-Ranking-Chart.avif)
+![查询与各规章制度的余弦相似度排名。得分越高表示语义越相关。](/images/docs/ai/Query-Document-Cosine-Similarity-Ranking-Chart.webp)
 
 通过衡量向量间的语义相似度，系统准确识别出"休假规定"和"考勤制度"这两份文档与用户查询语义最接近，因此将它们排在最前。这种**基于语义相似度计算而非简单关键词匹配**的方式，是现代AI应用（如智能问答、简历筛选、案例推荐、内容发现等）能提供更智能、更准确服务的核心机制，标志着相比传统搜索方法的重大进步。
 

@@ -5,14 +5,13 @@ releaseDate: 2024-09-15
 author:
   name: Richard Wang
   url: https://imrichard.com
-image: https://imrichard.com/wp-content/uploads/2025/06/build-a-lite-gpt-researcher-cover.avif
 ---
 
 最近在关注AI应用项目时，我注意到了 [gpt-researcher](https://github.com/assafelovic/gpt-researcher) 这个项目。在AI Agent概念刚开始兴起的那段时间，这是一个相当知名的实践案例，展示了如何用AI来自动化研究流程。
 
 出于学习目的，我研究了它的设计思路和实现逻辑，并尝试剥离原项目中许多工程化和扩展部分，专注于复刻其核心工作流程。
 
-![Lite Research智能研究工具的主界面截图](https://imrichard.com/wp-content/uploads/2025/06/lite-research-ui-overview.avif)
+![Lite Research智能研究工具的主界面截图](/images/docs/ai/lite-research-ui-overview.webp)
 
 ## gpt-researcher项目特点
 
@@ -36,7 +35,7 @@ gpt-researcher的核心价值在于将传统的人工研究流程自动化：
 
 基于对gpt-researcher的分析，我设计了简化版的工作流程：
 
-![Lite Research自动化研究的核心工作流程图](https://imrichard.com/wp-content/uploads/2025/06/lite-research-core-workflow-diagram-scaled.avif)
+![Lite Research自动化研究的核心工作流程图](/images/docs/ai/lite-research-core-workflow-diagram-scaled.webp)
 
 ### 第一步：专家角色选择
 
@@ -114,7 +113,7 @@ gpt-researcher的核心价值在于将传统的人工研究流程自动化：
 
 系统提供了多种报告类型以适应不同的使用需求。综合研究报告侧重于对主题进行全面的分析和总结，适合需要深入了解某个领域的场景。资源汇总报告主要整理相关资料和参考文献列表，为后续深入研究提供信息来源。研究大纲类型则提供主要观点和结构框架，帮助用户快速把握主题的整体脉络。
 
-![Lite Research提供的多种报告类型选项，包括综合研究报告、资源汇总报告、研究大纲以及详细深度报告等。](https://imrichard.com/wp-content/uploads/2025/06/lite-research-report-type-options.avif)
+![Lite Research提供的多种报告类型选项，包括综合研究报告、资源汇总报告、研究大纲以及详细深度报告等。](/images/docs/ai/lite-research-report-type-options.webp)
 
 详细深度报告是功能最完整的类型，它会进一步将主题分解为多个子主题，对每个子主题进行深入分析，最终形成全面且深入的研究成果。自定义报告则允许用户根据特定需求定制报告的内容结构和分析角度。
 
@@ -122,7 +121,7 @@ gpt-researcher的核心价值在于将传统的人工研究流程自动化：
 
 除了报告类型，系统还支持语气调节功能，这影响到报告的表达风格和读者定位。正式语气适用于学术研究和商业报告，用词严谨、逻辑清晰。分析性语气强调深度剖析和逻辑推理，突出观点的论证过程。信息性语气以客观呈现事实为主，减少主观判断和情感色彩。解释性语气则面向非专业受众，注重内容的易懂性和可读性。
 
-![Lite Research研究设置中的报告语气选择菜单，展示了客观、批判性、比较性、叙事性等多种可供选择的报告风格。](https://imrichard.com/wp-content/uploads/2025/06/lite-research-tone-selection-options.avif)
+![Lite Research研究设置中的报告语气选择菜单，展示了客观、批判性、比较性、叙事性等多种可供选择的报告风格。](/images/docs/ai/lite-research-tone-selection-options.webp)
 
 这些语气选项不仅影响用词和句式，还会调整内容的组织逻辑和信息密度，确保报告能够匹配目标读者的需求和理解能力。
 
@@ -150,7 +149,7 @@ gpt-researcher的核心价值在于将传统的人工研究流程自动化：
 
 在整个递进式构建过程中，系统实施了多项技术优化措施来确保稳定性和效率。使用asyncio.Semaphore来控制并发数量，避免过多的并发请求对外部API造成压力或触发限流机制。实现了完善的重试机制来处理网络异常和临时服务不可用的情况，确保偶发的错误不会影响整个流程的完成。
 
-![Lite Research执行研究任务的实时进度界面，显示了系统选择的AI代理、生成多个子查询以及并行处理查询的状态。](https://imrichard.com/wp-content/uploads/2025/06/lite-research-execution-process-log.avif)
+![Lite Research执行研究任务的实时进度界面，显示了系统选择的AI代理、生成多个子查询以及并行处理查询的状态。](/images/docs/ai/lite-research-execution-process-log.webp)
 
 同时，通过LangChain的SQLite缓存机制来减少重复的LLM调用，既提高了响应速度，也有效控制了API使用成本。
 
@@ -158,7 +157,7 @@ gpt-researcher的核心价值在于将传统的人工研究流程自动化：
 
 下面展示一个实际的研究案例效果：
 
-![Lite Research生成的关于"人工智能在教育领域的应用"的最终报告节选](https://imrichard.com/wp-content/uploads/2025/06/lite-research-final-report-example.avif)
+![Lite Research生成的关于"人工智能在教育领域的应用"的最终报告节选](/images/docs/ai/lite-research-final-report-example.webp)
 
 ## 开源项目
 

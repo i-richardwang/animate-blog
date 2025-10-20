@@ -5,7 +5,6 @@ releaseDate: 2023-09-16
 author:
   name: Richard Wang
   url: https://imrichard.com
-image: https://imrichard.com/wp-content/uploads/2025/04/self-hosted-jupyter-alternative-datalore-cover.avif
 ---
 
 对于需要进行数据分析、代码编写和结果共享的团队来说，Jupyter Notebook 是一个非常常用的工具。Datalore 是 JetBrains 公司开发的一款在线 Jupyter Notebook 服务，它在提供云服务的同时，也提供了自部署（Self-Hosted）的选项。对于 **10 个用户以内的小团队，其自部署版本是免费的**，这使其成为一个在内部共享 Notebook 和进行数据可视化的实用选择。
@@ -28,34 +27,34 @@ Datalore 提供了基于 Docker Compose 的容器化部署方式，整个过程�
 以下是一个示例 `docker-compose.yml` 文件。你可以将 `image` 标签中的版本号（`2023.2`）替换为你需要部署的最新版本。
 
 ```yaml
-version: "3.9"
+version: '3.9'
 services:
   datalore:
     image: jetbrains/datalore-server:2023.2 # 替换为最新的版本
     ports:
-      - "8080:8080"
-    expose: [ "8081", "5050", "4060" ]
+      - '8080:8080'
+    expose: ['8081', '5050', '4060']
     networks:
       - datalore-agents-network
       - datalore-backend-network
     volumes:
-      - "datalore-storage:/opt/data"
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - 'datalore-storage:/opt/data'
+      - '/var/run/docker.sock:/var/run/docker.sock'
     environment:
       #DATALORE_PUBLIC_URL: "https://datalore.example.com"
-      DB_PASSWORD: "changeme"
+      DB_PASSWORD: 'changeme'
   postgresql:
     image: jetbrains/datalore-postgres:2023.2 # 替换为最新的版本
-    expose: [ "5432" ]
+    expose: ['5432']
     networks:
       - datalore-backend-network
     volumes:
-      - "postgresql-data:/var/lib/postgresql/data"
+      - 'postgresql-data:/var/lib/postgresql/data'
     environment:
-      POSTGRES_PASSWORD: "changeme"
+      POSTGRES_PASSWORD: 'changeme'
 volumes:
-  postgresql-data: { }
-  datalore-storage: { }
+  postgresql-data: {}
+  datalore-storage: {}
 networks:
   datalore-agents-network:
     name: datalore-agents-network
@@ -98,19 +97,19 @@ sudo docker-compose up -d
 
 Datalore 采用 Workspace（工作空间）来组织 Notebooks 和相关文件。主界面（如下图所示）比较直观，可以方便地创建新的 Workspace 或 Notebook，并将相关分析归集管理。
 
-![Datalore 的主工作空间界面，展示了 Notebook 列表和左侧导航菜单。](https://imrichard.com/wp-content/uploads/2025/04/datalore-workspace-dashboard-notebooks-scaled.avif)
+![Datalore 的主工作空间界面，展示了 Notebook 列表和左侧导航菜单。](/images/docs/development/datalore-workspace-dashboard-notebooks-scaled.webp)
 
 ### Notebook 与交互式元素
 
 Datalore 的 Notebook 编辑器体验类似于标准的 Jupyter Notebook，但通过内置控件增强了交互性。如下图所示，除了代码和 Markdown 单元格，还可以直接插入 **交互式元素**，如下拉框 (Dropdown)、日期选择器 (Datepicker)、滑块 (Slider)、文本输入 (Text) 等，让结果展示更具动态性。
 
-![Datalore Notebook 中用于插入交互式控件的菜单，包含下拉框、滑块等选项。](https://imrichard.com/wp-content/uploads/2025/04/datalore-notebook-insert-interactive-elements.avif)
+![Datalore Notebook 中用于插入交互式控件的菜单，包含下拉框、滑块等选项。](/images/docs/development/datalore-notebook-insert-interactive-elements.webp)
 
 ### 环境管理
 
 配置 Notebook 的运行环境是 Datalore 的一个便捷特性。用户可以通过界面化的方式管理依赖库。在 Notebook 的 `Environment` 选项卡中（如下图所示），可以直接搜索 Python 库，查看其信息，并进行安装或移除。图中展示了我们本次绘图案例所需的 `plotly` 库已安装的情况。
 
-![Datalore 环境管理界面，显示已安装的 Python 库 plotly 及其版本和信息。](https://imrichard.com/wp-content/uploads/2025/04/datalore-environment-management-plotly-scaled.avif)
+![Datalore 环境管理界面，显示已安装的 Python 库 plotly 及其版本和信息。](/images/docs/development/datalore-environment-management-plotly-scaled.webp)
 
 ### 构建交互式图表选择器
 
@@ -118,7 +117,7 @@ Datalore 的 Notebook 编辑器体验类似于标准的 Jupyter Notebook，但�
 
 **创建交互控件：** 创建后或通过界面添加时，可以配置其标签、绑定的变量名以及选项，如下图所示的下拉框设置界面：
 
-![Datalore 交互式下拉框控件的配置界面，展示设置标签、变量名和选项值。](https://imrichard.com/wp-content/uploads/2025/04/datalore-interactive-dropdown-config.avif)
+![Datalore 交互式下拉框控件的配置界面，展示设置标签、变量名和选项值。](/images/docs/development/datalore-interactive-dropdown-config.webp)
 
 ### 发布与分享
 
@@ -126,15 +125,14 @@ Datalore 的一个实用功能是 **发布与分享**。通过其 "Report builde
 
 在这个例子中，代码单元格 (Cell 1, Cell 3) 则被排除在最终报告之外。
 
-![Datalore 的报告构建器界面，用于选择单元格创建分享报告，并实时预览包含交互控件和图表的最终效果。](https://imrichard.com/wp-content/uploads/2025/04/datalore-report-builder-sharing-preview-scaled.avif)
+![Datalore 的报告构建器界面，用于选择单元格创建分享报告，并实时预览包含交互控件和图表的最终效果。](/images/docs/development/datalore-report-builder-sharing-preview-scaled.webp)
 
 发布后，访问分享链接会看到一个简洁的页面。用户可以直接操作下拉框来切换图表类型，并实时看到结果，而无需接触或理解背后的 Python 代码。
 
 下面的动图展示了最终分享页面的交互效果：
 
-![Datalore 分享报告的交互效果动图演示：用户通过下拉框选择不同图表类型，图表随之动态更新](https://imrichard.com/wp-content/uploads/2025/04/datalore-shared-interactive-report-demo.gif)
+![Datalore 分享报告的交互效果动图演示：用户通过下拉框选择不同图表类型，图表随之动态更新](/images/docs/development/datalore-shared-interactive-report-demo.gif)
 
 ## 总结
 
 Datalore 提供了一种功能完善且界面友好的在线 Jupyter Notebook 体验。如果你正在寻找一个可以自托管、功能比原生 Jupyter 更丰富、并且适合小团队内部使用的 Notebook 解决方案，Datalore 是一个可以尝试的选项。
-

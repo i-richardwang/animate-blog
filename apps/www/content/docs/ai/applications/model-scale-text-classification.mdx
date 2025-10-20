@@ -5,7 +5,6 @@ releaseDate: 2024-02-03
 author:
   name: Richard Wang
   url: https://imrichard.com
-image: https://imrichard.com/wp-content/uploads/2025/04/impact-of-model-scale-on-text-classification-cover.avif
 ---
 
 大型语言模型（LLM）在文本分类、信息抽取等自动化处理任务中展示了不小的潜力。对于一些基于语义理解的任务，大家可能觉得，参数规模小一些的模型也许就够用了。但如果任务变得更复杂呢？比如，我们需要对员工调研的反馈进行多维度、细粒度的分析，不仅要理解字面意思，还要捕捉潜在情感、识别特定主题、判断是否包含敏感信息。
@@ -81,7 +80,7 @@ image: https://imrichard.com/wp-content/uploads/2025/04/impact-of-model-scale-on
 
 Qwen-14B 在处理这个任务时，观察到几个值得注意的现象：
 
-![表格展示Qwen-14B模型处理员工反馈的分类结果，其中可见一些分类错误。](https://imrichard.com/wp-content/uploads/2025/04/qwen-14b-classification-results.avif)
+![表格展示Qwen-14B模型处理员工反馈的分类结果，其中可见一些分类错误。](/images/docs/ai/qwen-14b-classification-results.webp)
 
 1. **主题分类偏离**：在第一个样本（"感谢公司，感谢老板！"）中，模型将主题分到了"感谢"，但这并不在我们预设的主题列表中。这似乎表明模型在生成回答时，可能未能完全遵循提示词中关于主题分类范围的明确限定，出现了"遗忘"任务要求的情况。
 2. **有效性判断偏差**：第二个样本（"无意见"）按我们的规则（少于10字）应为"无效"，但模型判断为"有效"。这显示出模型对指令中细节规则的理解和执行上存在偏差。
@@ -91,7 +90,7 @@ Qwen-14B 在处理这个任务时，观察到几个值得注意的现象：
 
 Yi-34B 模型相比 Qwen-14B 在某些方面有所进步，但在理解特定中文表达上遇到了困难：
 
-![表格展示Yi-34B模型处理员工反馈的分类结果，其在情感和主题分类上的一些特定理解偏差。](https://imrichard.com/wp-content/uploads/2025/04/yi-34b-classification-results.avif)
+![表格展示Yi-34B模型处理员工反馈的分类结果，其在情感和主题分类上的一些特定理解偏差。](/images/docs/ai/yi-34b-classification-results.webp)
 
 - 最明显的问题出现在第三个样本（"希望年终奖不要再打折了"）的情感判断上。这个表达在中国文化背景下通常带有明显的负面或抱怨意味，但模型却将其分类为"正向"。我们尝试与模型进行对话，询问"年终奖打折是什么意思"，发现它不仅无法准确解释，甚至将其理解为某种员工福利。这反映出模型可能缺乏对这类具有特定文化或行业背景词汇的深入理解。
 
@@ -99,7 +98,7 @@ Yi-34B 模型相比 Qwen-14B 在某些方面有所进步，但在理解特定中
 
 当模型规模扩大到 72B 时，其在处理这个复杂分类任务上的表现有了显著提升，整体结果比较稳健：
 
-![表格展示Qwen-72B模型处理员工反馈的分类结果，显示其在多维度分类任务上表现较为准确和稳定。](https://imrichard.com/wp-content/uploads/2025/04/qwen-72b-classification-results.avif)
+![表格展示Qwen-72B模型处理员工反馈的分类结果，显示其在多维度分类任务上表现较为准确和稳定。](/images/docs/ai/qwen-72b-classification-results.webp)
 
 - 它准确地将样本2（"无意见"）判断为"无效"，并相应地给出了"无法判断"的情感和空主题列表，这完全符合我们的预期。
 - 对于包含特定负面含义词汇的样本3（"希望年终奖不要再打折了"），它正确判断为"负向"。

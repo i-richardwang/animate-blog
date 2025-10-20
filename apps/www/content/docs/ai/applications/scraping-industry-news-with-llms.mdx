@@ -5,7 +5,6 @@ releaseDate: 2024-05-02
 author:
   name: Richard Wang
   url: https://imrichard.com
-image: https://imrichard.com/wp-content/uploads/2025/06/scraping-industry-news-with-llms-cover.avif
 ---
 
 在企业经营和战略研究中，持续追踪行业动态、对标竞品和头部公司至关重要。了解其组织架构变动、高层人事任免、重要政策调整等信息，能为企业决策提供有力支持。然而，传统的人工搜索和阅读大量新闻报告的方式，不仅耗时耗力，还容易遗漏关键信息。
@@ -71,7 +70,7 @@ except Exception as e:
 
 通过浏览器的"检查元素"功能（通常是右键点击新闻标题，选择"检查"），我们可以观察到新闻链接在 HTML 中的结构。
 
-![浏览器开发者工具中显示的晚点LatePost网站新闻标题HTML结构，突出显示headlines-title类的定位。](https://imrichard.com/wp-content/uploads/2025/06/latepost-inspect-news-title-html-scaled.avif)
+![浏览器开发者工具中显示的晚点LatePost网站新闻标题HTML结构，突出显示headlines-title类的定位。](/images/docs/ai/latepost-inspect-news-title-html-scaled.webp)
 
 在"晚点LatePost"首页，新闻通常分布在不同板块，例如头条、新闻报道、晚点早知道等。它们对应的 HTML class 可能有所不同，例如 `headlines-title`、`list-li-title`、`Newsletter-li`。我们需要构造一个合适的 CSS 选择器来同时选中这些元素下的链接。
 

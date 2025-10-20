@@ -5,7 +5,6 @@ releaseDate: 2025-03-15
 author:
   name: Richard Wang
   url: https://imrichard.com
-image: https://imrichard.com/wp-content/uploads/2025/06/building-llm-resume-recommender-cover.avif
 ---
 
 传统招聘流程中存在几个显著痛点：简历筛选耗时费力，关键词匹配可能会错过那些表达方式不同但同样有潜力的候选人，而我们有时会不自觉地过度依赖学历、学校或大厂背景等"硬标签"，忽视了候选人真实的技能水平和经验深度。
@@ -20,7 +19,7 @@ image: https://imrichard.com/wp-content/uploads/2025/06/building-llm-resume-reco
 
 在讨论细节之前，我们先用一个流程图来看看系统大致是怎么运作的：
 
-![基于大模型（LLM）和向量搜索的智能简历推荐系统处理流程图](https://imrichard.com/wp-content/uploads/2025/04/llm-resume-recommendation-system-flowchart-scaled.avif)
+![基于大模型（LLM）和向量搜索的智能简历推荐系统处理流程图](/images/docs/ai/llm-resume-recommendation-system-flowchart-scaled.webp)
 
 **与传统方法的关键不同：**
 
@@ -64,7 +63,7 @@ image: https://imrichard.com/wp-content/uploads/2025/06/building-llm-resume-reco
 
 下面是一个实际对话的示例，展示了系统如何通过提问来澄清和细化需求：
 
-![大模型通过提问细化岗位要求](https://imrichard.com/wp-content/uploads/2025/04/llm-job-requirement-clarification-chat.avif)
+![大模型通过提问细化岗位要求](/images/docs/ai/llm-job-requirement-clarification-chat.webp)
 
 **关键考量：**
 
@@ -94,7 +93,7 @@ image: https://imrichard.com/wp-content/uploads/2025/06/building-llm-resume-reco
 
 第一阶段完成后，系统会生成一个类似下面这样的整体策略，明确了不同简历维度的重要性：
 
-![大模型为不同简历维度分配重要性权重](https://imrichard.com/wp-content/uploads/2025/04/llm-resume-search-strategy-overall-weights.avif)
+![大模型为不同简历维度分配重要性权重](/images/docs/ai/llm-resume-search-strategy-overall-weights.webp)
 
 **关键考量：**
 
@@ -119,7 +118,7 @@ image: https://imrichard.com/wp-content/uploads/2025/06/building-llm-resume-reco
 
 下面是针对某个维度的部分策略输出示例（为了展示其底层结构，这里显示为 JSON 格式）：
 
-![展示针对简历特定字段的向量查询内容](https://imrichard.com/wp-content/uploads/2025/04/llm-resume-detailed-search-strategy-vector-query.avif)
+![展示针对简历特定字段的向量查询内容](/images/docs/ai/llm-resume-detailed-search-strategy-vector-query.webp)
 
 **关键考量：**
 
@@ -181,7 +180,7 @@ image: https://imrichard.com/wp-content/uploads/2025/06/building-llm-resume-reco
 2. **整合呈现：** 将 Top N 简历的评分、关键信息（个人特征、经验概述、技能概览）和推荐理由进行整合。
    - 通过清晰易懂的格式（如前端界面上的信息卡片）呈现给用户，便于快速评估和决策。
 
-![AI简历推荐系统最终结果呈现 - 显示推荐候选人列表、匹配得分及推荐理由](https://imrichard.com/wp-content/uploads/2025/04/ai-resume-recommendation-results-ui.avif)
+![AI简历推荐系统最终结果呈现 - 显示推荐候选人列表、匹配得分及推荐理由](/images/docs/ai/ai-resume-recommendation-results-ui.webp)
 
 **关键考量：**
 

@@ -5,7 +5,6 @@ releaseDate: 2023-03-04
 author:
   name: Richard Wang
   url: https://imrichard.com
-image: https://imrichard.com/wp-content/uploads/2025/04/using-tableau-dynamic-zone-visibility-for-interactive-dashboards-cover.avif
 ---
 
 在使用 Tableau 构建仪表盘时，我们常常希望界面能更智能、更简洁，只在需要时展示相关信息。Tableau 在 2022.3 版本中推出的**动态区域可见性**（Dynamic Zone Visibility）功能，正是为了满足这类需求。它允许我们根据参数或字段的值，动态地控制仪表盘上某个区域（如图表、筛选器容器、文本框等）的显示或隐藏。
@@ -20,7 +19,7 @@ image: https://imrichard.com/wp-content/uploads/2025/04/using-tableau-dynamic-zo
   本案例中所有数据和图表均为演示目的虚构，并非真实业务数据。数据集的构建过程可以参考文章《[从零构建员工晋升模拟数据集](/docs/data-science/analysis/mock-employee-promotion-data)》。
 </Callout>
 
-![Tableau动态区域可见性效果演示GIF](https://imrichard.com/wp-content/uploads/2025/04/tableau-dynamic-zone-visibility-demo.gif)
+![Tableau动态区域可见性效果演示GIF](/images/docs/data-science/tableau-dynamic-zone-visibility-demo.gif)
 
 在这个例子中，我们主要在三个地方运用了该功能：
 
@@ -47,7 +46,7 @@ image: https://imrichard.com/wp-content/uploads/2025/04/using-tableau-dynamic-zo
 
 下图展示了为一个区域绑定名为 `ButtonFilter` 的布尔参数的过程：
 
-![为区域启用"使用值控制可见性"并绑定布尔参数ButtonFilter的过程](https://imrichard.com/wp-content/uploads/2025/04/tableau-dynamic-visibility-configuration-setup.avif)
+![为区域启用"使用值控制可见性"并绑定布尔参数ButtonFilter的过程](/images/docs/data-science/tableau-dynamic-visibility-configuration-setup.webp)
 
 在这个 `ButtonFilter` 参数的设置界面（可以通过在参数列表中右键点击"编辑"来打开），我们可以看到：
 
@@ -67,7 +66,7 @@ image: https://imrichard.com/wp-content/uploads/2025/04/using-tableau-dynamic-zo
 
 下图展示了用于控制说明栏显隐的两个按钮状态：
 
-![展示使用Tableau工作表创建动态按钮的两种状态](https://imrichard.com/wp-content/uploads/2025/04/tableau-dynamic-visibility-button-states.avif)
+![展示使用Tableau工作表创建动态按钮的两种状态](/images/docs/data-science/tableau-dynamic-visibility-button-states.webp)
 
 左侧是说明栏隐藏时的状态（参数值为 False），显示 "+" 按钮，提示"点击展开 使用说明"；右侧是说明栏显示时的状态（参数值为 True），显示 "×" 按钮，提示"关闭侧边栏"。点击按钮会触发参数操作，改变参数值，从而同时切换按钮样式和说明栏的可见性。
 

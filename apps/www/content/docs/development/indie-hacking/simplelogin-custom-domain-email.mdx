@@ -5,7 +5,6 @@ releaseDate: 2025-03-23
 author:
   name: Richard Wang
   url: https://imrichard.com
-image: https://imrichard.com/wp-content/uploads/2025/04/set-up-custom-domain-email-with-simplelogin.avif
 ---
 
 对于独立开发者或小团队来说，给自己的产品或项目配一个专属的域名邮箱，不仅能提升专业形象，获取用户信任，也有助于分类管理邮件。另外，现在很多产品发布平台也要求用域名邮箱来验证身份或作为联系方式，所以拥有专属域名邮箱几乎成了产品上线的标配。
@@ -33,9 +32,9 @@ SimpleLogin 本来是做邮箱别名服务的，主打隐私保护，但它的�
 5. **管理功能更完善：**提供了邮件转发统计监控、拦截日志这些功能，方便你追踪和管理邮件情况。
 6. **邮箱别名与隐私追踪：**作为邮箱别名服务的老牌产品，SimpleLogin 提供无限别名功能特别实用。每个网站和服务都可以使用独立的邮箱地址，既保护了你的主邮箱不被泄露，又能精准定位垃圾邮件的来源渠道。
 
-![官方 FAQ 透露 SimpleLogin 自己的业务邮箱也基于别名实现](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-reliability-proof-faq-1.avif)
+![官方 FAQ 透露 SimpleLogin 自己的业务邮箱也基于别名实现](/images/docs/development/simplelogin-reliability-proof-faq-1.webp)
 
-![SimpleLogin 官方 FAQ 说明其可用于银行、政府等重要邮件的收发](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-reliability-proof-faq-2.avif)
+![SimpleLogin 官方 FAQ 说明其可用于银行、政府等重要邮件的收发](/images/docs/development/simplelogin-reliability-proof-faq-2.webp)
 
 <Callout type="info">
   此外，SimpleLogin
@@ -51,19 +50,19 @@ SimpleLogin 本来是做邮箱别名服务的，主打隐私保护，但它的�
 
 登录 SimpleLogin 后台，找到「Mailboxes」菜单。默认情况下，你注册 SimpleLogin 时使用的邮箱会自动被添加为个人邮箱。你也可以添加更多的邮箱地址来接收转发邮件，方便后面选用，也方便团队成员一起收邮件。
 
-![SimpleLogin后台添加收件邮箱界面截图，高亮显示输入新的个人邮箱地址以接收转发邮件](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-new-mailbox.avif)
+![SimpleLogin后台添加收件邮箱界面截图，高亮显示输入新的个人邮箱地址以接收转发邮件](/images/docs/development/simplelogin-new-mailbox.webp)
 
 ### Step 2：绑定域名 (Domains)
 
 进入「Domains」菜单，点击添加域名。你可以直接输入你的产品主域名（如 `example.com`），但我个人习惯为邮件服务设置一个子域名，例如 `mail.example.com`。输入后点击添加。
 
-![SimpleLogin后台添加自定义域名界面截图，高亮显示输入要绑定的域名信息。](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-add-custom-domain.avif)
+![SimpleLogin后台添加自定义域名界面截图，高亮显示输入要绑定的域名信息。](/images/docs/development/simplelogin-add-custom-domain.webp)
 
 ### Step 3：配置 DNS 记录
 
 添加域名后，SimpleLogin 会提供所需的 DNS 记录值。你需要前往你的域名服务商（如 Cloudflare、GoDaddy 等）后台添加 MX、SPF(TXT)、DKIM(CNAME) 和 DMARC(TXT) 这几类记录。以下是几个关键提示：
 
-![SimpleLogin后台展示绑定域名所需的DNS记录配置信息截图。](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-dns-configuration-records.avif)
+![SimpleLogin后台展示绑定域名所需的DNS记录配置信息截图。](/images/docs/development/simplelogin-dns-configuration-records.webp)
 
 - **记录的 Name (名称/主机名) 字段：**
   - 如果你的邮件域名是**子域名**（如 `mail.example.com`），配置 MX 和 SPF 时，`Name` 通常填写子域名部分 (`mail`)。
@@ -81,7 +80,7 @@ SimpleLogin 本来是做邮箱别名服务的，主打隐私保护，但它的�
 
 回到 SimpleLogin 的「Domains」页面，刷新查看。当 DNS 配置正确并生效后，对应域名的状态会显示为 **`Verified`** 或 **`Domain ready`**。
 
-![SimpleLogin自定义域名界面截图，绑定成功的域名显示 Domain ready](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-verified-domains-list.avif)
+![SimpleLogin自定义域名界面截图，绑定成功的域名显示 Domain ready](/images/docs/development/simplelogin-verified-domains-list.webp)
 
 点击域名旁边的 **Details** 或管理按钮，进行最后的设置：
 
@@ -89,7 +88,7 @@ SimpleLogin 本来是做邮箱别名服务的，主打隐私保护，但它的�
 2. **Mailboxes** (截图中的 `2`): 在"Auto-created aliases are automatically owned by the following mailboxes"部分，勾选你在 Step 1 中添加的、希望接收该域名下邮件的个人邮箱。可以多选，方便团队成员共享，我这里就选择了两个邮箱。
 3. **Default display name** (截图中的 `3`): 在输入框中设置一个默认的发件人显示名称（例如截图中填写的 `Project Team`）。当你通过个人邮箱回复这些转发来的邮件时，收件人看到的发件人名称就是这个。如果需要为不同的邮箱前缀（如 `support@` 和 `hello@`）设置不同的显示名称，之后可以在「Aliases」菜单中单独为每个别名进行配置。
 
-![在 SimpleLogin 中为自定义域名配置Catch-All、设置转发收件邮箱和默认发件人显示名称的操作界面](https://imrichard.com/wp-content/uploads/2025/04/simplelogin-custom-domain-auto-create-settings-scaled.avif)
+![在 SimpleLogin 中为自定义域名配置Catch-All、设置转发收件邮箱和默认发件人显示名称的操作界面](/images/docs/development/simplelogin-custom-domain-auto-create-settings-scaled.webp)
 
 ## 测试使用
 

@@ -5,7 +5,6 @@ releaseDate: 2024-03-17
 author:
   name: Richard Wang
   url: https://imrichard.com
-image: https://imrichard.com/wp-content/uploads/2024/04/python-plotly-sankey-diagram-cover.avif
 ---
 
 在数据分析工作中，我们经常需要展示数据在不同类别或阶段之间的流转情况。例如：用户在网页间如何跳转？资金在部门间如何分配？员工的绩效等级如何随时间变化？对于这类问题，桑基图（Sankey Diagram）是一种理想的可视化方式。
@@ -70,7 +69,7 @@ employees['第二年绩效'] = employees['第一年绩效'].apply(second_year_pe
 print("模拟员工数据 (前5行):\n", employees.head())
 ```
 
-![使用 Python Pandas 创建的模拟员工原始绩效数据表格的前五行截图](https://imrichard.com/wp-content/uploads/2025/04/employee-performance-raw-data-head.avif)
+![使用 Python Pandas 创建的模拟员工原始绩效数据表格的前五行截图](/images/docs/data-science/employee-performance-raw-data-head.webp)
 
 **2. 汇总数据得到流动统计表**
 
@@ -85,7 +84,7 @@ performance_transition_counts = employees.groupby(['第一年绩效', '第二年
 print("\n汇总后的流动统计数据 (用于绘图):\n", performance_transition_counts)
 ```
 
-![经过分组和计数汇总后的员工绩效流动统计数据表格，包含源、目标和计数列](https://imrichard.com/wp-content/uploads/2025/04/employee-performance-aggregated-flow-data.avif)
+![经过分组和计数汇总后的员工绩效流动统计数据表格，包含源、目标和计数列](/images/docs/data-science/employee-performance-aggregated-flow-data.webp)
 
 现在，我们得到了一个名为 `performance_transition_counts` 的 Pandas DataFrame，它清晰地列出了源（第一年绩效）、目标（第二年绩效）以及对应的流量值（count）。有了这份数据，我们就可以开始下一步的绘图了。
 
@@ -132,7 +131,7 @@ print("目标节点索引 (Targets):", targets)
 print("流量值 (Values):", values)
 ```
 
-![桑基图数据准备步骤的打印输出结果（节点、链接、流量）](https://imrichard.com/wp-content/uploads/2025/04/plotly-sankey-node-link-data-preparation-output.avif)
+![桑基图数据准备步骤的打印输出结果（节点、链接、流量）](/images/docs/data-science/plotly-sankey-node-link-data-preparation-output.webp)
 
 现在，我们已经准备好了绘制桑基图所需的四个关键列表：`all_labels`（节点标签）、`sources`（源节点）、`targets`（目标节点）和 `values`（流量值）。
 
@@ -237,7 +236,7 @@ fig.show()
 
 运行上面的绘图代码后，就能看到一个交互式的桑基图了。
 
-![使用 Python Plotly 绘制的员工两年绩效流动桑基图，展示了从第一年绩效到第二年状态的人数流动情况](https://imrichard.com/wp-content/uploads/2025/04/python-plotly-employee-performance-sankey-chart.webp)
+![使用 Python Plotly 绘制的员工两年绩效流动桑基图，展示了从第一年绩效到第二年状态的人数流动情况](/images/docs/data-science/python-plotly-employee-performance-sankey-chart.webp)
 
 <Callout type="info">
   Plotly

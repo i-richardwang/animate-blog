@@ -5,7 +5,6 @@ releaseDate: 2024-03-17
 author:
   name: Richard Wang
   url: https://imrichard.com
-image: https://imrichard.com/wp-content/uploads/2025/04/build-simple-sql-database-qa-with-llm-cover.avif
 ---
 
 在日常工作中，SQL 数据库是存储和管理企业数据的常用方式。虽然 SQL 提供了强大的数据查询能力，但其使用需要特定的语言技能，这对于组织内许多非技术背景的业务角色（如 HR、运营分析师等）来说，形成了一道获取数据时的壁垒。直接的数据访问受限，往往意味着信息获取不够及时，或需依赖技术团队支持，影响了决策效率。
@@ -33,7 +32,7 @@ image: https://imrichard.com/wp-content/uploads/2025/04/build-simple-sql-databas
   ID、姓名、性别、职级、年龄、部门、入职日期、是否离职、离职日期等。
 </Callout>
 
-![示例数据库表 emp_data 的结构定义及前3行数据预览](https://imrichard.com/wp-content/uploads/2025/04/sql-table-schema-info.avif)
+![示例数据库表 emp_data 的结构定义及前3行数据预览](/images/docs/ai/sql-table-schema-info.webp)
 
 ### 3. 自然语言到 SQL 的转换
 
@@ -41,7 +40,7 @@ image: https://imrichard.com/wp-content/uploads/2025/04/build-simple-sql-databas
 
 模型生成的 SQL 可能如下所示：
 
-![大模型根据"查询员工平均年龄"问题生成的 SQL 查询语句](https://imrichard.com/wp-content/uploads/2025/04/llm-generated-sql-query.avif)
+![大模型根据"查询员工平均年龄"问题生成的 SQL 查询语句](/images/docs/ai/llm-generated-sql-query.webp)
 
 ### 4. SQL 查询执行
 
@@ -49,7 +48,7 @@ image: https://imrichard.com/wp-content/uploads/2025/04/build-simple-sql-databas
 
 数据库返回的结果通常是结构化的原始数据：
 
-![执行 SQL 查询员工平均年龄后，数据库返回的原始结果](https://imrichard.com/wp-content/uploads/2025/04/raw-sql-query-result.avif)
+![执行 SQL 查询员工平均年龄后，数据库返回的原始结果](/images/docs/ai/raw-sql-query-result.webp)
 
 ### 5. 查询结果解释与格式化
 
@@ -57,7 +56,7 @@ image: https://imrichard.com/wp-content/uploads/2025/04/build-simple-sql-databas
 
 最终呈现给用户的回答：
 
-![大模型将查询结果处理后生成的关于"员工平均年龄"的最终中文回答](https://imrichard.com/wp-content/uploads/2025/04/llm-natural-language-answer.avif)
+![大模型将查询结果处理后生成的关于"员工平均年龄"的最终中文回答](/images/docs/ai/llm-natural-language-answer.webp)
 
 ## 技术实现路径与示例代码
 
