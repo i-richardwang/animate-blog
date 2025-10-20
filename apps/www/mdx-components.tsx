@@ -1,5 +1,6 @@
 import { cn } from '@workspace/ui/lib/utils';
 import { Card } from 'fumadocs-ui/components/card';
+import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { ComponentPreview } from '@/components/docs/component-preview';
@@ -19,6 +20,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
     ...components,
+    img: (props) => <ImageZoom {...(props as any)} />,
     Card: ({ children, className, accent, ...props }) => (
       <Card
         className={cn(
