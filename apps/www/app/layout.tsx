@@ -9,6 +9,7 @@ import { jsonLd } from '@/lib/json-ld';
 import { cn } from '@workspace/ui/lib/utils';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://richardwang.me'),
   title: {
     template: "%s - Richard's Page",
     default: "Richard's Page - Learning, Building, Sharing",
