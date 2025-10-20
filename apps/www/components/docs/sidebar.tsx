@@ -321,10 +321,7 @@ export const DocsSidebar = ({
     <>
       <Sidebar
         collapsible={false}
-        className={cn(
-          'md:mt-20 3xl:!absolute',
-          isBlogOrProjects && 'md:hidden',
-        )}
+        className={cn('md:mt-20', isBlogOrProjects && 'md:hidden')}
         {...sidebarProps}
       >
         <SidebarViewport className="md:[&_[data-radix-scroll-area-viewport]]:pb-14 [&_[data-radix-scroll-area-viewport]]:pb-4 max-md:pt-2">
