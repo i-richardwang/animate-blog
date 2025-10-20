@@ -1,6 +1,6 @@
 ---
-title: 使用 Animate UI 构建个人网站
-description: 如何将一个开源组件库改造成个人博客和知识库，以及你也可以这样做
+title: 用 Animate UI 搭建个人网站
+description: 如何将开源组件库改造成个人博客和知识库
 date: 2024-01-15
 author:
   name: Richard Wang
@@ -11,61 +11,61 @@ tags:
   - 个人网站
 ---
 
-When I decided to build my personal website, I wanted something more than just a basic blog template. I needed a space that could serve as both a digital garden for my notes and a showcase for my work—all while looking beautiful and feeling modern.
+当我决定搭建个人网站时，不想只是用个基础的博客模板了事。我需要一个既能作为笔记的数字花园，又能展示作品的空间，同时还要好看、现代。
 
-That's when I discovered [Animate UI](https://animate-ui.com).
+后来发现了 [Animate UI](https://animate-ui.com)。
 
-## Why Animate UI?
+## 为什么选择 Animate UI？
 
-Animate UI is an open-source React component distribution built with Tailwind CSS and Motion. What caught my attention wasn't just the gorgeous animations—it was the philosophy behind it.
+Animate UI 是一个用 Tailwind CSS 和 Motion 构建的开源 React 组件库。吸引我的不只是那些精美的动画效果，而是它背后的理念。
 
-Unlike typical npm packages, Animate UI follows the "copy and customize" approach popularized by shadcn/ui. You don't install it as a dependency; you copy the source code directly into your project. This means **complete control** over every component, every animation, and every design decision.
+和普通的 npm 包不同，Animate UI 采用的是 shadcn/ui 推广的"复制并定制"方式。你不是把它安装成依赖项，而是直接把源代码复制到项目里。这意味着你对每个组件、每个动画、每个设计决策都有**完全的控制权**。
 
-The original project is designed as a component library documentation site, showcasing animated primitives, components, and icons. But I saw potential for something different.
+Animate UI 原本是作为组件库的文档站点设计的，用来展示动画原语、组件和图标。但我看到了不同的可能性。
 
-## The Transformation Journey
+## 改造过程
 
-### From Component Library to Digital Garden
+### 从组件库到数字花园
 
-The beauty of Animate UI's architecture is its flexibility. The site is built with:
+Animate UI 架构的优势在于灵活性。站点的技术栈包括：
 
-- **Next.js 15** for the framework
-- **Fumadocs** for documentation structure
-- **Tailwind CSS** for styling
-- **Motion** (Framer Motion) for animations
+- **Next.js 15** 作为框架
+- **Fumadocs** 提供文档结构
+- **Tailwind CSS** 负责样式
+- **Motion**（Framer Motion）实现动画
 
-I realized this tech stack was perfect for a personal site. The documentation structure could easily become a knowledge base, the component showcase could transform into a blog, and those beautiful animations would make the whole experience delightful.
+这个技术栈很适合做个人站点。文档结构可以变成知识库，组件展示可以变成博客，那些精美的动画能让整个体验更愉悦。
 
-### The Core Changes
+### 核心改动
 
-I approached the transformation with a simple philosophy: **preserve the original structure, customize the content**.
+改造的思路很简单：**保留原有结构，定制内容**。
 
-**Navigation & Structure**: The original site had sections for Components, Primitives, and Icons. I replaced these with my content pillars: AI Exploration, Data Science, and Development. But I didn't stop there—I also added a dedicated Blog section, something the original project didn't have. The beauty is that Fumadocs already supported blog collections; I just needed to wire it up and add it to the navigation.
+**导航和结构**：原站点有 Components、Primitives、Icons 这些板块。我把它们换成了自己的内容支柱：AI 探索、数据科学、开发。同时还加了一个专门的 Blog 板块，这是原项目没有的。好在 Fumadocs 本身就支持博客集合，只需要接入并添加到导航里。
 
-**Homepage Evolution**: The hero section's animated logo and text effects were too good to lose. I kept all the animations but changed the messaging from "Animate your UI" to "Learning, Building, Sharing"—a better fit for a personal site. The CTA buttons now point to "Explore Notes" and "Read Blog" instead of component documentation.
+**首页演变**：Hero 区域的动画 logo 和文字效果太棒了，舍不得丢。我保留了所有动画，但把文案从"Animate your UI"改成了"Learning, Building, Sharing"，更适合个人站点。CTA 按钮也从指向组件文档改成了"探索笔记"和"阅读博客"。
 
-**Content Architecture**: Instead of component documentation, I created a dual content system:
+**内容架构**：用一个双轨内容系统替代了组件文档：
 
-- **Knowledge Base** (`/docs`): A three-tier structure with main modules (AI, Data Science, Development), sub-categories, and detailed notes
-- **Blog** (`/blog`): For sharing thoughts, tutorials, and project updates—more narrative, less structured than the knowledge base
+- **知识库**（`/docs`）：三层结构，包括主模块（AI、数据科学、开发）、子分类和详细笔记
+- **博客**（`/blog`）：用于分享想法、教程和项目更新，比知识库更具叙事性、结构也更松散
 
-The existing meta.json system for organizing docs worked beautifully for both the structured notes and the chronological blog posts.
+原有的 meta.json 组织系统对结构化笔记和按时间排序的博客文章都很好用。
 
-### Design Decisions
+### 设计决策
 
-One thing I was careful about: **maintaining the original design language**. The animations, the spacing, the typography—these were all thoughtfully crafted. Rather than reinventing the wheel, I focused on adapting the content to fit the existing aesthetic.
+有一点我很谨慎：**保持原有的设计语言**。动画、间距、排版都是精心设计的。与其重新造轮子，不如让内容适应现有的美学风格。
 
-The result? A personal site that feels cohesive, professional, and uniquely animated.
+结果就是一个连贯、专业且动画独特的个人站点。
 
-## Making It Your Own
+## 定制你自己的站点
 
-If you want to use this as a starting point for your own site, here's what you'll need to customize. I've designed the changes to be straightforward—mostly configuration and content updates.
+如果你想用这个作为起点搭建自己的站点，需要定制的内容主要是配置和内容更新，相对直观。
 
-### Site Identity
+### 站点身份
 
-The first step is making it yours—branding, metadata, and links.
+第一步是让它成为你的站点，包括品牌、元数据和链接。
 
-**Update site metadata** in `apps/www/app/layout.tsx`:
+**更新站点元数据**，在 `apps/www/app/layout.tsx` 中：
 
 ```tsx
 export const metadata: Metadata = {
@@ -78,64 +78,64 @@ export const metadata: Metadata = {
 };
 ```
 
-**Replace the domain** in both `layout.tsx` and `lib/json-ld.ts`:
+**替换域名**，在 `layout.tsx` 和 `lib/json-ld.ts` 中：
 
 ```tsx
-// Find and replace
+// 查找并替换
 url: 'https://richardwang.me';
-// with
+// 改为
 url: 'https://yourdomain.com';
 ```
 
-**Update social links** - GitHub and Twitter/X appear in multiple files:
+**更新社交链接**，GitHub 和 Twitter/X 链接出现在多个文件中：
 
 - `components/header.tsx`
 - `components/docs/nav.tsx`
 - `components/footer.tsx`
 - `app/docs/layout.tsx`
 
-Just search for `i-richardwang` and `richard2wang` and replace with your handles.
+搜索 `i-richardwang` 和 `richard2wang`，替换成你的用户名。
 
-### Visual Identity
+### 视觉标识
 
-**Logo**: If you want to keep the animated SVG logo (recommended—it's beautiful!), you'll need to create your text as an SVG path.
+**Logo**：如果你想保留动画 SVG logo（推荐，效果很棒），需要把你的文字创建成 SVG 路径。
 
-The easiest way:
+最简单的方法：
 
-1. Open Figma, create your text
-2. Select font and size
-3. Right-click → "Outline Stroke"
-4. Export as SVG
-5. Copy the path data into `components/logo.tsx`
+1. 打开 Figma，创建文字
+2. 选择字体和大小
+3. 右键 → "Outline Stroke"
+4. 导出为 SVG
+5. 把路径数据复制到 `components/logo.tsx`
 
-The logo component uses Motion to animate the path drawing—super smooth effect.
+Logo 组件用 Motion 来动画化路径绘制，效果很流畅。
 
-**Favicon**: Replace the files in `/public`:
+**Favicon**：替换 `/public` 中的文件：
 
 - `favicon-16x16.png`
 - `favicon-32x32.png`
 - `apple-touch-icon.png`
-- `og-image.png` (for social sharing)
+- `og-image.png`（用于社交分享）
 
-### Content & Navigation
+### 内容和导航
 
-**Homepage hero** (`components/hero.tsx`):
+**首页 hero**（`components/hero.tsx`）：
 
 ```tsx
 const TITLE = 'Your Tagline Here';
 
-// Update the badge/announcement
+// 更新徽章/公告
 <Link href="/blog">Latest thoughts and notes</Link>
 
-// Update the description
+// 更新描述
 <p>Your personal introduction...</p>
 
-// Update CTA buttons
+// 更新 CTA 按钮
 <Link href="/docs">Explore Notes</Link>
 <Link href="/blog">Read Blog</Link>
 ```
 
-**Header navigation** (`components/docs/nav.tsx`):
+**顶部导航**（`components/docs/nav.tsx`）：
 
 ```tsx
 export const NAV_ITEMS = [
@@ -145,7 +145,7 @@ export const NAV_ITEMS = [
 ];
 ```
 
-**Sidebar tabs** (`lib/sidebar.tsx`):
+**侧边栏标签**（`lib/sidebar.tsx`）：
 
 ```tsx
 export const SIDEBAR_TABS = [
@@ -155,11 +155,11 @@ export const SIDEBAR_TABS = [
     icon: <YourIcon />,
     url: '/docs/your-section',
   },
-  // Add more sections for your knowledge base
+  // 为知识库添加更多板块
 ];
 ```
 
-**Guide links** in sidebar (`app/layout.config.tsx`):
+**侧边栏指南链接**（`app/layout.config.tsx`）：
 
 ```tsx
 links: [
@@ -175,17 +175,17 @@ links: [
 ];
 ```
 
-### Content Organization
+### 内容组织
 
-The site supports two types of content, each with its own purpose:
+站点支持两种类型的内容，各有各的用途：
 
-**Knowledge Base** (`/content/docs/`): Structured, hierarchical notes organized by topic. Each section needs:
+**知识库**（`/content/docs/`）：按主题组织的结构化、层级化笔记。每个板块需要：
 
-- `index.mdx` - landing page with Cards to sub-sections
-- `meta.json` - defines navigation structure and ordering
-- Individual `.mdx` files for detailed notes
+- `index.mdx` - 着陆页，用 Cards 链接到子板块
+- `meta.json` - 定义导航结构和排序
+- 单独的 `.mdx` 文件存放详细笔记
 
-Example `meta.json`:
+`meta.json` 示例：
 
 ```json
 {
@@ -194,7 +194,7 @@ Example `meta.json`:
 }
 ```
 
-**Blog** (`/content/blogs/`): Time-based posts for sharing thoughts, tutorials, and updates. Each post is a standalone `.mdx` file with frontmatter:
+**博客**（`/content/blogs/`）：按时间排序的文章，用于分享想法、教程和更新。每篇文章是一个独立的 `.mdx` 文件，带有 frontmatter：
 
 ```mdx
 ---
@@ -205,39 +205,39 @@ tags: ['tag1', 'tag2']
 ---
 ```
 
-This dual structure gives you flexibility—use `/docs` for evergreen, structured content and `/blog` for timely, narrative pieces.
+双轨结构提供了灵活性：用 `/docs` 存放常青的、结构化的内容，用 `/blog` 存放时效性强的、叙事性的文章。
 
-### A Note on Code Preservation
+### 关于代码保留
 
-Throughout the codebase, you'll see comments like:
+在代码库中，你会看到这样的注释：
 
 ```tsx
 // Original ... (commented out for upstream sync)
 ```
 
-I've kept all the original Animate UI code in comments. This makes it easy to:
+我保留了所有原始 Animate UI 代码的注释。这样可以：
 
-- See what changed
-- Sync with upstream updates
-- Reference the original implementation
+- 看到做了哪些改动
+- 同步上游更新
+- 参考原始实现
 
-Feel free to keep this pattern or remove the comments once you're comfortable with the codebase.
+你可以保留这个模式，也可以在熟悉代码库后删除注释。
 
-## The Result
+## 改造结果
 
-What started as a component library is now a personal digital space. The animations that once showcased UI components now guide visitors through my thoughts and projects. The documentation structure that explained primitives now organizes my knowledge.
+从组件库变成了个人数字空间。曾经用来展示 UI 组件的动画，现在引导访客浏览我的想法和项目。曾经用来解释原语的文档结构，现在组织我的知识。
 
-And the best part? Because everything is customizable at the source level, I can continue to evolve it. Want to add a new section? Create a new module. Need a different layout? Modify the components. The possibilities are endless.
+最棒的是什么？因为所有东西都可以在源码层面定制，我可以持续演进它。想加新板块？创建一个新模块。需要不同的布局？修改组件。可能性是无限的。
 
-If you build something with this, I'd love to see it. Feel free to reach out and share what you create!
+如果你用它搭建了什么，我很想看看。欢迎联系我分享你的创作！
 
-## Credits
+## 致谢
 
-Huge thanks to the [Animate UI](https://animate-ui.com) team for building such an incredible foundation. The component library, the animations, the documentation structure—it's all open source and beautifully crafted.
+非常感谢 [Animate UI](https://animate-ui.com) 团队打造了如此出色的基础。组件库、动画、文档结构，都是开源的，制作精良。
 
-If you haven't checked out Animate UI for your projects, I highly recommend it. And if you're building a personal site, well, you know where to start now.
+如果你还没有在项目中尝试过 Animate UI，我强烈推荐。如果你正在搭建个人站点，现在你知道从哪里开始了。
 
 ---
 
-**GitHub Repository**: [animate-blog](https://github.com/i-richardwang/animate-blog)  
-**Built with**: [Animate UI](https://animate-ui.com), Next.js, Tailwind CSS, Motion
+**GitHub 仓库**：[animate-blog](https://github.com/i-richardwang/animate-blog)  
+**技术栈**：[Animate UI](https://animate-ui.com)、Next.js、Tailwind CSS、Motion
