@@ -13,13 +13,13 @@ author:
 
 ## 不同训练阶段的数据需求
 
-在前文《[大模型训练祛魅：从零构建流程详解](/docs/ai/fundamentals/guide-to-building-llms-from-scratch)》中，我们讲到了构建一个LLM通常涉及至少三个训练步骤：**分词器训练 (Tokenizer Training)**、**预训练 (Pre-training)** 和 **指令微调 (Supervised Fine-Tuning, SFT)**。每个步骤目标不同，所需的数据也有差异。
+在前文《[大模型训练祛魅：从零构建流程详解](/docs/ai/fundamentals/fundamentals/guide-to-building-llms-from-scratch)》中，我们讲到了构建一个LLM通常涉及至少三个训练步骤：**分词器训练 (Tokenizer Training)**、**预训练 (Pre-training)** 和 **指令微调 (Supervised Fine-Tuning, SFT)**。每个步骤目标不同，所需的数据也有差异。
 
 ### 分词器训练数据：构建词汇表与分词规则
 
 在模型学习语言之前，需要确定它处理文本的基本单元，即"词元"（Tokens）。分词器（Tokenizer）负责将原始文本切分成词元序列。这个过程侧重于**统计分析**，而非深度学习。
 
-![图解LLM分词器训练数据：关键目标、数据特点与示例](/images/docs/ai/llm-tokenizer-training-data-infographic.webp)
+![图解LLM分词器训练数据：关键目标、数据特点与示例](/ai/fundamentals/llm-tokenizer-training-data-infographic.webp)
 
 - **目标**：建立一套合理的词汇表（Vocabulary）和有效的分词规则。
 - **数据特点**：需要**大量且多样化的文本片段**，用以覆盖目标语言的常见字符和组合。单个文本片段不一定需要很长，干净、无错别字的文本是关键。
@@ -35,7 +35,7 @@ author:
 
 预训练是LLM获取广泛世界知识和基础语言能力的核心阶段。目标是让模型通过接触海量文本，掌握语言结构、事实知识、上下文理解等能力。
 
-![图解LLM预训练数据：核心目标、海量数据特点与示例](/images/docs/ai/llm-pretraining-data-infographic.webp)
+![图解LLM预训练数据：核心目标、海量数据特点与示例](/ai/fundamentals/llm-pretraining-data-infographic.webp)
 
 - **目标**：训练模型理解语言结构、预测文本序列，学习世界知识。
 - **数据特点**：需要**极其庞大（TB级别或更高）且来源多样**的文本语料，如网页、书籍、代码等。数据**质量和其中蕴含的价值观**对模型影响深远。通常是**段落级别的连续文本**。
@@ -52,7 +52,7 @@ author:
 
 预训练后的模型知识丰富，但不一定擅长按指令完成任务或进行流畅对话。指令微调（SFT）旨在让模型学会理解并遵循人类的指示。
 
-![图解LLM指令微调SFT数据：目标、高质量数据特点与示例](/images/docs/ai/llm-sft-instruction-tuning-data-infographic.webp)
+![图解LLM指令微调SFT数据：目标、高质量数据特点与示例](/ai/fundamentals/llm-sft-instruction-tuning-data-infographic.webp)
 
 - **目标**：使模型能够理解指令，并生成符合要求的、有帮助的回复。
 - **数据特点**：需要**高质量的"指令-响应"配对**或**多轮对话数据**。数据量级通常远小于预训练，但对**质量要求非常高**，需要清晰地示范期望的交互模式。
@@ -83,7 +83,7 @@ JSONL是一种文本格式，特点是**每一行都是一个独立的、合法�
 {"id": 2, "text": "Record two.", "source": "web"}
 ```
 
-![图解JSONL数据格式：核心定义、主要优缺点与格式示例](/images/docs/ai/llm-jsonl-data-format-infographic.webp)
+![图解JSONL数据格式：核心定义、主要优缺点与格式示例](/ai/fundamentals/llm-jsonl-data-format-infographic.webp)
 
 **主要优点**:
 
@@ -100,7 +100,7 @@ JSONL是一种文本格式，特点是**每一行都是一个独立的、合法�
 
 为了提高存储效率和加载速度，尤其在训练阶段需要反复读取数据时，常将预处理（如分词）后的数据转为**二进制格式**。这并非单一标准，而是泛指非文本的紧凑存储方式，例如直接存储Token ID序列。
 
-![图解二进制数据格式：核心特点、主要优缺点与常见用途](/images/docs/ai/llm-binary-bin-data-format-infographic.webp)
+![图解二进制数据格式：核心特点、主要优缺点与常见用途](/ai/fundamentals/llm-binary-bin-data-format-infographic.webp)
 
 **主要优点**:
 

@@ -97,19 +97,19 @@ sudo docker-compose up -d
 
 Datalore 采用 Workspace（工作空间）来组织 Notebooks 和相关文件。主界面（如下图所示）比较直观，可以方便地创建新的 Workspace 或 Notebook，并将相关分析归集管理。
 
-![Datalore 的主工作空间界面，展示了 Notebook 列表和左侧导航菜单。](/images/docs/development/datalore-workspace-dashboard-notebooks-scaled.webp)
+![Datalore 的主工作空间界面，展示了 Notebook 列表和左侧导航菜单。](/development/self-hosted/datalore-workspace-dashboard-notebooks-scaled.webp)
 
 ### Notebook 与交互式元素
 
 Datalore 的 Notebook 编辑器体验类似于标准的 Jupyter Notebook，但通过内置控件增强了交互性。如下图所示，除了代码和 Markdown 单元格，还可以直接插入 **交互式元素**，如下拉框 (Dropdown)、日期选择器 (Datepicker)、滑块 (Slider)、文本输入 (Text) 等，让结果展示更具动态性。
 
-![Datalore Notebook 中用于插入交互式控件的菜单，包含下拉框、滑块等选项。](/images/docs/development/datalore-notebook-insert-interactive-elements.webp)
+![Datalore Notebook 中用于插入交互式控件的菜单，包含下拉框、滑块等选项。](/development/self-hosted/datalore-notebook-insert-interactive-elements.webp)
 
 ### 环境管理
 
 配置 Notebook 的运行环境是 Datalore 的一个便捷特性。用户可以通过界面化的方式管理依赖库。在 Notebook 的 `Environment` 选项卡中（如下图所示），可以直接搜索 Python 库，查看其信息，并进行安装或移除。图中展示了我们本次绘图案例所需的 `plotly` 库已安装的情况。
 
-![Datalore 环境管理界面，显示已安装的 Python 库 plotly 及其版本和信息。](/images/docs/development/datalore-environment-management-plotly-scaled.webp)
+![Datalore 环境管理界面，显示已安装的 Python 库 plotly 及其版本和信息。](/development/self-hosted/datalore-environment-management-plotly-scaled.webp)
 
 ### 构建交互式图表选择器
 
@@ -117,7 +117,7 @@ Datalore 的 Notebook 编辑器体验类似于标准的 Jupyter Notebook，但�
 
 **创建交互控件：** 创建后或通过界面添加时，可以配置其标签、绑定的变量名以及选项，如下图所示的下拉框设置界面：
 
-![Datalore 交互式下拉框控件的配置界面，展示设置标签、变量名和选项值。](/images/docs/development/datalore-interactive-dropdown-config.webp)
+![Datalore 交互式下拉框控件的配置界面，展示设置标签、变量名和选项值。](/development/self-hosted/datalore-interactive-dropdown-config.webp)
 
 ### 发布与分享
 
@@ -125,13 +125,13 @@ Datalore 的一个实用功能是 **发布与分享**。通过其 "Report builde
 
 在这个例子中，代码单元格 (Cell 1, Cell 3) 则被排除在最终报告之外。
 
-![Datalore 的报告构建器界面，用于选择单元格创建分享报告，并实时预览包含交互控件和图表的最终效果。](/images/docs/development/datalore-report-builder-sharing-preview-scaled.webp)
+![Datalore 的报告构建器界面，用于选择单元格创建分享报告，并实时预览包含交互控件和图表的最终效果。](/development/self-hosted/datalore-report-builder-sharing-preview-scaled.webp)
 
 发布后，访问分享链接会看到一个简洁的页面。用户可以直接操作下拉框来切换图表类型，并实时看到结果，而无需接触或理解背后的 Python 代码。
 
 下面的动图展示了最终分享页面的交互效果：
 
-![Datalore 分享报告的交互效果动图演示：用户通过下拉框选择不同图表类型，图表随之动态更新](/images/docs/development/datalore-shared-interactive-report-demo.gif)
+![Datalore 分享报告的交互效果动图演示：用户通过下拉框选择不同图表类型，图表随之动态更新](/development/self-hosted/datalore-shared-interactive-report-demo.gif)
 
 ## 总结
 

@@ -125,7 +125,7 @@ def column_info(df, sort_by='default'):
 column_info(train_df, sort_by='unique')
 ```
 
-![员工流失预测项目训练集数据列信息统计表，展示各字段的缺失值、唯一值数量及数据类型。](/images/docs/data-science/employee-attrition-train-data-column-info-summary.webp)
+![员工流失预测项目训练集数据列信息统计表，展示各字段的缺失值、唯一值数量及数据类型。](/data-science/analysis/employee-attrition-train-data-column-info-summary.webp)
 
 **关键发现：**
 
@@ -164,7 +164,7 @@ def duplicate_info(df):
 duplicate_info(train_df)
 ```
 
-![训练数据集重复行检测统计，显示重复记录数量为0，占比为0%。](/images/docs/data-science/employee-attrition-train-duplicate-rows-check.webp)
+![训练数据集重复行检测统计，显示重复记录数量为0，占比为0%。](/data-science/analysis/employee-attrition-train-duplicate-rows-check.webp)
 
 **关键发现：**
 
@@ -201,7 +201,7 @@ def check_categorical_values(train_df, test_df, categorical_cols):
 check_categorical_values(train_df, test_df, categorical_cols)
 ```
 
-![测试集中发现训练集未包含的类别特征值列表](/images/docs/data-science/employee-attrition-test-new-categorical-values.webp)
+![测试集中发现训练集未包含的类别特征值列表](/data-science/analysis/employee-attrition-test-new-categorical-values.webp)
 
 **关键发现：**
 
@@ -263,7 +263,7 @@ for col, count in outlier_counts.items():
         print(f"字段: {col} - 异常值数量: {count}")
 ```
 
-![使用三倍标准差法检测出的各数值字段异常值数量统计列表](/images/docs/data-science/employee-attrition-train-outlier-counts-summary.webp)
+![使用三倍标准差法检测出的各数值字段异常值数量统计列表](/data-science/analysis/employee-attrition-train-outlier-counts-summary.webp)
 
 <Callout type="info">
   **注意：**
@@ -309,15 +309,15 @@ visualize_outliers(train_df, outlier_columns)
 
 - `DailyRate`：箱线图显示一个异常高的值（接近4000），这可能是录入错误或特殊情况，需要重点关注。
 
-![DailyRate字段箱线图和直方图分析](/images/docs/data-science/visualize_outliers_DailyRate.webp)
+![DailyRate字段箱线图和直方图分析](/data-science/analysis/visualize_outliers_DailyRate.webp)
 
 - `Education`：出现值为15的异常点，而其他编码都在1-5范围内，这很可能是异常值。
 
-![Education字段箱线图和直方图分析](/images/docs/data-science/visualize_outliers_Education.webp)
+![Education字段箱线图和直方图分析](/data-science/analysis/visualize_outliers_Education.webp)
 
 - `JobLevel`：出现值为7的点，如果职级体系中不存在7级，则属于异常值。
 
-![JobLevel字段箱线图和直方图分析](/images/docs/data-science/visualize_outliers_JobLevel.webp)
+![JobLevel字段箱线图和直方图分析](/data-science/analysis/visualize_outliers_JobLevel.webp)
 
 - 需结合业务判断： `MonthlyIncome`、`TotalWorkingYears`、`YearsAtCompany` 等字段虽有统计意义上的"异常点"（如特高收入、特长工龄），但这些可能是正常的长尾分布。处理这类值时，应结合业务逻辑（如收入是否合理）和对模型的影响来决定。
 
