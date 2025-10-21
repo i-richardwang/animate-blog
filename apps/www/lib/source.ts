@@ -12,6 +12,9 @@ import { createMDXSource } from 'fumadocs-mdx';
 import { icons } from 'lucide-react';
 import { createElement } from 'react';
 
+// Directories to exclude (Animate UI original documentation)
+const EXCLUDED_PATHS = ['components', 'icons', 'primitives'];
+
 export const source = loader({
   baseUrl: '/docs',
   source: docs.toFumadocsSource(),
@@ -55,6 +58,44 @@ export const getSortedProjects = () => {
       (a, b) =>
         new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
     );
+};
+
+// Helper to get latest content (blogs + docs with releaseDate) sorted by date
+export const getLatestContent = (limit: number = 3) => {
+  // Get all blog posts
+  const blogPosts = blogs.getPages().map((post) => ({
+    title: post.data.title,
+    url: post.url,
+    date: new Date(post.data.date),
+    type: 'blog' as const,
+  }));
+
+  // Get all docs with releaseDate, excluding certain directories
+  const docsWithDate = source
+    .getPages()
+    .filter((page) => {
+      // Filter out excluded directories
+      const pathSegments = page.url.replace('/docs/', '').split('/');
+      const firstSegment = pathSegments[0];
+      if (EXCLUDED_PATHS.includes(firstSegment)) return false;
+
+      // Only include pages with releaseDate
+      return page.data.releaseDate;
+    })
+    .map((page) => ({
+      title: page.data.title,
+      url: page.url,
+      date: new Date(page.data.releaseDate!),
+      type: 'docs' as const,
+    }));
+
+  // Combine and sort by date (newest first)
+  const allContent = [...blogPosts, ...docsWithDate].sort(
+    (a, b) => b.date.getTime() - a.date.getTime(),
+  );
+
+  // Return top N items
+  return allContent.slice(0, limit);
 };
 
 export type Page = InferPageType<typeof source>;

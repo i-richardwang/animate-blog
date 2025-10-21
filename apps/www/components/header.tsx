@@ -4,16 +4,10 @@ import { motion } from 'motion/react';
 
 import { Logo } from '@/components/logo';
 import XIcon from '@workspace/ui/components/icons/x-icon';
+import GithubIcon from '@workspace/ui/components/icons/github-icon';
+import MailIcon from '@workspace/ui/components/icons/mail-icon';
 import { useIsMobile } from '@workspace/ui/hooks/use-mobile';
 import { ThemeSwitcher } from './animate/theme-switcher';
-import { StarIcon } from 'lucide-react';
-import {
-  GithubStars,
-  GithubStarsIcon,
-  GithubStarsLogo,
-  GithubStarsNumber,
-  GithubStarsParticles,
-} from '@/registry/primitives/animate/github-stars';
 
 const LOGO_WRAPPER_VARIANTS = {
   center: {
@@ -86,32 +80,15 @@ export const Header = ({ transition }: { transition: boolean }) => {
           className="absolute z-110 flex items-center gap-x-4"
         >
           <div className="hidden xs:flex items-center gap-x-1">
-            <GithubStars
-              username="i-richardwang"
-              repo="animate-blog"
-              delay={2000}
-              asChild
+            <a
+              href="https://github.com/i-richardwang/animate-blog"
+              rel="noreferrer noopener"
+              target="_blank"
+              className="inline-flex sm:mt-1 items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&_svg]:size-5 text-fd-muted-foreground sm:[&_svg]:size-5.5"
+              data-active="false"
             >
-              <a
-                href="https://github.com/i-richardwang/animate-blog"
-                rel="noreferrer noopener"
-                target="_blank"
-                className="sm:mt-1 group cursor-pointer justify-center rounded-md text-sm group font-medium transition-colors duration-300 ease-in-out disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&_svg]:size-5 text-fd-muted-foreground sm:[&_svg]:size-5.5 flex items-center gap-x-2"
-              >
-                <GithubStarsLogo className="size-6" />
-
-                <span className="rounded-[4px] flex items-center gap-x-1 select-none bg-accent dark:group-hover:bg-neutral-900 group-hover:bg-white text-sm py-1 pl-1.5 pr-[5px]">
-                  <GithubStarsNumber />{' '}
-                  <GithubStarsParticles>
-                    <GithubStarsIcon
-                      icon={StarIcon}
-                      className="!size-4"
-                      activeClassName="text-muted-foreground group-hover:text-current"
-                    />
-                  </GithubStarsParticles>
-                </span>
-              </a>
-            </GithubStars>
+              <GithubIcon />
+            </a>
             <a
               href="https://x.com/richard2wang"
               rel="noreferrer noopener"
@@ -120,6 +97,13 @@ export const Header = ({ transition }: { transition: boolean }) => {
               data-active="false"
             >
               <XIcon />
+            </a>
+            <a
+              href="mailto:contact@richardwang.me"
+              className="inline-flex sm:mt-1 items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&_svg]:size-5 text-fd-muted-foreground sm:[&_svg]:size-5.5"
+              data-active="false"
+            >
+              <MailIcon />
             </a>
           </div>
 

@@ -1,4 +1,4 @@
-import { Dancing_Script, Noto_Serif_SC } from 'next/font/google';
+import { Dancing_Script } from 'next/font/google';
 import { MotionEffect } from './effects/motion-effect';
 import { cn } from '@workspace/ui/lib/utils';
 import { About } from './icons/about';
@@ -109,10 +109,6 @@ const COMPONENTS = [
 ];
 
 const dancing = Dancing_Script({ subsets: ['latin'] });
-const notoSerifSC = Noto_Serif_SC({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-});
 
 export const Features = () => {
   return (
@@ -158,12 +154,7 @@ export const Features = () => {
                     >
                       {component.name}
                     </p>
-                    <p
-                      className={cn(
-                        notoSerifSC.className,
-                        'text-sm font-medium text-muted-foreground/70 leading-tight',
-                      )}
-                    >
+                    <p className="text-sm font-medium text-muted-foreground/70 leading-tight font-serif">
                       {component.description}
                     </p>
                   </div>

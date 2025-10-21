@@ -10,7 +10,8 @@ import { CommandIcon } from 'lucide-react';
 import { useSearchContext, useSidebar } from 'fumadocs-ui/provider';
 import { ThemeSwitcher } from '../animate/theme-switcher';
 import XIcon from '@workspace/ui/components/icons/x-icon';
-import { GithubStarsLogo } from '@/registry/primitives/animate/github-stars';
+import GithubIcon from '@workspace/ui/components/icons/github-icon';
+import MailIcon from '@workspace/ui/components/icons/mail-icon';
 import { Menu } from '@/registry/icons/menu';
 import { NotesMenu } from './notes-menu';
 
@@ -113,7 +114,7 @@ export const Nav = () => {
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground size-8 [&_svg]:size-5 text-fd-muted-foreground"
                 data-active="false"
               >
-                <GithubStarsLogo />
+                <GithubIcon />
               </a>
 
               <a
@@ -124,6 +125,14 @@ export const Nav = () => {
                 data-active="false"
               >
                 <XIcon />
+              </a>
+
+              <a
+                href="mailto:contact@richardwang.me"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground size-8 [&_svg]:size-5 text-fd-muted-foreground"
+                data-active="false"
+              >
+                <MailIcon />
               </a>
             </div>
 

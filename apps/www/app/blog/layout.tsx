@@ -4,7 +4,6 @@ import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import { Nav } from '@/components/docs/nav';
 import { baseOptions } from '@/app/layout.config';
 import { ThemeSwitcher } from '@/components/animate/theme-switcher';
-import XIcon from '@workspace/ui/components/icons/x-icon';
 import { getSortedBlogPosts } from '@/lib/source';
 import type { PageTree } from 'fumadocs-core/server';
 import { DocsSidebar } from '@/components/docs/sidebar';
@@ -27,15 +26,6 @@ const BLOG_LAYOUT_PROPS: DocsLayoutProps = {
     component: <ThemeSwitcher />,
   },
   ...baseOptions,
-  links: [
-    ...(baseOptions.links || []),
-    {
-      icon: <XIcon />,
-      url: 'https://x.com/richard2wang',
-      text: 'X',
-      type: 'icon',
-    },
-  ],
 };
 
 export default function BlogLayout({ children }: { children: ReactNode }) {

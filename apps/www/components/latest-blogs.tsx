@@ -10,21 +10,11 @@ import Link from 'next/link';
 import { SendHorizontalIcon } from '@/registry/icons/send-horizontal';
 import { PartyPopper } from '@/registry/icons/party-popper';
 import { useEffect, useState } from 'react';
+import type { LatestContent } from '@/types/content';
 
-const LATEST_BLOGS = [
-  {
-    title: 'Building a Personal Site with Animate UI',
-    url: '/blog/building-personal-site-with-animate-ui',
-  },
-  {
-    title: 'Welcome to My Digital Garden',
-    url: '/blog/welcome-to-animate-ui',
-  },
-  {
-    title: 'Building Animated Interfaces with Motion',
-    url: '/blog/building-animated-interfaces',
-  },
-];
+type LatestBlogsProps = {
+  content: LatestContent[];
+};
 
 const SyncedSendIcon = () => {
   const { currentText } = useRotatingText();
@@ -44,24 +34,29 @@ const SyncedSendIcon = () => {
   );
 };
 
-const BlogLink = () => {
+const BlogLink = ({ content }: { content: LatestContent[] }) => {
   const { currentText } = useRotatingText();
-  const currentBlog = LATEST_BLOGS.find((blog) => blog.title === currentText);
+  const currentItem = content.find((item) => item.title === currentText);
 
-  if (!currentBlog) {
+  if (!currentItem) {
     return (
       <RotatingText className="font-medium text-foreground/80 text-sm sm:text-base line-clamp-1" />
     );
   }
 
   return (
-    <Link href={currentBlog.url} className="block group">
+    <Link href={currentItem.url} className="block group">
       <RotatingText className="font-medium text-foreground/80 group-hover:text-foreground text-sm sm:text-base line-clamp-1 transition-colors underline decoration-foreground/30 group-hover:decoration-foreground/60 underline-offset-4" />
     </Link>
   );
 };
 
-export const LatestBlogs = () => {
+export const LatestBlogs = ({ content }: LatestBlogsProps) => {
+  // Fallback to empty array if no content provided
+  if (!content || content.length === 0) {
+    return null;
+  }
+
   return (
     <MotionEffect
       slide={{
@@ -79,14 +74,14 @@ export const LatestBlogs = () => {
           </span>
 
           <RotatingTextContainer
-            text={LATEST_BLOGS.map((blog) => blog.title)}
+            text={content.map((item) => item.title)}
             duration={4000}
             inView
             inViewOnce={false}
             className="flex-1 text-left flex items-center gap-3"
           >
             <SyncedSendIcon />
-            <BlogLink />
+            <BlogLink content={content} />
           </RotatingTextContainer>
         </div>
       </div>

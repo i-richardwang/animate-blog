@@ -6,10 +6,15 @@ import { MotionEffect } from './effects/motion-effect';
 import { ArrowRightIcon } from '@/registry/icons/arrow-right';
 import { AnimateIcon } from '@/registry/icons/icon';
 import { LatestBlogs } from './latest-blogs';
+import type { LatestContent } from '@/types/content';
 
 const TITLE = "👋 Hi, I'm Richard Wang.";
 
-export const Hero = () => {
+type HeroProps = {
+  latestContent: LatestContent[];
+};
+
+export const Hero = ({ latestContent }: HeroProps) => {
   return (
     <div className="relative overflow-x-hidden flex flex-col items-center px-5">
       <div className="relative z-10 flex flex-col items-center justify-center pt-40">
@@ -136,7 +141,7 @@ export const Hero = () => {
           ))}
         </div> */}
 
-        <LatestBlogs />
+        <LatestBlogs content={latestContent} />
       </div>
     </div>
   );

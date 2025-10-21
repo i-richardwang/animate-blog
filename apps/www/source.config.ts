@@ -28,6 +28,10 @@ export const docs = defineDocs({
   meta: {
     schema: metaSchema,
   },
+  // Exclude Animate UI original documentation directories
+  // These are component library docs, not personal content
+  dir: 'content/docs',
+  // Note: We'll handle filtering at the source loader level in lib/source.ts
 });
 
 export const blog = defineCollections({

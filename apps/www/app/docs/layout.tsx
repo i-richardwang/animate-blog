@@ -5,7 +5,6 @@ import { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import { baseOptions } from '@/app/layout.config';
 import { source } from '@/lib/source';
 import { ThemeSwitcher } from '@/components/animate/theme-switcher';
-import XIcon from '@workspace/ui/components/icons/x-icon';
 import { SIDEBAR_TABS } from '@/lib/sidebar';
 import { Nav } from '@/components/docs/nav';
 import { Footer } from '@/components/footer';
@@ -22,15 +21,6 @@ const DOCS_LAYOUT_PROPS: DocsLayoutProps = {
     component: <ThemeSwitcher />,
   },
   ...baseOptions,
-  links: [
-    ...(baseOptions.links || []),
-    {
-      icon: <XIcon />,
-      url: 'https://x.com/richard2wang',
-      text: 'X',
-      type: 'icon',
-    },
-  ],
 };
 
 export default function Layout({ children }: { children: ReactNode }) {
