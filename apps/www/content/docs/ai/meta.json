@@ -18,6 +18,7 @@
     "applications/model-scale-text-classification",
     "applications/sql-database-qa-llm",
     "applications/rag-pdf-qa",
+    "applications/hypothetical-questions-rag-retrieval",
     "applications/scraping-industry-news-with-llms",
     "applications/structured-performance-data-extraction"
   ]

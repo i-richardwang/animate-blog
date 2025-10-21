@@ -6,6 +6,7 @@
   "pages": [
     "---数据集构造---",
     "analysis/mock-employee-promotion-data",
+    "analysis/mock-employee-retention-progression",
     "---员工流失预测项目实战---",
     "analysis/employee-attrition-data-quality",
     "analysis/employee-attrition-eda",
