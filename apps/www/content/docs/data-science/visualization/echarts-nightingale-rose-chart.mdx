@@ -1,0 +1,170 @@
+---
+title: 绘制南丁格尔玫瑰图
+description: 使用 ECharts 和 Python 生成南丁格尔玫瑰图，为数据报告增添视觉吸引力
+releaseDate: 2024-02-18
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+在一些分享交流场合，如果能用更有趣的图表来呈现数据，往往能更好地吸引读者注意力。南丁格尔玫瑰图就是这样一种兼具美感和实用性的可视化方式。
+
+它本质上是一种极坐标下的柱状图，扇形的半径长度代表数值大小，视觉效果比传统饼图更有层次感。本文将以部门员工星座分布为例，演示如何用 Python 生成数据并构建 ECharts 配置，最终绘制出南丁格尔玫瑰图。
+
+## 准备示例数据
+
+首先用 Python 构造一个模拟的星座分布数据集。
+
+```python
+import pandas as pd
+import numpy as np
+
+# 定义星座列表
+constellations = [
+    "白羊座", "金牛座", "双子座", "巨蟹座",
+    "狮子座", "处女座", "天秤座", "天蝎座",
+    "射手座", "摩羯座", "水瓶座", "双鱼座"
+]
+
+# 生成随机人数
+np.random.seed(100)  # 固定随机种子，确保结果可复现
+people_counts = np.random.randint(5, 20, size=len(constellations))
+
+# 创建数据集
+dataset = pd.DataFrame({
+    "星座": constellations,
+    "人数": people_counts
+})
+
+print(dataset.head())
+```
+
+这样我们就得到了一个包含 12 个星座及其对应人数的数据表。
+
+## 生成 ECharts 配置
+
+ECharts 是一个强大的 JavaScript 可视化库，它通过配置对象（option）来定义图表的样式和数据。我们可以用 Python 来构建这个配置对象，然后导出为 JSON 格式。
+
+### 数据排序与格式转换
+
+先对数据按人数降序排列，这样在玫瑰图中能更清晰地看出大小关系。
+
+```python
+# 按人数降序排列
+sorted_dataset = dataset.sort_values(by="人数", ascending=False)
+
+# 转换为字典列表格式，方便后续构建 ECharts data
+data_for_echarts = sorted_dataset.to_dict('records')
+```
+
+### 构建 option 配置
+
+接下来构建完整的 ECharts option 配置对象。
+
+```python
+option = {
+    "legend": {
+        "show": False,  # 不显示图例，因为标签已经足够清晰
+        "top": "bottom"
+    },
+    "toolbox": {
+        "show": True,  # 显示工具栏
+        "feature": {
+            "mark": {"show": True},
+            "dataView": {"show": True, "readOnly": False},  # 数据视图
+            "restore": {"show": True},  # 还原
+            "saveAsImage": {"show": True}  # 保存为图片
+        }
+    },
+    "series": [
+        {
+            "name": "Nightingale Chart",
+            "type": "pie",  # 类型为饼图
+            "radius": [50, 250],  # 内外半径，形成环形
+            "center": ["50%", "50%"],  # 圆心位置
+            "roseType": "area",  # 南丁格尔模式，扇区面积表示数据大小
+            "itemStyle": {
+                "borderRadius": 8  # 扇区圆角
+            },
+            "label": {
+                "show": True  # 显示标签
+            },
+            "data": [{"name": row["星座"], "value": row["人数"]} for row in data_for_echarts]
+        }
+    ]
+}
+```
+
+**关键参数说明：**
+
+- `radius: [50, 250]`：设置内外半径，形成环形玫瑰图
+- `roseType: "area"`：南丁格尔模式，扇区半径根据数值大小变化
+- `itemStyle.borderRadius`：给扇区加上圆角，视觉效果更现代
+- `data`：数据格式为 `[{name: "星座", value: 人数}, ...]`
+
+### 转换为 JSON 格式
+
+Python 和 JavaScript 在布尔值表示上有差异（`True` vs `true`），直接复制配置到 ECharts 会报错。使用 `json.dumps()` 可以自动完成转换。
+
+```python
+import json
+
+# 转换为 JSON 格式，ensure_ascii=False 确保中文正常显示
+option_json = json.dumps(option, ensure_ascii=False)
+
+print(option_json)
+```
+
+输出的配置可以直接在 ECharts 中使用：
+
+```json
+{
+  "legend": { "show": false, "top": "bottom" },
+  "toolbox": {
+    "show": true,
+    "feature": {
+      "mark": { "show": true },
+      "dataView": { "show": true, "readOnly": false },
+      "restore": { "show": true },
+      "saveAsImage": { "show": true }
+    }
+  },
+  "series": [
+    {
+      "name": "Nightingale Chart",
+      "type": "pie",
+      "radius": [50, 250],
+      "center": ["50%", "50%"],
+      "roseType": "area",
+      "itemStyle": { "borderRadius": 8 },
+      "label": { "show": true },
+      "data": [
+        { "name": "天蝎座", "value": 19 },
+        { "name": "天秤座", "value": 15 },
+        { "name": "白羊座", "value": 13 },
+        { "name": "金牛座", "value": 13 },
+        { "name": "巨蟹座", "value": 12 },
+        { "name": "狮子座", "value": 12 },
+        { "name": "水瓶座", "value": 10 },
+        { "name": "射手座", "value": 9 },
+        { "name": "双子座", "value": 8 },
+        { "name": "摩羯座", "value": 7 },
+        { "name": "双鱼座", "value": 7 },
+        { "name": "处女座", "value": 5 }
+      ]
+    }
+  ]
+}
+```
+
+## 查看效果
+
+访问 [ECharts 官网示例编辑器](https://echarts.apache.org/examples/zh/editor.html?c=pie-roseType)，将上面生成的 JSON 配置复制到左侧代码框中，点击运行即可看到效果。
+
+![使用 ECharts 绘制的南丁格尔玫瑰图，展示员工星座分布数据](/data-science/visualization/echarts-nightingale-rose-chart.png)
+
+## 配置即数据
+
+用 Python 生成 ECharts 配置的好处是可以动态处理数据。当你有多个类似的数据集需要可视化时，只需要替换数据源，配置逻辑可以复用。比如把星座换成部门、产品类别，或者任何分类数据，代码改动很小。
+
+南丁格尔玫瑰图适合展示分类数据的占比和大小关系，尤其是在需要突出视觉吸引力的场景。如果你的数据分析报告需要一些"不那么常规"的图表来吸引注意，不妨试试这个方法。

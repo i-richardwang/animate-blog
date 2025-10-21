@@ -1,0 +1,116 @@
+---
+title: 带路径的散点图展示数据变化
+description: 利用 Tableau 路径功能，将两年散点图数据连线，清晰呈现指标的变化趋势
+releaseDate: 2023-04-08
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+在员工调研场景中，散点图常用来展示各子维度的关注度和认可度分布。但如果要对比两年的数据变化，基础的散点图就不太够用了。
+
+![基础员工调研两年对比散点图](/data-science/visualization/tableau-scatter-basic-comparison.webp)
+
+即使用颜色区分年份，要从密集的数据点中找出变化趋势也很费劲。用户需要反复对照同一维度在两年的位置，效率很低。
+
+Tableau 的路径（Path）功能可以解决这个问题。通过将两年的数据点连线，并用节点大小表示时间先后，就能一眼看出每个维度的变化方向和幅度。
+
+## 配置路径散点图
+
+![Tableau 路径散点图的标记卡配置截图](/data-science/visualization/tableau-scatter-path-settings.webp)
+
+核心配置有三个：
+
+1. **将"年份"拖到"路径"标记**：Tableau 会按年份顺序连接数据点，形成路径线。
+2. **将"年份"拖到"大小"标记**：让不同年份的节点大小不同，越新的年份节点越大，视觉上形成"箭头"效果，指向最新数据。
+3. **将"平均分数"拖到"颜色"标记**：用颜色编码分数高低，快速识别哪些维度得分更高。
+
+这样配置后，每条路径就代表一个维度在两年间的变化轨迹。
+
+## 效果对比
+
+![带路径的员工调研两年对比散点图，清晰展示各维度变化](/data-science/visualization/tableau-scatter-with-path.webp)
+
+有了路径连线后，可以直观地看出：
+
+- **哪些维度在改善**：路径向右上方延伸，表示关注度和认可度都在提升。
+- **哪些维度在恶化**：路径向左下方延伸，需要重点关注。
+- **哪些维度变化幅度大**：路径越长，变化越明显。
+- **分数的绝对高低**：通过颜色快速识别。
+
+这种可视化方式把"对比两年数据"这个需要反复查找的任务，变成了一眼就能看出来的视觉模式。
+
+## 构造模拟数据集
+
+案例中的数据是虚构的两年员工调研结果。生成逻辑如下：
+
+```python
+import pandas as pd
+import numpy as np
+
+# 基础设定
+employee_ids = [f"E{str(i).zfill(4)}" for i in range(1, 201)]  # 200名员工
+dimensions = [
+    "薪酬福利", "工作环境", "成长发展", "合作协同", "团队氛围",
+    "领导能力", "工作压力", "公司品牌", "工作内容", "多元包容"
+]
+departments = ["财务部", "人力资源部", "市场部", "技术部", "销售部", "客服部", "研发部", "行政部"]
+
+# 为每个维度设置不同的平均得分（模拟真实场景中的差异）
+adjusted_means = np.array([1, 3, 3, 4, 3, 5, 2, 3, 1, 5])
+
+# 为每个维度设置被选中的概率（模拟员工关注重点不同）
+probabilities = np.random.uniform(0.05, 0.45, len(dimensions))
+probabilities /= probabilities.sum()  # 归一化为概率
+
+def generate_scores(dimension, mean_score):
+    """根据维度的均值，生成符合正态分布的分数（1-5分）"""
+    score = np.random.normal(mean_score, 2)  # 标准差为2
+    score = np.clip(round(score), 1, 5)  # 限制在1-5分范围内
+    return score
+
+def generate_survey_data_with_department_and_scores(year):
+    """生成某一年的调研数据"""
+    records = []
+    for emp_id in employee_ids:
+        # 每个员工随机选择3个维度进行评价
+        chosen_dims = np.random.choice(dimensions, size=3, replace=False, p=probabilities)
+        department = np.random.choice(departments)
+
+        for dim in chosen_dims:
+            index = dimensions.index(dim)
+            mean_score = adjusted_means[index]
+            score = generate_scores(dim, mean_score)
+            records.append([emp_id, dim, score, year, department])
+
+    return records
+
+# 生成两年数据
+records_2021 = generate_survey_data_with_department_and_scores(2021)
+records_2022 = generate_survey_data_with_department_and_scores(2022)
+
+all_records = records_2021 + records_2022
+
+# 创建 DataFrame 并保存
+df_survey_results = pd.DataFrame(
+    all_records,
+    columns=["Employee ID", "Dimension", "Score", "Year", "Department"]
+)
+
+df_survey_results.to_csv("employee_survey_results.csv", index=False)
+print(f"生成数据集：{len(df_survey_results)} 条记录")
+```
+
+<Callout type="info">
+  数据集中的参数设置（如各维度的平均分）仅为模拟演示，不代表真实调研结果。
+</Callout>
+
+## 路径的价值
+
+路径散点图适合展示同一对象在两个时间点的二维属性变化。除了员工调研，还可以用在：
+
+- **产品组合分析**：用市场份额和增长率作为两轴，路径显示产品的战略位置变化。
+- **客户细分追踪**：用消费频次和客单价作为两轴，路径显示客户群体的迁移。
+- **项目风险评估**：用风险等级和收益潜力作为两轴，路径显示项目状态的演变。
+
+核心逻辑是一样的：当你需要在二维空间里追踪变化时，路径比单纯的颜色区分要直观得多。

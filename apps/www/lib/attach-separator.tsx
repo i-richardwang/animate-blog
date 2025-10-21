@@ -150,14 +150,14 @@ export const attachSeparator: BuildPageTreeOptions['attachSeparator'] = (
         <Separator icon={<HardDrive strokeWidth={2} />} name="Self Hosted" />
       );
       break;
-    case 'Tableau 可视化':
+    case '进阶图表绘制':
       node.name = (
-        <Separator icon={<PieChart strokeWidth={2} />} name="Tableau 可视化" />
+        <Separator icon={<LineChart strokeWidth={2} />} name="进阶图表绘制" />
       );
       break;
-    case 'Python 可视化':
+    case 'Tableau 仪表板':
       node.name = (
-        <Separator icon={<LineChart strokeWidth={2} />} name="Python 可视化" />
+        <Separator icon={<PieChart strokeWidth={2} />} name="Tableau 仪表板" />
       );
       break;
     case '独立开发':

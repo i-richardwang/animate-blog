@@ -9,14 +9,16 @@
     "---员工流失预测项目实战---",
     "analysis/employee-attrition-data-quality",
     "analysis/employee-attrition-eda",
-    "---Tableau 可视化---",
+    "---进阶图表绘制---",
+    "visualization/python-plotly-sankey-diagram",
+    "visualization/plotly-boxplot-violinplot",
+    "visualization/echarts-nightingale-rose-chart",
+    "visualization/tableau-scatter-path-chart",
+    "---Tableau 仪表板---",
     "visualization/tableau-structured-dashboard-containers",
     "visualization/tableau-dynamic-zone-visibility",
     "visualization/tableau-parameters-interactive-analysis",
     "visualization/tableau-dashboard-actions",
-    "visualization/tableau-custom-palette",
-    "---Python 可视化---",
-    "visualization/python-plotly-sankey-diagram",
-    "visualization/plotly-boxplot-violinplot"
+    "visualization/tableau-custom-palette"
   ]
 }
