@@ -71,9 +71,7 @@ export const Hero = () => {
           delay={0.3}
         >
           <p className="block font-normal md:text-lg sm:text-base text-sm text-center mt-6 text-muted-foreground md:max-w-[660px] sm:max-w-[450px] text-balance">
-            Learning, Building, Sharing. A personal digital space for
-            documenting my journey in AI, data science, and software
-            development.
+            求知，践行，分享。关于人工智能、数据科学、软件开发与自托管服务的实践笔记。
           </p>
         </MotionEffect>
 
@@ -98,7 +96,7 @@ export const Hero = () => {
                   asChild
                 >
                   <Link href="/docs">
-                    Explore Notes <ArrowRightIcon className="!size-5" />
+                    探索笔记 <ArrowRightIcon className="!size-5" />
                   </Link>
                 </Button>
               </motion.div>
@@ -115,7 +113,7 @@ export const Hero = () => {
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button size="lg" className="w-full" variant="accent" asChild>
-                <Link href="/blog">Read Blog</Link>
+                <Link href="/blog">博客文章</Link>
               </Button>
             </motion.div>
           </MotionEffect>

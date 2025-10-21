@@ -1,4 +1,4 @@
-import { Dancing_Script } from 'next/font/google';
+import { Dancing_Script, Noto_Serif_SC } from 'next/font/google';
 import { MotionEffect } from './effects/motion-effect';
 import { cn } from '@workspace/ui/lib/utils';
 import { About } from './icons/about';
@@ -85,26 +85,34 @@ import { motion } from 'motion/react';
 const COMPONENTS = [
   {
     name: 'About Me',
+    description: '关于我',
     icon: <About />,
   },
   {
     name: 'Projects',
+    description: '项目展示',
     href: '/projects',
     icon: <Projects />,
   },
   {
     name: 'Blog',
+    description: '博客文章',
     href: '/blog',
     icon: <Blog />,
   },
   {
     name: 'Notes',
+    description: '学习笔记',
     href: '/docs',
     icon: <Notes />,
   },
 ];
 
 const dancing = Dancing_Script({ subsets: ['latin'] });
+const notoSerifSC = Noto_Serif_SC({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+});
 
 export const Features = () => {
   return (
@@ -137,18 +145,28 @@ export const Features = () => {
                     damping: 20,
                   }}
                   className={cn(
-                    'relative w-full dark:bg-neutral-800 bg-neutral-100 rounded-2xl pt-1',
+                    'relative w-full dark:bg-neutral-800 bg-neutral-100 rounded-2xl overflow-hidden',
                     !component?.href && 'opacity-50 cursor-not-allowed',
                   )}
                 >
-                  <p
-                    className={cn(
-                      dancing.className,
-                      'text-[24px] font-black text-muted-foreground absolute xs:top-2 top-3 left-1/2 -translate-x-1/2',
-                    )}
-                  >
-                    {component.name}
-                  </p>
+                  <div className="pt-3 pb-1 px-4 flex flex-col items-center gap-1.5">
+                    <p
+                      className={cn(
+                        dancing.className,
+                        'text-[24px] font-black text-muted-foreground leading-none',
+                      )}
+                    >
+                      {component.name}
+                    </p>
+                    <p
+                      className={cn(
+                        notoSerifSC.className,
+                        'text-sm font-medium text-muted-foreground/70 leading-tight',
+                      )}
+                    >
+                      {component.description}
+                    </p>
+                  </div>
 
                   {component.icon}
                 </motion.div>
