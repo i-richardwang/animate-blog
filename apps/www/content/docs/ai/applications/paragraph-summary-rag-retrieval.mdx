@@ -1,0 +1,310 @@
+---
+title: 用段落摘要提升 RAG 检索准确度
+description: 通过生成段落摘要进行多向量检索，用精炼的摘要文本提高检索的相关性和效率
+releaseDate: 2024-05-19
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+[假设问题检索](/docs/ai/applications/hypothetical-questions-rag-retrieval)的方法是让 LLM 为文档生成可能的用户问题，通过问题来匹配检索。除了这个方向，还有另一个思路：让 LLM 为每个文档片段生成摘要，用摘要来做检索。
+
+长文档片段往往包含大量细节信息，其中可能只有一小部分和用户问题真正相关。如果直接对原文进行向量化，这些细节信息会"稀释"核心语义特征。而摘要能够提炼出文档的关键信息，去除冗余描述，让向量表示更加聚焦。
+
+另外，摘要通常更短，向量化和存储的开销都会更小。特别是处理长文档（如学术论文、技术报告）时，这个优势会更明显。
+
+## 生成段落摘要
+
+文档导入和切分的步骤这里不再重复，可以参考之前的[基础 RAG 实现](/docs/ai/applications/rag-pdf-qa)。假设我们已经有了切分好的文档片段列表 `data`。
+
+<Steps>
+<Step>
+
+### 构建摘要生成任务
+
+用 LLM 生成摘要比生成假设问题简单一些，不需要复杂的 Prompt：
+
+```python
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+
+chain = (
+    {"doc": lambda x: x.page_content}
+    | ChatPromptTemplate.from_template("Summarize the following document in Chinese:\n\n{doc}")
+    | model
+    | StrOutputParser()
+)
+```
+
+这个链会读取文档内容，生成中文摘要，并返回字符串结果。
+
+</Step>
+<Step>
+
+### 批量生成摘要
+
+实际应用中需要处理大量文档片段，直接用批量并行处理：
+
+```python
+summaries = chain.batch(data, {"max_concurrency": 5})
+```
+
+<Callout type="info">
+  并发数可以根据实际情况调整。处理几十个文档片段，5 的并发数通常就足够了。
+</Callout>
+
+</Step>
+<Step>
+
+### 效果对比
+
+看一个实际例子，对比原文和摘要：
+
+**原文**（财报中的一大段表格文字）：
+
+```text
+管理層討論及分析
+截至二零二三年十二月三十一日止年度與截至二零二二年十二月三十一日止年度的
+比較
+下表載列截至二零二三年及二零二二年十二月三十一日止年度的比較數字：
+截至十二月三十一日止年度
+二零二三年 二零二二年
+經重列*
+（人民幣百萬元）
+收入 609,015 554,552
+收入成本 (315,906) (315,806)
+毛利 293,109 238,746
+銷售及市場推廣開支 (34,211) (29,229)
+一般及行政開支 (103,525) (106,696)
+其他收益╱（虧損）淨額 4,701 8,006*
+經營盈利 160,074 110,827*
+投資收益╱（虧損）淨額及其他 (6,090) 116,287*
+利息收入 13,808 8,592*
+財務成本 (12,268) (9,352)
+分佔聯營公司及合營公司盈利╱（虧損）淨額 5,800 (16,129)
+除稅前盈利 161,324 210,225
+所得稅開支 (43,276) (21,516)
+年度盈利 118,048 188,709
+下列人士應佔：
+本公司權益持有人 115,216 188,243
+非控制性權益 2,832 466
+118,048 188,709
+非國際財務報告準則經營盈利 191,886 143,203*
+非國際財務報告準則本公司權益持有人應佔盈利 157,688 115,649
+* 若干項目已自經營盈利以上重新分類至經營盈利以下，且前期的比較數字已相應重列。詳見綜合財務報表附註1。
+```
+
+**LLM 生成的摘要**：
+
+```text
+以下是关于2022年和2023年财务数据的比较摘要（单位：百万元人民币）：
+
+- 2023年收入为609,015百万元，2022年为554,552百万元，增长了约10%。
+- 毛利从2022年的238,746百万元增加到2023年的293,109百万元。
+- 经营利润2023年为160,074百万元，2022年为110,827百万元，增长了约45%。
+- 投资收益2023年为-6,090百万元，2022年为116,287百万元，大幅下降。
+- 纯利润2023年为118,048百万元，2022年为188,709百万元，下降约37%。
+- 2023年归属于本公司权益持有人的净利润为115,216百万元，2022年为188,243百万元。
+- 非国际财务报告准则下的经营利润和净利润也有所调整，2023年分别为191,886百万元和157,688百万元。
+
+详细信息请参阅综合财务报表附注1，其中涉及某些项目的重分类和调整。
+```
+
+可以看到，摘要保留了关键的数字信息，并用更自然的语言重新组织了内容。这种结构化的摘要在向量检索时会更容易匹配到用户的问题。
+
+</Step>
+</Steps>
+
+## 构建多向量检索器
+
+有了摘要后，需要将它们向量化存储，并建立与原始文档片段的关联。这个过程和假设问题检索的方法完全一样。
+
+<Steps>
+<Step>
+
+### 初始化存储组件
+
+```python
+from langchain_community.vectorstores import Chroma
+from langchain.storage import InMemoryByteStore
+
+# 向量数据库：存储摘要的向量
+vectorstore = Chroma(
+    collection_name="summaries",
+    embedding_function=embeddings
+)
+
+# 内存存储：存储原始文档片段
+store = InMemoryByteStore()
+id_key = "doc_id"
+```
+
+初始化多向量检索器：
+
+```python
+from langchain.retrievers.multi_vector import MultiVectorRetriever
+
+retriever = MultiVectorRetriever(
+    vectorstore=vectorstore,
+    byte_store=store,
+    id_key=id_key,
+)
+```
+
+</Step>
+<Step>
+
+### 准备数据并建立关联
+
+为每个原始文档片段生成唯一 ID：
+
+```python
+import uuid
+
+doc_ids = [str(uuid.uuid4()) for _ in data]
+```
+
+将摘要和 `doc_id` 封装为 `Document` 对象：
+
+```python
+summary_docs = [
+    Document(page_content=s, metadata={id_key: doc_ids[i]})
+    for i, s in enumerate(summaries)
+]
+```
+
+</Step>
+<Step>
+
+### 存储向量和建立映射
+
+将摘要向量化并存入向量数据库：
+
+```python
+retriever.vectorstore.add_documents(summary_docs)
+```
+
+建立摘要与原始文档片段的映射关系：
+
+```python
+retriever.docstore.mset(list(zip(doc_ids, data)))
+```
+
+</Step>
+</Steps>
+
+## 检索效果验证
+
+<Steps>
+<Step>
+
+### 召回摘要
+
+先看向量数据库召回的摘要：
+
+```python
+result = retriever.vectorstore.similarity_search("2023年收入比2022年高多少")[0]
+print(result.page_content)
+```
+
+召回结果：
+
+```text
+以下是关于2022年和2023年财务数据的比较摘要（单位：百万元人民币）：
+
+- 2023年收入为609,015百万元，2022年为554,552百万元，增长了约10%。
+- 毛利从2022年的238,746百万元增加到2023年的293,109百万元。
+- 经营利润2023年为160,074百万元，2022年为110,827百万元，增长了约45%。
+- 投资收益2023年为-6,090百万元，2022年为116,287百万元，大幅下降。
+- 纯利润2023年为118,048百万元，2022年为188,709百万元，下降约37%。
+- 2023年归属于本公司权益持有人的净利润为115,216百万元，2022年为188,243百万元。
+- 非国际财务报告准则下的经营利润和净利润也有所调整，2023年分别为191,886百万元和157,688百万元。
+
+详细信息请参阅综合财务报表附注1，其中涉及某些项目的重分类和调整。
+```
+
+可以看到，摘要直接包含了问题的答案信息，匹配度很高。
+
+</Step>
+<Step>
+
+### 构建问答链
+
+构建完整的 RAG 问答流程：
+
+```python
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+
+template = """
+You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.
+
+Context: {context}
+
+Question: {question}
+
+Answer:
+"""
+
+rag_prompt = PromptTemplate.from_template(template)
+
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
+
+rag_chain = (
+    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    | rag_prompt
+    | model
+    | StrOutputParser()
+)
+```
+
+</Step>
+<Step>
+
+### 最终效果
+
+测试问答效果：
+
+```python
+question = "2023年收入比2022年高多少？"
+answer = rag_chain.invoke(question)
+
+print(f'\nQuestion: {question}\nAnswer: {answer}')
+```
+
+输出：
+
+```
+Question: 2023年收入比2022年高多少？
+Answer: 2023年的收入为609,015百万元，比2022年的554,552百万元增长了约10%。
+```
+
+同样准确命中。通过摘要这个中间层，系统召回了包含答案的文档片段。
+
+</Step>
+</Steps>
+
+## 摘要 vs 假设问题
+
+段落摘要和假设问题是两种不同的多向量检索策略，各有适用场景：
+
+**段落摘要的优势**：
+
+- **更节省资源**：每个文档片段只生成一个摘要，而假设问题通常需要生成 3-5 个。向量存储和检索开销更小。
+- **适合信息密集型文档**：对于包含大量数据和细节的文档（如财报、研究论文），摘要能有效提炼关键信息。
+- **生成更稳定**：摘要是对原文的归纳，相对标准化，而假设问题的质量可能受 Prompt 和模型能力影响较大。
+
+**假设问题的优势**：
+
+- **更贴近用户意图**：直接用问题匹配问题，语义相似度通常更高。
+- **适合需求导向型文档**：比如产品文档、FAQ、技术教程，这类内容本身就是为了回答用户问题。
+- **多样性更好**：生成多个不同角度的问题，能覆盖更多潜在的查询方式。
+
+实际应用中，也可以结合两种方法：为每个文档片段同时生成摘要和假设问题，检索时在两个向量空间中分别召回，然后合并结果。这样能够发挥各自的优势，但成本也会相应增加。
+
+选择哪种方法，还是要看具体场景和资源约束。如果文档量很大、预算有限，摘要是更经济的选择。如果追求最佳检索效果、资源充足，可以考虑双管齐下。

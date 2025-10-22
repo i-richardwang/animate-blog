@@ -1,0 +1,363 @@
+---
+title: 用 ReAct 模式构建 SQL Agent
+description: 从基础 SQL 问答到智能 Agent，通过 ReAct 模式实现动态选表、SQL 校验和错误自修复
+releaseDate: 2024-06-15
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+之前搭建的 [SQL 问答系统](/docs/ai/applications/sql-database-qa-llm)，能把自然语言转成 SQL 并执行查询。单表、简单查询的场景下效果不错，但遇到复杂情况就暴露出明显的局限：
+
+**问题一：表名需要预先指定**。如果数据库有多张表，用户问"销售部门有多少人"，系统不知道该查 `employees` 还是 `staff_info`。
+
+**问题二：生成的 SQL 可能出错**。字段名写错、表不存在、语法问题等，一旦执行失败，系统就卡住了。
+
+**问题三：缺乏自我修复能力**。即使知道 SQL 执行失败，系统也不会分析原因、调整查询重试。
+
+这些问题在真实场景中很常见。要解决它们，需要让系统具备"思考-行动-观察-再思考"的循环能力，而不只是一次性生成 SQL 然后执行。这正是 **ReAct 模式**的核心思想。
+
+<Callout type="info">
+**ReAct** 全称是 **Reasoning and Acting**，由 Princeton 和 Google 研究者在论文 [ReAct: Synergizing Reasoning and Acting in Language Models](https://react-lm.github.io/) 中提出。核心机制是让 LLM 交替进行推理（Thought）和行动（Action），通过观察（Observation）行动结果来调整下一步策略，直到解决问题。
+
+![ReAct 工作流程对比图](/ai/applications/react-workflow-comparison.png)
+
+</Callout>
+
+## 快速体验
+
+LangChain 提供了封装好的 SQL Agent，先看看效果：
+
+```python
+from langchain_openai import ChatOpenAI
+from langchain_community.utilities import SQLDatabase
+from langchain_community.agent_toolkits import create_sql_agent
+
+# 初始化模型和数据库连接
+model = ChatOpenAI()
+db = SQLDatabase.from_uri("mysql+pymysql://user:password@localhost:3306/database")
+
+# 创建 SQL Agent
+agent_executor = create_sql_agent(model, db=db, verbose=True)
+
+# 直接提问
+agent_executor.invoke("请问员工的平均年龄是多少？")
+```
+
+输出：
+
+```
+{'input': '请问员工的平均年龄是多少？', 'output': '员工的平均年龄是 31.32 岁。'}
+```
+
+这一行代码背后，Agent 自动完成了：查看有哪些表 → 获取表结构 → 生成 SQL → 校验语法 → 执行查询 → 返回答案。
+
+下面我们拆解这个过程，手动实现一遍。
+
+## Agent 的工具箱
+
+SQL Agent 能够智能处理查询，依赖于它可以调用的四个工具函数：
+
+```python
+from langchain_community.tools.sql_database.tool import (
+    InfoSQLDatabaseTool,
+    ListSQLDatabaseTool,
+    QuerySQLCheckerTool,
+    QuerySQLDataBaseTool,
+)
+```
+
+<Steps>
+<Step>
+
+### 列出所有表
+
+```python
+list_tables_tool = ListSQLDatabaseTool(db=db)
+print(list_tables_tool._run())
+```
+
+输出：
+
+```
+emp_data
+```
+
+这个工具让 Agent 知道数据库里有什么表可用。
+
+</Step>
+<Step>
+
+### 查看表结构
+
+```python
+info_tool = InfoSQLDatabaseTool(db=db)
+print(info_tool._run("emp_data"))
+```
+
+输出：
+
+```
+CREATE TABLE emp_data (
+    `Employee ID` TEXT,
+    `Name` TEXT,
+    `Gender` TEXT,
+    `Job Level` TEXT,
+    `Age` INTEGER,
+    `Department` TEXT,
+    `Hire Date` TEXT,
+    `Resigned` TEXT,
+    `Leave Date` TEXT
+)
+
+/*
+3 rows from emp_data table:
+Employee ID	Name	Gender	Job Level	Age	Department	Hire Date	Resigned	Leave Date
+ID00001	Donald Bailey	女	P7	30	人力	2021-03-24	True	2023-09-06
+ID00002	Lisa Webster	女	P8	34	产品	2019-07-08	False	None
+ID00003	Brooke Fischer	女	P8	34	研发	2020-05-24	False	None
+*/
+```
+
+这提供了表的 DDL 定义和样本数据，Agent 用它来理解字段含义。
+
+</Step>
+<Step>
+
+### 校验 SQL 语法
+
+```python
+checker_tool = QuerySQLCheckerTool(db=db, llm=model)
+print(checker_tool._run(query="SELECT * FROM emp_data LIMIT 3"))
+```
+
+输出：
+
+```
+The query is correct. Final SQL query: SELECT * FROM emp_data LIMIT 3
+```
+
+在执行前，先用这个工具检查 SQL 是否有明显错误。
+
+</Step>
+<Step>
+
+### 执行 SQL 查询
+
+```python
+execute_tool = QuerySQLDataBaseTool(db=db)
+print(execute_tool._run("SELECT AVG(Age) FROM emp_data"))
+```
+
+输出：
+
+```
+[(Decimal('31.3183'),)]
+```
+
+返回数据库的原始查询结果。
+
+</Step>
+</Steps>
+
+## 构建 ReAct Agent
+
+<Steps>
+<Step>
+
+### 准备工具和说明
+
+LangChain 的 `SQLDatabaseToolkit` 已经为这些工具函数写好了描述文本：
+
+```python
+from langchain_community.agent_toolkits import SQLDatabaseToolkit
+from langchain.agents import AgentType
+
+toolkit = SQLDatabaseToolkit(llm=model, db=db)
+tools = toolkit.get_tools()
+
+# 查看工具描述
+for tool in tools:
+    print(f"{tool.name}\n{tool.description}\n")
+```
+
+输出示例：
+
+```
+sql_db_query
+Input to this tool is a detailed and correct SQL query, output is a result from the database.
+If the query is not correct, an error message will be returned. If an error is returned,
+rewrite the query, check the query, and try again.
+
+sql_db_schema
+Input to this tool is a comma-separated list of tables, output is the schema and sample rows
+for those tables. Be sure that the tables actually exist by calling sql_db_list_tables first!
+
+sql_db_list_tables
+Input is an empty string, output is a comma separated list of tables in the database.
+
+sql_db_query_checker
+Use this tool to double check if your query is correct before executing it.
+Always use this tool before executing a query with sql_db_query!
+```
+
+这些描述会告诉 LLM 每个工具的用途和调用方式。
+
+</Step>
+<Step>
+
+### 定义 ReAct Prompt
+
+ReAct 框架要求 LLM 按照特定格式输出，LangChain 提供了标准模板：
+
+```python
+from langchain.agents.mrkl import prompt as react_prompt
+from langchain_core.prompts import PromptTemplate
+
+format_instructions = react_prompt.FORMAT_INSTRUCTIONS
+
+template = "\n\n".join([
+    react_prompt.PREFIX,
+    "{tools}",
+    format_instructions,
+    react_prompt.SUFFIX,
+])
+
+prompt = PromptTemplate.from_template(template)
+```
+
+模板内容大致如下：
+
+```
+Answer the following questions as best you can. You have access to the following tools:
+
+{tools}
+
+Use the following format:
+
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: the final answer to the original input question
+
+Begin!
+
+Question: {input}
+Thought: {agent_scratchpad}
+```
+
+这个格式强制 LLM 按"思考→行动→观察"的循环来解决问题。
+
+</Step>
+<Step>
+
+### 组装 Agent
+
+```python
+from langchain.agents import create_react_agent
+from langchain.agents.agent import AgentExecutor, RunnableAgent
+
+# 创建 ReAct Agent
+agent = RunnableAgent(
+    runnable=create_react_agent(model, tools, prompt),
+    input_keys_arg=["input"],
+    return_keys_arg=["output"],
+)
+
+# 创建执行器
+sql_agent = AgentExecutor(
+    name="SQL Agent",
+    agent=agent,
+    tools=tools,
+    verbose=True,           # 打印思考过程
+    max_iterations=15,      # 最多循环 15 次
+    early_stopping_method="force",
+)
+```
+
+`max_iterations` 防止 Agent 陷入死循环，如果 15 步还没解决问题，就强制结束。
+
+</Step>
+</Steps>
+
+## 实际运行效果
+
+执行一个查询，观察 Agent 的思考过程：
+
+```python
+sql_agent.invoke("请问员工的平均年龄是多少岁？")
+```
+
+控制台输出（简化版）：
+
+```
+> Entering new SQL Agent chain...
+
+Thought: 需要查询员工的平均年龄，先生成 SQL 语句
+Action: sql_db_query_checker
+Action Input: SELECT AVG(age) FROM employee
+
+Observation: The query is correct: SELECT AVG(age) FROM employee
+
+Thought: SQL 语法没问题，执行查询
+Action: sql_db_query
+Action Input: SELECT AVG(age) FROM employee
+
+Observation: Error: Table 'employee' doesn't exist
+
+Thought: 表名不对，先查看数据库有哪些表
+Action: sql_db_list_tables
+Action Input:
+
+Observation: emp_data
+
+Thought: 数据库中只有 emp_data 表，查看它的结构
+Action: sql_db_schema
+Action Input: emp_data
+
+Observation: CREATE TABLE emp_data (Age INTEGER, ...)
+
+Thought: 确认了 Age 字段存在，重新查询
+Action: sql_db_query
+Action Input: SELECT AVG(Age) FROM emp_data
+
+Observation: [(Decimal('31.3183'),)]
+
+Thought: 已经得到结果，平均年龄是 31.32 岁
+Final Answer: 员工的平均年龄是 31.32 岁。
+
+> Finished chain.
+```
+
+可以看到，Agent 遇到"表不存在"错误后，没有停止，而是：
+
+1. 查看数据库有哪些表
+2. 获取正确表的结构
+3. 修正 SQL 重新执行
+4. 得到结果并回答
+
+这种自我修复能力，正是 ReAct 模式的价值所在。
+
+## ReAct 的优势与成本
+
+**优势**：
+
+- **动态决策**：不需要预先知道表名、字段名，Agent 会自己探索
+- **错误恢复**：SQL 执行失败时能分析原因、调整策略重试
+- **可观测性**：每步思考和行动都可见，方便调试和优化
+
+**成本**：
+
+- **Token 消耗**：每次思考、每次工具调用都是独立的 LLM 请求，成本会增加
+- **响应延迟**：多轮交互比一次性生成要慢
+- **不确定性**：复杂问题可能需要很多步才能解决，甚至可能失败
+
+在数据库结构复杂、查询需求多变的场景下，ReAct Agent 的灵活性值得这些额外开销。如果查询模式固定、表结构简单，直接用基础的 SQL 生成链路可能更合适。
+
+选择哪种方案，取决于你的具体需求和资源预算。ReAct 提供了一种可能性：让 AI 不只是生成代码，而是像人一样思考、尝试、修正，直到找到答案。

@@ -1,0 +1,220 @@
+---
+title: 用问题拆解应对复杂查询
+description: 通过将复杂问题分解为多个子问题，让 RAG 系统能够准确召回相关文档并生成正确答案
+releaseDate: 2024-05-20
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+在 RAG 系统中，复杂查询是个棘手的问题。比如用户问"腾讯2023年收入比2022年高多少"，这个问题实际上包含了两个信息点（2023年收入、2022年收入）和一个计算逻辑（比较差值）。
+
+直接检索这个问题，系统可能会召回一些包含"收入增长"、"同比提升"的段落，但这些段落未必包含准确的数字。看一个实际例子：
+
+```
+Question: 腾讯全年的收入是多少
+Answer: 腾讯在截至二零二三年十二月三十一日止年度的收入为人民币6,090亿元。
+
+Question: 腾讯2023年收入比2022年高多少？
+Answer: 腾讯2023年的收入比2022年增长了21%，从298亿元人民币增长到357亿元人民币。
+```
+
+第一个问题答案正确，第二个问题就出错了。实际上，模型召回了游戏业务的增长数据（某个业务线从298亿增长到357亿，增幅21%），而不是全年总收入的对比。
+
+解决方法是让 LLM 先进行问题分解。把"2023年比2022年高多少"拆成"2023年收入是多少"+"2022年收入是多少"+"两者差值"这样的子问题，分别召回相关文档，然后综合这些文档来生成答案。
+
+## 实现问题拆解
+
+<Steps>
+<Step>
+
+### 封装召回函数
+
+先定义一个简单的召回函数，方便后续调用：
+
+```python
+def Retriever(query):
+    return retriever.get_relevant_documents(query)
+```
+
+<Callout type="info">
+  这里的 `retriever` 是 LangChain 提供的检索器，具体配置可以参考之前的[基础 RAG
+  实现](/docs/ai/applications/rag-pdf-qa)。
+</Callout>
+
+</Step>
+<Step>
+
+### 设计分解 Prompt
+
+关键是让 LLM 把复杂问题拆成多个可独立检索的子问题：
+
+```python {16-20}
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+
+system = """
+You are an expert at converting user questions into database queries. \
+You have access to a database of documents about financial reports.
+
+Perform query decomposition. Given a user question, break it down into distinct sub questions that \
+you need to answer in order to answer the original question. Focus on creating retrievable queries without adding any processing steps like calculations.
+
+If there are acronyms or words you are not familiar with, do not try to rephrase them.
+
+Ensure that your responses strictly adhere to the format of the following example.
+
+example:
+question: "What's the difference between LangChain agents and LangGraph?"
+output format:
+[Retriever("What are LangChain agents"),
+Retriever("What is LangGraph"),
+Retriever("What's the difference between LangChain agents and LangGraph?")]
+"""
+```
+
+这个 Prompt 有几个关键点：
+
+1. **强调可检索性**："Focus on creating retrievable queries without adding any processing steps like calculations" 告诉模型不要在子问题里加入计算逻辑，只负责拆解信息需求。
+2. **保持原词**："If there are acronyms or words you are not familiar with, do not try to rephrase them" 避免模型自作主张改写专有名词。
+3. **格式约束**：要求输出格式为 `[Retriever("子问题1"), Retriever("子问题2")]`，这样可以直接用 `eval()` 函数执行。
+
+</Step>
+<Step>
+
+### 测试问题分解
+
+看看 LLM 能否正确分解问题：
+
+```python
+prompt = ChatPromptTemplate.from_messages([
+    ("system", system),
+    ("human", "{question}"),
+])
+
+query_analyzer = prompt | model
+
+querys = query_analyzer.invoke({"question": "腾讯2023年收入比2022年高多少？"}).content
+print(querys)
+```
+
+输出示例：
+
+```python
+[Retriever("What was Tencent's income in 2023?"),
+ Retriever("What was Tencent's income in 2022?"),
+ Retriever("What is the difference between Tencent's income in 2023 and 2022?")]
+```
+
+可以看到，模型成功将问题拆解为三个子问题：2023年收入、2022年收入、两者差值。虽然第三个子问题实际上还是包含计算逻辑，但这已经能帮助系统召回正确的文档段落了。
+
+</Step>
+<Step>
+
+### 批量召回子问题
+
+由于输出格式是 `Retriever()` 函数调用的列表，可以直接用 `eval()` 执行：
+
+```python
+docs = eval(querys)
+```
+
+<Callout type="warn">
+  在生产环境中，直接使用 `eval()` 存在安全风险。建议使用 `ast.literal_eval()`
+  或者正则表达式解析子问题列表，然后显式调用 `Retriever()` 函数。
+</Callout>
+
+这会返回一个双层列表，外层是子问题，内层是每个子问题召回的文档片段。比如 3 个子问题，每个召回 3 个文档，总共就是 `[[doc1, doc2, doc3], [doc4, doc5, doc6], [doc7, doc8, doc9]]`。
+
+```python
+print(f"子问题数量: {len(docs)}")
+print(f"第一个子问题召回的文档数: {len(docs[0])}")
+```
+
+输出：
+
+```
+子问题数量: 3
+第一个子问题召回的文档数: 3
+```
+
+</Step>
+<Step>
+
+### 格式化文档并生成答案
+
+需要把双层列表展平，并去除重复的文档片段：
+
+```python
+def format_docs(docs):
+    # 如果是双层列表（多个子问题的召回结果），展平为一维
+    if type(docs[0]) == list:
+        flattened_docs = [doc for sublist in docs for doc in sublist]
+    else:
+        flattened_docs = docs
+
+    # 提取文档内容
+    doc_list = [doc.page_content for doc in flattened_docs]
+
+    # 去重：多个子问题可能召回相同的文档片段
+    seen = set()
+    unique_list = [x for x in doc_list if x not in seen and (seen.add(x) or True)]
+
+    return "\n\n".join(doc for doc in unique_list)
+```
+
+构建问答链：
+
+```python
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+
+context = format_docs(docs)
+
+rag_chain = (
+    {"context": RunnablePassthrough(), "question": RunnablePassthrough()}
+    | custom_rag_prompt
+    | model
+    | StrOutputParser()
+)
+
+answer = rag_chain.invoke({
+    'context': context,
+    'question': "腾讯2023年收入比2022年高多少"
+})
+
+print(answer)
+```
+
+输出：
+
+```
+腾讯2023年的收入为人民币609,015百万元，2022年为554,552百万元，
+2023年收入比2022年高54,463百万元（约增长10%）。
+```
+
+这次答案正确了。通过问题拆解，系统分别召回了包含2023年和2022年收入数据的文档段落，LLM 基于这些准确的数据给出了正确答案。
+
+</Step>
+</Steps>
+
+## 问题拆解的其他应用
+
+问题拆解不只是用在文档检索上，在其他场景也很有用：
+
+**SQL 查询生成**：在之前介绍过的[数据库问答系统](/docs/ai/applications/sql-database-qa-llm)中，如果用户问"哪个部门的平均工资最高，比第二名高多少"，这个问题也可以先拆解为：
+
+- 子问题1：每个部门的平均工资是多少
+- 子问题2：哪个部门平均工资最高
+- 子问题3：第二名是哪个部门
+- 子问题4：两者差值
+
+然后分别生成 SQL，或者生成一个包含子查询的复杂 SQL。
+
+**问题改写**：有时候问题已经很简单、无法再拆解了，但检索效果还是不好。这时可以让 LLM 换种说法重述问题。比如"员工离职率高的原因"可以改写成"导致员工流失的因素有哪些"、"为什么员工会选择离职"等多个表述，分别检索后合并结果。
+
+**多跳推理**：对于需要多步推理的问题（如"A公司和B公司的创始人谁更年轻"），可以拆解为"A公司创始人是谁"→"这个人的年龄"→"B公司创始人是谁"→"这个人的年龄"→"比较"。每一跳都做一次检索，逐步接近最终答案。
+
+问题拆解的核心思想是把复杂任务分解为多个简单任务，利用 LLM 的规划能力和文档检索的精确性，让系统能够处理更复杂的查询场景。

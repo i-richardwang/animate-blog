@@ -4,22 +4,26 @@
   "icon": "Brain",
   "root": true,
   "pages": [
-    "---AI技术解码---",
+    "---技术解码---",
     "fundamentals/understanding-vector-embedding",
     "fundamentals/guide-to-building-llms-from-scratch",
     "fundamentals/llm-data-prep-stages-and-formats",
-    "---AI深度实践---",
+    "---深度实践---",
     "applications/practical-llm-fine-tuning",
     "applications/building-ai-research-agent",
     "applications/building-llm-resume-recommender",
-    "---LLM 应用实践---",
+    "---原型实验---",
     "applications/skills-knowledge-graph",
     "applications/employee-sentiment-analysis-llm",
     "applications/model-scale-text-classification",
     "applications/sql-database-qa-llm",
+    "applications/sql-agent-react-pattern",
     "applications/rag-pdf-qa",
-    "applications/hypothetical-questions-rag-retrieval",
     "applications/scraping-industry-news-with-llms",
-    "applications/structured-performance-data-extraction"
+    "applications/structured-performance-data-extraction",
+    "---优化策略---",
+    "applications/hypothetical-questions-rag-retrieval",
+    "applications/paragraph-summary-rag-retrieval",
+    "applications/query-decomposition-rag"
   ]
 }

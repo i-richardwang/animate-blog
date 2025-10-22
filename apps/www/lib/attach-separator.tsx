@@ -21,6 +21,8 @@ import {
   PieChart,
   LineChart,
   Zap,
+  Search,
+  FlaskConical,
 } from 'lucide-react';
 import { LucideIcons } from '@/components/icons/lucide-icons';
 
@@ -114,22 +116,15 @@ export const attachSeparator: BuildPageTreeOptions['attachSeparator'] = (
         <Separator icon={<SquareMenu strokeWidth={2} />} name="Menu" />
       );
       break;
-    case 'AI技术解码':
-      node.name = (
-        <Separator icon={<Zap strokeWidth={2} />} name="AI技术解码" />
-      );
+    case '技术解码':
+      node.name = <Separator icon={<Zap strokeWidth={2} />} name="技术解码" />;
       break;
-    case 'AI深度实践':
-      node.name = (
-        <Separator icon={<Cpu strokeWidth={2} />} name="AI深度实践" />
-      );
+    case '深度实践':
+      node.name = <Separator icon={<Cpu strokeWidth={2} />} name="深度实践" />;
       break;
-    case 'LLM 应用实践':
+    case '原型实验':
       node.name = (
-        <Separator
-          icon={<SparklesIcon fill="currentColor" />}
-          name="LLM 应用实践"
-        />
+        <Separator icon={<FlaskConical strokeWidth={2} />} name="原型实验" />
       );
       break;
     case '数据集构造':
@@ -163,6 +158,11 @@ export const attachSeparator: BuildPageTreeOptions['attachSeparator'] = (
     case '独立开发':
       node.name = (
         <Separator icon={<Hammer strokeWidth={2} />} name="独立开发" />
+      );
+      break;
+    case '优化策略':
+      node.name = (
+        <Separator icon={<Lightbulb strokeWidth={2} />} name="优化策略" />
       );
       break;
   }
