@@ -1,0 +1,126 @@
+---
+title: 特征筛选
+description: 机器学习实战系列：第四篇聚焦特征筛选，通过多种方法剔除无效特征，提升模型训练效率
+releaseDate: 2023-11-19
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+[上一篇](/docs/data-science/analysis/employee-attrition-feature-engineering)中，我们基于 EDA 的发现构造了一批新特征。现在手上的特征数量不少，但并不是所有特征都有价值。有些特征的所有值都相同（比如常量列），有些特征之间高度重复，还有一些特征可能对预测没什么帮助，甚至会干扰模型学习。
+
+过多的无效特征会拖慢训练速度，增加过拟合风险，还会让模型难以解释。特征筛选就是要把这些"噪音"剔除掉，只保留真正有用的信息。
+
+筛选特征的方法有很多，从简单的统计指标到复杂的模型评估。这里我们按照从易到难的顺序，逐步过滤特征：先快速去掉明显无用的，再基于统计关系做深入筛选。
+
+## 基于信息包含量
+
+第一轮筛选的目标很明确：找出那些几乎没有信息的特征，直接剔除。判断依据有两个：缺失值比例和方差。
+
+### 缺失值比例检查
+
+如果某个特征的缺失值比例过高（比如超过90%），除非有业务上的特殊处理方法，否则这个特征基本没什么用。大部分值都是空的，剩下的少量信息很难支撑有效的预测。
+
+在[数据质量检查](/docs/data-science/analysis/employee-attrition-data-quality)阶段，我们已经确认了本数据集没有缺失值，所以这一步可以跳过。如果遇到有缺失的数据集，这个检查能快速过滤掉一批问题特征。
+
+### 方差为零的特征
+
+方差衡量的是数据的离散程度。如果某个特征的方差为0，说明所有样本在这个特征上的取值都相同，相当于一个常量，完全没有区分能力。这种特征对模型来说毫无意义，应该立即剔除。
+
+使用 `sklearn` 的 `VarianceThreshold` 可以快速完成这个检查：
+
+```python
+import pandas as pd
+from sklearn.feature_selection import VarianceThreshold
+
+# data = 原始数据集
+# encoded_data = 对离散变量进行 OrdinalEncoder 后的数据集
+# numerical_cols, categorical_cols, target_col = 三个字段名称的列表
+
+# 提取特征
+X = encoded_data[categorical_cols + numerical_cols].copy()
+
+# 使用 VarianceThreshold 进行特征选择，剔除方差为0的特征
+selector = VarianceThreshold(threshold=0)
+selector.fit(X)
+
+# 获取未被剔除的特征列
+selected_features = X.columns[selector.get_support()]
+
+# 创建结果 DataFrame
+variance_results = pd.DataFrame({
+    'Feature': X.columns,
+    'Variance': selector.variances_
+})
+
+# 按方差降序排列
+variance_results = variance_results.sort_values(by='Variance', ascending=False)
+```
+
+**方差检查结果：**
+
+```text title="variance_results"
++----+--------------------------+--------------+
+|    | Feature                  |     Variance |
+|----+--------------------------+--------------|
+| 24 | MonthlyRate              | 24905        |
+| 23 | MonthlyIncome            | 18990        |
+|  5 | EmployeeNumber           |  2067        |
+| 20 | DailyRate                |  1397        |
+| 22 | HourlyRate               |    70        |
+| 19 | Age                      |    42        |
+| 28 | TotalWorkingYears        |    40        |
+| 30 | YearsAtCompany           |    37.5088   |
+| 21 | DistanceFromHome         |    28        |
+| 26 | PercentSalaryHike        |    13.386    |
+| 31 | YearsInCurrentRole       |    13.1182   |
+| 33 | YearsWithCurrManager     |    12.7229   |
+| 32 | YearsSinceLastPromotion  |    10.377    |
+| 25 | NumCompaniesWorked       |     6.2358   |
+| 10 | JobRole                  |     6.05644  |
+|  3 | EducationField           |     1.77134  |
+| 29 | TrainingTimesLastYear    |     1.66109  |
+|  9 | JobLevel                 |     1.22448  |
+| 11 | JobSatisfaction          |     1.21544  |
+|  6 | EnvironmentSatisfaction  |     1.19402  |
+| 16 | RelationshipSatisfaction |     1.16822  |
+|  2 | Education                |     1.0482   |
+| 17 | StockOptionLevel         |     0.725541 |
+| 12 | MaritalStatus            |     0.532714 |
+|  8 | JobInvolvement           |     0.505975 |
+| 18 | WorkLifeBalance          |     0.498769 |
+|  0 | BusinessTravel           |     0.442529 |
+|  1 | Department               |     0.278375 |
+|  7 | Gender                   |     0.24     |
+| 14 | OverTime                 |     0.202908 |
+| 15 | PerformanceRating        |     0.130105 |
+| 27 | StandardHours            |     0        |
+| 13 | Over18                   |     0        |
+|  4 | EmployeeCount            |     0        |
++----+--------------------------+--------------+
+```
+
+**关键发现：**
+
+`StandardHours`、`Over18`、`EmployeeCount` 这三个特征的方差为0。这与我们在数据质量检查阶段的发现一致，这些常量列可以直接剔除。
+
+<Callout type="info">
+  **关于方差阈值的说明：**
+  特征的方差会受到取值范围的影响。比如年龄的方差和收入的方差不在一个数量级，直接比较意义不大。因此，对于连续变量，通常只剔除方差为0的特征，而不会设置一个统一的阈值。如果要基于方差做更细致的筛选，需要先对特征进行标准化处理。
+</Callout>
+
+## 基于统计检验
+
+（本章节内容待补充）
+
+这部分将介绍如何使用各种统计方法来评估特征与目标变量之间的关联强度，包括：
+
+- **卡方检验**：适用于类别特征与类别目标变量的关联性分析
+- **F 检验**：适用于连续特征与类别目标变量的线性相关性检验
+- **互信息法**：可用于任何类型特征与目标变量的非线性关联评估
+
+通过这些方法，可以量化每个特征对预测目标的贡献程度，筛选出统计上显著相关的特征。
+
+## 初步过滤完成
+
+通过方差检查，我们快速剔除了几个常量特征。这只是特征筛选的第一步，后续还需要通过统计检验方法做进一步的精细筛选，量化每个特征与目标变量的关联强度，确保进入模型的特征都有实际的预测价值。

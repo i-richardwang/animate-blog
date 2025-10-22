@@ -1,0 +1,181 @@
+---
+title: 手动特征衍生
+description: 机器学习实战系列：第三篇聚焦特征工程，将EDA发现的数据模式转化为模型可学习的有效特征
+releaseDate: 2023-11-12
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+[上一篇EDA分析](/docs/data-science/analysis/employee-attrition-eda)中，我们发现了一些有价值的模式：年轻员工流失率更高，单身且住得远的员工风险显著增加，司龄短、时薪低也是风险因素。这些发现不只是停留在"洞察"层面，它们会直接指导我们构造新特征。
+
+特征工程就是把这些从数据中提炼出的模式转化为模型可以学习的输入。一个精心设计的特征，往往比换一个更复杂的模型带来的提升更大。**原始数据集只是提供了基础信息，特征工程才是让模型真正"看懂"业务逻辑的关键**。
+
+## 从分布到特征：设计思路
+
+EDA阶段，我们通过可视化和统计分析发现了一些明确的分界点和规律。现在要做的，是把这些规律显式地表达出来，让模型不需要自己去"猜"这些边界在哪里。
+
+### 基于阈值的风险标记
+
+当某个连续变量在特定范围内与流失高度相关时，我们可以创建一个二元特征（0或1）来标记这种风险。比如年龄小于34岁的员工流失倾向明显更高，那我们就创建一个 `Age_risk` 特征，用1标记高风险区间，0标记低风险区间。
+
+这样做的好处是**让模型直接获得业务规则**，而不是让它在高维空间中慢慢学习"34"这个数字的特殊性。对于树模型（如随机森林、XGBoost），这样的特征可以直接作为分裂节点；对于线性模型，则提供了更清晰的信号。
+
+### 组合已有信息
+
+有些重要的信息隐藏在现有字段的组合中。比如"薪资与年龄比"能反映员工的薪资增长速度，这可能比单独看薪资或年龄更有预测力。又比如"平均任职时长"（总工作年限除以公司数量）能反映员工的稳定性，频繁跳槽的人往往这个值很小。
+
+### 交互效应的显式表达
+
+EDA中我们发现了 `MaritalStatus` 和 `DistanceFromHome` 的交互效应。虽然树模型理论上能学到这种交互，但显式地创建一个 `JobHopper`（职业跳槽者）特征，结合了公司数量和平均任职时长，能让模型更容易捕捉这种复合模式。
+
+## 特征构造详解
+
+下面逐一介绍每个新特征的构造逻辑。所有特征都基于EDA阶段观察到的分布规律。
+
+<Callout type="info">
+  以下特征的阈值设定均基于前文EDA的可视化分析。如果你使用其他数据集，需要重新进行分布分析来确定合适的阈值。
+</Callout>
+
+### 1. 年龄风险标记
+
+EDA显示，33-35岁是一个明显的分界点，年龄低于34岁的员工离职密度显著高于在职密度。
+
+```python
+import pandas as pd
+
+# 创建新特征DataFrame
+df_fe = pd.DataFrame()
+
+# 年龄小于34岁标记为高风险
+df_fe["Age_risk"] = (df["Age"] < 34).astype(int)
+```
+
+### 2. 薪资与年龄比
+
+这个比率反映了员工的薪资增长速度。年轻但高薪的员工，其薪资/年龄比会较大；反之，年龄大但薪资偏低的员工，这个比值会很小。后者可能对薪资不满，流失风险可能更高。
+
+```python
+# 薪资增长速度指标
+df_fe['MonthlyIncome/Age'] = df['MonthlyIncome'] / df['Age']
+```
+
+### 3. 时薪风险标记
+
+通过箱线图和分布图观察，时薪低于60的员工群体流失率明显更高。
+
+```python
+# 时薪低于60标记为高风险
+df_fe["HourlyRate_risk"] = (df["HourlyRate"] < 60).astype(int)
+```
+
+### 4. 通勤距离风险标记
+
+离家距离大于等于20公里的员工，尤其是单身或离异群体，流失风险显著增加（这是EDA中组合特征分析的发现）。
+
+```python
+# 通勤距离大于等于20公里标记为高风险
+df_fe["Distance_risk"] = (df["DistanceFromHome"] >= 20).astype(int)
+```
+
+### 5. 司龄风险标记
+
+在公司工作不到4年的员工，流失倾向更高。这可能反映了员工在入职初期对公司文化和工作内容的适应问题。
+
+```python
+# 司龄小于4年标记为高风险
+df_fe["YearsAtCo_risk"] = (df["YearsAtCompany"] < 4).astype(int)
+```
+
+### 6. 历史工作公司数量修正
+
+原始数据中，`NumCompaniesWorked` 为0表示这是员工的第一份工作。但在后续计算平均任职时长时，0会导致除法问题。我们将0替换为1，表示"当前这一家公司"。
+
+```python
+# 将0替换为1，避免除法错误，且语义上更合理
+df_fe['NumCompaniesWorked'] = df['NumCompaniesWorked'].replace(0, 1)
+```
+
+### 7. 平均任职时长
+
+总工作年限除以工作过的公司数量，得到平均每家公司的任职时长。这个值越小，说明员工跳槽越频繁。
+
+```python
+# 计算平均每家公司的任职时长
+df_fe['AverageTenure'] = df["TotalWorkingYears"] / df_fe["NumCompaniesWorked"]
+```
+
+### 8. 职业跳槽者标记
+
+结合公司数量和平均任职时长，我们定义"职业跳槽者"为：工作过超过2家公司，且平均任职时长不到2年。这类员工的稳定性较差，流失风险可能更高。
+
+```python
+# 跳槽频繁的员工标记
+df_fe['JobHopper'] = ((df_fe["NumCompaniesWorked"] > 2) & (df_fe["AverageTenure"] < 2.0)).astype(int)
+```
+
+### 9. 综合风险评分
+
+将所有风险标记相加，得到一个综合风险评分。分数越高，说明员工同时具备多个流失风险因素。
+
+```python
+# 汇总所有风险因素
+df_fe["AttritionRisk"] = (
+    df_fe["Age_risk"] +
+    df_fe["HourlyRate_risk"] +
+    df_fe["Distance_risk"] +
+    df_fe["YearsAtCo_risk"] +
+    df_fe['JobHopper']
+)
+```
+
+## 验证特征有效性
+
+构造完特征后，我们需要验证它们是否真的有预测价值。最直接的方法是计算新特征与目标变量 `Attrition` 的相关性。
+
+```python
+import plotly.graph_objects as go
+
+# 添加目标变量到特征集
+df_fe["Attrition"] = df["Attrition"]
+
+# 计算相关性矩阵并排序
+corr_with_label = df_fe.corr()['Attrition'].drop('Attrition').sort_values(ascending=False)
+
+# 创建条形图
+fig = go.Figure()
+
+fig.add_trace(go.Bar(
+    x=corr_with_label.index,
+    y=corr_with_label.values,
+    marker_color=['#C02B34' if x > 0 else '#CDBBA7' for x in corr_with_label.values]
+))
+
+# 更新布局
+fig.update_layout(
+    title='衍生特征与 Attrition 的相关性',
+    xaxis_title='特征',
+    yaxis_title='相关系数',
+    plot_bgcolor='#F4F2F0',
+    paper_bgcolor='#F4F2F0',
+    height=500,
+    width=1000
+)
+
+# 显示图表
+fig.show()
+```
+
+![衍生特征与员工流失标签的相关性系数条形图](/data-science/analysis/feature_engineering_correlation.webp)
+
+**关键发现：**
+
+- 综合风险评分 `AttritionRisk` 与流失的相关性最高，超过了原始数据集中的任何单一特征。
+- 年龄风险、司龄风险、职业跳槽者等标记特征都显示出较强的相关性。
+- 这验证了我们的特征设计思路：将EDA中发现的模式显式化，确实能提升特征的预测力。
+
+## 手工特征构造
+
+特征工程的过程，实际上是在用代码表达业务理解。年龄小于34是风险、频繁跳槽是风险、通勤远是风险，这些都是从数据分布中观察到的规律，现在通过特征工程把它们变成了模型的直接输入。
+
+这里展示的是手动特征衍生的方法，基于对数据的深入理解来构造特征。除此之外，还有一些自动化的批量特征生成方法（如多项式特征、特征交叉等工具），可以系统性地生成大量候选特征，再通过筛选机制保留有效的部分。这些自动化方法各有适用场景，有机会再详细介绍。

@@ -10,6 +10,8 @@
     "---员工流失预测项目实战---",
     "analysis/employee-attrition-data-quality",
     "analysis/employee-attrition-eda",
+    "analysis/employee-attrition-feature-engineering",
+    "analysis/employee-attrition-feature-selection",
     "---进阶图表绘制---",
     "visualization/python-plotly-sankey-diagram",
     "visualization/plotly-boxplot-violinplot",
