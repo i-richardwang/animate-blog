@@ -1,0 +1,94 @@
+---
+title: OpenMLStudio
+description: 开源的 Streamlit 机器学习工作室，支持二分类和回归任务的完整建模流程
+date: 2023-11-20
+category: opensource
+tech:
+  - Streamlit
+  - Python
+  - scikit-learn
+  - XGBoost
+  - SHAP
+  - Optuna
+  - Plotly
+links:
+  github: https://github.com/i-richardwang/OpenMLStudio
+featured: false
+---
+
+一个开源的 Streamlit 机器学习工作室，支持二分类和回归任务。OpenMLStudio 提供从数据上传到模型训练、评估、SHAP 解释和预测的完整工作流程，通过直观的 Web 界面让机器学习变得易于使用。
+
+## 核心功能
+
+**二分类和回归任务**  
+支持二分类（恰好 2 个类别）和回归任务的完整建模流程。
+
+**多种经典算法**  
+包含随机森林、决策树、XGBoost 和线性回归的实现。
+
+**自动超参数调优**  
+集成 Optuna 和 GridSearchCV 进行自动参数优化。Optuna 使用贝叶斯优化进行高效参数搜索，而 GridSearchCV 则穷举搜索所有参数组合。
+
+**SHAP 可解释性**  
+通过 SHAP（SHapley Additive exPlanations）分析提供全面的模型解释，包括全局特征重要性、单个预测解释和特征依赖可视化。
+
+**模型持久化**  
+训练好的模型可以保存并加载以供将来使用，支持对新数据集进行批量预测。
+
+**数据格式支持**  
+接受 CSV 和 Excel 文件上传，自动检测特征类型（数值型和分类型）。
+
+## 系统架构
+
+OpenMLStudio 采用模块化设计，核心分为五个层次：
+
+**Web UI 层** - Streamlit 构建的交互界面，负责数据上传、参数配置和结果展示
+
+**核心引擎** - 包含 Training 和 Prediction 两个核心模块，处理模型训练和预测逻辑
+
+**算法层** - 四种机器学习算法的实现，Random Forest 和 XGBoost 支持 Optuna 自动调优，Decision Tree 和 Linear Regression 提供快速建模
+
+**分析层** - 集成 SHAP 解释性分析、Plotly 性能可视化和 scikit-learn 评估指标
+
+**存储层** - 持久化训练好的模型和预测结果
+
+**ML Stack** - 基于 scikit-learn、XGBoost、SHAP、Plotly 和 Optuna 构建
+
+### 核心模块结构
+
+```
+OpenMLStudio/
+├── backend/analysis/              # 核心 ML 逻辑
+│   ├── model_utils.py             # 核心工具函数
+│   ├── model_training.py          # 训练引擎
+│   ├── model_prediction.py        # 预测引擎
+│   ├── shap_analysis.py           # SHAP 解释
+│   ├── visualization.py           # 性能可视化
+│   ├── random_forest_trainer.py   # 随机森林
+│   ├── decision_tree_trainer.py   # 决策树
+│   ├── xgboost_trainer.py         # XGBoost
+│   └── linear_regression_trainer.py # 线性回归
+├── frontend/                      # Web UI
+├── data/ml_models/                # 模型存储
+└── requirements.txt               # 依赖管理
+```
+
+## 使用流程
+
+OpenMLStudio 提供两种工作模式：
+
+**训练模式** - 上传数据 → 数据预览与验证 → 选择特征和目标变量 → 选择算法 → 配置参数 → 可选的超参数调优 → 开始训练 → 性能评估 → SHAP 解释 → 保存模型
+
+**预测模式** - 选择已保存的模型 → 上传待预测数据 → 验证数据格式 → 执行预测 → 可视化预测结果 → 下载结果
+
+值得注意的是，分类任务要求目标变量恰好有 2 个类别，系统不支持多分类任务。
+
+## 适用场景
+
+**快速原型开发** - 无需编写代码即可完成整个建模工作流程。
+
+**教学演示** - 直观展示机器学习过程的各个阶段，帮助理解算法原理。
+
+**团队协作** - 技术和业务用户都可以通过界面进行模型训练和预测。
+
+**可解释性研究** - SHAP 分析提供对模型决策的深入洞察。
