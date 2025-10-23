@@ -1,0 +1,344 @@
+---
+title: 逻辑回归模型调优
+description: 机器学习实战系列：第五篇展示完整的建模调参过程，从基础配置到逐步优化，记录真实的迭代路径
+releaseDate: 2023-11-26
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+经过前面的数据清洗、探索分析、特征工程和特征筛选，现在终于到了建模环节。对于二分类问题，逻辑回归是个不错的起点。它训练快、可解释性强，能作为一个可靠的基准模型。
+
+模型调优是个反复试验的过程。我们会从最简单的配置开始，观察结果，调整配置，再观察结果。每次改动都有明确的依据，每次改进都能量化。这篇文章记录的是真实的迭代路径，包括那些看起来"不够完美"但必须经历的尝试。
+
+<Callout type="info">
+  **关于评估标准**：只有训练集时，用交叉验证的平均得分来评估模型效果，而不是直接看训练集得分。这能有效防止过拟合。本文所有版本的对比都基于交叉验证的 ROC AUC 分数。
+</Callout>
+
+## Version 1：最简单的起点
+
+先从最基础的配置开始。逻辑回归只能处理数值，需要把分类变量编码。这里用 `OrdinalEncoder`，按照数据中出现的顺序给每个类别分配一个数字。
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
+
+X_train = train_df.drop('Attrition', axis=1)
+y_train = train_df['Attrition']
+X_test = test_df
+
+# 识别分类变量和数值变量
+categorical_cols = X_train.select_dtypes(include=['object']).columns.tolist()
+numerical_cols = X_train.select_dtypes(exclude=['object']).columns.tolist()
+
+# 创建预处理管道
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', 'passthrough', numerical_cols),
+        ('cat', OrdinalEncoder(), categorical_cols)
+    ])
+
+# 创建逻辑回归模型
+logreg = LogisticRegression(max_iter=10000000)
+
+# 创建包含预处理和模型的管道
+clf = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('classifier', logreg)
+])
+
+# 定义超参数网格
+param_grid = [
+    {'classifier__C': [0.01, 0.1, 1, 10], 
+     'classifier__penalty': ['l2'], 
+     'classifier__solver': ['liblinear', 'lbfgs', 'sag', 'saga']},
+    {'classifier__C': [0.01, 0.1, 1, 10], 
+     'classifier__penalty': ['l1'], 
+     'classifier__solver': ['liblinear', 'saga']}
+]
+
+# 创建 GridSearchCV 对象
+grid_search = GridSearchCV(clf, param_grid, cv=5, scoring='roc_auc', n_jobs=-1)
+
+# 训练模型
+grid_search.fit(X_train, y_train)
+
+# 输出最佳参数
+best_params = grid_search.best_params_
+best_score = grid_search.best_score_
+print("最佳参数:", best_params)
+print("最佳交叉验证得分:\nROC AUC:", best_score)
+```
+
+**训练结果：**
+
+```
+最佳参数: {'classifier__C': 10, 'classifier__penalty': 'l1', 'classifier__solver': 'liblinear'}
+最佳交叉验证得分:
+ROC AUC: 0.8001219651855245
+```
+
+0.80 的起点，不算差。作为第一版的基准，这个分数告诉我们数据本身是有预测价值的。
+
+| 版本 | 改动内容 | ROC AUC |
+| --- | --- | --- |
+| Version 1 | Ordinal Encoding | 0.80012 |
+
+## Version 2：One-Hot 编码
+
+`OrdinalEncoder` 会给类别分配 0、1、2、3 这样的编号。问题是，逻辑回归可能会误以为这些编号之间存在大小关系（比如 3 > 2 > 1），但实际上"销售部"和"技术部"之间并没有这种顺序关系。
+
+换成 `OneHotEncoder`，每个类别变成一个独立的 0/1 特征，避免了这种误导。
+
+```python
+from sklearn.preprocessing import OneHotEncoder
+
+# 创建预处理管道
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', 'passthrough', numerical_cols),
+        ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
+    ])
+
+# 其余代码不变
+```
+
+**训练结果：**
+
+```
+最佳参数: {'classifier__C': 10, 'classifier__penalty': 'l2', 'classifier__solver': 'lbfgs'}
+最佳交叉验证得分:
+ROC AUC: 0.8137899679340357
+```
+
+提升了 0.013，看来编码方式确实有影响。
+
+| 版本 | 改动内容 | ROC AUC |
+| --- | --- | --- |
+| Version 1 | Ordinal Encoding | 0.80012 |
+| Version 2 | One-Hot Encoding | 0.81379 |
+
+## Version 3：标准化数值特征
+
+逻辑回归对特征的尺度敏感。如果一个特征的值在 0-1 之间，另一个在 0-100000 之间，模型可能会过度关注后者。用 `StandardScaler` 把所有数值特征转换到相同的尺度上，有助于模型更稳定地学习。
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+# 创建预处理管道
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), numerical_cols),
+        ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
+    ])
+
+# 其余代码不变
+```
+
+**训练结果：**
+
+```
+最佳参数: {'classifier__C': 0.1, 'classifier__penalty': 'l2', 'classifier__solver': 'sag'}
+最佳交叉验证得分:
+ROC AUC: 0.8171719537333944
+```
+
+又涨了 0.003。每次改进都不大，但累积起来就很可观了。
+
+| 版本 | 改动内容 | ROC AUC |
+| --- | --- | --- |
+| Version 1 | Ordinal Encoding | 0.80012 |
+| Version 2 | One-Hot Encoding | 0.81379 |
+| Version 3 | StandardScaler | 0.81717 |
+
+## Version 4：手动指定变量类型
+
+前面都是用 `select_dtypes` 自动判断变量类型，但有些存储为 `int` 的字段其实是分类变量，比如 `Education`（1-5 代表不同学历等级）、`JobLevel` 等。把它们当成连续变量处理可能不太合适。
+
+手动指定一下，看看效果：
+
+```python
+# 自定义分类变量和数值变量
+numerical_cols = ['Age', 'DailyRate', 'DistanceFromHome', 'HourlyRate', 'MonthlyIncome', 'MonthlyRate',
+                  'NumCompaniesWorked', 'PercentSalaryHike', 'TotalWorkingYears', 'TrainingTimesLastYear',
+                  'YearsAtCompany', 'YearsInCurrentRole', 'YearsSinceLastPromotion', 'YearsWithCurrManager']
+
+categorical_cols = ['BusinessTravel', 'Department', 'Education', 'EducationField',
+                    'EnvironmentSatisfaction', 'Gender', 'JobInvolvement', 'JobLevel', 'JobRole',
+                    'JobSatisfaction', 'MaritalStatus', 'OverTime', 'PerformanceRating',
+                    'RelationshipSatisfaction', 'StockOptionLevel', 'WorkLifeBalance']
+
+# 创建预处理管道
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), numerical_cols),
+        ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
+    ])
+
+# 其余代码不变
+```
+
+**训练结果：**
+
+```
+最佳参数: {'classifier__C': 0.1, 'classifier__penalty': 'l2', 'classifier__solver': 'liblinear'}
+最佳交叉验证得分:
+ROC AUC: 0.8332083142464498
+```
+
+这次提升比较明显，涨了 0.016。正确识别变量类型很重要。
+
+| 版本 | 改动内容 | ROC AUC |
+| --- | --- | --- |
+| Version 1 | Ordinal Encoding | 0.80012 |
+| Version 2 | One-Hot Encoding | 0.81379 |
+| Version 3 | StandardScaler | 0.81717 |
+| Version 4 | 手动指定变量类型 | 0.83321 |
+
+## Version 5：加入特征工程
+
+[特征工程那篇](/docs/data-science/analysis/employee-attrition-feature-engineering)里，我们基于 EDA 的发现手动构造了一些新特征，比如年龄风险标记、综合风险评分等。现在把这些特征加进来试试。
+
+```python
+# 切换成特征工程后的数据集
+X_train = fe_train_df.drop('Attrition', axis=1)
+y_train = fe_train_df['Attrition']
+
+# 其余代码不变
+```
+
+**训练结果：**
+
+```
+最佳参数: {'classifier__C': 0.1, 'classifier__penalty': 'l2', 'classifier__solver': 'liblinear'}
+最佳交叉验证得分:
+ROC AUC: 0.836042143838754
+```
+
+特征工程带来的提升虽然不大（0.003），但考虑到我们只是手动构造了几个特征，这个收益还是值得的。
+
+| 版本 | 改动内容 | ROC AUC |
+| --- | --- | --- |
+| Version 1 | Ordinal Encoding | 0.80012 |
+| Version 2 | One-Hot Encoding | 0.81379 |
+| Version 3 | StandardScaler | 0.81717 |
+| Version 4 | 手动指定变量类型 | 0.83321 |
+| Version 5 | 特征工程 | 0.83604 |
+
+## Version 6：参数精调
+
+前面的实验都是用经验范围内的参数网格。现在可以根据最佳参数的位置，在附近做更细致的搜索。比如上一版最佳的 `C=0.1`，我们就在 0.2 到 0.4 之间多试几个点。
+
+逻辑回归参数少、速度快，可以多迭代几次。经过两轮调整后，参数网格如下：
+
+```python
+# 定义超参数网格
+param_grid = [
+    {'classifier__C': [0.2, 0.25, 0.3, 0.35, 0.4], 
+     'classifier__penalty': ['l2'], 
+     'classifier__solver': ['liblinear', 'lbfgs', 'sag', 'saga']},
+    {'classifier__C': [0.2, 0.25, 0.3, 0.35, 0.4], 
+     'classifier__penalty': ['l1'], 
+     'classifier__solver': ['liblinear', 'saga']}
+]
+```
+
+**训练结果：**
+
+```
+最佳参数: {'classifier__C': 0.25, 'classifier__penalty': 'l2', 'classifier__solver': 'lbfgs'}
+最佳交叉验证得分:
+ROC AUC: 0.836177508016491
+```
+
+微弱提升，但也算是把参数空间探索得更彻底了。
+
+| 版本 | 改动内容 | ROC AUC |
+| --- | --- | --- |
+| Version 1 | Ordinal Encoding | 0.80012 |
+| Version 2 | One-Hot Encoding | 0.81379 |
+| Version 3 | StandardScaler | 0.81717 |
+| Version 4 | 手动指定变量类型 | 0.83321 |
+| Version 5 | 特征工程 | 0.83604 |
+| Version 6 | 参数精调 | 0.83618 |
+
+## Version 7：调整交叉验证折数
+
+最后试试调整交叉验证的折数。之前用的是 5 折，改成 10 折试试。
+
+```python
+# 创建 GridSearchCV 对象
+grid_search = GridSearchCV(clf, param_grid, cv=10, scoring='roc_auc', n_jobs=-1)
+```
+
+<Callout type="info">
+  交叉验证折数越多，理论上评估越准确，但计算量也会增加。对于小数据集，折数太多可能导致每折的样本量过少，反而不稳定。通常 5-10 折是个合理的选择。
+</Callout>
+
+**训练结果：**
+
+```
+最佳参数: {'classifier__C': 0.3, 'classifier__penalty': 'l2', 'classifier__solver': 'liblinear'}
+最佳交叉验证得分:
+ROC AUC: 0.8397028405956977
+```
+
+这次有个小惊喜，分数又往上走了一点。
+
+| 版本 | 改动内容 | ROC AUC |
+| --- | --- | --- |
+| Version 1 | Ordinal Encoding | 0.80012 |
+| Version 2 | One-Hot Encoding | 0.81379 |
+| Version 3 | StandardScaler | 0.81717 |
+| Version 4 | 手动指定变量类型 | 0.83321 |
+| Version 5 | 特征工程 | 0.83604 |
+| Version 6 | 参数精调 | 0.83618 |
+| Version 7 | 调整交叉验证折数 | 0.83970 |
+
+## 提交到 Kaggle
+
+七个版本下来，ROC AUC 从 0.8001 提升到了 0.8397。每一步的改进都不算大，但叠加起来就是接近 4 个百分点的提升。
+
+用最终的模型对测试集做预测，提交到 Kaggle 看看实际排名：
+
+```python
+# 使用特征工程后的测试集
+X_test = fe_test_df
+
+# 使用最佳模型进行预测
+best_clf = grid_search.best_estimator_
+y_pred_test_proba = best_clf.predict_proba(X_test)[:, 1]
+
+# 将预测结果保存为提交文件
+submission = pd.DataFrame({
+    'id': test_ids,
+    'Attrition': y_pred_test_proba
+})
+submission.to_csv("logreg_submission.csv", index=False)
+
+# 提交到 Kaggle
+!kaggle competitions submit -c playground-series-s3e3 -f logreg_submission.csv -m "logreg_best"
+
+# 查看提交结果
+!kaggle competitions submissions -c playground-series-s3e3
+```
+
+**提交结果：**
+
+```
+Successfully submitted to Binary Classification with a Tabular Employee Attrition Dataset
+
+fileName               date                 description    status    publicScore  privateScore
+---------------------  -------------------  -------------  --------  -----------  ------------
+logreg_submission.csv  2023-04-18 21:54:15  logreg_best    complete  0.93962      0.88385
+```
+
+Private Score 0.88385，排在第 257 名。作为一个基础的逻辑回归模型，这个成绩算是中规中矩。
+
+这个调优过程展示了机器学习项目的真实样子：没有一步到位的完美方案，都是不断尝试、观察结果、调整方向。编码方式、特征缩放、变量类型识别、特征工程，每个环节都可能影响最终效果。有些改动带来明显提升，有些只是微调，但都是必要的探索。
+
+如果要继续提升，可以尝试更复杂的模型（如随机森林、XGBoost），或者挖掘更多有效的特征。逻辑回归的价值在于它足够简单和稳定，是一个可靠的参照点。
+

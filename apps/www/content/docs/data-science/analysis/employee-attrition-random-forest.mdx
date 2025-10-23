@@ -1,0 +1,216 @@
+---
+title: 随机森林与贝叶斯优化
+description: 机器学习实战系列：第六篇尝试集成学习算法，用贝叶斯优化替代网格搜索，更高效地探索参数空间
+releaseDate: 2023-11-28
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+逻辑回归做出了 0.84 的交叉验证分数，在 Kaggle 上的 Private Score 是 0.88385。对于一个线性模型来说，这个成绩已经不错了。但线性模型有个天然的局限，它假设特征和目标之间存在线性关系，对于复杂的非线性模式，它的学习能力有限。
+
+随机森林是另一种思路。它不假设线性关系，通过构建多棵决策树，每棵树从不同角度学习数据模式，最后用投票或平均的方式综合所有树的判断。这种集成策略让它能捕捉到更复杂的特征交互，理论上应该比单一的线性模型更强。
+
+在实际应用中，随机森林常常是处理中小型结构化数据的首选。它对参数不那么敏感，训练速度也还可以，代码实现简单。唯一的麻烦是参数组合太多，调参比逻辑回归费事。
+
+## 参数空间太大，网格搜索不够用
+
+逻辑回归的参数少，用网格搜索（GridSearchCV）能把所有组合都试一遍。但随机森林的参数多得多，树的数量、树的深度、分裂标准、特征采样方式等等，每个参数都有一堆可选值。如果还是用网格搜索，组合数量会爆炸，跑几天都跑不完。
+
+随机网格搜索（RandomizedSearchCV）是个折中方案，它不试所有组合，只随机选一部分。但这种方法有点"碰运气"，可能错过最佳区域。
+
+贝叶斯优化是个更聪明的策略。它不是盲目试参数，而是根据之前的结果推测哪些参数组合可能更好，优先去试那些有希望的区域。这样能用更少的次数找到接近最优的参数，特别适合参数空间大、每次训练成本高的情况。
+
+Python 里常用的贝叶斯优化库有 hyperopt 和 Optuna。Optuna 的 API 更简洁，代码写起来更直观，我们用它来做这次调参。
+
+## 参数的优先级
+
+随机森林的参数很多，但不是每个参数的影响力都一样大。调参时应该优先关注那些影响最大的参数，把主要精力放在这些参数上。
+
+**影响力最高的三个参数**：
+
+- `n_estimators`：森林里有多少棵树。树越多，模型学习能力越强，但训练时间也越长。通常从几十到几百都是合理范围。
+- `max_depth`：每棵树允许长多深。深度越大，模型越容易过拟合；深度太小，又学不到足够的模式。这个参数对模型复杂度影响最直接。
+- `max_features`：每次分裂节点时考虑多少个特征。这个参数控制树之间的差异性，是随机森林"随机"的核心。
+
+**次要但仍值得调的参数**：
+
+- `min_samples_split`：节点至少要有多少样本才允许继续分裂。这是剪枝的一种方式，能防止过拟合。
+- `min_samples_leaf`：叶节点至少要包含多少样本。和 `min_samples_split` 类似，也是控制模型复杂度的手段。
+- `class_weight`：是否对不同类别赋予不同权重。在类别不平衡的情况下，设置为 `'balanced'` 能让模型更关注少数类。
+
+其他参数（如 `criterion`、`max_leaf_nodes`）影响相对较小，通常保持默认值就行。调参时先把主要参数调好，如果还有精力再微调次要参数。
+
+## 用 Optuna 搜索参数
+
+整个调参过程分四步：准备数据管道、定义目标函数、运行优化器、用最佳参数训练最终模型。
+
+### 1. 数据预处理管道
+
+这部分和逻辑回归一样，数值特征直接用，类别特征做 One-Hot 编码。我们用的是特征工程后的数据集（`fe_train_df`），它包含了之前手工构造的风险标记和综合评分。
+
+```python
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import roc_auc_score, classification_report, confusion_matrix
+import optuna
+from optuna.samplers import TPESampler
+
+X_train = fe_train_df.drop('Attrition', axis=1)
+y_train = fe_train_df['Attrition']
+X_test = fe_test_df
+
+# 识别分类变量和数值变量
+fe_categorical_cols = X_train.select_dtypes(include=['object']).columns.tolist()
+fe_numerical_cols = X_train.select_dtypes(exclude=['object']).columns.tolist()
+
+# 创建预处理管道
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', 'passthrough', fe_numerical_cols),
+        ('cat', OneHotEncoder(handle_unknown='ignore'), fe_categorical_cols)
+    ])
+```
+
+### 2. 定义目标函数
+
+Optuna 需要一个目标函数，这个函数接收一个 `trial` 对象，从中采样超参数组合，然后返回模型的评估分数。分数越高，表示这组参数越好。
+
+```python
+def objective(trial):
+    # 定义超参数搜索空间
+    n_estimators = trial.suggest_int('classifier__n_estimators', 10, 300)
+    max_depth = trial.suggest_int('classifier__max_depth', 5, 25)
+    min_samples_split = trial.suggest_int('classifier__min_samples_split', 2, 20)
+    min_samples_leaf = trial.suggest_int('classifier__min_samples_leaf', 1, 20)
+    max_features = trial.suggest_categorical('classifier__max_features', ['sqrt', 'log2'] + list(range(2, 12, 2)))
+
+    # 创建随机森林模型
+    rf = RandomForestClassifier(
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        min_samples_split=min_samples_split,
+        min_samples_leaf=min_samples_leaf,
+        max_features=max_features,
+        random_state=94
+    )
+
+    # 创建包含预处理和模型的管道
+    clf = Pipeline(steps=[
+        ('preprocessor', preprocessor),
+        ('classifier', rf)
+    ])
+
+    # 进行5折交叉验证
+    scores = cross_val_score(clf, X_train, y_train, cv=5, scoring='roc_auc', n_jobs=-1)
+    return scores.mean()
+```
+
+这里的参数范围是根据经验设定的。`n_estimators` 在 10 到 300 之间，太少学不够，太多训练时间长且收益递减。`max_depth` 在 5 到 25 之间，员工流失这个问题的复杂度不算特别高，深度不需要太大。`max_features` 试了几个常用的选项，包括 `'sqrt'`、`'log2'` 以及几个固定数值。
+
+### 3. 运行优化器
+
+创建一个 study 对象，指定优化方向为"最大化"（因为我们要让 ROC AUC 越高越好），然后运行 300 次试验。
+
+```python
+# 使用 Optuna 进行超参数优化
+study = optuna.create_study(direction='maximize', sampler=TPESampler())
+study.optimize(objective, n_trials=300, n_jobs=-1)
+
+# 输出最佳参数和最佳交叉验证得分
+best_params = study.best_params
+best_score = study.best_value
+print("最佳参数:", best_params)
+print("最佳交叉验证得分 (ROC AUC):", best_score)
+```
+
+`n_trials=300` 表示最多试 300 组参数。实际上，Optuna 可能不需要试完 300 次就能收敛到一个不错的结果，但我们给它足够的预算，让它充分探索参数空间。
+
+**输出结果：**
+
+```
+最佳参数: {'classifier__n_estimators': 273, 'classifier__max_depth': 17, 'classifier__min_samples_split': 14, 'classifier__min_samples_leaf': 3, 'classifier__max_features': 6}
+最佳交叉验证得分 (ROC AUC): 0.8415392235455794
+```
+
+交叉验证分数是 0.8415，比逻辑回归的 0.8397 略高一点。看起来随机森林确实学到了一些逻辑回归捕捉不到的模式。
+
+### 4. 用最佳参数训练模型
+
+拿到最佳参数后，用这组参数重新训练一个模型，然后在训练集上做个快速验证，看看效果是否符合预期。
+
+```python
+# 使用最佳参数训练模型
+best_rf = RandomForestClassifier(
+    n_estimators=best_params['classifier__n_estimators'],
+    max_depth=best_params['classifier__max_depth'],
+    min_samples_split=best_params['classifier__min_samples_split'],
+    min_samples_leaf=best_params['classifier__min_samples_leaf'],
+    max_features=best_params['classifier__max_features'],
+    random_state=94
+)
+
+clf = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('classifier', best_rf)
+])
+
+clf.fit(X_train, y_train)
+
+# 使用最佳模型进行预测
+y_pred_train = clf.predict(X_train)
+y_pred_train_proba = clf.predict_proba(X_train)[:, 1]
+
+# 计算并输出训练集的评估结果
+roc_auc = roc_auc_score(y_train, y_pred_train_proba)
+print("训练集评估结果:")
+print(f"ROC AUC: {roc_auc}")
+print("分类报告:")
+print(classification_report(y_train, y_pred_train))
+print("混淆矩阵:")
+print(confusion_matrix(y_train, y_pred_train))
+```
+
+训练集上的 ROC AUC 通常会比交叉验证分数高，因为模型见过这些数据。我们更关心的是交叉验证分数和最终的测试集表现。
+
+## 提交到 Kaggle
+
+用这个模型对测试集做预测，提交到 Kaggle 看看实际排名。
+
+```python
+# 对测试集进行预测
+y_pred_test_proba = clf.predict_proba(X_test)[:, 1]
+
+# 保存提交文件
+submission = pd.DataFrame({
+    'id': test_ids,
+    'Attrition': y_pred_test_proba
+})
+submission.to_csv("rf_submission.csv", index=False)
+```
+
+**提交结果：**
+
+```
+fileName               date                 description    status    publicScore  privateScore
+---------------------  -------------------  -------------  --------  -----------  ------------
+rf_submission.csv      2023-04-19 22:05:34  rf_best        complete  0.88468      0.87128
+```
+
+Private Score 是 0.87128，反而比逻辑回归的 0.88385 还低。交叉验证时随机森林略好，但在测试集上反而不如逻辑回归。
+
+这种情况说明随机森林在这个数据集上可能有点过拟合了。虽然它在训练时学到了更复杂的模式，但这些模式在新数据上没能泛化得很好。逻辑回归虽然简单，但在这个问题上反而更稳定。
+
+## 贝叶斯优化的不确定性
+
+贝叶斯优化每次运行的结果会有差异，因为它内部的采样过程有随机性。如果多跑几次，可能会得到不同的"最佳参数"。这不是 bug，而是算法的特性。
+
+实践中，可以多跑几次，观察参数的共性。比如 `max_depth` 总是在 15-20 之间，`n_estimators` 总是在 200 以上，那这些区间就是相对可靠的。可以在这些区间里做更细致的搜索，或者手动微调。
+
+但对于这个数据集，即使进一步精调，随机森林也不太可能超过逻辑回归太多。这个问题的数据量不大（1677 条训练样本），特征也不算特别复杂，逻辑回归的线性假设已经够用了。随机森林的复杂度反而成了负担。
+
+换个角度看，如果数据量更大、特征交互更复杂，随机森林的优势可能就能发挥出来。没有一种模型适合所有场景，关键是根据数据特点选择合适的工具。

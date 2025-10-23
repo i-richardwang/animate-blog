@@ -1,0 +1,217 @@
+---
+title: LightGBM 轻量梯度提升
+description: 机器学习实战系列：第八篇尝试LightGBM算法，在保持准确度的同时大幅提升训练速度
+releaseDate: 2023-12-02
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+XGBoost拿到了0.88的测试集分数，交叉验证从0.84提升到了0.856。但有个明显的问题：2500次贝叶斯优化跑得太久了。每次交叉验证都要训练4折，每折又要构建几百棵树，时间成本确实不低。
+
+LightGBM是个更快的选择。它和XGBoost同样是基于梯度提升的树模型，但在实现上做了几个关键优化，让训练速度提升了好几倍。如果能在保持精度的同时大幅缩短训练时间，那调参的迭代速度就能快很多。
+
+微软开发LightGBM的时候，主要解决的就是大规模数据的训练效率问题。它在内存占用和计算速度上都比XGBoost更优，这让它成为快速探索的理想工具。很多机器学习竞赛中，选手会先用LightGBM快速试错，找到大致的方向，再用XGBoost或其他模型精调。
+
+## LightGBM 的核心改进
+
+LightGBM的速度优势来自几个技术改进。
+
+**直方图算法**：XGBoost在分裂节点时，需要遍历所有可能的分裂点。如果特征是连续值，可能的分裂点会非常多。LightGBM把连续特征离散化成直方图（比如把年龄分成20个箱），这样每个特征只需要考虑有限的几个分裂候选点，大幅减少了计算量。
+
+**Leaf-wise 树生长策略**：XGBoost用的是 Level-wise 策略，也就是一层一层地生长，每层的所有节点同时分裂。LightGBM用的是 Leaf-wise，每次选择增益最大的那个叶子节点分裂。这样能更快地降低损失，用更少的树达到相同的效果。但这种策略也更容易过拟合，所以LightGBM加了很多正则化参数来控制。
+
+**更高效的并行**：特征并行和数据并行的实现更优化，能更好地利用多核CPU。
+
+这些改进综合起来，让LightGBM在训练速度上比XGBoost快3-10倍（取决于数据量和参数设置）。对于我们这个数据集，虽然只有1677条训练样本，但在调参阶段跑几百次试验时，速度优势还是很明显的。
+
+## 参数空间的差异
+
+LightGBM的参数命名和XGBoost略有不同，但核心思路类似。这里列出几个关键参数的对应关系和调优思路。
+
+**树的复杂度控制**：
+
+- `num_leaves`：最大叶子节点数，这是LightGBM最重要的参数之一。因为用的是Leaf-wise生长，直接限制叶子数比限制深度更有效。经验上，`num_leaves` 应该小于 `2^max_depth`。
+- `max_depth`：树的最大深度，作为辅助控制。LightGBM的默认值是-1（不限制），但为了防止过拟合，通常还是会设一个较小的值。
+
+**学习速度和迭代次数**：
+
+- `learning_rate`：和XGBoost一样，控制每棵树的贡献。
+- `n_estimators`：树的数量。
+
+**采样控制**：
+
+- `subsample`（或`bagging_fraction`）：每棵树使用的样本比例。
+- `subsample_freq`（或`bagging_freq`）：多少次迭代做一次采样。
+- `colsample_bytree`（或`feature_fraction`）：每棵树使用的特征比例。
+
+**正则化**：
+
+- `lambda_l1`（或`reg_alpha`）：L1正则化。
+- `lambda_l2`（或`reg_lambda`）：L2正则化。
+- `min_gain_to_split`（或`min_split_gain`）：分裂所需的最小增益。
+- `min_data_in_leaf`（或`min_child_samples`）：叶子节点最少样本数。
+
+LightGBM的参数名有多个别名，这是因为它想兼容多种风格（XGBoost风格、传统GBDT风格等）。只要选一套风格统一使用就行。
+
+## 用 Optuna 调参
+
+数据预处理管道和之前一样，直接复用XGBoost那篇的代码。
+
+### 定义目标函数
+
+```python
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from lightgbm import LGBMClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import cross_val_score
+import optuna
+from optuna.samplers import TPESampler
+
+X_train = fe_train_df.drop('Attrition', axis=1)
+y_train = fe_train_df['Attrition']
+X_test = fe_test_df
+
+# 识别分类变量和数值变量
+fe_categorical_cols = X_train.select_dtypes(include=['object']).columns.tolist()
+fe_numerical_cols = X_train.select_dtypes(exclude=['object']).columns.tolist()
+
+# 创建预处理管道
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', 'passthrough', fe_numerical_cols),
+        ('cat', OneHotEncoder(handle_unknown='ignore'), fe_categorical_cols)
+    ])
+
+def objective(trial):
+    # 定义超参数搜索空间
+    params = {
+        'n_estimators': trial.suggest_int('n_estimators', 100, 500),
+        'max_depth': trial.suggest_int('max_depth', 3, 7),
+        'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
+        'num_leaves': trial.suggest_int('num_leaves', 20, 80),
+        'subsample': trial.suggest_float('subsample', 0.5, 1.0),
+        'subsample_freq': trial.suggest_int('subsample_freq', 1, 5),
+        'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1.0),
+        'reg_alpha': trial.suggest_float('reg_alpha', 0, 2),
+        'reg_lambda': trial.suggest_float('reg_lambda', 0, 2),
+        'min_split_gain': trial.suggest_float('min_split_gain', 0, 2),
+        'min_child_samples': trial.suggest_int('min_child_samples', 5, 100),
+    }
+
+    # 创建 LightGBM 模型
+    lgbm = LGBMClassifier(
+        **params,
+        random_state=42,
+        verbose=-1  # 关闭训练日志输出
+    )
+
+    # 创建包含预处理和模型的管道
+    clf = Pipeline(steps=[
+        ('preprocessor', preprocessor),
+        ('classifier', lgbm)
+    ])
+
+    # 进行交叉验证
+    scores = cross_val_score(clf, X_train, y_train, cv=5, scoring='roc_auc', n_jobs=-1)
+    return scores.mean()
+```
+
+参数范围的设定参考了XGBoost的经验。`num_leaves`在20到80之间，这个范围对应的树复杂度大致和XGBoost的`max_depth`在3到7之间相当。
+
+### 运行优化器
+
+```python
+# 使用 Optuna 进行超参数优化
+study = optuna.create_study(direction='maximize', sampler=TPESampler())
+study.optimize(objective, n_trials=500, n_jobs=-1)
+
+# 输出最佳参数和最佳交叉验证得分
+best_params = study.best_params
+best_score = study.best_value
+print("最佳参数:", best_params)
+print("最佳交叉验证得分 (ROC AUC):", best_score)
+```
+
+这次跑500次试验，比XGBoost的2500次少了很多，但因为LightGBM速度快，总时间反而更短。
+
+**输出结果：**
+
+```
+最佳参数: {'n_estimators': 340, 'max_depth': 2, 'learning_rate': 0.09120536829685104, 'num_leaves': 39, 'subsample': 0.9518485950238226, 'subsample_freq': 2, 'colsample_bytree': 0.7370999229495948, 'reg_alpha': 0.7150238555812067, 'reg_lambda': 0.3328513354897683, 'min_split_gain': 1.6424059831736437, 'min_child_samples': 32}
+最佳交叉验证得分 (ROC AUC): 0.851099175446633
+```
+
+交叉验证分数是0.851，比XGBoost的0.856略低一点。这个差距不算大，考虑到训练速度的提升，这个结果完全可以接受。
+
+### 用最佳参数训练模型
+
+```python
+# 使用最佳参数训练模型
+best_lgbm = LGBMClassifier(
+    n_estimators=best_params['n_estimators'],
+    max_depth=best_params['max_depth'],
+    learning_rate=best_params['learning_rate'],
+    num_leaves=best_params['num_leaves'],
+    subsample=best_params['subsample'],
+    subsample_freq=best_params['subsample_freq'],
+    colsample_bytree=best_params['colsample_bytree'],
+    reg_alpha=best_params['reg_alpha'],
+    reg_lambda=best_params['reg_lambda'],
+    min_split_gain=best_params['min_split_gain'],
+    min_child_samples=best_params['min_child_samples'],
+    random_state=42,
+    verbose=-1
+)
+
+clf = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('classifier', best_lgbm)
+])
+
+clf.fit(X_train, y_train)
+```
+
+## 提交到 Kaggle
+
+```python
+# 对测试集进行预测
+y_pred_test_proba = clf.predict_proba(X_test)[:, 1]
+
+# 保存提交文件
+submission = pd.DataFrame({
+    'id': test_ids,
+    'Attrition': y_pred_test_proba
+})
+submission.to_csv("lgbm_submission.csv", index=False)
+```
+
+**提交结果：**
+
+```
+fileName               date                 description    status    publicScore  privateScore
+---------------------  -------------------  -------------  --------  -----------  ------------
+lgbm_submission.csv    2023-04-22 23:46:43  lgbm-best      complete  0.90662      0.88374
+```
+
+Private Score是0.88374，和XGBoost的0.88448基本持平，差距在误差范围内。
+
+## 速度优势明显，精度持平
+
+LightGBM的表现和预期一致：训练速度明显快于XGBoost，但在这个数据集上的最终精度差不多。
+
+对比三个树模型的成绩：
+
+- 随机森林：CV 0.842，测试集 0.871
+- XGBoost：CV 0.856，测试集 0.884
+- LightGBM：CV 0.851，测试集 0.884
+
+XGBoost和LightGBM在测试集上打成平手，但LightGBM的训练速度快得多。如果要做更多轮的参数搜索，或者数据量更大，LightGBM的优势会更明显。
+
+从参数上看，LightGBM最终选择的是一个比较保守的配置：深度只有2层，但叶子节点有39个。这符合Leaf-wise策略的特点，用有限的深度但更多的叶子来捕捉模式。学习率0.091不算特别小，340棵树也不算特别多，说明模型收敛得比较快。
+
+对于这个1677条样本的小数据集，三个树模型的表现都差不多，都在0.87到0.88之间。逻辑回归的0.884反而是最好的，这再次说明了一个问题：数据量不大、特征不算复杂的情况下，简单模型往往更稳定。复杂模型的优势需要足够的数据量才能体现出来。
+
+如果继续优化，可以考虑模型融合（Ensemble），把逻辑回归、XGBoost和LightGBM的预测结果组合起来。三个模型的思路不同，融合后可能会有额外的提升。但对于这个数据集，单模型能做到0.88已经算是不错的成绩了。
