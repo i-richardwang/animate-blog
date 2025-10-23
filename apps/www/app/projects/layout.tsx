@@ -8,6 +8,7 @@ import XIcon from '@workspace/ui/components/icons/x-icon';
 import { getSortedProjects } from '@/lib/source';
 import type { PageTree } from 'fumadocs-core/server';
 import { DocsSidebar } from '@/components/docs/sidebar';
+import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 
 const projectTree: PageTree.Root = {
   name: 'Projects',
@@ -39,6 +40,7 @@ const PROJECTS_LAYOUT_PROPS: DocsLayoutProps = {
 export default function ProjectsLayout({ children }: { children: ReactNode }) {
   return (
     <>
+      <ScrollProgressBar />
       <DocsLayout
         {...PROJECTS_LAYOUT_PROPS}
         nav={{

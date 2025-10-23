@@ -8,6 +8,7 @@ import XIcon from '@workspace/ui/components/icons/x-icon';
 import { getSortedBlogPosts } from '@/lib/source';
 import type { PageTree } from 'fumadocs-core/server';
 import { DocsSidebar } from '@/components/docs/sidebar';
+import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 
 // Build page tree sorted by date (newest first)
 const blogTree: PageTree.Root = {
@@ -40,6 +41,7 @@ const BLOG_LAYOUT_PROPS: DocsLayoutProps = {
 export default function BlogLayout({ children }: { children: ReactNode }) {
   return (
     <>
+      <ScrollProgressBar />
       <DocsLayout
         {...BLOG_LAYOUT_PROPS}
         nav={{

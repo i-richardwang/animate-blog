@@ -250,6 +250,16 @@
     overscroll-behavior: none;
   }
 
+  /* Hide scrollbar but keep functionality */
+  html {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
   #nd-sidebar {
     @apply md:!border-0;
   }

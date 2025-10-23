@@ -9,6 +9,7 @@ import XIcon from '@workspace/ui/components/icons/x-icon';
 import { SIDEBAR_TABS } from '@/lib/sidebar';
 import { Nav } from '@/components/docs/nav';
 import { Footer } from '@/components/footer';
+import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 
 const DOCS_LAYOUT_PROPS: DocsLayoutProps = {
   tree: source.pageTree,
@@ -35,6 +36,7 @@ const DOCS_LAYOUT_PROPS: DocsLayoutProps = {
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <>
+      <ScrollProgressBar />
       <DocsLayout
         {...DOCS_LAYOUT_PROPS}
         sidebar={{
