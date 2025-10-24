@@ -85,7 +85,7 @@ const outfit = Outfit({ subsets: ['latin'] });
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={outfit.className} suppressHydrationWarning>
+    <html lang="zh" className={outfit.className} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"

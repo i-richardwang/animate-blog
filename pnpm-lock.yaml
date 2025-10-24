@@ -77,6 +77,9 @@ importers:
       '@headlessui/react':
         specifier: ^2.2.6
         version: 2.2.7(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      '@orama/tokenizers':
+        specifier: ^3.1.16
+        version: 3.1.16
       '@workspace/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -962,6 +965,14 @@ packages:
 
   '@orama/orama@3.1.13':
     resolution: {integrity: sha512-O0hdKt4K31i8fpq8Bw5RfdPVAqm0EdduBUcluPo2MRcfCOwUEf5JlnvRhf/J0ezOYOD8jQ/LumYZxOVi/XK/BA==}
+    engines: {node: '>= 20.0.0'}
+
+  '@orama/orama@3.1.16':
+    resolution: {integrity: sha512-scSmQBD8eANlMUOglxHrN1JdSW8tDghsPuS83otqealBiIeMukCQMOf/wc0JJjDXomqwNdEQFLXLGHrU6PGxuA==}
+    engines: {node: '>= 20.0.0'}
+
+  '@orama/tokenizers@3.1.16':
+    resolution: {integrity: sha512-QLYWlcFNs3G2ikJJewxSsC/JSz3Ltz5uZED1yAubhMg5Vk3jG/3P4UkDYt5SzuimkQYwYnHXVGlw93ZzsP+M0w==}
     engines: {node: '>= 20.0.0'}
 
   '@radix-ui/number@1.1.1':
@@ -5697,6 +5708,12 @@ snapshots:
   '@opentelemetry/api@1.9.0': {}
 
   '@orama/orama@3.1.13': {}
+
+  '@orama/orama@3.1.16': {}
+
+  '@orama/tokenizers@3.1.16':
+    dependencies:
+      '@orama/orama': 3.1.16
 
   '@radix-ui/number@1.1.1': {}
 
