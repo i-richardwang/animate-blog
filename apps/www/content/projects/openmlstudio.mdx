@@ -1,94 +1,89 @@
 ---
 title: OpenMLStudio
-description: 开源的 Streamlit 机器学习工作室，支持二分类和回归任务的完整建模流程
+description: 开源的 Streamlit 机器学习平台，支持二分类和回归任务的完整建模流程
 date: 2023-11-20
 category: opensource
 tech:
   - Streamlit
   - Python
   - scikit-learn
-  - XGBoost
-  - SHAP
-  - Optuna
   - Plotly
 links:
   github: https://github.com/i-richardwang/OpenMLStudio
+  url: https://openmlstudio.streamlit.app
 featured: false
 ---
 
-一个开源的 Streamlit 机器学习工作室，支持二分类和回归任务。OpenMLStudio 提供从数据上传到模型训练、评估、SHAP 解释和预测的完整工作流程，通过直观的 Web 界面让机器学习变得易于使用。
-
-## 核心功能
-
-**二分类和回归任务**  
-支持二分类（恰好 2 个类别）和回归任务的完整建模流程。
-
-**多种经典算法**  
-包含随机森林、决策树、XGBoost 和线性回归的实现。
-
-**自动超参数调优**  
-集成 Optuna 和 GridSearchCV 进行自动参数优化。Optuna 使用贝叶斯优化进行高效参数搜索，而 GridSearchCV 则穷举搜索所有参数组合。
-
-**SHAP 可解释性**  
-通过 SHAP（SHapley Additive exPlanations）分析提供全面的模型解释，包括全局特征重要性、单个预测解释和特征依赖可视化。
-
-**模型持久化**  
-训练好的模型可以保存并加载以供将来使用，支持对新数据集进行批量预测。
-
-**数据格式支持**  
-接受 CSV 和 Excel 文件上传，自动检测特征类型（数值型和分类型）。
+一个开源的机器学习建模平台，支持二分类和回归任务。提供从数据上传到模型训练、评估、SHAP 解释和预测的完整工作流程，通过 Web 界面完成机器学习建模。
 
 ## 系统架构
 
-OpenMLStudio 采用模块化设计，核心分为五个层次：
+![系统架构](/projects/openmlstudio/architecture.png)
 
-**Web UI 层** - Streamlit 构建的交互界面，负责数据上传、参数配置和结果展示
+OpenMLStudio 采用模块化设计，从用户数据输入开始，通过 Streamlit Web UI 进行交互，核心包含训练模块和预测模块两大引擎。训练模块支持四种算法（Random Forest、Decision Tree、XGBoost、Linear Regression），并集成 SHAP 解释、性能可视化和模型评估等分析工具。底层基于 scikit-learn、XGBoost、SHAP、Plotly 和 Optuna 等成熟技术栈构建。
 
-**核心引擎** - 包含 Training 和 Prediction 两个核心模块，处理模型训练和预测逻辑
+## 使用流程
 
-**算法层** - 四种机器学习算法的实现，Random Forest 和 XGBoost 支持 Optuna 自动调优，Decision Tree 和 Linear Regression 提供快速建模
+### 1. 数据上传与预览
 
-**分析层** - 集成 SHAP 解释性分析、Plotly 性能可视化和 scikit-learn 评估指标
+![数据上传与预览](/projects/openmlstudio/data-upload.png)
 
-**存储层** - 持久化训练好的模型和预测结果
+上传 CSV 或 Excel 文件后，系统自动识别特征类型（数值型、分类型），并展示数据预览。用户可以选择目标变量和用于建模的特征，系统会检测是分类任务还是回归任务。
 
-**ML Stack** - 基于 scikit-learn、XGBoost、SHAP、Plotly 和 Optuna 构建
+### 2. 模型选择与训练
 
-### 核心模块结构
+![模型选择与训练](/projects/openmlstudio/model-training.png)
+
+选择算法（Random Forest、Decision Tree、XGBoost、Linear Regression），配置训练/测试集划分比例。Random Forest 和 XGBoost 支持 Optuna 自动超参数调优，可以配置调优范围和优化目标。系统还提供数据预处理选项，如标准化和独热编码。
+
+### 3. 模型评估
+
+![模型评估结果](/projects/openmlstudio/model-evaluation.png)
+
+训练完成后，系统展示详细的性能指标。对于分类任务，提供 ROC-AUC、准确率、混淆矩阵和分类报告。对于回归任务，提供 MSE、RMSE、MAE 和 R² 等指标。所有模型训练记录都会被保存，可以查看历史模型的性能对比。
+
+### 4. SHAP 可解释性分析
+
+![SHAP 可解释性分析](/projects/openmlstudio/shap-analysis.png)
+
+基于 SHAP 的可解释性分析。展示全局特征重要性，帮助理解哪些特征对模型预测最重要。SHAP 依赖图展示单个特征与目标变量的关系，以及特征之间的交互效应。
+
+### 5. 批量预测
+
+![批量预测功能](/projects/openmlstudio/batch-prediction.png)
+
+加载已保存的模型，上传新数据进行批量预测。系统会验证数据格式是否与训练时一致，展示预测结果分布和详细的预测值，支持下载预测结果。
+
+## 技术特性
+
+**算法支持**  
+Random Forest、Decision Tree、XGBoost、Linear Regression。其中 Random Forest 和 XGBoost 支持基于 Optuna 的贝叶斯优化自动调参。
+
+**可解释性分析**  
+集成 SHAP 分析，提供全局特征重要性、单样本解释和特征依赖可视化。帮助理解模型的决策逻辑。
+
+**模型管理**  
+自动保存所有训练记录，支持模型持久化和版本管理。可随时加载历史模型进行预测或对比分析。
+
+**数据处理**  
+自动识别特征类型，支持标准化、独热编码等预处理。仅支持二分类和回归任务，不支持多分类。
+
+## 项目结构
 
 ```
 OpenMLStudio/
 ├── backend/analysis/              # 核心 ML 逻辑
-│   ├── model_utils.py             # 核心工具函数
 │   ├── model_training.py          # 训练引擎
 │   ├── model_prediction.py        # 预测引擎
 │   ├── shap_analysis.py           # SHAP 解释
-│   ├── visualization.py           # 性能可视化
 │   ├── random_forest_trainer.py   # 随机森林
 │   ├── decision_tree_trainer.py   # 决策树
 │   ├── xgboost_trainer.py         # XGBoost
 │   └── linear_regression_trainer.py # 线性回归
-├── frontend/                      # Web UI
-├── data/ml_models/                # 模型存储
-└── requirements.txt               # 依赖管理
+├── frontend/                      # Streamlit Web UI
+└── data/ml_models/                # 模型存储
 ```
-
-## 使用流程
-
-OpenMLStudio 提供两种工作模式：
-
-**训练模式** - 上传数据 → 数据预览与验证 → 选择特征和目标变量 → 选择算法 → 配置参数 → 可选的超参数调优 → 开始训练 → 性能评估 → SHAP 解释 → 保存模型
-
-**预测模式** - 选择已保存的模型 → 上传待预测数据 → 验证数据格式 → 执行预测 → 可视化预测结果 → 下载结果
-
-值得注意的是，分类任务要求目标变量恰好有 2 个类别，系统不支持多分类任务。
 
 ## 适用场景
 
-**快速原型开发** - 无需编写代码即可完成整个建模工作流程。
-
-**教学演示** - 直观展示机器学习过程的各个阶段，帮助理解算法原理。
-
-**团队协作** - 技术和业务用户都可以通过界面进行模型训练和预测。
-
-**可解释性研究** - SHAP 分析提供对模型决策的深入洞察。
+快速原型开发、教学演示、团队协作、可解释性研究。

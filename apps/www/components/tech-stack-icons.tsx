@@ -9,6 +9,8 @@ import FastapiIcon from '@workspace/ui/components/icons/fastapi-icon';
 import StreamlitIcon from '@workspace/ui/components/icons/streamlit-icon';
 import LangchainIcon from '@workspace/ui/components/icons/langchain-icon';
 import McpIcon from '@workspace/ui/components/icons/mcp-icon';
+import SklearnIcon from '@workspace/ui/components/icons/sklearn-icon';
+import PlotlyIcon from '@workspace/ui/components/icons/plotly-icon';
 import { cn } from '@workspace/ui/lib/utils';
 
 interface TechStackIconsProps {
@@ -29,6 +31,8 @@ const TECH_ICON_MAP: Record<string, React.ComponentType<any>> = {
   Streamlit: StreamlitIcon,
   LangChain: LangchainIcon,
   MCP: McpIcon,
+  'scikit-learn': SklearnIcon,
+  Plotly: PlotlyIcon,
 };
 
 export function TechStackIcons({
