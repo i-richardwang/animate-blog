@@ -11,6 +11,14 @@ import LangchainIcon from '@workspace/ui/components/icons/langchain-icon';
 import McpIcon from '@workspace/ui/components/icons/mcp-icon';
 import SklearnIcon from '@workspace/ui/components/icons/sklearn-icon';
 import PlotlyIcon from '@workspace/ui/components/icons/plotly-icon';
+import MilvusIcon from '@workspace/ui/components/icons/milvus-icon';
+import SanityIcon from '@workspace/ui/components/icons/sanity-icon';
+import PuppeteerIcon from '@workspace/ui/components/icons/puppeteer-icon';
+import PandasIcon from '@workspace/ui/components/icons/pandas-icon';
+import NodejsIcon from '@workspace/ui/components/icons/nodejs-icon';
+import ViteIcon from '@workspace/ui/components/icons/vite-icon';
+import UptimekumaIcon from '@workspace/ui/components/icons/uptimekuma-icon';
+import DockerIcon from '@workspace/ui/components/icons/docker-icon';
 import { cn } from '@workspace/ui/lib/utils';
 
 interface TechStackIconsProps {
@@ -33,6 +41,14 @@ const TECH_ICON_MAP: Record<string, React.ComponentType<any>> = {
   MCP: McpIcon,
   'scikit-learn': SklearnIcon,
   Plotly: PlotlyIcon,
+  Milvus: MilvusIcon,
+  Sanity: SanityIcon,
+  Puppeteer: PuppeteerIcon,
+  pandas: PandasIcon,
+  'Node.js': NodejsIcon,
+  Vite: ViteIcon,
+  'Uptime Kuma': UptimekumaIcon,
+  Docker: DockerIcon,
 };
 
 export function TechStackIcons({
