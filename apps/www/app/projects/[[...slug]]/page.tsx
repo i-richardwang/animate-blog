@@ -10,12 +10,10 @@ import { getMDXComponents } from '@/mdx-components';
 import { Metadata } from 'next';
 import { Footer } from '@/components/footer';
 import { Button } from '@/registry/components/buttons/button';
-import { ArrowLeft, Github, ExternalLink } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { format } from 'date-fns';
-import { enUS } from 'date-fns/locale';
 import { ProjectList } from '@/components/docs/project-list';
-import { TechStackIcons } from '@/components/tech-stack-icons';
+import { ProjectActions } from '@/components/docs/page-actions';
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -92,7 +90,6 @@ export default async function Page(props: {
   if (!page) notFound();
 
   const MDXContent = page.data.body;
-  const date = new Date(page.data.date);
 
   return (
     <>
@@ -112,47 +109,25 @@ export default async function Page(props: {
           {page.data.description}
         </DocsDescription>
 
-        <div className="flex flex-wrap gap-3 items-center mb-4">
-          <time
-            dateTime={date.toISOString()}
-            className="text-sm text-muted-foreground"
-          >
-            {format(date, 'MMM d, yyyy', { locale: enUS })}
-          </time>
-
-          {page.data.links?.url && (
-            <Button variant="default" size="sm" asChild>
-              <a
-                href={page.data.links.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLink className="size-4" />
-                访问
-              </a>
-            </Button>
-          )}
-
-          {page.data.links?.github && (
-            <Button variant="accent" size="sm" asChild>
-              <a
-                href={page.data.links.github}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Github className="size-4" />
-                查看代码
-              </a>
-            </Button>
-          )}
-        </div>
-
         {page.data.tech && page.data.tech.length > 0 && (
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-sm text-muted-foreground">技术栈：</span>
-            <TechStackIcons tech={page.data.tech} maxDisplay={8} />
+          <div className="flex flex-row gap-2 items-center flex-wrap">
+            {page.data.tech.map((tech) => (
+              <span
+                key={tech}
+                className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
+              >
+                {tech}
+              </span>
+            ))}
           </div>
         )}
+
+        <div className="flex flex-row gap-2 items-center">
+          <ProjectActions
+            projectUrl={page.data.links?.url}
+            githubUrl={page.data.links?.github}
+          />
+        </div>
 
         <DocsBody id="docs-body" className="pb-10 pt-4">
           <MDXContent components={getMDXComponents()} />

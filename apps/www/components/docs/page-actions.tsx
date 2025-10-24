@@ -7,6 +7,7 @@ import {
   Copy,
   ExternalLinkIcon,
   MessageCircleIcon,
+  Github,
 } from 'lucide-react';
 import { cn } from '@workspace/ui/lib/utils';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
@@ -17,6 +18,7 @@ import {
   PopoverTrigger,
 } from 'fumadocs-ui/components/ui/popover';
 import { cva } from 'class-variance-authority';
+import { Shine } from '@/registry/primitives/effects/shine';
 
 const cache = new Map<string, string>();
 
@@ -181,5 +183,70 @@ export function ViewOptions({
         ))}
       </PopoverContent>
     </Popover>
+  );
+}
+
+export function ProjectActions({
+  projectUrl,
+  githubUrl,
+}: {
+  /**
+   * Live project URL
+   */
+  projectUrl?: string;
+
+  /**
+   * GitHub repository URL
+   */
+  githubUrl?: string;
+}) {
+  if (!projectUrl && !githubUrl) {
+    return null;
+  }
+
+  return (
+    <>
+      {projectUrl && (
+        <Shine enableOnHover duration={1200} asChild>
+          <a
+            href={projectUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            className={cn(
+              buttonVariants({
+                color: 'ghost',
+                size: 'sm',
+                className:
+                  'gap-2 [&_svg]:size-3.5 bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 hover:text-primary-foreground border-0',
+              }),
+            )}
+          >
+            <ExternalLinkIcon />
+            Visit Website
+          </a>
+        </Shine>
+      )}
+
+      {githubUrl && (
+        <Shine enableOnHover duration={1200} asChild>
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            className={cn(
+              buttonVariants({
+                color: 'ghost',
+                size: 'sm',
+                className:
+                  'gap-2 [&_svg]:size-3.5 bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 hover:text-primary-foreground border-0',
+              }),
+            )}
+          >
+            <Github />
+            View Code on GitHub
+          </a>
+        </Shine>
+      )}
+    </>
   );
 }
