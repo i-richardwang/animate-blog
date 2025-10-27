@@ -1,0 +1,275 @@
+---
+title: 用桑基图追踪员工发展轨迹
+description: 使用 ECharts 绘制桑基图，可视化员工从入职到多年后的级别变动和流失情况，发现保留与发展的关键节点
+releaseDate: 2024-04-12
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+桑基图特别适合展示状态随时间的流动和转换。在人力资源分析中，我们常常需要回答这样的问题：一批新员工入职后，一年、两年、三年后分别有多少人留存？他们的职级如何变化？在哪个阶段流失最严重？
+
+Plotly 能快速画出交互式桑基图，但如果你对图表的美观度和定制化有更高要求，ECharts 是个更好的选择。它的配置虽然稍微复杂一些，但带来的视觉效果和灵活性值得这点投入。
+
+本文将演示如何用 Python 处理数据并生成 ECharts 配置，最终绘制一张追踪员工入职三年发展轨迹的桑基图。
+
+## 准备数据集
+
+我们需要一个记录员工在不同年份状态的数据集。每一行代表一名员工从入职（Year 0）到三年后（Year 3）的完整轨迹，包含职级和在职/离职状态。
+
+<Callout type="info">
+  本文使用的数据为模拟数据，构造过程参考[《模拟员工入职三年的成长与保留》](/docs/data-science/analysis/mock-employee-retention-progression)。数据依据常识设定，请勿作为真实情况参考。
+</Callout>
+
+**数据样本：**
+
+| Employee ID | Year 0       | Year 1       | Year 2       | Year 3       |
+| ----------- | ------------ | ------------ | ------------ | ------------ |
+| E0001       | Level 1 入职 | Level 1 在职 | Level 2 在职 | Level 2 在职 |
+| E0004       | Level 1 入职 | Level 1 在职 | Level 1 在职 | Level 1 离职 |
+| E0005       | Level 1 入职 | Level 1 在职 | Level 2 在职 | Level 3 在职 |
+| E0010       | Level 1 入职 | Level 1 在职 | Level 1 离职 | 已离职       |
+
+从表格可以看出，每个员工的发展路径各不相同。有人快速晋升，有人原地停留，也有人在不同阶段离职。
+
+## 转换为流动统计数据
+
+桑基图需要的是从一个状态流向另一个状态的人数统计，而不是逐行的员工记录。我们需要先做一些数据转换。
+
+### 确保节点名称唯一
+
+ECharts 桑基图有个重要的要求：**每个节点的名称必须唯一**。即使是同一个状态（比如 "Level 1 在职"），在不同时间点也要用不同的名称来区分。
+
+我们给每个年份的状态加上后缀：
+
+```python
+import pandas as pd
+
+# 给每个年份的状态添加年份标识，确保节点唯一
+employees['Year 1'] = employees['Year 1'] + ' Y1'
+employees['Year 2'] = employees['Year 2'] + ' Y2'
+employees['Year 3'] = employees['Year 3'] + ' Y3'
+
+# 构造流动关系：从 Year 0 到 Year 1，从 Year 1 到 Year 2，从 Year 2 到 Year 3
+transitions = pd.DataFrame({
+    'source': employees['Year 0'].tolist() + employees['Year 1'].tolist() + employees['Year 2'].tolist(),
+    'target': employees['Year 1'].tolist() + employees['Year 2'].tolist() + employees['Year 3'].tolist()
+})
+
+# 统计每条流动路径的人数
+flow_counts = transitions.groupby(['source', 'target']).size().reset_index(name='value')
+```
+
+### 处理已离职的边界情况
+
+已经离职的员工，在后续年份中不应该再显示节点和流动。我们需要做两件事：
+
+1. **删除源节点为"已离职"的流动**：已经离职的人不会再有后续流动。
+2. **隐藏离职后的目标节点**：把目标为"已离职"的节点名称替换为空格，并将流量值设为 0，让这些边在图中不可见。
+
+```python
+# 删除源节点为"已离职"的流动记录
+# 这些员工已经不在系统中，不会有后续状态
+flow_counts = flow_counts[~flow_counts['source'].str.startswith('已离职')]
+
+# 将目标节点为"已离职"的节点名称替换为空格（视觉上隐藏）
+# 同时将对应的流量值设为 0，让连接线不可见
+flow_counts.loc[flow_counts['target'].str.startswith('已离职'), 'target'] = ' '
+flow_counts.loc[flow_counts['target'] == ' ', 'value'] = 0
+```
+
+这样处理后，离职员工的流动会"消失"在图中，视觉上更加清晰。
+
+## 生成 ECharts 配置
+
+ECharts 通过一个 JavaScript 配置对象来定义图表的样式和数据。我们用 Python 函数来自动生成这个配置。
+
+### 配置生成函数
+
+```python
+def generate_sankey_options(flow_counts):
+    # 自定义颜色映射，保持同级别同颜色
+    color_map = {
+        'Level 1 在职': '#9AC2BE',  # 青绿色
+        'Level 1 离职': '#E0E0E0',  # 浅灰色
+        'Level 2 在职': '#F2C299',  # 橘黄色
+        'Level 2 离职': '#D3D3D3',  # 灰色
+        'Level 3 在职': '#F2C1B6',  # 粉色
+        'Level 3 离职': '#C0C0C0',  # 深灰色
+        'Level 1': '#9AC2BE',       # 入职统一用 Level 1 颜色
+        ' ': 'rgba(0, 0, 0, 0)'     # 隐藏节点用透明色
+    }
+
+    # 准备节点（nodes）和连接（links）数据
+    nodes = []
+    links = []
+    
+    for idx, row in flow_counts.iterrows():
+        source = row['source']
+        target = row['target']
+        value = row['value']
+        
+        # 收集所有唯一的节点
+        if source not in [node['name'] for node in nodes]:
+            nodes.append({"name": source})
+        if target not in [node['name'] for node in nodes]:
+            nodes.append({"name": target})
+        
+        # 构建连接关系
+        links.append({
+            "source": source,
+            "target": target,
+            "value": value,
+            "lineStyle": {
+                # 如果目标是隐藏节点，连接线也透明
+                "color": 'rgba(0, 0, 0, 0)' if target.startswith(" ") else "source"
+            }
+        })
+
+    # 对节点排序，让图表布局更合理
+    # 优先级：在职 > 离职 > 级别高低
+    def node_sort_key(node):
+        name = node['name']
+        
+        # 第一优先级：状态类型
+        if '在职' in name:
+            priority = 0
+        elif '离职' in name:
+            priority = 1
+        else:
+            priority = 2
+
+        # 第二优先级：级别（Level 3 > Level 2 > Level 1）
+        if 'Level 3' in name:
+            level = 0
+        elif 'Level 2' in name:
+            level = 1
+        elif 'Level 1' in name:
+            level = 2
+        else:
+            level = 3
+
+        return (priority, level, name)
+
+    nodes.sort(key=node_sort_key)
+
+    # 为每个节点应用颜色
+    for node in nodes:
+        node_name = node['name']
+        # 去掉年份后缀，获取基础名称用于匹配颜色
+        base_name = ' '.join(node_name.split()[:-1])
+        if node_name.startswith(" "):
+            base_name = ' '
+        node_color = color_map.get(base_name, '#DDDDDD')
+        node['itemStyle'] = {'color': node_color}
+
+    # 构造完整的 ECharts 配置对象
+    options = {
+        "title": {
+            "text": "员工发展与保留桑基图",
+        },
+        "tooltip": {
+            "trigger": "item",
+        },
+        "series": [
+            {
+                "type": "sankey",
+                "data": nodes,
+                "links": links,
+                "lineStyle": {
+                    "opacity": 0.3,    # 连接线半透明
+                    "curve": 0.5       # 连接线曲率
+                },
+                "label": {
+                    "position": "right"  # 标签显示在右侧
+                }
+            }
+        ]
+    }
+
+    return options
+
+# 生成配置
+echarts_options = generate_sankey_options(flow_counts)
+```
+
+### ECharts 配置示例
+
+生成的配置可以直接在 [ECharts 示例编辑器](https://echarts.apache.org/examples/zh/editor.html?c=sankey-simple) 中使用。下面是生成的配置结构示例：
+
+```javascript
+{
+    title: { text: '员工发展与保留桑基图' },
+    series: [
+        {
+            type: 'sankey',
+            data: [
+                { name: 'Level 3 在职 Y3', itemStyle: { color: '#F2C1B6' } },
+                { name: 'Level 2 在职 Y2', itemStyle: { color: '#F2C299' } },
+                { name: 'Level 2 在职 Y3', itemStyle: { color: '#F2C299' } },
+                { name: 'Level 1 在职 Y1', itemStyle: { color: '#9AC2BE' } },
+                { name: 'Level 1 在职 Y2', itemStyle: { color: '#9AC2BE' } },
+                { name: 'Level 1 在职 Y3', itemStyle: { color: '#9AC2BE' } },
+                { name: 'Level 3 离职 Y3', itemStyle: { color: '#C0C0C0' } },
+                { name: 'Level 2 离职 Y2', itemStyle: { color: '#D3D3D3' } },
+                { name: 'Level 2 离职 Y3', itemStyle: { color: '#D3D3D3' } },
+                { name: 'Level 1 离职 Y1', itemStyle: { color: '#E0E0E0' } },
+                { name: 'Level 1 离职 Y2', itemStyle: { color: '#E0E0E0' } },
+                { name: 'Level 1 离职 Y3', itemStyle: { color: '#E0E0E0' } },
+                { name: 'Level 1 入职', itemStyle: { color: '#9AC2BE' } },
+                { name: ' ', itemStyle: { color: 'rgba(0, 0, 0, 0)' } }
+            ],
+            links: [
+                {
+                    source: 'Level 1 入职',
+                    target: 'Level 1 在职 Y1',
+                    value: 946,
+                    lineStyle: { color: 'source' }
+                },
+                {
+                    source: 'Level 1 入职',
+                    target: 'Level 1 离职 Y1',
+                    value: 54,
+                    lineStyle: { color: 'source' }
+                },
+                {
+                    source: 'Level 1 在职 Y1',
+                    target: 'Level 2 在职 Y2',
+                    value: 273,
+                    lineStyle: { color: 'source' }
+                },
+                // ... 更多连接
+            ],
+            lineStyle: { opacity: 0.3, curve: 0.5 },
+            label: { position: 'right' }
+        }
+    ]
+}
+```
+
+**关键配置说明：**
+
+- **nodes.itemStyle.color**：控制每个节点的颜色，相同级别使用相同颜色便于追踪
+- **links.lineStyle.color**：设为 `'source'` 时，连接线继承源节点颜色
+- **lineStyle.opacity**：连接线透明度，避免重叠时过于杂乱
+- **lineStyle.curve**：连接线的弯曲程度，0.5 看起来比较柔和
+
+## 效果展示
+
+![使用 ECharts 绘制的员工发展与保留桑基图，展示从入职到三年后的级别变化和流失情况](/data-science/visualization/echarts-sankey-chart.webp)
+
+从图中可以很直观地看出几个关键信息：
+
+- **入职第一年的流失**：直接从 "Level 1 入职" 流向 "Level 1 离职 Y1" 的带子，显示了试用期或适应期的流失情况
+- **晋升路径**：从 Level 1 到 Level 2，再到 Level 3 的流动带，展示了员工的成长轨迹
+- **流失的关键节点**：通过观察哪个阶段流向"离职"的带子最宽，可以识别出保留的薄弱环节
+- **留存率变化**：对比不同年份在职节点的高度（代表人数），能看出整体留存趋势
+
+## Plotly 还是 ECharts？
+
+[之前那篇用 Plotly 画桑基图](/docs/data-science/visualization/python-plotly-sankey-diagram)的优势在于快。几行代码就能出图，鼠标拖动节点、悬停看数据这些交互功能都是自带的。适合做探索性分析，或者在 Jupyter Notebook 里快速验证想法。
+
+ECharts 的优势在于对视觉效果的控制力。每个节点的颜色、连接线的透明度、节点的排列顺序，甚至像隐藏已离职节点这种特殊需求，都能精确控制。这在做对外展示、嵌入网页或者需要统一视觉风格时很有用。
+
+代价是配置复杂一些。不过用 Python 函数生成配置能省不少事，颜色映射、节点排序这些规则写在函数里，换数据时直接复用就行。如果你需要给多批员工画类似的图，或者要套用到其他流动场景（用户转化路径、资金流转），这套方法能少写很多重复代码。
+

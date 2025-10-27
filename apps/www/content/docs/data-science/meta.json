@@ -18,6 +18,7 @@
     "analysis/employee-attrition-lightgbm",
     "---进阶图表绘制---",
     "visualization/python-plotly-sankey-diagram",
+    "visualization/echarts-employee-development-sankey",
     "visualization/plotly-boxplot-violinplot",
     "visualization/echarts-nightingale-rose-chart",
     "visualization/tableau-scatter-path-chart",
