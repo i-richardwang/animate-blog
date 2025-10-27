@@ -13,6 +13,7 @@
     "applications/building-ai-research-agent",
     "applications/building-llm-resume-recommender",
     "---原型实验---",
+    "applications/batch-processing-llm-calls",
     "applications/skills-knowledge-graph",
     "applications/employee-sentiment-analysis-llm",
     "applications/model-scale-text-classification",
@@ -24,6 +25,7 @@
     "---优化策略---",
     "applications/hypothetical-questions-rag-retrieval",
     "applications/paragraph-summary-rag-retrieval",
-    "applications/query-decomposition-rag"
+    "applications/query-decomposition-rag",
+    "applications/unstructured-document-processing"
   ]
 }

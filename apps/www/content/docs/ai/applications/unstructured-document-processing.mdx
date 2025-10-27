@@ -1,0 +1,316 @@
+---
+title: Unstructured统一文档处理
+description: 介绍Unstructured工具如何通过智能元素识别和统一接口，解决多格式文档加载和内容切分问题
+releaseDate: 2024-06-15
+author:
+  name: Richard Wang
+  url: https://imrichard.com
+---
+
+处理企业文档数据时，经常会遇到两类问题。一是格式多样：PDF、PPT、图片、邮件，每种格式需要不同的处理工具。二是切分不当：按字数切分时可能把表格切碎，段落在关键位置断裂。这些问题在构建知识库、数据分析、文档归档等场景中都很常见。
+
+[Unstructured](https://unstructured.io/) 的核心特点是两个：用统一的接口处理多种格式，通过 OCR 和视觉模型识别文档元素（标题、段落、表格、图片），然后支持基于元素的组合，而不是简单按字数切分。
+
+本文记录通过 Unstructured 处理文档数据的实践过程，包括本地服务部署和实际应用效果。
+
+## 本地服务部署
+
+Unstructured 提供两种使用方式：线上付费 API 和本地开源版本。
+
+线上 API 使用的模型效果更好，且不依赖本地硬件。但考虑到企业对数据安全的要求，这里选择本地部署方案。部署过程使用 Docker，官方提供了完整的镜像和文档。
+
+<Callout type="info">
+  Unstructured 的核心功能依赖 OCR 和视觉识别模型，需要在服务器端运行。本地部署后，客户端通过 API 调用的方式处理数据，保证了数据不出本地环境。
+</Callout>
+
+部署完成后，可以通过 Python SDK 访问本地服务：
+
+```python
+pip install unstructured-client
+```
+
+## 智能元素识别与切分
+
+传统方法是先加载整个文档，再按字数切分。Unstructured 的思路正好相反：先识别文档中的每个元素，再根据需要组合。
+
+我们用腾讯财报作为示例，看看这种方式的效果。
+
+### 基础元素识别
+
+首先加载文档，查看 Unstructured 如何识别元素：
+
+```python
+from unstructured_client import UnstructuredClient
+from unstructured_client.models import shared
+
+# 连接本地服务
+s = UnstructuredClient(
+    api_key_auth="",
+    server_url="http://localhost:8000/general/v0/general"
+)
+
+# 加载文档
+filename = "腾讯2023年第四季度及全年业绩.pdf"
+file = open(filename, "rb")
+
+req = shared.PartitionParameters(
+    files=shared.Files(
+        content=file.read(),
+        file_name=filename,
+    ),
+)
+
+res = s.general.partition(req)
+print(f"识别出的元素数量: {len(res.elements)}")
+```
+
+```text
+识别出的元素数量: 823
+```
+
+823 个元素，这个数量说明 Unstructured 把文档切得非常细。我们看几个典型元素：
+
+**普通段落：**
+
+```python
+res.elements[0]
+```
+
+```python
+{
+    'type': 'NarrativeText',
+    'element_id': 'be8ac291bbf76eb22d465dca4a103dca',
+    'text': '香港交易及結算所有限公司及香港聯合交易所有限公司對本公佈的內容概不負責...',
+    'metadata': {
+        'filetype': 'application/pdf',
+        'languages': ['eng'],
+        'page_number': 1,
+        'filename': '腾讯2023年第四季度及全年业绩.pdf'
+    }
+}
+```
+
+**标题：**
+
+```python
+res.elements[7]
+```
+
+```python
+{
+    'type': 'Title',
+    'element_id': 'f3fe705e91a4a52d0665a15bdcc078d8',
+    'text': '財務表現摘要',
+    'metadata': {
+        'filetype': 'application/pdf',
+        'languages': ['eng'],
+        'page_number': 1,
+        'filename': '腾讯2023年第四季度及全年业绩.pdf'
+    }
+}
+```
+
+**表格：**
+
+```python
+res.elements[9]
+```
+
+```python
+{
+    'type': 'Table',
+    'element_id': 'a29be236f96722cd90bcbb2e3dd09bef',
+    'text': '二零二三年 十二月三十一日 二零二二年 二零二三年 九月三十日 經重列 * 十二月三十一日 同比變動...',
+    'metadata': {
+        'filetype': 'application/pdf',
+        'languages': ['eng'],
+        'page_number': 1,
+        'parent_id': 'eab9ecf6b1536f2b564e1d348acbe580',
+        'filename': '腾讯2023年第四季度及全年业绩.pdf'
+    }
+}
+```
+
+可以看到，Unstructured 准确识别出了不同类型的元素。标题、段落、表格都被正确分类，表格内容保持完整，没有被切碎。
+
+### 元素组合策略
+
+如此细粒度的切分会导致严重缺失上下文。好在 Unstructured 支持元素组合，通过 `combine_under_n_chars` 参数可以将较短的元素合并。
+
+```python
+req = shared.PartitionParameters(
+    files=shared.Files(
+        content=file.read(),
+        file_name=filename,
+    ),
+    # 启用高精度策略
+    strategy="hi_res",
+    hi_res_model_name="yolox",
+    # 按标题组合元素
+    chunking_strategy="by_title",
+    # 合并长度小于 500 的元素
+    combine_under_n_chars=500,
+)
+
+res = s.general.partition(req)
+print(f"合并后的元素数量: {len(res.elements)}")
+```
+
+```text
+合并后的元素数量: 229
+```
+
+元素数量从 823 降到 229，上下文得到了保留。查看合并后的效果：
+
+```python
+res.elements[0]
+```
+
+```python
+{
+    'type': 'CompositeElement',
+    'element_id': '5ce42c46926efcf6b455cb04e0b68bff',
+    'text': '香港交易及結算所有限公司及香港聯合交易所有限公司對本公佈的內容概不負責...\n\nTencent...\n\n截至二零二三年十二月三十一日止年度全年業績公佈\n\n董事會欣然宣佈本集團截至二零二三年十二月三十一日止年度的經審核綜合業績...\n\n財務表現摘要\n\n未經審核 截至下列日期止三個月',
+    'metadata': {
+        'filetype': 'application/pdf',
+        'languages': ['eng'],
+        'page_number': 1,
+        'orig_elements': 'eJy1V21vGzcM...',
+        'filename': '腾讯2023年第四季度及全年业绩.pdf'
+    }
+}
+```
+
+这个长度已经适合后续的数据处理需求。关键是，表格没有被切碎，段落也在合理的边界进行了合并。
+
+<Callout type="warn">
+  `combine_under_n_chars` 参数需要根据实际情况调整。值太小会导致上下文不足，值太大则可能影响后续处理。建议从 500-1000 开始尝试，根据具体应用场景（如向量检索、文本分析、数据归档等）进行调整。
+</Callout>
+
+## 多格式数据加载
+
+Unstructured 的另一个优势是用统一的接口处理不同格式。我们测试几种常见的企业数据格式。
+
+### PPT 文档识别
+
+员工述职和部门战略规划的 PPT 包含丰富信息。我们用一份述职报告模板测试识别效果：
+
+![PPT 示例页面](/ai/applications/unstructured-ppt-sample.png)
+
+```python
+from langchain_community.document_loaders import UnstructuredAPIFileLoader
+
+loader = UnstructuredAPIFileLoader(
+    "述职报告.pptx",
+    url="http://localhost:8000/general/v0/general",
+    languages=['chi_sim'],
+)
+
+docs = loader.load()
+print(docs[0].page_content[:200])
+```
+
+识别结果：
+
+```text
+20XX
+
+个人述职报告模板
+
+述职报告｜工作总结｜岗位竞聘｜职称答辩
+
+汇报人：第一PPT
+
+申报职务：XXXX
+
+05
+
+科研成果
+
+文字内容
+
+文字内容
+
+文字内容
+
+请替换文字内容，修改文字内容，也可以直接复制你的内容到此。请替换文字
+
+请替换文字内容，修改文字内容，也可以直接复制你的内容到此...
+```
+
+文本内容被正确提取并整理成了结构化数据。
+
+### 图片文字识别
+
+从盖洛普的员工敬业度报告中截取一张图片，测试 OCR 效果：
+
+![盖洛普 Q12 问卷图片](/ai/applications/unstructured-gallup-q12-sample.png)
+
+```python
+loader = UnstructuredAPIFileLoader(
+    "GALLUP_Q12.png",
+    url="http://localhost:8000/general/v0/general",
+    languages=['chi_sim'],
+)
+
+docs = loader.load()
+```
+
+识别结果（部分）：
+
+```text
+盖洛普聚焦影响员工的12个驱动因素
+
+经过多年的研究，盖洛普提炼出了12个经典问题，问题的回答顺序对于测评也异常重要。
+Q12测评关注员工的主观感受，精简的12道问题不仅给员工最便捷的答题体验...
+
+Q12. 过去一年里，我在工作中有机会学习和成长
+Q11. 在过去的六个月内，工作单位有人和我谈及我的进步
+Q10. 我在工作单位有一个最要好的朋友
+...
+```
+
+文本内容基本准确提取。虽然部分字符可能有识别误差（如"盖洛普"被识别为"盖 洛 普"），但整体信息完整，对于后续的语义检索影响不大。
+
+### 邮件内容提取
+
+邮件是企业内重要的数据来源。我们用一封 Kaggle 的竞赛通知邮件测试：
+
+![Kaggle 邮件示例](/ai/applications/unstructured-kaggle-email-sample.png)
+
+```python
+loader = UnstructuredAPIFileLoader(
+    "Competition Launch_ Home Credit - Credit Risk Model Stability.eml",
+    url="http://localhost:8000/general/v0/general",
+    languages=['chi_sim'],
+)
+
+docs = loader.load()
+```
+
+邮件内容成功读取：
+
+```text
+Hi Richard Wang, Formal credit history is not the only means to judge loan applicants. 
+The power of data science could help better predict one's repayment capabilities and make 
+loans more accessible to those who may benefit the most. In this competition, you'll 
+predict which clients will default on their loans.
+
+Total Prizes: $105,000 Entry Deadline: April 29, 2024    Learn More    
+Your participation may enable consumer finance providers to accept more loan applications...
+```
+
+邮件正文、发件人、关键信息都被正确提取。
+
+## 实践中的几点经验
+
+**参数需要调优。** `combine_under_n_chars` 没有通用的最佳值，需要根据文档特点和应用场景实验。财报类文档信息密度高，可以设小一些；技术文档内容较松散，可以设大一些。
+
+**可以叠加使用其他技巧。** Unstructured 的元素识别解决了切分不当的问题，但依然可以配合 overlap 策略、文档预处理等方法进一步提升效果。这些技术是互补的，而不是互斥的。
+
+**线上 API 和本地部署的取舍。** 线上 API 的识别模型更先进，效果更好，也不占用本地资源。如果数据安全允许，线上 API 是更优选择。本地部署适合对数据安全有严格要求的场景。
+
+**OCR 识别精度受图片质量影响。** 对于图片和扫描件，原始质量直接影响识别效果。如果识别结果不理想，可以先对图片进行预处理（提高分辨率、调整对比度等），再送入 Unstructured 处理。
+
+Unstructured 提供了一种更智能的文档处理方式。它不能解决所有问题，但在处理复杂文档和多格式数据时，确实能减少很多麻烦。无论是构建知识库、做数据分析，还是文档归档，都值得尝试这个工具。
+
