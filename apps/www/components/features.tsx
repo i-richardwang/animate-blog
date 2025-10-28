@@ -85,6 +85,7 @@ import { motion } from 'motion/react';
 const COMPONENTS = [
   {
     name: 'About Me',
+    href: '/about',
     icon: <About />,
   },
   {
