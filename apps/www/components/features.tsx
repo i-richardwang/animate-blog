@@ -86,6 +86,7 @@ const COMPONENTS = [
   {
     name: 'About Me',
     description: '关于我',
+    href: '/about',
     icon: <About />,
   },
   {
