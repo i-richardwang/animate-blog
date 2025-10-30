@@ -317,7 +317,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/components/backgrounds/bubble.tsx',
         content:
-          '\'use client\';\n\nimport * as React from \'react\';\nimport {\n  motion,\n  useMotionValue,\n  useSpring,\n  type SpringOptions,\n} from \'motion/react\';\n\nimport { cn } from \'@/lib/utils\';\n\ntype BubbleColors = {\n  first: string;\n  second: string;\n  third: string;\n  fourth: string;\n  fifth: string;\n  sixth: string;\n};\n\ntype BubbleBackgroundProps = React.ComponentProps<\'div\'> & {\n  interactive?: boolean;\n  transition?: SpringOptions;\n  colors?: BubbleColors;\n};\n\nfunction BubbleBackground({\n  ref,\n  className,\n  children,\n  interactive = false,\n  transition = { stiffness: 100, damping: 20 },\n  colors = {\n    first: \'18,113,255\',\n    second: \'221,74,255\',\n    third: \'0,220,255\',\n    fourth: \'200,50,50\',\n    fifth: \'180,180,50\',\n    sixth: \'140,100,255\',\n  },\n  ...props\n}: BubbleBackgroundProps) {\n  const containerRef = React.useRef<HTMLDivElement>(null);\n  React.useImperativeHandle(ref, () => containerRef.current as HTMLDivElement);\n\n  const mouseX = useMotionValue(0);\n  const mouseY = useMotionValue(0);\n  const springX = useSpring(mouseX, transition);\n  const springY = useSpring(mouseY, transition);\n\n  React.useEffect(() => {\n    if (!interactive) return;\n\n    const currentContainer = containerRef.current;\n    if (!currentContainer) return;\n\n    const handleMouseMove = (e: MouseEvent) => {\n      const rect = currentContainer.getBoundingClientRect();\n      const centerX = rect.left + rect.width / 2;\n      const centerY = rect.top + rect.height / 2;\n      mouseX.set(e.clientX - centerX);\n      mouseY.set(e.clientY - centerY);\n    };\n\n    currentContainer?.addEventListener(\'mousemove\', handleMouseMove);\n    return () =>\n      currentContainer?.removeEventListener(\'mousemove\', handleMouseMove);\n  }, [interactive, mouseX, mouseY]);\n\n  return (\n    <div\n      ref={containerRef}\n      data-slot="bubble-background"\n      className={cn(\n        \'relative size-full overflow-hidden bg-gradient-to-br from-violet-900 to-blue-900\',\n        className,\n      )}\n      {...props}\n    >\n      <style>\n        {`\n            :root {\n              --first-color: ${colors.first};\n              --second-color: ${colors.second};\n              --third-color: ${colors.third};\n              --fourth-color: ${colors.fourth};\n              --fifth-color: ${colors.fifth};\n              --sixth-color: ${colors.sixth};\n            }\n          `}\n      </style>\n\n      <svg\n        xmlns="http://www.w3.org/2000/svg"\n        className="absolute top-0 left-0 w-0 h-0"\n      >\n        <defs>\n          <filter id="goo">\n            <feGaussianBlur\n              in="SourceGraphic"\n              stdDeviation="10"\n              result="blur"\n            />\n            <feColorMatrix\n              in="blur"\n              mode="matrix"\n              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"\n              result="goo"\n            />\n            <feBlend in="SourceGraphic" in2="goo" />\n          </filter>\n        </defs>\n      </svg>\n\n      <div\n        className="absolute inset-0"\n        style={{ filter: \'url(#goo) blur(40px)\' }}\n      >\n        <motion.div\n          className="absolute rounded-full size-[80%] top-[10%] left-[10%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,rgba(var(--first-color),0.8)_0%,rgba(var(--first-color),0)_50%)]"\n          animate={{ y: [-50, 50, -50] }}\n          transition={{ duration: 30, ease: \'easeInOut\', repeat: Infinity }}\n        />\n\n        <motion.div\n          className="absolute inset-0 flex justify-center items-center origin-[calc(50%-400px)]"\n          animate={{ rotate: 360 }}\n          transition={{\n            duration: 20,\n            ease: \'linear\',\n            repeat: Infinity,\n            repeatType: \'loop\',\n          }}\n        >\n          <div className="rounded-full size-[80%] top-[10%] left-[10%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,rgba(var(--second-color),0.8)_0%,rgba(var(--second-color),0)_50%)]" />\n        </motion.div>\n\n        <motion.div\n          className="absolute inset-0 flex justify-center items-center origin-[calc(50%+400px)]"\n          animate={{ rotate: 360 }}\n          transition={{ duration: 40, ease: \'linear\', repeat: Infinity }}\n        >\n          <div className="absolute rounded-full size-[80%] bg-[radial-gradient(circle_at_center,rgba(var(--third-color),0.8)_0%,rgba(var(--third-color),0)_50%)] mix-blend-hard-light top-[calc(50%+200px)] left-[calc(50%-500px)]" />\n        </motion.div>\n\n        <motion.div\n          className="absolute rounded-full size-[80%] top-[10%] left-[10%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,rgba(var(--fourth-color),0.8)_0%,rgba(var(--fourth-color),0)_50%)] opacity-70"\n          animate={{ x: [-50, 50, -50] }}\n          transition={{ duration: 40, ease: \'easeInOut\', repeat: Infinity }}\n        />\n\n        <motion.div\n          className="absolute inset-0 flex justify-center items-center origin-[calc(50%_-_800px)_calc(50%_+_200px)]"\n          animate={{ rotate: 360 }}\n          transition={{ duration: 20, ease: \'linear\', repeat: Infinity }}\n        >\n          <div className="absolute rounded-full size-[160%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,rgba(var(--fifth-color),0.8)_0%,rgba(var(--fifth-color),0)_50%)] top-[calc(50%-80%)] left-[calc(50%-80%)]" />\n        </motion.div>\n\n        {interactive && (\n          <motion.div\n            className="absolute rounded-full size-full mix-blend-hard-light bg-[radial-gradient(circle_at_center,rgba(var(--sixth-color),0.8)_0%,rgba(var(--sixth-color),0)_50%)] opacity-70"\n            style={{\n              x: springX,\n              y: springY,\n            }}\n          />\n        )}\n      </div>\n\n      {children}\n    </div>\n  );\n}\n\nexport { BubbleBackground, type BubbleBackgroundProps };',
+          "'use client';\n\nimport * as React from 'react';\nimport {\n  motion,\n  useMotionValue,\n  useSpring,\n  type SpringOptions,\n} from 'motion/react';\n\nimport { cn } from '@/lib/utils';\n\ntype BubbleColors = {\n  first: string;\n  second: string;\n  third: string;\n  fourth: string;\n  fifth: string;\n  sixth: string;\n};\n\ntype BubbleBackgroundProps = React.ComponentProps<'div'> & {\n  interactive?: boolean;\n  transition?: SpringOptions;\n  colors?: BubbleColors;\n};\n\nfunction BubbleBackground({\n  ref,\n  className,\n  children,\n  interactive = false,\n  transition = { stiffness: 100, damping: 20 },\n  colors = {\n    first: '18,113,255',\n    second: '221,74,255',\n    third: '0,220,255',\n    fourth: '200,50,50',\n    fifth: '180,180,50',\n    sixth: '140,100,255',\n  },\n  ...props\n}: BubbleBackgroundProps) {\n  const containerRef = React.useRef<HTMLDivElement>(null);\n  React.useImperativeHandle(ref, () => containerRef.current as HTMLDivElement);\n\n  const mouseX = useMotionValue(0);\n  const mouseY = useMotionValue(0);\n  const springX = useSpring(mouseX, transition);\n  const springY = useSpring(mouseY, transition);\n\n  const rectRef = React.useRef<DOMRect | null>(null);\n  const rafIdRef = React.useRef<number | null>(null);\n\n  React.useLayoutEffect(() => {\n    const updateRect = () => {\n      if (containerRef.current) {\n        rectRef.current = containerRef.current.getBoundingClientRect();\n      }\n    };\n\n    updateRect();\n\n    const el = containerRef.current;\n    const ro = new ResizeObserver(updateRect);\n    if (el) ro.observe(el);\n\n    window.addEventListener('resize', updateRect);\n    window.addEventListener('scroll', updateRect, { passive: true });\n\n    return () => {\n      ro.disconnect();\n      window.removeEventListener('resize', updateRect);\n      window.removeEventListener('scroll', updateRect);\n    };\n  }, []);\n\n  React.useEffect(() => {\n    if (!interactive) return;\n\n    const el = containerRef.current;\n    if (!el) return;\n\n    const handleMouseMove = (e: MouseEvent) => {\n      const rect = rectRef.current;\n      if (!rect) return;\n      const centerX = rect.left + rect.width / 2;\n      const centerY = rect.top + rect.height / 2;\n\n      if (rafIdRef.current != null) cancelAnimationFrame(rafIdRef.current);\n      rafIdRef.current = requestAnimationFrame(() => {\n        mouseX.set(e.clientX - centerX);\n        mouseY.set(e.clientY - centerY);\n      });\n    };\n\n    el.addEventListener('mousemove', handleMouseMove as EventListener, {\n      passive: true,\n    });\n    return () => {\n      el.removeEventListener('mousemove', handleMouseMove as EventListener);\n      if (rafIdRef.current != null) cancelAnimationFrame(rafIdRef.current);\n    };\n  }, [interactive, mouseX, mouseY]);\n\n  return (\n    <div\n      ref={containerRef}\n      data-slot=\"bubble-background\"\n      className={cn(\n        'relative size-full overflow-hidden bg-gradient-to-br from-violet-900 to-blue-900',\n        className,\n      )}\n      {...props}\n    >\n      <style>\n        {`\n            :root {\n              --first-color: ${colors.first};\n              --second-color: ${colors.second};\n              --third-color: ${colors.third};\n              --fourth-color: ${colors.fourth};\n              --fifth-color: ${colors.fifth};\n              --sixth-color: ${colors.sixth};\n            }\n          `}\n      </style>\n\n      <svg\n        xmlns=\"http://www.w3.org/2000/svg\"\n        className=\"absolute top-0 left-0 w-0 h-0\"\n      >\n        <defs>\n          <filter id=\"goo\">\n            <feGaussianBlur\n              in=\"SourceGraphic\"\n              stdDeviation=\"16\"\n              result=\"blur\"\n            />\n            <feColorMatrix\n              in=\"blur\"\n              mode=\"matrix\"\n              values=\"1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8\"\n              result=\"goo\"\n            />\n            <feBlend in=\"SourceGraphic\" in2=\"goo\" />\n          </filter>\n        </defs>\n      </svg>\n\n      <div\n        className=\"absolute inset-0\"\n        style={{ filter: 'url(#goo) blur(40px)' }}\n      >\n        <motion.div\n          className=\"absolute rounded-full size-[80%] top-[10%] left-[10%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,rgba(var(--first-color),0.8)_0%,rgba(var(--first-color),0)_50%)]\"\n          animate={{ y: [-50, 50, -50] }}\n          transition={{ duration: 30, ease: 'easeInOut', repeat: Infinity }}\n          style={{ transform: 'translateZ(0)', willChange: 'transform' }}\n        />\n\n        <motion.div\n          className=\"absolute inset-0 flex justify-center items-center origin-[calc(50%-400px)]\"\n          animate={{ rotate: 360 }}\n          transition={{\n            duration: 20,\n            ease: 'linear',\n            repeat: Infinity,\n            repeatType: 'loop',\n          }}\n          style={{ transform: 'translateZ(0)', willChange: 'transform' }}\n        >\n          <div className=\"rounded-full size-[80%] top-[10%] left-[10%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,rgba(var(--second-color),0.8)_0%,rgba(var(--second-color),0)_50%)]\" />\n        </motion.div>\n\n        <motion.div\n          className=\"absolute inset-0 flex justify-center items-center origin-[calc(50%+400px)]\"\n          animate={{ rotate: 360 }}\n          transition={{ duration: 40, ease: 'linear', repeat: Infinity }}\n          style={{ transform: 'translateZ(0)', willChange: 'transform' }}\n        >\n          <div className=\"absolute rounded-full size-[80%] bg-[radial-gradient(circle_at_center,rgba(var(--third-color),0.8)_0%,rgba(var(--third-color),0)_50%)] mix-blend-hard-light top-[calc(50%+200px)] left-[calc(50%-500px)]\" />\n        </motion.div>\n\n        <motion.div\n          className=\"absolute rounded-full size-[80%] top-[10%] left-[10%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,rgba(var(--fourth-color),0.8)_0%,rgba(var(--fourth-color),0)_50%)] opacity-70\"\n          animate={{ x: [-50, 50, -50] }}\n          transition={{ duration: 40, ease: 'easeInOut', repeat: Infinity }}\n          style={{ transform: 'translateZ(0)', willChange: 'transform' }}\n        />\n\n        <motion.div\n          className=\"absolute inset-0 flex justify-center items-center origin-[calc(50%_-_800px)_calc(50%_+_200px)]\"\n          animate={{ rotate: 360 }}\n          transition={{ duration: 20, ease: 'linear', repeat: Infinity }}\n          style={{ transform: 'translateZ(0)', willChange: 'transform' }}\n        >\n          <div className=\"absolute rounded-full size-[160%] mix-blend-hard-light bg-[radial-gradient(circle_at_center,rgba(var(--fifth-color),0.8)_0%,rgba(var(--fifth-color),0)_50%)] top-[calc(50%-80%)] left-[calc(50%-80%)]\" />\n        </motion.div>\n\n        {interactive && (\n          <motion.div\n            className=\"absolute rounded-full size-full mix-blend-hard-light bg-[radial-gradient(circle_at_center,rgba(var(--sixth-color),0.8)_0%,rgba(var(--sixth-color),0)_50%)] opacity-70\"\n            style={{\n              x: springX,\n              y: springY,\n              transform: 'translateZ(0)',\n              willChange: 'transform',\n            }}\n          />\n        )}\n      </div>\n\n      {children}\n    </div>\n  );\n}\n\nexport { BubbleBackground, type BubbleBackgroundProps };",
       },
     ],
     keywords: [],
@@ -725,6 +725,43 @@ export const index: Record<string, any> = {
     })(),
     command: '@animate-ui/components-base-files',
   },
+  'components-base-menu': {
+    name: 'components-base-menu',
+    description:
+      'A list of actions in a dropdown, enhanced with keyboard navigation.',
+    type: 'registry:ui',
+    dependencies: undefined,
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/primitives-base-menu'],
+    files: [
+      {
+        path: 'registry/components/base/menu/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/components/base/menu.tsx',
+        content:
+          "import * as React from 'react';\n\nimport {\n  Menu as MenuPrimitive,\n  MenuTrigger as MenuTriggerPrimitive,\n  MenuPortal as MenuPortalPrimitive,\n  MenuPopup as MenuPopupPrimitive,\n  MenuPositioner as MenuPositionerPrimitive,\n  MenuGroup as MenuGroupPrimitive,\n  MenuGroupLabel as MenuGroupLabelPrimitive,\n  MenuArrow as MenuArrowPrimitive,\n  MenuItem as MenuItemPrimitive,\n  MenuCheckboxItem as MenuCheckboxItemPrimitive,\n  MenuCheckboxItemIndicator as MenuCheckboxItemIndicatorPrimitive,\n  MenuRadioGroup as MenuRadioGroupPrimitive,\n  MenuRadioItem as MenuRadioItemPrimitive,\n  MenuRadioItemIndicator as MenuRadioItemIndicatorPrimitive,\n  MenuHighlightItem as MenuHighlightItemPrimitive,\n  MenuHighlight as MenuHighlightPrimitive,\n  MenuSeparator as MenuSeparatorPrimitive,\n  MenuShortcut as MenuShortcutPrimitive,\n  MenuSubmenu as MenuSubmenuPrimitive,\n  MenuSubmenuTrigger as MenuSubmenuTriggerPrimitive,\n  type MenuProps as MenuPrimitiveProps,\n  type MenuTriggerProps as MenuTriggerPrimitiveProps,\n  type MenuPortalProps as MenuPortalPrimitiveProps,\n  type MenuPopupProps as MenuPopupPrimitiveProps,\n  type MenuPositionerProps as MenuPositionerPrimitiveProps,\n  type MenuGroupProps as MenuGroupPrimitiveProps,\n  type MenuGroupLabelProps as MenuGroupLabelPrimitiveProps,\n  type MenuArrowProps as MenuArrowPrimitiveProps,\n  type MenuItemProps as MenuItemPrimitiveProps,\n  type MenuCheckboxItemProps as MenuCheckboxItemPrimitiveProps,\n  type MenuRadioGroupProps as MenuRadioGroupPrimitiveProps,\n  type MenuRadioItemProps as MenuRadioItemPrimitiveProps,\n  type MenuSeparatorProps as MenuSeparatorPrimitiveProps,\n  type MenuShortcutProps as MenuShortcutPrimitiveProps,\n  type MenuSubmenuProps as MenuSubmenuPrimitiveProps,\n  type MenuSubmenuTriggerProps as MenuSubmenuTriggerPrimitiveProps,\n} from '@/components/animate-ui/primitives/base/menu';\nimport { cn } from '@/lib/utils';\nimport { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';\n\ntype MenuProps = MenuPrimitiveProps;\n\nfunction Menu(props: MenuProps) {\n  return <MenuPrimitive {...props} />;\n}\n\ntype MenuTriggerProps = MenuTriggerPrimitiveProps;\n\nfunction MenuTrigger(props: MenuTriggerProps) {\n  return <MenuTriggerPrimitive {...props} />;\n}\n\ntype MenuPortalProps = MenuPortalPrimitiveProps;\n\nfunction MenuPortal(props: MenuPortalProps) {\n  return <MenuPortalPrimitive {...props} />;\n}\n\ntype MenuPanelProps = MenuPopupPrimitiveProps & MenuPositionerPrimitiveProps;\n\nfunction MenuPanel({\n  className,\n  finalFocus,\n  id,\n  children,\n  sideOffset = 4,\n  transition = { duration: 0.2 },\n  ...props\n}: MenuPanelProps) {\n  return (\n    <MenuPortal>\n      <MenuPositionerPrimitive\n        className=\"z-50\"\n        sideOffset={sideOffset}\n        {...props}\n      >\n        <MenuPopupPrimitive\n          finalFocus={finalFocus}\n          transition={transition}\n          id={id}\n          className={cn(\n            'bg-popover text-popover-foreground max-h-(--available-height) min-w-[8rem] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md outline-none',\n            className,\n          )}\n        >\n          <MenuHighlightPrimitive className=\"absolute inset-0 bg-accent z-0 rounded-sm\">\n            {children}\n          </MenuHighlightPrimitive>\n        </MenuPopupPrimitive>\n      </MenuPositionerPrimitive>\n    </MenuPortal>\n  );\n}\n\ntype MenuGroupProps = MenuGroupPrimitiveProps;\n\nfunction MenuGroup(props: MenuGroupProps) {\n  return <MenuGroupPrimitive {...props} />;\n}\n\ntype MenuGroupLabelProps = MenuGroupLabelPrimitiveProps & {\n  inset?: boolean;\n};\n\nfunction MenuGroupLabel({ className, inset, ...props }: MenuGroupLabelProps) {\n  return (\n    <MenuGroupLabelPrimitive\n      data-inset={inset}\n      className={cn(\n        'px-2 py-1.5 text-sm font-medium data-[inset]:pl-8',\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\ntype MenuItemProps = MenuItemPrimitiveProps & {\n  inset?: boolean;\n  variant?: 'default' | 'destructive';\n};\n\nfunction MenuItem({\n  className,\n  inset,\n  variant = 'default',\n  disabled,\n  ...props\n}: MenuItemProps) {\n  return (\n    <MenuHighlightItemPrimitive\n      activeClassName={\n        variant === 'destructive'\n          ? 'bg-destructive/10 dark:bg-destructive/20'\n          : ''\n      }\n      disabled={disabled}\n    >\n      <MenuItemPrimitive\n        disabled={disabled}\n        data-inset={inset}\n        data-variant={variant}\n        className={cn(\n          \"focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4\",\n          className,\n        )}\n        {...props}\n      />\n    </MenuHighlightItemPrimitive>\n  );\n}\n\ntype MenuCheckboxItemProps = MenuCheckboxItemPrimitiveProps;\n\nfunction MenuCheckboxItem({\n  className,\n  children,\n  checked,\n  disabled,\n  ...props\n}: MenuCheckboxItemProps) {\n  return (\n    <MenuHighlightItemPrimitive disabled={disabled}>\n      <MenuCheckboxItemPrimitive\n        disabled={disabled}\n        className={cn(\n          \"focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4\",\n          className,\n        )}\n        checked={checked}\n        {...props}\n      >\n        <span className=\"pointer-events-none absolute left-2 flex size-3.5 items-center justify-center\">\n          <MenuCheckboxItemIndicatorPrimitive\n            initial={{ opacity: 0, scale: 0.5 }}\n            animate={{ opacity: 1, scale: 1 }}\n          >\n            <CheckIcon className=\"size-4\" />\n          </MenuCheckboxItemIndicatorPrimitive>\n        </span>\n        {children}\n      </MenuCheckboxItemPrimitive>\n    </MenuHighlightItemPrimitive>\n  );\n}\n\ntype MenuRadioGroupProps = MenuRadioGroupPrimitiveProps;\n\nfunction MenuRadioGroup(props: MenuRadioGroupProps) {\n  return <MenuRadioGroupPrimitive {...props} />;\n}\n\ntype MenuRadioItemProps = MenuRadioItemPrimitiveProps;\n\nfunction MenuRadioItem({\n  className,\n  children,\n  disabled,\n  ...props\n}: MenuRadioItemProps) {\n  return (\n    <MenuHighlightItemPrimitive disabled={disabled}>\n      <MenuRadioItemPrimitive\n        disabled={disabled}\n        className={cn(\n          \"focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4\",\n          className,\n        )}\n        {...props}\n      >\n        <span className=\"pointer-events-none absolute left-2 flex size-3.5 items-center justify-center\">\n          <MenuRadioItemIndicatorPrimitive layoutId=\"dropdown-menu-item-indicator-radio\">\n            <CircleIcon className=\"size-2 fill-current\" />\n          </MenuRadioItemIndicatorPrimitive>\n        </span>\n        {children}\n      </MenuRadioItemPrimitive>\n    </MenuHighlightItemPrimitive>\n  );\n}\n\ntype MenuSeparatorProps = MenuSeparatorPrimitiveProps;\n\nfunction MenuSeparator({ className, ...props }: MenuSeparatorProps) {\n  return (\n    <MenuSeparatorPrimitive\n      className={cn('bg-border -mx-1 my-1 h-px', className)}\n      {...props}\n    />\n  );\n}\n\ntype MenuShortcutProps = MenuShortcutPrimitiveProps;\n\nfunction MenuShortcut({ className, ...props }: MenuShortcutProps) {\n  return (\n    <MenuShortcutPrimitive\n      className={cn(\n        'text-muted-foreground ml-auto text-xs tracking-widest',\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\ntype MenuArrowProps = MenuArrowPrimitiveProps;\n\nfunction MenuArrow(props: MenuArrowProps) {\n  return <MenuArrowPrimitive {...props} />;\n}\n\ntype MenuSubmenuProps = MenuSubmenuPrimitiveProps;\n\nfunction MenuSubmenu(props: MenuSubmenuProps) {\n  return <MenuSubmenuPrimitive {...props} />;\n}\n\ntype MenuSubmenuTriggerProps = MenuSubmenuTriggerPrimitiveProps & {\n  inset?: boolean;\n  children?: React.ReactNode;\n};\n\nfunction MenuSubmenuTrigger({\n  disabled,\n  className,\n  inset,\n  children,\n  ...props\n}: MenuSubmenuTriggerProps) {\n  return (\n    <MenuHighlightItemPrimitive disabled={disabled}>\n      <MenuSubmenuTriggerPrimitive\n        disabled={disabled}\n        data-inset={inset}\n        className={cn(\n          'focus:text-accent-foreground data-[state=open]:text-accent-foreground flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[inset]:pl-8',\n          'aria-[expanded=true]:[&_[data-slot=chevron]]:rotate-90 [&_[data-slot=chevron]]:transition-transform [&_[data-slot=chevron]]:duration-300 [&_[data-slot=chevron]]:ease-in-out',\n          className,\n        )}\n        {...props}\n      >\n        {children}\n        <ChevronRightIcon data-slot=\"chevron\" className=\"ml-auto size-4\" />\n      </MenuSubmenuTriggerPrimitive>\n    </MenuHighlightItemPrimitive>\n  );\n}\n\ntype MenuSubmenuPanelProps = MenuPopupPrimitiveProps &\n  MenuPositionerPrimitiveProps;\n\nfunction MenuSubmenuPanel({\n  className,\n  finalFocus,\n  id,\n  children,\n  sideOffset = 4,\n  transition = { duration: 0.2 },\n  ...props\n}: MenuSubmenuPanelProps) {\n  return (\n    <MenuPortal>\n      <MenuPositionerPrimitive\n        className=\"z-50\"\n        sideOffset={sideOffset}\n        {...props}\n      >\n        <MenuPopupPrimitive\n          finalFocus={finalFocus}\n          transition={transition}\n          id={id}\n          className={cn(\n            'bg-popover text-popover-foreground max-h-(--available-height) min-w-[8rem] origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md',\n            className,\n          )}\n        >\n          {children}\n        </MenuPopupPrimitive>\n      </MenuPositionerPrimitive>\n    </MenuPortal>\n  );\n}\n\nexport {\n  Menu,\n  MenuTrigger,\n  MenuPortal,\n  MenuPanel,\n  MenuGroup,\n  MenuGroupLabel,\n  MenuItem,\n  MenuCheckboxItem,\n  MenuRadioGroup,\n  MenuRadioItem,\n  MenuSeparator,\n  MenuShortcut,\n  MenuArrow,\n  MenuSubmenu,\n  MenuSubmenuTrigger,\n  MenuSubmenuPanel,\n  type MenuProps,\n  type MenuTriggerProps,\n  type MenuPortalProps,\n  type MenuPanelProps,\n  type MenuGroupProps,\n  type MenuGroupLabelProps,\n  type MenuItemProps,\n  type MenuCheckboxItemProps,\n  type MenuRadioGroupProps,\n  type MenuRadioItemProps,\n  type MenuSeparatorProps,\n  type MenuShortcutProps,\n  type MenuArrowProps,\n  type MenuSubmenuProps,\n  type MenuSubmenuTriggerProps,\n  type MenuSubmenuPanelProps,\n};",
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/components/base/menu/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'components-base-menu';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/components-base-menu',
+  },
   'components-base-popover': {
     name: 'components-base-popover',
     description: 'An accessible popup anchored to a button.',
@@ -998,7 +1035,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/components/base/toggle-group.tsx',
         content:
-          "import * as React from 'react';\nimport { type VariantProps } from 'class-variance-authority';\n\nimport {\n  ToggleGroup as ToggleGroupPrimitive,\n  Toggle as TogglePrimitive,\n  ToggleGroupHighlight as ToggleGroupHighlightPrimitive,\n  ToggleHighlight as ToggleHighlightPrimitive,\n  useToggleGroup as useToggleGroupPrimitive,\n  type ToggleGroupProps as ToggleGroupPrimitiveProps,\n  type ToggleProps as TogglePrimitiveProps,\n} from '@/components/animate-ui/primitives/base/toggle-group';\nimport { toggleVariants } from '@/components/animate-ui/components/base/toggle';\nimport { cn } from '@/lib/utils';\nimport { getStrictContext } from '@/lib/get-strict-context';\n\nconst [ToggleGroupProvider, useToggleGroup] =\n  getStrictContext<VariantProps<typeof toggleVariants>>('ToggleGroupContext');\n\ntype ToggleGroupProps = ToggleGroupPrimitiveProps &\n  VariantProps<typeof toggleVariants>;\n\nfunction ToggleGroup({\n  className,\n  variant,\n  size,\n  children,\n  toggleMultiple,\n  ...props\n}: ToggleGroupProps) {\n  return (\n    <ToggleGroupPrimitive\n      data-variant={variant}\n      data-size={size}\n      className={cn(\n        'group/toggle-group flex gap-0.5 w-fit items-center rounded-lg data-[variant=outline]:shadow-xs data-[variant=outline]:border data-[variant=outline]:p-0.5',\n        className,\n      )}\n      toggleMultiple={toggleMultiple}\n      {...props}\n    >\n      <ToggleGroupProvider value={{ variant, size }}>\n        {!toggleMultiple ? (\n          <ToggleGroupHighlightPrimitive className=\"bg-accent rounded-md\">\n            {children}\n          </ToggleGroupHighlightPrimitive>\n        ) : (\n          children\n        )}\n      </ToggleGroupProvider>\n    </ToggleGroupPrimitive>\n  );\n}\n\ntype ToggleProps = TogglePrimitiveProps & VariantProps<typeof toggleVariants>;\n\nfunction Toggle({ className, children, variant, size, ...props }: ToggleProps) {\n  const { variant: contextVariant, size: contextSize } = useToggleGroup();\n  const { toggleMultiple } = useToggleGroupPrimitive();\n\n  return (\n    <ToggleHighlightPrimitive\n      value={props.value?.toString()}\n      className={cn(toggleMultiple && 'bg-accent rounded-md')}\n    >\n      <TogglePrimitive\n        data-variant={contextVariant || variant}\n        data-size={contextSize || size}\n        className={cn(\n          toggleVariants({\n            variant: contextVariant || variant,\n            size: contextSize || size,\n          }),\n          'min-w-0 border-0 flex-1 shrink-0 shadow-none rounded-md focus:z-10 focus-visible:z-10',\n          className,\n        )}\n        {...props}\n      >\n        {children}\n      </TogglePrimitive>\n    </ToggleHighlightPrimitive>\n  );\n}\n\nexport { ToggleGroup, Toggle, type ToggleGroupProps, type ToggleProps };",
+          "import * as React from 'react';\nimport { type VariantProps } from 'class-variance-authority';\n\nimport {\n  ToggleGroup as ToggleGroupPrimitive,\n  Toggle as TogglePrimitive,\n  ToggleGroupHighlight as ToggleGroupHighlightPrimitive,\n  ToggleHighlight as ToggleHighlightPrimitive,\n  useToggleGroup as useToggleGroupPrimitive,\n  type ToggleGroupProps as ToggleGroupPrimitiveProps,\n  type ToggleProps as TogglePrimitiveProps,\n} from '@/components/animate-ui/primitives/base/toggle-group';\nimport { toggleVariants } from '@/components/animate-ui/components/base/toggle';\nimport { cn } from '@/lib/utils';\nimport { getStrictContext } from '@/lib/get-strict-context';\n\nconst [ToggleGroupProvider, useToggleGroup] =\n  getStrictContext<VariantProps<typeof toggleVariants>>('ToggleGroupContext');\n\ntype ToggleGroupProps = ToggleGroupPrimitiveProps &\n  VariantProps<typeof toggleVariants>;\n\nfunction ToggleGroup({\n  className,\n  variant,\n  size,\n  children,\n  multiple,\n  ...props\n}: ToggleGroupProps) {\n  return (\n    <ToggleGroupPrimitive\n      data-variant={variant}\n      data-size={size}\n      className={cn(\n        'group/toggle-group flex gap-0.5 w-fit items-center rounded-lg data-[variant=outline]:shadow-xs data-[variant=outline]:border data-[variant=outline]:p-0.5',\n        className,\n      )}\n      multiple={multiple}\n      {...props}\n    >\n      <ToggleGroupProvider value={{ variant, size }}>\n        {!multiple ? (\n          <ToggleGroupHighlightPrimitive className=\"bg-accent rounded-md\">\n            {children}\n          </ToggleGroupHighlightPrimitive>\n        ) : (\n          children\n        )}\n      </ToggleGroupProvider>\n    </ToggleGroupPrimitive>\n  );\n}\n\ntype ToggleProps = TogglePrimitiveProps & VariantProps<typeof toggleVariants>;\n\nfunction Toggle({ className, children, variant, size, ...props }: ToggleProps) {\n  const { variant: contextVariant, size: contextSize } = useToggleGroup();\n  const { multiple } = useToggleGroupPrimitive();\n\n  return (\n    <ToggleHighlightPrimitive\n      value={props.value?.toString()}\n      className={cn(multiple && 'bg-accent rounded-md')}\n    >\n      <TogglePrimitive\n        data-variant={contextVariant || variant}\n        data-size={contextSize || size}\n        className={cn(\n          toggleVariants({\n            variant: contextVariant || variant,\n            size: contextSize || size,\n          }),\n          'min-w-0 border-0 flex-1 shrink-0 shadow-none rounded-md focus:z-10 focus-visible:z-10',\n          className,\n        )}\n        {...props}\n      >\n        {children}\n      </TogglePrimitive>\n    </ToggleHighlightPrimitive>\n  );\n}\n\nexport { ToggleGroup, Toggle, type ToggleGroupProps, type ToggleProps };",
       },
     ],
     keywords: [],
@@ -2068,7 +2105,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/components/radix/dropdown-menu.tsx',
         content:
-          "import * as React from 'react';\n\nimport {\n  DropdownMenu as DropdownMenuPrimitive,\n  DropdownMenuContent as DropdownMenuContentPrimitive,\n  DropdownMenuGroup as DropdownMenuGroupPrimitive,\n  DropdownMenuHighlightItem as DropdownMenuHighlightItemPrimitive,\n  DropdownMenuHighlight as DropdownMenuHighlightPrimitive,\n  DropdownMenuItem as DropdownMenuItemPrimitive,\n  DropdownMenuItemIndicator as DropdownMenuItemIndicatorPrimitive,\n  DropdownMenuCheckboxItem as DropdownMenuCheckboxItemPrimitive,\n  DropdownMenuRadioGroup as DropdownMenuRadioGroupPrimitive,\n  DropdownMenuRadioItem as DropdownMenuRadioItemPrimitive,\n  DropdownMenuLabel as DropdownMenuLabelPrimitive,\n  DropdownMenuSeparator as DropdownMenuSeparatorPrimitive,\n  DropdownMenuShortcut as DropdownMenuShortcutPrimitive,\n  DropdownMenuSub as DropdownMenuSubPrimitive,\n  DropdownMenuSubContent as DropdownMenuSubContentPrimitive,\n  DropdownMenuSubTrigger as DropdownMenuSubTriggerPrimitive,\n  DropdownMenuTrigger as DropdownMenuTriggerPrimitive,\n  type DropdownMenuProps as DropdownMenuPrimitiveProps,\n  type DropdownMenuContentProps as DropdownMenuContentPrimitiveProps,\n  type DropdownMenuGroupProps as DropdownMenuGroupPrimitiveProps,\n  type DropdownMenuItemProps as DropdownMenuItemPrimitiveProps,\n  type DropdownMenuCheckboxItemProps as DropdownMenuCheckboxItemPrimitiveProps,\n  type DropdownMenuRadioGroupProps as DropdownMenuRadioGroupPrimitiveProps,\n  type DropdownMenuRadioItemProps as DropdownMenuRadioItemPrimitiveProps,\n  type DropdownMenuLabelProps as DropdownMenuLabelPrimitiveProps,\n  type DropdownMenuSeparatorProps as DropdownMenuSeparatorPrimitiveProps,\n  type DropdownMenuShortcutProps as DropdownMenuShortcutPrimitiveProps,\n  type DropdownMenuSubProps as DropdownMenuSubPrimitiveProps,\n  type DropdownMenuSubContentProps as DropdownMenuSubContentPrimitiveProps,\n  type DropdownMenuSubTriggerProps as DropdownMenuSubTriggerPrimitiveProps,\n  type DropdownMenuTriggerProps as DropdownMenuTriggerPrimitiveProps,\n} from '@/components/animate-ui/primitives/radix/dropdown-menu';\nimport { cn } from '@/lib/utils';\nimport { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';\n\ntype DropdownMenuProps = DropdownMenuPrimitiveProps;\n\nfunction DropdownMenu(props: DropdownMenuProps) {\n  return <DropdownMenuPrimitive {...props} />;\n}\n\ntype DropdownMenuTriggerProps = DropdownMenuTriggerPrimitiveProps;\n\nfunction DropdownMenuTrigger(props: DropdownMenuTriggerProps) {\n  return <DropdownMenuTriggerPrimitive {...props} />;\n}\n\ntype DropdownMenuContentProps = DropdownMenuContentPrimitiveProps;\n\nfunction DropdownMenuContent({\n  sideOffset = 4,\n  className,\n  children,\n  ...props\n}: DropdownMenuContentProps) {\n  return (\n    <DropdownMenuContentPrimitive\n      sideOffset={sideOffset}\n      className={cn(\n        'bg-popover text-popover-foreground z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md',\n        className,\n      )}\n      {...props}\n    >\n      <DropdownMenuHighlightPrimitive className=\"absolute inset-0 bg-accent z-0 rounded-sm\">\n        {children}\n      </DropdownMenuHighlightPrimitive>\n    </DropdownMenuContentPrimitive>\n  );\n}\n\ntype DropdownMenuGroupProps = DropdownMenuGroupPrimitiveProps;\n\nfunction DropdownMenuGroup({ ...props }: DropdownMenuGroupProps) {\n  return <DropdownMenuGroupPrimitive {...props} />;\n}\n\ntype DropdownMenuItemProps = DropdownMenuItemPrimitiveProps & {\n  inset?: boolean;\n  variant?: 'default' | 'destructive';\n};\n\nfunction DropdownMenuItem({\n  className,\n  inset,\n  variant = 'default',\n  disabled,\n  ...props\n}: DropdownMenuItemProps) {\n  return (\n    <DropdownMenuHighlightItemPrimitive disabled={disabled}>\n      <DropdownMenuItemPrimitive\n        disabled={disabled}\n        data-inset={inset}\n        data-variant={variant}\n        className={cn(\n          \"focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4\",\n          className,\n        )}\n        {...props}\n      />\n    </DropdownMenuHighlightItemPrimitive>\n  );\n}\n\ntype DropdownMenuCheckboxItemProps = DropdownMenuCheckboxItemPrimitiveProps;\n\nfunction DropdownMenuCheckboxItem({\n  className,\n  children,\n  checked,\n  disabled,\n  ...props\n}: DropdownMenuCheckboxItemProps) {\n  return (\n    <DropdownMenuHighlightItemPrimitive disabled={disabled}>\n      <DropdownMenuCheckboxItemPrimitive\n        disabled={disabled}\n        className={cn(\n          \"focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4\",\n          className,\n        )}\n        checked={checked}\n        {...props}\n      >\n        <span className=\"pointer-events-none absolute left-2 flex size-3.5 items-center justify-center\">\n          <DropdownMenuItemIndicatorPrimitive\n            initial={{ opacity: 0, scale: 0.5 }}\n            animate={{ opacity: 1, scale: 1 }}\n          >\n            <CheckIcon className=\"size-4\" />\n          </DropdownMenuItemIndicatorPrimitive>\n        </span>\n        {children}\n      </DropdownMenuCheckboxItemPrimitive>\n    </DropdownMenuHighlightItemPrimitive>\n  );\n}\n\ntype DropdownMenuRadioGroupProps = DropdownMenuRadioGroupPrimitiveProps;\n\nfunction DropdownMenuRadioGroup(props: DropdownMenuRadioGroupProps) {\n  return <DropdownMenuRadioGroupPrimitive {...props} />;\n}\n\ntype DropdownMenuRadioItemProps = DropdownMenuRadioItemPrimitiveProps;\n\nfunction DropdownMenuRadioItem({\n  className,\n  children,\n  disabled,\n  ...props\n}: DropdownMenuRadioItemProps) {\n  return (\n    <DropdownMenuHighlightItemPrimitive disabled={disabled}>\n      <DropdownMenuRadioItemPrimitive\n        disabled={disabled}\n        className={cn(\n          \"focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4\",\n          className,\n        )}\n        {...props}\n      >\n        <span className=\"pointer-events-none absolute left-2 flex size-3.5 items-center justify-center\">\n          <DropdownMenuItemIndicatorPrimitive layoutId=\"dropdown-menu-item-indicator-radio\">\n            <CircleIcon className=\"size-2 fill-current\" />\n          </DropdownMenuItemIndicatorPrimitive>\n        </span>\n        {children}\n      </DropdownMenuRadioItemPrimitive>\n    </DropdownMenuHighlightItemPrimitive>\n  );\n}\n\ntype DropdownMenuLabelProps = DropdownMenuLabelPrimitiveProps & {\n  inset?: boolean;\n};\n\nfunction DropdownMenuLabel({\n  className,\n  inset,\n  ...props\n}: DropdownMenuLabelProps) {\n  return (\n    <DropdownMenuLabelPrimitive\n      data-inset={inset}\n      className={cn(\n        'px-2 py-1.5 text-sm font-medium data-[inset]:pl-8',\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuSeparatorProps = DropdownMenuSeparatorPrimitiveProps;\n\nfunction DropdownMenuSeparator({\n  className,\n  ...props\n}: DropdownMenuSeparatorProps) {\n  return (\n    <DropdownMenuSeparatorPrimitive\n      className={cn('bg-border -mx-1 my-1 h-px', className)}\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuShortcutProps = DropdownMenuShortcutPrimitiveProps;\n\nfunction DropdownMenuShortcut({\n  className,\n  ...props\n}: DropdownMenuShortcutProps) {\n  return (\n    <DropdownMenuShortcutPrimitive\n      className={cn(\n        'text-muted-foreground ml-auto text-xs tracking-widest',\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuSubProps = DropdownMenuSubPrimitiveProps;\n\nfunction DropdownMenuSub(props: DropdownMenuSubProps) {\n  return <DropdownMenuSubPrimitive {...props} />;\n}\n\ntype DropdownMenuSubTriggerProps = DropdownMenuSubTriggerPrimitiveProps & {\n  inset?: boolean;\n};\n\nfunction DropdownMenuSubTrigger({\n  className,\n  inset,\n  children,\n  ...props\n}: DropdownMenuSubTriggerProps) {\n  return (\n    <DropdownMenuHighlightItemPrimitive>\n      <DropdownMenuSubTriggerPrimitive\n        data-inset={inset}\n        className={cn(\n          'focus:text-accent-foreground data-[state=open]:text-accent-foreground flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[inset]:pl-8',\n          'data-[state=open]:[&_[data-slot=chevron]]:rotate-90 [&_[data-slot=chevron]]:transition-transform [&_[data-slot=chevron]]:duration-300 [&_[data-slot=chevron]]:ease-in-out',\n          className,\n        )}\n        {...props}\n      >\n        {children}\n        <ChevronRightIcon data-slot=\"chevron\" className=\"ml-auto size-4\" />\n      </DropdownMenuSubTriggerPrimitive>\n    </DropdownMenuHighlightItemPrimitive>\n  );\n}\n\ntype DropdownMenuSubContentProps = DropdownMenuSubContentPrimitiveProps;\n\nfunction DropdownMenuSubContent({\n  className,\n  ...props\n}: DropdownMenuSubContentProps) {\n  return (\n    <DropdownMenuSubContentPrimitive\n      className={cn(\n        'bg-popover text-popover-foreground z-50 min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-md border p-1 shadow-lg',\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\nexport {\n  DropdownMenu,\n  DropdownMenuTrigger,\n  DropdownMenuContent,\n  DropdownMenuGroup,\n  DropdownMenuItem,\n  DropdownMenuCheckboxItem,\n  DropdownMenuRadioGroup,\n  DropdownMenuRadioItem,\n  DropdownMenuLabel,\n  DropdownMenuSeparator,\n  DropdownMenuShortcut,\n  DropdownMenuSub,\n  DropdownMenuSubTrigger,\n  DropdownMenuSubContent,\n  type DropdownMenuProps,\n  type DropdownMenuTriggerProps,\n  type DropdownMenuContentProps,\n  type DropdownMenuGroupProps,\n  type DropdownMenuItemProps,\n  type DropdownMenuCheckboxItemProps,\n  type DropdownMenuRadioGroupProps,\n  type DropdownMenuRadioItemProps,\n  type DropdownMenuLabelProps,\n  type DropdownMenuSeparatorProps,\n  type DropdownMenuShortcutProps,\n  type DropdownMenuSubProps,\n  type DropdownMenuSubTriggerProps,\n  type DropdownMenuSubContentProps,\n};",
+          "import * as React from 'react';\n\nimport {\n  DropdownMenu as DropdownMenuPrimitive,\n  DropdownMenuContent as DropdownMenuContentPrimitive,\n  DropdownMenuGroup as DropdownMenuGroupPrimitive,\n  DropdownMenuHighlightItem as DropdownMenuHighlightItemPrimitive,\n  DropdownMenuHighlight as DropdownMenuHighlightPrimitive,\n  DropdownMenuItem as DropdownMenuItemPrimitive,\n  DropdownMenuItemIndicator as DropdownMenuItemIndicatorPrimitive,\n  DropdownMenuCheckboxItem as DropdownMenuCheckboxItemPrimitive,\n  DropdownMenuRadioGroup as DropdownMenuRadioGroupPrimitive,\n  DropdownMenuRadioItem as DropdownMenuRadioItemPrimitive,\n  DropdownMenuLabel as DropdownMenuLabelPrimitive,\n  DropdownMenuSeparator as DropdownMenuSeparatorPrimitive,\n  DropdownMenuShortcut as DropdownMenuShortcutPrimitive,\n  DropdownMenuSub as DropdownMenuSubPrimitive,\n  DropdownMenuSubContent as DropdownMenuSubContentPrimitive,\n  DropdownMenuSubTrigger as DropdownMenuSubTriggerPrimitive,\n  DropdownMenuTrigger as DropdownMenuTriggerPrimitive,\n  type DropdownMenuProps as DropdownMenuPrimitiveProps,\n  type DropdownMenuContentProps as DropdownMenuContentPrimitiveProps,\n  type DropdownMenuGroupProps as DropdownMenuGroupPrimitiveProps,\n  type DropdownMenuItemProps as DropdownMenuItemPrimitiveProps,\n  type DropdownMenuCheckboxItemProps as DropdownMenuCheckboxItemPrimitiveProps,\n  type DropdownMenuRadioGroupProps as DropdownMenuRadioGroupPrimitiveProps,\n  type DropdownMenuRadioItemProps as DropdownMenuRadioItemPrimitiveProps,\n  type DropdownMenuLabelProps as DropdownMenuLabelPrimitiveProps,\n  type DropdownMenuSeparatorProps as DropdownMenuSeparatorPrimitiveProps,\n  type DropdownMenuShortcutProps as DropdownMenuShortcutPrimitiveProps,\n  type DropdownMenuSubProps as DropdownMenuSubPrimitiveProps,\n  type DropdownMenuSubContentProps as DropdownMenuSubContentPrimitiveProps,\n  type DropdownMenuSubTriggerProps as DropdownMenuSubTriggerPrimitiveProps,\n  type DropdownMenuTriggerProps as DropdownMenuTriggerPrimitiveProps,\n} from '@/components/animate-ui/primitives/radix/dropdown-menu';\nimport { cn } from '@/lib/utils';\nimport { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';\n\ntype DropdownMenuProps = DropdownMenuPrimitiveProps;\n\nfunction DropdownMenu(props: DropdownMenuProps) {\n  return <DropdownMenuPrimitive {...props} />;\n}\n\ntype DropdownMenuTriggerProps = DropdownMenuTriggerPrimitiveProps;\n\nfunction DropdownMenuTrigger(props: DropdownMenuTriggerProps) {\n  return <DropdownMenuTriggerPrimitive {...props} />;\n}\n\ntype DropdownMenuContentProps = DropdownMenuContentPrimitiveProps;\n\nfunction DropdownMenuContent({\n  sideOffset = 4,\n  className,\n  children,\n  ...props\n}: DropdownMenuContentProps) {\n  return (\n    <DropdownMenuContentPrimitive\n      sideOffset={sideOffset}\n      className={cn(\n        'bg-popover text-popover-foreground z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border p-1 shadow-md outline-none',\n        className,\n      )}\n      {...props}\n    >\n      <DropdownMenuHighlightPrimitive className=\"absolute inset-0 bg-accent z-0 rounded-sm\">\n        {children}\n      </DropdownMenuHighlightPrimitive>\n    </DropdownMenuContentPrimitive>\n  );\n}\n\ntype DropdownMenuGroupProps = DropdownMenuGroupPrimitiveProps;\n\nfunction DropdownMenuGroup({ ...props }: DropdownMenuGroupProps) {\n  return <DropdownMenuGroupPrimitive {...props} />;\n}\n\ntype DropdownMenuItemProps = DropdownMenuItemPrimitiveProps & {\n  inset?: boolean;\n  variant?: 'default' | 'destructive';\n};\n\nfunction DropdownMenuItem({\n  className,\n  inset,\n  variant = 'default',\n  disabled,\n  ...props\n}: DropdownMenuItemProps) {\n  return (\n    <DropdownMenuHighlightItemPrimitive\n      activeClassName={\n        variant === 'destructive'\n          ? 'bg-destructive/10 dark:bg-destructive/20'\n          : ''\n      }\n      disabled={disabled}\n    >\n      <DropdownMenuItemPrimitive\n        disabled={disabled}\n        data-inset={inset}\n        data-variant={variant}\n        className={cn(\n          \"focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4\",\n          className,\n        )}\n        {...props}\n      />\n    </DropdownMenuHighlightItemPrimitive>\n  );\n}\n\ntype DropdownMenuCheckboxItemProps = DropdownMenuCheckboxItemPrimitiveProps;\n\nfunction DropdownMenuCheckboxItem({\n  className,\n  children,\n  checked,\n  disabled,\n  ...props\n}: DropdownMenuCheckboxItemProps) {\n  return (\n    <DropdownMenuHighlightItemPrimitive disabled={disabled}>\n      <DropdownMenuCheckboxItemPrimitive\n        disabled={disabled}\n        className={cn(\n          \"focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4\",\n          className,\n        )}\n        checked={checked}\n        {...props}\n      >\n        <span className=\"pointer-events-none absolute left-2 flex size-3.5 items-center justify-center\">\n          <DropdownMenuItemIndicatorPrimitive\n            initial={{ opacity: 0, scale: 0.5 }}\n            animate={{ opacity: 1, scale: 1 }}\n          >\n            <CheckIcon className=\"size-4\" />\n          </DropdownMenuItemIndicatorPrimitive>\n        </span>\n        {children}\n      </DropdownMenuCheckboxItemPrimitive>\n    </DropdownMenuHighlightItemPrimitive>\n  );\n}\n\ntype DropdownMenuRadioGroupProps = DropdownMenuRadioGroupPrimitiveProps;\n\nfunction DropdownMenuRadioGroup(props: DropdownMenuRadioGroupProps) {\n  return <DropdownMenuRadioGroupPrimitive {...props} />;\n}\n\ntype DropdownMenuRadioItemProps = DropdownMenuRadioItemPrimitiveProps;\n\nfunction DropdownMenuRadioItem({\n  className,\n  children,\n  disabled,\n  ...props\n}: DropdownMenuRadioItemProps) {\n  return (\n    <DropdownMenuHighlightItemPrimitive disabled={disabled}>\n      <DropdownMenuRadioItemPrimitive\n        disabled={disabled}\n        className={cn(\n          \"focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4\",\n          className,\n        )}\n        {...props}\n      >\n        <span className=\"pointer-events-none absolute left-2 flex size-3.5 items-center justify-center\">\n          <DropdownMenuItemIndicatorPrimitive layoutId=\"dropdown-menu-item-indicator-radio\">\n            <CircleIcon className=\"size-2 fill-current\" />\n          </DropdownMenuItemIndicatorPrimitive>\n        </span>\n        {children}\n      </DropdownMenuRadioItemPrimitive>\n    </DropdownMenuHighlightItemPrimitive>\n  );\n}\n\ntype DropdownMenuLabelProps = DropdownMenuLabelPrimitiveProps & {\n  inset?: boolean;\n};\n\nfunction DropdownMenuLabel({\n  className,\n  inset,\n  ...props\n}: DropdownMenuLabelProps) {\n  return (\n    <DropdownMenuLabelPrimitive\n      data-inset={inset}\n      className={cn(\n        'px-2 py-1.5 text-sm font-medium data-[inset]:pl-8',\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuSeparatorProps = DropdownMenuSeparatorPrimitiveProps;\n\nfunction DropdownMenuSeparator({\n  className,\n  ...props\n}: DropdownMenuSeparatorProps) {\n  return (\n    <DropdownMenuSeparatorPrimitive\n      className={cn('bg-border -mx-1 my-1 h-px', className)}\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuShortcutProps = DropdownMenuShortcutPrimitiveProps;\n\nfunction DropdownMenuShortcut({\n  className,\n  ...props\n}: DropdownMenuShortcutProps) {\n  return (\n    <DropdownMenuShortcutPrimitive\n      className={cn(\n        'text-muted-foreground ml-auto text-xs tracking-widest',\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuSubProps = DropdownMenuSubPrimitiveProps;\n\nfunction DropdownMenuSub(props: DropdownMenuSubProps) {\n  return <DropdownMenuSubPrimitive {...props} />;\n}\n\ntype DropdownMenuSubTriggerProps = DropdownMenuSubTriggerPrimitiveProps & {\n  inset?: boolean;\n};\n\nfunction DropdownMenuSubTrigger({\n  disabled,\n  className,\n  inset,\n  children,\n  ...props\n}: DropdownMenuSubTriggerProps) {\n  return (\n    <DropdownMenuHighlightItemPrimitive disabled={disabled}>\n      <DropdownMenuSubTriggerPrimitive\n        disabled={disabled}\n        data-inset={inset}\n        className={cn(\n          'focus:text-accent-foreground data-[state=open]:text-accent-foreground flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[inset]:pl-8',\n          'data-[state=open]:[&_[data-slot=chevron]]:rotate-90 [&_[data-slot=chevron]]:transition-transform [&_[data-slot=chevron]]:duration-300 [&_[data-slot=chevron]]:ease-in-out',\n          className,\n        )}\n        {...props}\n      >\n        {children}\n        <ChevronRightIcon data-slot=\"chevron\" className=\"ml-auto size-4\" />\n      </DropdownMenuSubTriggerPrimitive>\n    </DropdownMenuHighlightItemPrimitive>\n  );\n}\n\ntype DropdownMenuSubContentProps = DropdownMenuSubContentPrimitiveProps;\n\nfunction DropdownMenuSubContent({\n  className,\n  ...props\n}: DropdownMenuSubContentProps) {\n  return (\n    <DropdownMenuSubContentPrimitive\n      className={cn(\n        'bg-popover text-popover-foreground z-50 min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-md border p-1 shadow-lg outline-none',\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\nexport {\n  DropdownMenu,\n  DropdownMenuTrigger,\n  DropdownMenuContent,\n  DropdownMenuGroup,\n  DropdownMenuItem,\n  DropdownMenuCheckboxItem,\n  DropdownMenuRadioGroup,\n  DropdownMenuRadioItem,\n  DropdownMenuLabel,\n  DropdownMenuSeparator,\n  DropdownMenuShortcut,\n  DropdownMenuSub,\n  DropdownMenuSubTrigger,\n  DropdownMenuSubContent,\n  type DropdownMenuProps,\n  type DropdownMenuTriggerProps,\n  type DropdownMenuContentProps,\n  type DropdownMenuGroupProps,\n  type DropdownMenuItemProps,\n  type DropdownMenuCheckboxItemProps,\n  type DropdownMenuRadioGroupProps,\n  type DropdownMenuRadioItemProps,\n  type DropdownMenuLabelProps,\n  type DropdownMenuSeparatorProps,\n  type DropdownMenuShortcutProps,\n  type DropdownMenuSubProps,\n  type DropdownMenuSubTriggerProps,\n  type DropdownMenuSubContentProps,\n};",
       },
     ],
     keywords: [],
@@ -3194,7 +3231,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/demo/components/base/accordion.tsx',
         content:
-          "import {\n  Accordion,\n  AccordionItem,\n  AccordionTrigger,\n  AccordionPanel,\n} from '@/components/animate-ui/components/base/accordion';\n\nconst ITEMS = [\n  {\n    title: 'What is Animate UI?',\n    content:\n      'Animate UI is an open-source distribution of React components built with TypeScript, Tailwind CSS, and Motion.',\n  },\n  {\n    title: 'How is it different from other libraries?',\n    content:\n      'Instead of installing via NPM, you copy and paste the components directly. This gives you full control to modify or customize them as needed.',\n  },\n  {\n    title: 'Is Animate UI free to use?',\n    content:\n      'Absolutely! Animate UI is fully open-source. You can use, modify, and adapt it to fit your needs.',\n  },\n];\n\ntype BaseAccordionDemoProps = {\n  openMultiple?: boolean;\n  keepRendered?: boolean;\n  showArrow?: boolean;\n};\n\nexport const BaseAccordionDemo = ({\n  openMultiple = false,\n  keepRendered = false,\n  showArrow = true,\n}: BaseAccordionDemoProps) => {\n  return (\n    <Accordion openMultiple={openMultiple} className=\"max-w-[400px] w-full\">\n      {ITEMS.map((item, index) => (\n        <AccordionItem key={index} value={`item-${index + 1}`}>\n          <AccordionTrigger showArrow={showArrow}>\n            {item.title}\n          </AccordionTrigger>\n          <AccordionPanel keepRendered={keepRendered}>\n            {item.content}\n          </AccordionPanel>\n        </AccordionItem>\n      ))}\n    </Accordion>\n  );\n};",
+          "import {\n  Accordion,\n  AccordionItem,\n  AccordionTrigger,\n  AccordionPanel,\n} from '@/components/animate-ui/components/base/accordion';\n\nconst ITEMS = [\n  {\n    title: 'What is Animate UI?',\n    content:\n      'Animate UI is an open-source distribution of React components built with TypeScript, Tailwind CSS, and Motion.',\n  },\n  {\n    title: 'How is it different from other libraries?',\n    content:\n      'Instead of installing via NPM, you copy and paste the components directly. This gives you full control to modify or customize them as needed.',\n  },\n  {\n    title: 'Is Animate UI free to use?',\n    content:\n      'Absolutely! Animate UI is fully open-source. You can use, modify, and adapt it to fit your needs.',\n  },\n];\n\ntype BaseAccordionDemoProps = {\n  multiple?: boolean;\n  keepRendered?: boolean;\n  showArrow?: boolean;\n};\n\nexport const BaseAccordionDemo = ({\n  multiple = false,\n  keepRendered = false,\n  showArrow = true,\n}: BaseAccordionDemoProps) => {\n  return (\n    <Accordion multiple={multiple} className=\"max-w-[400px] w-full\">\n      {ITEMS.map((item, index) => (\n        <AccordionItem key={index} value={`item-${index + 1}`}>\n          <AccordionTrigger showArrow={showArrow}>\n            {item.title}\n          </AccordionTrigger>\n          <AccordionPanel keepRendered={keepRendered}>\n            {item.content}\n          </AccordionPanel>\n        </AccordionItem>\n      ))}\n    </Accordion>\n  );\n};",
       },
     ],
     keywords: [],
@@ -3411,6 +3448,180 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/demo-components-base-files',
+  },
+  'demo-components-base-menu': {
+    name: 'demo-components-base-menu',
+    description: 'Demo showing a menu.',
+    type: 'registry:ui',
+    dependencies: undefined,
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/components-base-menu'],
+    files: [
+      {
+        path: 'registry/demo/components/base/menu/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/demo/components/base/menu.tsx',
+        content:
+          "import { Button } from '@/components/ui/button';\nimport {\n  Menu,\n  MenuTrigger,\n  MenuPanel,\n  MenuGroup,\n  MenuGroupLabel,\n  MenuItem,\n  MenuSeparator,\n  MenuShortcut,\n  MenuSubmenu,\n  MenuSubmenuTrigger,\n  MenuSubmenuPanel,\n} from '@/components/animate-ui/components/base/menu';\n\ninterface BaseMenuDemoProps {\n  side?: 'top' | 'bottom' | 'left' | 'right' | 'inline-start' | 'inline-end';\n  sideOffset?: number;\n  align?: 'start' | 'center' | 'end';\n  alignOffset?: number;\n}\n\nexport function BaseMenuDemo({\n  side,\n  sideOffset,\n  align,\n  alignOffset,\n}: BaseMenuDemoProps) {\n  return (\n    <Menu>\n      <MenuTrigger render={<Button variant=\"outline\">Open</Button>} />\n      <MenuPanel\n        className=\"w-56\"\n        align={align}\n        alignOffset={alignOffset}\n        side={side}\n        sideOffset={sideOffset}\n      >\n        <MenuGroup>\n          <MenuGroupLabel>My Account</MenuGroupLabel>\n          <MenuItem>\n            Profile\n            <MenuShortcut>⇧⌘P</MenuShortcut>\n          </MenuItem>\n          <MenuItem>\n            Billing\n            <MenuShortcut>⌘B</MenuShortcut>\n          </MenuItem>\n          <MenuItem>\n            Settings\n            <MenuShortcut>⌘S</MenuShortcut>\n          </MenuItem>\n          <MenuItem>\n            Keyboard shortcuts\n            <MenuShortcut>⌘K</MenuShortcut>\n          </MenuItem>\n        </MenuGroup>\n        <MenuSeparator />\n        <MenuGroup>\n          <MenuItem>Team</MenuItem>\n          <MenuSubmenu>\n            <MenuSubmenuTrigger>Invite users</MenuSubmenuTrigger>\n            <MenuSubmenuPanel>\n              <MenuItem>Email</MenuItem>\n              <MenuItem>Message</MenuItem>\n              <MenuSeparator />\n              <MenuItem>More...</MenuItem>\n            </MenuSubmenuPanel>\n          </MenuSubmenu>\n          <MenuItem>\n            New Team\n            <MenuShortcut>⌘+T</MenuShortcut>\n          </MenuItem>\n        </MenuGroup>\n        <MenuSeparator />\n        <MenuItem>GitHub</MenuItem>\n        <MenuItem>Support</MenuItem>\n        <MenuItem disabled>API</MenuItem>\n        <MenuSeparator />\n        <MenuItem variant=\"destructive\">\n          Log out\n          <MenuShortcut>⇧⌘Q</MenuShortcut>\n        </MenuItem>\n      </MenuPanel>\n    </Menu>\n  );\n}",
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/demo/components/base/menu/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'demo-components-base-menu';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {
+        MenuPositioner: {
+          side: {
+            value: 'bottom',
+            options: {
+              top: 'top',
+              bottom: 'bottom',
+              left: 'left',
+              right: 'right',
+              'inline-start': 'inline-start',
+              'inline-end': 'inline-end',
+            },
+          },
+          sideOffset: { value: 4 },
+          align: {
+            value: 'center',
+            options: { start: 'start', center: 'center', end: 'end' },
+          },
+          alignOffset: { value: 0 },
+        },
+      };
+      return LazyComp;
+    })(),
+    command: '@animate-ui/demo-components-base-menu',
+  },
+  'demo-components-base-menu-checkbox': {
+    name: 'demo-components-base-menu-checkbox',
+    description: 'Demo showing a menu checkbox.',
+    type: 'registry:ui',
+    dependencies: undefined,
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/components-base-menu'],
+    files: [
+      {
+        path: 'registry/demo/components/base/menu-checkbox/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/demo/components/base/menu-checkbox.tsx',
+        content:
+          "import * as React from 'react';\n\nimport { Button } from '@/components/ui/button';\nimport {\n  Menu,\n  MenuTrigger,\n  MenuPanel,\n  MenuGroup,\n  MenuGroupLabel,\n  MenuCheckboxItem,\n  MenuSeparator,\n} from '@/components/animate-ui/components/base/menu';\n\ninterface BaseMenuCheckboxDemoProps {\n  side?: 'top' | 'bottom' | 'left' | 'right' | 'inline-start' | 'inline-end';\n  sideOffset?: number;\n  align?: 'start' | 'center' | 'end';\n  alignOffset?: number;\n}\n\nexport function BaseMenuCheckboxDemo({\n  side,\n  sideOffset,\n  align,\n  alignOffset,\n}: BaseMenuCheckboxDemoProps) {\n  const [showStatusBar, setShowStatusBar] = React.useState<boolean>(true);\n  const [showActivityBar, setShowActivityBar] = React.useState<boolean>(false);\n  const [showPanel, setShowPanel] = React.useState<boolean>(false);\n\n  return (\n    <Menu>\n      <MenuTrigger render={<Button variant=\"outline\">Open</Button>} />\n      <MenuPanel\n        className=\"w-56\"\n        align={align}\n        alignOffset={alignOffset}\n        side={side}\n        sideOffset={sideOffset}\n      >\n        <MenuGroup>\n          <MenuGroupLabel>Appearance</MenuGroupLabel>\n          <MenuSeparator />\n          <MenuCheckboxItem\n            checked={showStatusBar}\n            onCheckedChange={setShowStatusBar}\n          >\n            Status Bar\n          </MenuCheckboxItem>\n          <MenuCheckboxItem\n            checked={showActivityBar}\n            onCheckedChange={setShowActivityBar}\n          >\n            Activity Bar\n          </MenuCheckboxItem>\n          <MenuCheckboxItem checked={showPanel} onCheckedChange={setShowPanel}>\n            Panel\n          </MenuCheckboxItem>\n        </MenuGroup>\n      </MenuPanel>\n    </Menu>\n  );\n}",
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/demo/components/base/menu-checkbox/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'demo-components-base-menu-checkbox';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {
+        MenuPositioner: {
+          side: {
+            value: 'bottom',
+            options: {
+              top: 'top',
+              bottom: 'bottom',
+              left: 'left',
+              right: 'right',
+              'inline-start': 'inline-start',
+              'inline-end': 'inline-end',
+            },
+          },
+          sideOffset: { value: 4 },
+          align: {
+            value: 'center',
+            options: { start: 'start', center: 'center', end: 'end' },
+          },
+          alignOffset: { value: 0 },
+        },
+      };
+      return LazyComp;
+    })(),
+    command: '@animate-ui/demo-components-base-menu-checkbox',
+  },
+  'demo-components-base-menu-radio': {
+    name: 'demo-components-base-menu-radio',
+    description: 'Demo showing a menu radio.',
+    type: 'registry:ui',
+    dependencies: undefined,
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/components-base-menu'],
+    files: [
+      {
+        path: 'registry/demo/components/base/menu-radio/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/demo/components/base/menu-radio.tsx',
+        content:
+          "import * as React from 'react';\n\nimport { Button } from '@/components/ui/button';\nimport {\n  Menu,\n  MenuTrigger,\n  MenuPanel,\n  MenuGroupLabel,\n  MenuSeparator,\n  MenuRadioGroup,\n  MenuRadioItem,\n  MenuGroup,\n} from '@/components/animate-ui/components/base/menu';\n\ninterface BaseMenuRadioDemoProps {\n  side?: 'top' | 'bottom' | 'left' | 'right' | 'inline-start' | 'inline-end';\n  sideOffset?: number;\n  align?: 'start' | 'center' | 'end';\n  alignOffset?: number;\n}\n\nexport function BaseMenuRadioDemo({\n  side,\n  sideOffset,\n  align,\n  alignOffset,\n}: BaseMenuRadioDemoProps) {\n  const [position, setPosition] = React.useState('bottom');\n\n  return (\n    <Menu>\n      <MenuTrigger render={<Button variant=\"outline\">Open</Button>} />\n      <MenuPanel\n        className=\"w-56\"\n        align={align}\n        alignOffset={alignOffset}\n        side={side}\n        sideOffset={sideOffset}\n      >\n        <MenuGroup>\n          <MenuGroupLabel>Panel Position</MenuGroupLabel>\n          <MenuSeparator />\n          <MenuRadioGroup value={position} onValueChange={setPosition}>\n            <MenuRadioItem value=\"top\">Top</MenuRadioItem>\n            <MenuRadioItem value=\"bottom\">Bottom</MenuRadioItem>\n            <MenuRadioItem value=\"right\">Right</MenuRadioItem>\n          </MenuRadioGroup>\n        </MenuGroup>\n      </MenuPanel>\n    </Menu>\n  );\n}",
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/demo/components/base/menu-radio/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'demo-components-base-menu-radio';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {
+        MenuPositioner: {
+          side: {
+            value: 'bottom',
+            options: {
+              top: 'top',
+              bottom: 'bottom',
+              left: 'left',
+              right: 'right',
+              'inline-start': 'inline-start',
+              'inline-end': 'inline-end',
+            },
+          },
+          sideOffset: { value: 4 },
+          align: {
+            value: 'center',
+            options: { start: 'start', center: 'center', end: 'end' },
+          },
+          alignOffset: { value: 0 },
+        },
+      };
+      return LazyComp;
+    })(),
+    command: '@animate-ui/demo-components-base-menu-radio',
   },
   'demo-components-base-popover': {
     name: 'demo-components-base-popover',
@@ -3740,7 +3951,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/demo/components/base/toggle-group.tsx',
         content:
-          'import {\n  Toggle,\n  ToggleGroup,\n  type ToggleGroupProps,\n} from \'@/components/animate-ui/components/base/toggle-group\';\nimport { Bold, Italic, Underline } from \'lucide-react\';\n\ninterface BaseToggleGroupDemoProps {\n  toggleMultiple: boolean;\n  variant: ToggleGroupProps[\'variant\'];\n  size: ToggleGroupProps[\'size\'];\n}\n\nexport function BaseToggleGroupDemo({\n  toggleMultiple,\n  variant,\n  size,\n}: BaseToggleGroupDemoProps) {\n  return (\n    <ToggleGroup toggleMultiple={toggleMultiple} variant={variant} size={size}>\n      <Toggle value="bold" aria-label="Toggle bold">\n        <Bold />\n      </Toggle>\n      <Toggle value="italic" aria-label="Toggle italic">\n        <Italic />\n      </Toggle>\n      <Toggle value="strikethrough" aria-label="Toggle strikethrough">\n        <Underline />\n      </Toggle>\n    </ToggleGroup>\n  );\n}',
+          'import {\n  Toggle,\n  ToggleGroup,\n  type ToggleGroupProps,\n} from \'@/components/animate-ui/components/base/toggle-group\';\nimport { Bold, Italic, Underline } from \'lucide-react\';\n\ninterface BaseToggleGroupDemoProps {\n  multiple: boolean;\n  variant: ToggleGroupProps[\'variant\'];\n  size: ToggleGroupProps[\'size\'];\n}\n\nexport function BaseToggleGroupDemo({\n  multiple,\n  variant,\n  size,\n}: BaseToggleGroupDemoProps) {\n  return (\n    <ToggleGroup multiple={multiple} variant={variant} size={size}>\n      <Toggle value="bold" aria-label="Toggle bold">\n        <Bold />\n      </Toggle>\n      <Toggle value="italic" aria-label="Toggle italic">\n        <Italic />\n      </Toggle>\n      <Toggle value="strikethrough" aria-label="Toggle strikethrough">\n        <Underline />\n      </Toggle>\n    </ToggleGroup>\n  );\n}',
       },
     ],
     keywords: [],
@@ -5108,7 +5319,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/demo/components/radix/dropdown-menu.tsx',
         content:
-          "import { Button } from '@/components/ui/button';\nimport {\n  DropdownMenu,\n  DropdownMenuContent,\n  DropdownMenuGroup,\n  DropdownMenuItem,\n  DropdownMenuLabel,\n  DropdownMenuSeparator,\n  DropdownMenuShortcut,\n  DropdownMenuSub,\n  DropdownMenuSubContent,\n  DropdownMenuSubTrigger,\n  DropdownMenuTrigger,\n} from '@/components/animate-ui/components/radix/dropdown-menu';\n\ninterface RadixDropdownMenuDemoProps {\n  side?: 'top' | 'bottom' | 'left' | 'right';\n  sideOffset?: number;\n  align?: 'start' | 'center' | 'end';\n  alignOffset?: number;\n}\n\nexport function RadixDropdownMenuDemo({\n  side,\n  sideOffset,\n  align,\n  alignOffset,\n}: RadixDropdownMenuDemoProps) {\n  return (\n    <DropdownMenu>\n      <DropdownMenuTrigger asChild>\n        <Button variant=\"outline\">Open</Button>\n      </DropdownMenuTrigger>\n      <DropdownMenuContent\n        className=\"w-56\"\n        align={align}\n        alignOffset={alignOffset}\n        side={side}\n        sideOffset={sideOffset}\n      >\n        <DropdownMenuLabel>My Account</DropdownMenuLabel>\n        <DropdownMenuGroup>\n          <DropdownMenuItem>\n            Profile\n            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>\n          </DropdownMenuItem>\n          <DropdownMenuItem>\n            Billing\n            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>\n          </DropdownMenuItem>\n          <DropdownMenuItem>\n            Settings\n            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>\n          </DropdownMenuItem>\n          <DropdownMenuItem>\n            Keyboard shortcuts\n            <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>\n          </DropdownMenuItem>\n        </DropdownMenuGroup>\n        <DropdownMenuSeparator />\n        <DropdownMenuGroup>\n          <DropdownMenuItem>Team</DropdownMenuItem>\n          <DropdownMenuSub>\n            <DropdownMenuSubTrigger>Invite users</DropdownMenuSubTrigger>\n            <DropdownMenuSubContent>\n              <DropdownMenuItem>Email</DropdownMenuItem>\n              <DropdownMenuItem>Message</DropdownMenuItem>\n              <DropdownMenuSeparator />\n              <DropdownMenuItem>More...</DropdownMenuItem>\n            </DropdownMenuSubContent>\n          </DropdownMenuSub>\n          <DropdownMenuItem>\n            New Team\n            <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>\n          </DropdownMenuItem>\n        </DropdownMenuGroup>\n        <DropdownMenuSeparator />\n        <DropdownMenuItem>GitHub</DropdownMenuItem>\n        <DropdownMenuItem>Support</DropdownMenuItem>\n        <DropdownMenuItem disabled>API</DropdownMenuItem>\n        <DropdownMenuSeparator />\n        <DropdownMenuItem>\n          Log out\n          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>\n        </DropdownMenuItem>\n      </DropdownMenuContent>\n    </DropdownMenu>\n  );\n}",
+          "import { Button } from '@/components/ui/button';\nimport {\n  DropdownMenu,\n  DropdownMenuContent,\n  DropdownMenuGroup,\n  DropdownMenuItem,\n  DropdownMenuLabel,\n  DropdownMenuSeparator,\n  DropdownMenuShortcut,\n  DropdownMenuSub,\n  DropdownMenuSubContent,\n  DropdownMenuSubTrigger,\n  DropdownMenuTrigger,\n} from '@/components/animate-ui/components/radix/dropdown-menu';\n\ninterface RadixDropdownMenuDemoProps {\n  side?: 'top' | 'bottom' | 'left' | 'right';\n  sideOffset?: number;\n  align?: 'start' | 'center' | 'end';\n  alignOffset?: number;\n}\n\nexport function RadixDropdownMenuDemo({\n  side,\n  sideOffset,\n  align,\n  alignOffset,\n}: RadixDropdownMenuDemoProps) {\n  return (\n    <DropdownMenu>\n      <DropdownMenuTrigger asChild>\n        <Button variant=\"outline\">Open</Button>\n      </DropdownMenuTrigger>\n      <DropdownMenuContent\n        className=\"w-56\"\n        align={align}\n        alignOffset={alignOffset}\n        side={side}\n        sideOffset={sideOffset}\n      >\n        <DropdownMenuLabel>My Account</DropdownMenuLabel>\n        <DropdownMenuGroup>\n          <DropdownMenuItem>\n            Profile\n            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>\n          </DropdownMenuItem>\n          <DropdownMenuItem>\n            Billing\n            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>\n          </DropdownMenuItem>\n          <DropdownMenuItem>\n            Settings\n            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>\n          </DropdownMenuItem>\n          <DropdownMenuItem>\n            Keyboard shortcuts\n            <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>\n          </DropdownMenuItem>\n        </DropdownMenuGroup>\n        <DropdownMenuSeparator />\n        <DropdownMenuGroup>\n          <DropdownMenuItem>Team</DropdownMenuItem>\n          <DropdownMenuSub>\n            <DropdownMenuSubTrigger>Invite users</DropdownMenuSubTrigger>\n            <DropdownMenuSubContent>\n              <DropdownMenuItem>Email</DropdownMenuItem>\n              <DropdownMenuItem>Message</DropdownMenuItem>\n              <DropdownMenuSeparator />\n              <DropdownMenuItem>More...</DropdownMenuItem>\n            </DropdownMenuSubContent>\n          </DropdownMenuSub>\n          <DropdownMenuItem>\n            New Team\n            <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>\n          </DropdownMenuItem>\n        </DropdownMenuGroup>\n        <DropdownMenuSeparator />\n        <DropdownMenuItem>GitHub</DropdownMenuItem>\n        <DropdownMenuItem>Support</DropdownMenuItem>\n        <DropdownMenuItem disabled>API</DropdownMenuItem>\n        <DropdownMenuSeparator />\n        <DropdownMenuItem variant=\"destructive\">\n          Log out\n          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>\n        </DropdownMenuItem>\n      </DropdownMenuContent>\n    </DropdownMenu>\n  );\n}",
       },
     ],
     keywords: [],
@@ -6273,7 +6484,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/demo/primitives/base/accordion.tsx',
         content:
-          "import {\n  Accordion,\n  AccordionItem,\n  AccordionTrigger,\n  AccordionPanel,\n  AccordionHeader,\n} from '@/components/animate-ui/primitives/base/accordion';\n\nconst ITEMS = [\n  {\n    title: 'What is Animate UI?',\n    content:\n      'Animate UI is an open-source distribution of React components built with TypeScript, Tailwind CSS, and Motion.',\n  },\n  {\n    title: 'How is it different from other libraries?',\n    content:\n      'Instead of installing via NPM, you copy and paste the components directly. This gives you full control to modify or customize them as needed.',\n  },\n  {\n    title: 'Is Animate UI free to use?',\n    content:\n      'Absolutely! Animate UI is fully open-source. You can use, modify, and adapt it to fit your needs.',\n  },\n];\n\ntype BaseAccordionDemoProps = {\n  openMultiple?: boolean;\n  keepRendered?: boolean;\n};\n\nexport const BaseAccordionDemo = ({\n  openMultiple = false,\n  keepRendered = false,\n}: BaseAccordionDemoProps) => {\n  return (\n    <Accordion openMultiple={openMultiple} className=\"max-w-[400px] w-full\">\n      {ITEMS.map((item, index) => (\n        <AccordionItem key={index} value={`item-${index + 1}`}>\n          <AccordionHeader>\n            <AccordionTrigger className=\"border-b py-2 w-full text-start\">\n              {item.title}\n            </AccordionTrigger>\n          </AccordionHeader>\n          <AccordionPanel keepRendered={keepRendered}>\n            <div className=\"py-2 text-sm text-muted-foreground\">\n              {item.content}\n            </div>\n          </AccordionPanel>\n        </AccordionItem>\n      ))}\n    </Accordion>\n  );\n};",
+          "import {\n  Accordion,\n  AccordionItem,\n  AccordionTrigger,\n  AccordionPanel,\n  AccordionHeader,\n} from '@/components/animate-ui/primitives/base/accordion';\n\nconst ITEMS = [\n  {\n    title: 'What is Animate UI?',\n    content:\n      'Animate UI is an open-source distribution of React components built with TypeScript, Tailwind CSS, and Motion.',\n  },\n  {\n    title: 'How is it different from other libraries?',\n    content:\n      'Instead of installing via NPM, you copy and paste the components directly. This gives you full control to modify or customize them as needed.',\n  },\n  {\n    title: 'Is Animate UI free to use?',\n    content:\n      'Absolutely! Animate UI is fully open-source. You can use, modify, and adapt it to fit your needs.',\n  },\n];\n\ntype BaseAccordionDemoProps = {\n  multiple?: boolean;\n  keepRendered?: boolean;\n};\n\nexport const BaseAccordionDemo = ({\n  multiple = false,\n  keepRendered = false,\n}: BaseAccordionDemoProps) => {\n  return (\n    <Accordion multiple={multiple} className=\"max-w-[400px] w-full\">\n      {ITEMS.map((item, index) => (\n        <AccordionItem key={index} value={`item-${index + 1}`}>\n          <AccordionHeader>\n            <AccordionTrigger className=\"border-b py-2 w-full text-start\">\n              {item.title}\n            </AccordionTrigger>\n          </AccordionHeader>\n          <AccordionPanel keepRendered={keepRendered}>\n            <div className=\"py-2 text-sm text-muted-foreground\">\n              {item.content}\n            </div>\n          </AccordionPanel>\n        </AccordionItem>\n      ))}\n    </Accordion>\n  );\n};",
       },
     ],
     keywords: [],
@@ -6516,6 +6727,64 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/demo-primitives-base-files',
+  },
+  'demo-primitives-base-menu': {
+    name: 'demo-primitives-base-menu',
+    description: 'Demo showing an animated base menu.',
+    type: 'registry:ui',
+    dependencies: undefined,
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/primitives-base-menu'],
+    files: [
+      {
+        path: 'registry/demo/primitives/base/menu/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/demo/primitives/base/menu.tsx',
+        content:
+          "'use client';\n\nimport {\n  ChevronRight,\n  CreditCard,\n  Keyboard,\n  LogOut,\n  Mail,\n  MessageSquare,\n  Plus,\n  PlusCircle,\n  Settings,\n  User,\n  UserPlus,\n  Users,\n} from 'lucide-react';\n\nimport {\n  Menu,\n  MenuArrow,\n  MenuGroup,\n  MenuGroupLabel,\n  MenuHighlight,\n  MenuHighlightItem,\n  MenuItem,\n  MenuPortal,\n  MenuPositioner,\n  MenuPopup,\n  MenuSubmenu,\n  MenuSubmenuTrigger,\n  MenuSeparator,\n  MenuShortcut,\n  MenuTrigger,\n} from '@/components/animate-ui/primitives/base/menu';\n\nconst itemClassName =\n  'relative z-[1] focus:text-accent-foreground select-none flex items-center gap-2 px-2 py-1.5 text-sm outline-none [&_svg]:size-4 [&_span]:data-[slot=menu-shortcut]:text-xs [&_span]:data-[slot=menu-shortcut]:ml-auto';\nconst separatorClassName = '-mx-1 my-1 h-px bg-border';\n\ninterface BaseMenuDemoProps {\n  side?: 'top' | 'bottom' | 'left' | 'right' | 'inline-start' | 'inline-end';\n  sideOffset?: number;\n  align?: 'start' | 'center' | 'end';\n  alignOffset?: number;\n}\n\nexport const BaseMenuDemo = ({\n  side,\n  sideOffset,\n  align,\n  alignOffset,\n}: BaseMenuDemoProps) => {\n  return (\n    <Menu>\n      <MenuTrigger>Open</MenuTrigger>\n      <MenuPortal>\n        <MenuPositioner\n          side={side}\n          sideOffset={sideOffset}\n          align={align}\n          alignOffset={alignOffset}\n          className=\"z-50\"\n        >\n          <MenuPopup className=\"w-56 max-h-[var(--available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden border bg-background p-1 outline-none\">\n            <MenuArrow />\n            <MenuHighlight className=\"absolute inset-0 bg-accent z-0\">\n              <MenuGroup>\n                <MenuGroupLabel className=\"px-2 py-1.5 text-sm font-semibold\">\n                  My Account\n                </MenuGroupLabel>\n                <MenuSeparator className={separatorClassName} />\n                <MenuHighlightItem>\n                  <MenuItem className={itemClassName}>\n                    <User />\n                    <span>Profile</span>\n                    <MenuShortcut>⇧⌘P</MenuShortcut>\n                  </MenuItem>\n                </MenuHighlightItem>\n                <MenuHighlightItem>\n                  <MenuItem className={itemClassName}>\n                    <CreditCard />\n                    <span>Billing</span>\n                    <MenuShortcut>⌘B</MenuShortcut>\n                  </MenuItem>\n                </MenuHighlightItem>\n                <MenuHighlightItem>\n                  <MenuItem className={itemClassName}>\n                    <Settings />\n                    <span>Settings</span>\n                    <MenuShortcut>⌘S</MenuShortcut>\n                  </MenuItem>\n                </MenuHighlightItem>\n                <MenuHighlightItem>\n                  <MenuItem className={itemClassName}>\n                    <Keyboard />\n                    <span>Keyboard shortcuts</span>\n                    <MenuShortcut>⌘K</MenuShortcut>\n                  </MenuItem>\n                </MenuHighlightItem>\n              </MenuGroup>\n\n              <MenuSeparator className={separatorClassName} />\n\n              <MenuGroup>\n                <MenuHighlightItem>\n                  <MenuItem className={itemClassName}>\n                    <Users />\n                    <span>Team</span>\n                  </MenuItem>\n                </MenuHighlightItem>\n                <MenuSubmenu>\n                  <MenuHighlightItem>\n                    <MenuSubmenuTrigger className={itemClassName}>\n                      <UserPlus />\n                      <span>Invite users</span>\n                      <ChevronRight data-chevron className=\"ml-auto size-4\" />\n                    </MenuSubmenuTrigger>\n                  </MenuHighlightItem>\n                  <MenuPortal>\n                    <MenuPositioner className=\"z-50\">\n                      <MenuPopup className=\"overflow-hidden min-w-[8rem] overflow-y-auto overflow-x-hidden border bg-background p-1 z-50\">\n                        <MenuHighlightItem>\n                          <MenuItem className={itemClassName}>\n                            <Mail />\n                            <span>Email</span>\n                          </MenuItem>\n                        </MenuHighlightItem>\n                        <MenuHighlightItem>\n                          <MenuItem className={itemClassName}>\n                            <MessageSquare />\n                            <span>Message</span>\n                          </MenuItem>\n                        </MenuHighlightItem>\n                        <MenuSeparator className={separatorClassName} />\n                        <MenuHighlightItem>\n                          <MenuItem className={itemClassName}>\n                            <PlusCircle />\n                            <span>More...</span>\n                          </MenuItem>\n                        </MenuHighlightItem>\n                      </MenuPopup>\n                    </MenuPositioner>\n                  </MenuPortal>\n                </MenuSubmenu>\n\n                <MenuHighlightItem>\n                  <MenuItem className={itemClassName}>\n                    <Plus />\n                    <span>New Team</span>\n                    <MenuShortcut>⌘+T</MenuShortcut>\n                  </MenuItem>\n                </MenuHighlightItem>\n              </MenuGroup>\n\n              <MenuSeparator className={separatorClassName} />\n\n              <MenuHighlightItem>\n                <MenuItem className={itemClassName}>\n                  <LogOut />\n                  <span>Log out</span>\n                  <MenuShortcut>⇧⌘Q</MenuShortcut>\n                </MenuItem>\n              </MenuHighlightItem>\n            </MenuHighlight>\n          </MenuPopup>\n        </MenuPositioner>\n      </MenuPortal>\n    </Menu>\n  );\n};",
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/demo/primitives/base/menu/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'demo-primitives-base-menu';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {
+        MenuPositioner: {
+          side: {
+            value: 'bottom',
+            options: {
+              top: 'top',
+              bottom: 'bottom',
+              left: 'left',
+              right: 'right',
+              'inline-start': 'inline-start',
+              'inline-end': 'inline-end',
+            },
+          },
+          sideOffset: { value: 4 },
+          align: {
+            value: 'center',
+            options: { start: 'start', center: 'center', end: 'end' },
+          },
+          alignOffset: { value: 0 },
+        },
+      };
+      return LazyComp;
+    })(),
+    command: '@animate-ui/demo-primitives-base-menu',
   },
   'demo-primitives-base-popover': {
     name: 'demo-primitives-base-popover',
@@ -6843,7 +7112,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/demo/primitives/base/toggle-group.tsx',
         content:
-          'import {\n  ToggleGroup,\n  Toggle,\n  ToggleGroupHighlight,\n  ToggleHighlight,\n} from \'@/components/animate-ui/primitives/base/toggle-group\';\nimport { Bold, Italic, Underline } from \'lucide-react\';\nimport { useEffect, useState } from \'react\';\n\ninterface BaseToggleGroupDemoProps {\n  toggleMultiple: boolean;\n}\n\nexport const BaseToggleGroupDemo = ({\n  toggleMultiple,\n}: BaseToggleGroupDemoProps) => {\n  const [value, setValue] = useState<any[]>([]);\n\n  useEffect(() => {\n    setValue([\'bold\']);\n  }, [toggleMultiple]);\n\n  return !toggleMultiple ? (\n    <ToggleGroup value={value} onValueChange={setValue} className="flex gap-2">\n      <ToggleGroupHighlight className="bg-accent">\n        <ToggleHighlight value="bold">\n          <Toggle\n            value="bold"\n            aria-label="Toggle bold"\n            className="size-8 flex items-center justify-center"\n          >\n            <Bold className="h-4 w-4" />\n          </Toggle>\n        </ToggleHighlight>\n        <ToggleHighlight value="italic">\n          <Toggle\n            value="italic"\n            aria-label="Toggle italic"\n            className="size-8 flex items-center justify-center"\n          >\n            <Italic className="h-4 w-4" />\n          </Toggle>\n        </ToggleHighlight>\n        <ToggleHighlight value="underline">\n          <Toggle\n            value="underline"\n            aria-label="Toggle underline"\n            className="size-8 flex items-center justify-center"\n          >\n            <Underline className="h-4 w-4" />\n          </Toggle>\n        </ToggleHighlight>\n      </ToggleGroupHighlight>\n    </ToggleGroup>\n  ) : (\n    <ToggleGroup\n      toggleMultiple\n      value={value}\n      onValueChange={setValue}\n      className="flex gap-2"\n    >\n      <ToggleHighlight value="bold" className="bg-accent">\n        <Toggle\n          value="bold"\n          aria-label="Toggle bold"\n          className="size-8 flex items-center justify-center"\n        >\n          <Bold className="h-4 w-4" />\n        </Toggle>\n      </ToggleHighlight>\n      <ToggleHighlight value="italic" className="bg-accent">\n        <Toggle\n          value="italic"\n          aria-label="Toggle italic"\n          className="size-8 flex items-center justify-center"\n        >\n          <Italic className="h-4 w-4" />\n        </Toggle>\n      </ToggleHighlight>\n      <ToggleHighlight value="underline" className="bg-accent">\n        <Toggle\n          value="underline"\n          aria-label="Toggle underline"\n          className="size-8 flex items-center justify-center"\n        >\n          <Underline className="h-4 w-4" />\n        </Toggle>\n      </ToggleHighlight>\n    </ToggleGroup>\n  );\n};',
+          'import {\n  ToggleGroup,\n  Toggle,\n  ToggleGroupHighlight,\n  ToggleHighlight,\n} from \'@/components/animate-ui/primitives/base/toggle-group\';\nimport { Bold, Italic, Underline } from \'lucide-react\';\nimport { useEffect, useState } from \'react\';\n\ninterface BaseToggleGroupDemoProps {\n  toggleMultiple: boolean;\n}\n\nexport const BaseToggleGroupDemo = ({\n  toggleMultiple,\n}: BaseToggleGroupDemoProps) => {\n  const [value, setValue] = useState<any[]>([]);\n\n  useEffect(() => {\n    setValue([\'bold\']);\n  }, [toggleMultiple]);\n\n  return !toggleMultiple ? (\n    <ToggleGroup value={value} onValueChange={setValue} className="flex gap-2">\n      <ToggleGroupHighlight className="bg-accent">\n        <ToggleHighlight value="bold">\n          <Toggle\n            value="bold"\n            aria-label="Toggle bold"\n            className="size-8 flex items-center justify-center"\n          >\n            <Bold className="h-4 w-4" />\n          </Toggle>\n        </ToggleHighlight>\n        <ToggleHighlight value="italic">\n          <Toggle\n            value="italic"\n            aria-label="Toggle italic"\n            className="size-8 flex items-center justify-center"\n          >\n            <Italic className="h-4 w-4" />\n          </Toggle>\n        </ToggleHighlight>\n        <ToggleHighlight value="underline">\n          <Toggle\n            value="underline"\n            aria-label="Toggle underline"\n            className="size-8 flex items-center justify-center"\n          >\n            <Underline className="h-4 w-4" />\n          </Toggle>\n        </ToggleHighlight>\n      </ToggleGroupHighlight>\n    </ToggleGroup>\n  ) : (\n    <ToggleGroup\n      multiple\n      value={value}\n      onValueChange={setValue}\n      className="flex gap-2"\n    >\n      <ToggleHighlight value="bold" className="bg-accent">\n        <Toggle\n          value="bold"\n          aria-label="Toggle bold"\n          className="size-8 flex items-center justify-center"\n        >\n          <Bold className="h-4 w-4" />\n        </Toggle>\n      </ToggleHighlight>\n      <ToggleHighlight value="italic" className="bg-accent">\n        <Toggle\n          value="italic"\n          aria-label="Toggle italic"\n          className="size-8 flex items-center justify-center"\n        >\n          <Italic className="h-4 w-4" />\n        </Toggle>\n      </ToggleHighlight>\n      <ToggleHighlight value="underline" className="bg-accent">\n        <Toggle\n          value="underline"\n          aria-label="Toggle underline"\n          className="size-8 flex items-center justify-center"\n        >\n          <Underline className="h-4 w-4" />\n        </Toggle>\n      </ToggleHighlight>\n    </ToggleGroup>\n  );\n};',
       },
     ],
     keywords: [],
@@ -7382,6 +7651,44 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/demo-primitives-effects-highlight',
+  },
+  'demo-primitives-effects-image-zoom': {
+    name: 'demo-primitives-effects-image-zoom',
+    description: 'Demo showing a image zoom effect.',
+    type: 'registry:ui',
+    dependencies: undefined,
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/primitives-effects-image-zoom'],
+    files: [
+      {
+        path: 'registry/demo/primitives/effects/image-zoom/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/demo/primitives/effects/image-zoom.tsx',
+        content:
+          'import { ImageZoom, Image } from \'@/components/animate-ui/primitives/effects/image-zoom\';\nimport NextImage from \'next/image\';\n\nexport const ImageZoomDemo = () => {\n  return (\n    <ImageZoom className="rounded-2xl">\n      <Image\n        src="https://images.pexels.com/photos/34293571/pexels-photo-34293571.jpeg"\n        alt="Aerial View of the Great Lake of Almaty in Kazakhstan"\n        as={NextImage}\n        width={3840}\n        height={2160}\n      />\n    </ImageZoom>\n  );\n};',
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/demo/primitives/effects/image-zoom/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'demo-primitives-effects-image-zoom';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/demo-primitives-effects-image-zoom',
   },
   'demo-primitives-effects-magnetic': {
     name: 'demo-primitives-effects-magnetic',
@@ -9799,6 +10106,42 @@ export const index: Record<string, any> = {
     })(),
     command: '@animate-ui/icons-arrow-up',
   },
+  'icons-arrow-up-down': {
+    name: 'icons-arrow-up-down',
+    description: 'Arrow up down icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/arrow-up-down/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/arrow-up-down.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype ArrowUpDownProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    upArrowGroup: {\n      initial: {\n        y: 0,\n        transition: { ease: \'easeInOut\', duration: 0.3 },\n      },\n      animate: {\n        y: -3,\n        transition: { ease: \'easeInOut\', duration: 0.3 },\n      },\n    },\n    downArrowGroup: {\n      initial: {\n        y: 0,\n        transition: { ease: \'easeInOut\', duration: 0.3 },\n      },\n      animate: {\n        y: 3,\n        transition: { ease: \'easeInOut\', duration: 0.3 },\n      },\n    },\n    upArrowLine: {},\n    upArrowHead: {},\n    downArrowLine: {},\n    downArrowHead: {},\n  } satisfies Record<string, Variants>,\n  \'default-loop\': {\n    upArrowGroup: {\n      initial: {\n        y: 0,\n      },\n      animate: {\n        y: [0, -3, 0],\n        transition: { ease: \'easeInOut\', duration: 0.6 },\n      },\n    },\n    downArrowGroup: {\n      initial: {\n        y: 0,\n      },\n      animate: {\n        y: [0, 3, 0],\n        transition: { ease: \'easeInOut\', duration: 0.6 },\n      },\n    },\n    upArrowLine: {},\n    upArrowHead: {},\n    downArrowLine: {},\n    downArrowHead: {},\n  } satisfies Record<string, Variants>,\n  out: {\n    upArrowGroup: {\n      initial: {\n        y: 0,\n      },\n      animate: {\n        y: [0, -24, 24, 0],\n        transition: {\n          default: { ease: \'easeInOut\', duration: 0.6 },\n          y: {\n            ease: \'easeInOut\',\n            duration: 0.6,\n            times: [0, 0.5, 0.5, 1],\n          },\n        },\n      },\n    },\n    downArrowGroup: {\n      initial: {\n        y: 0,\n      },\n      animate: {\n        y: [0, 24, -24, 0],\n        transition: {\n          default: { ease: \'easeInOut\', duration: 0.6 },\n          y: {\n            ease: \'easeInOut\',\n            duration: 0.6,\n            times: [0, 0.5, 0.5, 1],\n          },\n        },\n      },\n    },\n    upArrowLine: {},\n    upArrowHead: {},\n    downArrowLine: {},\n    downArrowHead: {},\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: ArrowUpDownProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      {/* Right Arrow (Down) */}\n      <motion.g\n        variants={variants.downArrowGroup}\n        initial="initial"\n        animate={controls}\n      >\n        <motion.path\n          d="m21 16-4 4-4-4"\n          variants={variants.downArrowHead}\n          initial="initial"\n          animate={controls}\n        />\n        <motion.path\n          d="M17 20V4"\n          variants={variants.downArrowLine}\n          initial="initial"\n          animate={controls}\n        />\n      </motion.g>\n      {/* Left Arrow (Up) */}\n      <motion.g\n        variants={variants.upArrowGroup}\n        initial="initial"\n        animate={controls}\n      >\n        <motion.path\n          d="m3 8 4-4 4 4"\n          variants={variants.upArrowHead}\n          initial="initial"\n          animate={controls}\n        />\n        <motion.path\n          d="M7 4v16"\n          variants={variants.upArrowLine}\n          initial="initial"\n          animate={controls}\n        />\n      </motion.g>\n    </motion.svg>\n  );\n}\n\nfunction ArrowUpDown(props: ArrowUpDownProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  ArrowUpDown,\n  ArrowUpDown as ArrowUpDownIcon,\n  type ArrowUpDownProps,\n  type ArrowUpDownProps as ArrowUpDownIconProps,\n};',
+      },
+    ],
+    keywords: ['arrow', 'up', 'down', 'sort', 'direction', 'vertical'],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/arrow-up-down/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-arrow-up-down';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-arrow-up-down',
+  },
   'icons-audio-lines': {
     name: 'icons-audio-lines',
     description: 'Audio Lines icon component.',
@@ -10231,6 +10574,254 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/icons-bell-ring',
+  },
+  'icons-between-horizontal-end': {
+    name: 'icons-between-horizontal-end',
+    description: 'Between horizontal end icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/between-horizontal-end/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/between-horizontal-end.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { motion, type Variants } from 'motion/react';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from '@/components/animate-ui/icons/icon';\n\ntype BetweenHorizontalEndProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    topRect: {\n      initial: {\n        y: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        y: -2,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n    bottomRect: {\n      initial: {\n        y: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        y: 2,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n    arrow: {\n      initial: {\n        x: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        x: -3,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n  'default-loop': {\n    topRect: {\n      initial: { y: 0 },\n      animate: {\n        y: [0, -2, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n    bottomRect: {\n      initial: { y: 0 },\n      animate: {\n        y: [0, 2, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n    arrow: {\n      initial: { x: 0 },\n      animate: {\n        x: [0, -3, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: BetweenHorizontalEndProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns=\"http://www.w3.org/2000/svg\"\n      width={size}\n      height={size}\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      strokeWidth={2}\n      strokeLinecap=\"round\"\n      strokeLinejoin=\"round\"\n      {...props}\n    >\n      <motion.rect\n        width={13}\n        height={7}\n        x={3}\n        y={3}\n        rx={1}\n        variants={variants.topRect}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.path\n        d=\"m22 15-3-3 3-3\"\n        variants={variants.arrow}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.rect\n        width={13}\n        height={7}\n        x={3}\n        y={14}\n        rx={1}\n        variants={variants.bottomRect}\n        initial=\"initial\"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction BetweenHorizontalEnd(props: BetweenHorizontalEndProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  BetweenHorizontalEnd,\n  BetweenHorizontalEnd as BetweenHorizontalEndIcon,\n  type BetweenHorizontalEndProps,\n  type BetweenHorizontalEndProps as BetweenHorizontalEndIconProps,\n};",
+      },
+    ],
+    keywords: [
+      'insert',
+      'add',
+      'left',
+      'slot',
+      'squeeze',
+      'space',
+      'grid',
+      'table',
+      'rows',
+      'cells',
+      'excel',
+      'spreadsheet',
+      'accountancy',
+      'data',
+      'enter',
+      'entry',
+      'entries',
+      'blocks',
+      'rectangles',
+      'chevron',
+      'between',
+      'horizontal',
+      'end',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/icons/between-horizontal-end/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-between-horizontal-end';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-between-horizontal-end',
+  },
+  'icons-between-horizontal-start': {
+    name: 'icons-between-horizontal-start',
+    description: 'Between horizontal start icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/between-horizontal-start/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/between-horizontal-start.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { motion, type Variants } from 'motion/react';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from '@/components/animate-ui/icons/icon';\n\ntype BetweenHorizontalStartProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    topRect: {\n      initial: {\n        y: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        y: -2,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n    bottomRect: {\n      initial: {\n        y: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        y: 2,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n    arrow: {\n      initial: {\n        x: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        x: 3,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n  'default-loop': {\n    topRect: {\n      initial: { y: 0 },\n      animate: {\n        y: [0, -2, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n    bottomRect: {\n      initial: { y: 0 },\n      animate: {\n        y: [0, 2, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n    arrow: {\n      initial: { x: 0 },\n      animate: {\n        x: [0, 3, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: BetweenHorizontalStartProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns=\"http://www.w3.org/2000/svg\"\n      width={size}\n      height={size}\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      strokeWidth={2}\n      strokeLinecap=\"round\"\n      strokeLinejoin=\"round\"\n      {...props}\n    >\n      <motion.rect\n        width={13}\n        height={7}\n        x={8}\n        y={3}\n        rx={1}\n        variants={variants.topRect}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.path\n        d=\"m2 9 3 3-3 3\"\n        variants={variants.arrow}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.rect\n        width={13}\n        height={7}\n        x={8}\n        y={14}\n        rx={1}\n        variants={variants.bottomRect}\n        initial=\"initial\"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction BetweenHorizontalStart(props: BetweenHorizontalStartProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  BetweenHorizontalStart,\n  BetweenHorizontalStart as BetweenHorizontalStartIcon,\n  type BetweenHorizontalStartProps,\n  type BetweenHorizontalStartProps as BetweenHorizontalStartIconProps,\n};",
+      },
+    ],
+    keywords: [
+      'insert',
+      'add',
+      'right',
+      'slot',
+      'squeeze',
+      'space',
+      'grid',
+      'table',
+      'rows',
+      'cells',
+      'excel',
+      'spreadsheet',
+      'accountancy',
+      'data',
+      'enter',
+      'entry',
+      'entries',
+      'blocks',
+      'rectangles',
+      'chevron',
+      'between',
+      'horizontal',
+      'start',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/icons/between-horizontal-start/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-between-horizontal-start';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-between-horizontal-start',
+  },
+  'icons-between-vertical-end': {
+    name: 'icons-between-vertical-end',
+    description: 'Between vertical end icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/between-vertical-end/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/between-vertical-end.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { motion, type Variants } from 'motion/react';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from '@/components/animate-ui/icons/icon';\n\ntype BetweenVerticalEndProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    leftRect: {\n      initial: {\n        x: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        x: -2,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n    rightRect: {\n      initial: {\n        x: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        x: 2,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n    arrow: {\n      initial: {\n        y: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        y: -3,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n  'default-loop': {\n    leftRect: {\n      initial: { x: 0 },\n      animate: {\n        x: [0, -2, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n    rightRect: {\n      initial: { x: 0 },\n      animate: {\n        x: [0, 2, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n    arrow: {\n      initial: { y: 0 },\n      animate: {\n        y: [0, -3, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: BetweenVerticalEndProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns=\"http://www.w3.org/2000/svg\"\n      width={size}\n      height={size}\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      strokeWidth={2}\n      strokeLinecap=\"round\"\n      strokeLinejoin=\"round\"\n      {...props}\n    >\n      <motion.rect\n        width={7}\n        height={13}\n        x={3}\n        y={3}\n        rx={1}\n        variants={variants.leftRect}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.path\n        d=\"m9 22 3-3 3 3\"\n        variants={variants.arrow}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.rect\n        width={7}\n        height={13}\n        x={14}\n        y={3}\n        rx={1}\n        variants={variants.rightRect}\n        initial=\"initial\"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction BetweenVerticalEnd(props: BetweenVerticalEndProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  BetweenVerticalEnd,\n  BetweenVerticalEnd as BetweenVerticalEndIcon,\n  type BetweenVerticalEndProps,\n  type BetweenVerticalEndProps as BetweenVerticalEndIconProps,\n};",
+      },
+    ],
+    keywords: [
+      'insert',
+      'add',
+      'down',
+      'slot',
+      'squeeze',
+      'space',
+      'grid',
+      'table',
+      'columns',
+      'cells',
+      'excel',
+      'spreadsheet',
+      'accountancy',
+      'data',
+      'enter',
+      'entry',
+      'entries',
+      'blocks',
+      'rectangles',
+      'chevron',
+      'between',
+      'vertical',
+      'end',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/icons/between-vertical-end/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-between-vertical-end';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-between-vertical-end',
+  },
+  'icons-between-vertical-start': {
+    name: 'icons-between-vertical-start',
+    description: 'Between vertical start icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/between-vertical-start/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/between-vertical-start.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { motion, type Variants } from 'motion/react';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from '@/components/animate-ui/icons/icon';\n\ntype BetweenVerticalStartProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    leftRect: {\n      initial: {\n        x: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        x: -2,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n    rightRect: {\n      initial: {\n        x: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        x: 2,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n    arrow: {\n      initial: {\n        y: 0,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n      animate: {\n        y: 3,\n        transition: { ease: 'easeInOut', duration: 0.3 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n  'default-loop': {\n    leftRect: {\n      initial: { x: 0 },\n      animate: {\n        x: [0, -2, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n    rightRect: {\n      initial: { x: 0 },\n      animate: {\n        x: [0, 2, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n    arrow: {\n      initial: { y: 0 },\n      animate: {\n        y: [0, 3, 0],\n        transition: { ease: 'easeInOut', duration: 0.6 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: BetweenVerticalStartProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns=\"http://www.w3.org/2000/svg\"\n      width={size}\n      height={size}\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      strokeWidth={2}\n      strokeLinecap=\"round\"\n      strokeLinejoin=\"round\"\n      {...props}\n    >\n      <motion.rect\n        width={7}\n        height={13}\n        x={3}\n        y={8}\n        rx={1}\n        variants={variants.leftRect}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.path\n        d=\"m15 2-3 3-3-3\"\n        variants={variants.arrow}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.rect\n        width={7}\n        height={13}\n        x={14}\n        y={8}\n        rx={1}\n        variants={variants.rightRect}\n        initial=\"initial\"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction BetweenVerticalStart(props: BetweenVerticalStartProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  BetweenVerticalStart,\n  BetweenVerticalStart as BetweenVerticalStartIcon,\n  type BetweenVerticalStartProps,\n  type BetweenVerticalStartProps as BetweenVerticalStartIconProps,\n};",
+      },
+    ],
+    keywords: [
+      'insert',
+      'add',
+      'up',
+      'slot',
+      'squeeze',
+      'space',
+      'grid',
+      'table',
+      'columns',
+      'cells',
+      'excel',
+      'spreadsheet',
+      'accountancy',
+      'data',
+      'enter',
+      'entry',
+      'entries',
+      'blocks',
+      'rectangles',
+      'chevron',
+      'between',
+      'vertical',
+      'start',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/icons/between-vertical-start/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-between-vertical-start';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-between-vertical-start',
   },
   'icons-binary': {
     name: 'icons-binary',
@@ -13521,6 +14112,184 @@ export const index: Record<string, any> = {
     })(),
     command: '@animate-ui/icons-frame',
   },
+  'icons-gallery-horizontal': {
+    name: 'icons-gallery-horizontal',
+    description: 'Gallery horizontal icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/gallery-horizontal/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/gallery-horizontal.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { motion, type Variants } from 'motion/react';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from '@/components/animate-ui/icons/icon';\n\ntype GalleryHorizontalProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: (() => {\n    const animation: Record<string, Variants> = {\n      rect: {},\n    };\n\n    for (let i = 1; i <= 2; i++) {\n      animation[`path${i}`] = {\n        initial: { opacity: 1, scale: 1, x: 0 },\n        animate: {\n          opacity: [0, 1],\n          scale: [0.8, 1],\n          x: [4 * Math.pow(-1, i + 1), 0],\n          transition: {\n            type: 'spring',\n            stiffness: 150,\n            damping: 15,\n          },\n        },\n      };\n    }\n\n    return animation;\n  })() satisfies Record<string, Variants>,\n\n  zoom: (() => {\n    const animation: Record<string, Variants> = {\n      rect: {\n        initial: { opacity: 1, scale: 1 },\n        animate: {\n          opacity: 0,\n          scale: 0,\n          transition: {\n            opacity: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.2,\n            },\n            scale: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.2,\n            },\n          },\n        },\n      },\n    };\n\n    for (let i = 1; i <= 2; i++) {\n      animation[`path${i}`] = {\n        initial: { opacity: 1, transform: 'translateX(0) scale(1)' },\n        animate: {\n          opacity: 0,\n          transform: `translateX(${8 * Math.pow(-1, i + 1)}px) scale(0)`,\n          transition: {\n            transform: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.4,\n            },\n            opacity: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.4,\n            },\n            scale: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.4,\n            },\n          },\n        },\n      };\n    }\n\n    return animation;\n  })() satisfies Record<string, Variants>,\n\n  collapse: {\n    rect: {},\n    path1: {\n      initial: { x: 0, scaleY: 1 },\n      animate: {\n        x: 4,\n        scaleY: 0.8,\n        transition: {\n          duration: 0.3,\n          ease: 'easeInOut',\n        },\n      },\n    },\n    path2: {\n      initial: { x: 0, scaleY: 1 },\n      animate: {\n        x: -4,\n        scaleY: 0.8,\n        transition: {\n          duration: 0.3,\n          ease: 'easeInOut',\n        },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: GalleryHorizontalProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns=\"http://www.w3.org/2000/svg\"\n      width={size}\n      height={size}\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      strokeWidth={2}\n      strokeLinecap=\"round\"\n      strokeLinejoin=\"round\"\n      {...props}\n    >\n      <motion.path\n        d=\"M2 3v18\"\n        variants={variants.path1}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.rect\n        width=\"12\"\n        height=\"18\"\n        x=\"6\"\n        y=\"3\"\n        rx=\"2\"\n        variants={variants.rect}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.path\n        d=\"M22 3v18\"\n        variants={variants.path2}\n        initial=\"initial\"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction GalleryHorizontal(props: GalleryHorizontalProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  GalleryHorizontal,\n  GalleryHorizontal as GalleryHorizontalIcon,\n  type GalleryHorizontalProps,\n  type GalleryHorizontalProps as GalleryHorizontalIconProps,\n};",
+      },
+    ],
+    keywords: [
+      'layout',
+      'design',
+      'development',
+      'photography',
+      'multimedia',
+      'files',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/icons/gallery-horizontal/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-gallery-horizontal';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-gallery-horizontal',
+  },
+  'icons-gallery-vertical-end': {
+    name: 'icons-gallery-vertical-end',
+    description: 'Gallery vertical end icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/gallery-vertical-end/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/gallery-vertical-end.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { motion, type Variants } from 'motion/react';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from '@/components/animate-ui/icons/icon';\n\ntype GalleryHorizontalEndProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: (() => {\n    const animation: Record<string, Variants> = {\n      rect: {},\n    };\n\n    for (let i = 1; i <= 2; i++) {\n      animation[`path${i}`] = {\n        initial: { opacity: 1, scale: 1, x: 0 },\n        animate: {\n          opacity: [0, 1],\n          scale: [0.8, 1],\n          x: [2 * i, 0],\n          transition: {\n            delay: 0.2 * (2 - i),\n            type: 'spring',\n            stiffness: 150,\n            damping: 15,\n          },\n        },\n      };\n    }\n\n    return animation;\n  })() satisfies Record<string, Variants>,\n\n  zoom: (() => {\n    const animation: Record<string, Variants> = {\n      rect: {\n        initial: { opacity: 1, scale: 1 },\n        animate: {\n          opacity: 0,\n          scale: 0,\n          transition: {\n            opacity: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.2,\n            },\n            scale: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.2,\n            },\n          },\n        },\n      },\n    };\n\n    for (let i = 1; i <= 2; i++) {\n      animation[`path${i}`] = {\n        initial: { opacity: 1, transform: 'translateX(0) scale(1)' },\n        animate: {\n          opacity: 0,\n          transform: `translateX(${(3 - i) * 3}px) scale(0)`,\n          transition: {\n            transform: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.8 - 0.2 * i,\n            },\n            opacity: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.8 - 0.2 * i,\n            },\n            scale: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.8 - 0.2 * i,\n            },\n          },\n        },\n      };\n    }\n\n    return animation;\n  })() satisfies Record<string, Variants>,\n\n  collapse: {\n    rect: {\n      initial: { x: 0 },\n      animate: {\n        x: -4,\n        transition: {\n          duration: 0.3,\n          ease: 'easeInOut',\n        },\n      },\n    },\n    path1: {\n      initial: { x: 0 },\n      animate: {\n        x: 4,\n        transition: {\n          duration: 0.3,\n          ease: 'easeInOut',\n        },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: GalleryHorizontalEndProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns=\"http://www.w3.org/2000/svg\"\n      width={size}\n      height={size}\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      strokeWidth={2}\n      strokeLinecap=\"round\"\n      strokeLinejoin=\"round\"\n      {...props}\n    >\n      <motion.path\n        d=\"M2 7v10\"\n        variants={variants.path1}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.path\n        d=\"M6 5v14\"\n        variants={variants.path2}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.rect\n        width=\"12\"\n        height=\"18\"\n        x=\"10\"\n        y=\"3\"\n        rx=\"2\"\n        variants={variants.rect}\n        initial=\"initial\"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction GalleryHorizontalEnd(props: GalleryHorizontalEndProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  GalleryHorizontalEnd,\n  GalleryHorizontalEnd as GalleryHorizontalEndIcon,\n  type GalleryHorizontalEndProps,\n  type GalleryHorizontalEndProps as GalleryHorizontalEndIconProps,\n};",
+      },
+    ],
+    keywords: [
+      'layout',
+      'design',
+      'development',
+      'photography',
+      'multimedia',
+      'files',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/icons/gallery-vertical-end/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-gallery-vertical-end';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-gallery-vertical-end',
+  },
+  'icons-gallery-vertical': {
+    name: 'icons-gallery-vertical',
+    description: 'Gallery vertical icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/gallery-vertical/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/gallery-vertical.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { motion, type Variants } from 'motion/react';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from '@/components/animate-ui/icons/icon';\n\ntype GalleryVerticalProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: (() => {\n    const animation: Record<string, Variants> = {\n      rect: {},\n    };\n\n    for (let i = 1; i <= 2; i++) {\n      animation[`path${i}`] = {\n        initial: { opacity: 1, scale: 1, y: 0 },\n        animate: {\n          opacity: [0, 1],\n          scale: [0.8, 1],\n          y: [4 * Math.pow(-1, i + 1), 0],\n          transition: {\n            type: 'spring',\n            stiffness: 150,\n            damping: 15,\n          },\n        },\n      };\n    }\n\n    return animation;\n  })() satisfies Record<string, Variants>,\n\n  zoom: (() => {\n    const animation: Record<string, Variants> = {\n      rect: {\n        initial: { opacity: 1, scale: 1 },\n        animate: {\n          opacity: 0,\n          scale: 0,\n          transition: {\n            opacity: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.2,\n            },\n            scale: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.2,\n            },\n          },\n        },\n      },\n    };\n\n    for (let i = 1; i <= 2; i++) {\n      animation[`path${i}`] = {\n        initial: { opacity: 1, transform: 'translateY(0) scale(1)' },\n        animate: {\n          opacity: 0,\n          transform: `translateY(${3 * Math.pow(-1, i + 1)}px) scale(0)`,\n          transition: {\n            transform: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.4,\n            },\n            opacity: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.4,\n            },\n            scale: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.4,\n            },\n          },\n        },\n      };\n    }\n\n    return animation;\n  })() satisfies Record<string, Variants>,\n\n  collapse: {\n    rect: {},\n    path1: {\n      initial: { y: 0, scaleX: 1 },\n      animate: {\n        y: 4,\n        scaleX: 0.8,\n        transition: {\n          duration: 0.3,\n          ease: 'easeInOut',\n        },\n      },\n    },\n    path2: {\n      initial: { y: 0, scaleX: 1 },\n      animate: {\n        y: -4,\n        scaleX: 0.8,\n        transition: {\n          duration: 0.3,\n          ease: 'easeInOut',\n        },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: GalleryVerticalProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns=\"http://www.w3.org/2000/svg\"\n      width={size}\n      height={size}\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      strokeWidth={2}\n      strokeLinecap=\"round\"\n      strokeLinejoin=\"round\"\n      {...props}\n    >\n      <motion.path\n        d=\"M3 2h18\"\n        variants={variants.path1}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.rect\n        width=\"18\"\n        height=\"12\"\n        x=\"3\"\n        y=\"6\"\n        rx=\"2\"\n        variants={variants.rect}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.path\n        d=\"M3 22h18\"\n        variants={variants.path2}\n        initial=\"initial\"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction GalleryVertical(props: GalleryVerticalProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  GalleryVertical,\n  GalleryVertical as GalleryVerticalIcon,\n  type GalleryVerticalProps,\n  type GalleryVerticalProps as GalleryVerticalIconProps,\n};",
+      },
+    ],
+    keywords: [
+      'layout',
+      'design',
+      'development',
+      'photography',
+      'multimedia',
+      'files',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/gallery-vertical/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-gallery-vertical';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-gallery-vertical',
+  },
+  'icons-gallery-horizontal-end': {
+    name: 'icons-gallery-horizontal-end',
+    description: 'Gallery horizontal end icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/gallery-horizontal-end/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/gallery-horizontal-end.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { motion, type Variants } from 'motion/react';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from '@/components/animate-ui/icons/icon';\n\ntype GalleryVerticalEndProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: (() => {\n    const animation: Record<string, Variants> = {\n      rect: {},\n    };\n\n    for (let i = 1; i <= 2; i++) {\n      animation[`path${i}`] = {\n        initial: { opacity: 1, scale: 1, y: 0 },\n        animate: {\n          opacity: [0, 1],\n          scale: [0.8, 1],\n          y: [2 * i, 0],\n          transition: {\n            delay: 0.2 * (2 - i),\n            type: 'spring',\n            stiffness: 150,\n            damping: 15,\n          },\n        },\n      };\n    }\n\n    return animation;\n  })() satisfies Record<string, Variants>,\n\n  zoom: (() => {\n    const animation: Record<string, Variants> = {\n      rect: {\n        initial: { opacity: 1, scale: 1 },\n        animate: {\n          opacity: 0,\n          scale: 0,\n          transition: {\n            opacity: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.2,\n            },\n            scale: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.2,\n            },\n          },\n        },\n      },\n    };\n\n    for (let i = 1; i <= 2; i++) {\n      animation[`path${i}`] = {\n        initial: { opacity: 1, transform: 'translateY(0) scale(1)' },\n        animate: {\n          opacity: 0,\n          transform: `translateY(${(3 - i) * 3}px) scale(0)`,\n          transition: {\n            transform: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.8 - 0.2 * i,\n            },\n            opacity: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.8 - 0.2 * i,\n            },\n            scale: {\n              duration: 0.2,\n              ease: 'easeInOut',\n              repeat: 1,\n              repeatType: 'reverse',\n              repeatDelay: 0.8 - 0.2 * i,\n            },\n          },\n        },\n      };\n    }\n\n    return animation;\n  })() satisfies Record<string, Variants>,\n\n  collapse: {\n    rect: {\n      initial: { y: 0 },\n      animate: {\n        y: -4,\n        transition: {\n          duration: 0.3,\n          ease: 'easeInOut',\n        },\n      },\n    },\n    path1: {\n      initial: { y: 0 },\n      animate: {\n        y: 4,\n        transition: {\n          duration: 0.3,\n          ease: 'easeInOut',\n        },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: GalleryVerticalEndProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns=\"http://www.w3.org/2000/svg\"\n      width={size}\n      height={size}\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      strokeWidth={2}\n      strokeLinecap=\"round\"\n      strokeLinejoin=\"round\"\n      {...props}\n    >\n      <motion.path\n        d=\"M7 2h10\"\n        variants={variants.path1}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.path\n        d=\"M5 6h14\"\n        variants={variants.path2}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.rect\n        width=\"18\"\n        height=\"12\"\n        x=\"3\"\n        y=\"10\"\n        rx=\"2\"\n        variants={variants.rect}\n        initial=\"initial\"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction GalleryVerticalEnd(props: GalleryVerticalEndProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  GalleryVerticalEnd,\n  GalleryVerticalEnd as GalleryVerticalEndIcon,\n  type GalleryVerticalEndProps,\n  type GalleryVerticalEndProps as GalleryVerticalEndIconProps,\n};",
+      },
+    ],
+    keywords: [
+      'layout',
+      'design',
+      'development',
+      'photography',
+      'multimedia',
+      'files',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/icons/gallery-horizontal-end/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-gallery-horizontal-end';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-gallery-horizontal-end',
+  },
   'icons-gauge': {
     name: 'icons-gauge',
     description: 'Gauge icon component.',
@@ -14033,6 +14802,50 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/icons-link',
+  },
+  'icons-link-2': {
+    name: 'icons-link-2',
+    description: 'Link 2 icon with connect/unlink animations.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/link-2/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/link-2.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { motion, type Variants } from 'motion/react';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from '@/components/animate-ui/icons/icon';\n\ntype Link2Props = IconProps<keyof typeof animations>;\n\nconst spring = { type: 'spring', damping: 20, stiffness: 200 } as const;\n\nconst animations = {\n  // Little \"clink\" at the joint\n  default: {\n    left: {\n      initial: { rotate: 0, transformOrigin: '9px 12px' },\n      animate: {\n        rotate: [0, 10, 0],\n        transformOrigin: '9px 12px',\n        transition: { duration: 0.4, ease: 'easeInOut' },\n      },\n    },\n    right: {\n      initial: { rotate: 0, transformOrigin: '15px 12px' },\n      animate: {\n        rotate: [0, -6, 0],\n        transformOrigin: '15px 12px',\n        transition: { duration: 0.4, ease: 'easeInOut' },\n      },\n    },\n    middle: {\n      initial: { rotate: 0 },\n      animate: {\n        rotate: [0, 12, 0],\n        transition: { duration: 0.4, ease: 'easeInOut' },\n      },\n    },\n    burstTop: {\n      initial: { opacity: 0 },\n      animate: { opacity: 0 },\n    },\n    burstLeft: {\n      initial: { opacity: 0 },\n      animate: { opacity: 0 },\n    },\n    burstBottom: {\n      initial: { opacity: 0 },\n      animate: { opacity: 0 },\n    },\n    burstRight: {\n      initial: { opacity: 0 },\n      animate: { opacity: 0 },\n    },\n  } satisfies Record<string, Variants>,\n\n  // Pull apart: arcs move outward, line shrinks away\n  unlink: {\n    left: {\n      initial: { x: 0 },\n      animate: { x: -1, transition: spring },\n    },\n    right: {\n      initial: { x: 0 },\n      animate: { x: 1, transition: spring },\n    },\n    middle: {\n      initial: { opacity: 1, scale: 1 },\n      animate: {\n        opacity: 0,\n        scale: 0,\n        transition: { ...spring, delay: 0.1 },\n      },\n    },\n    burstTop: {\n      initial: { opacity: 0, scale: 0 },\n      animate: {\n        opacity: [0, 1, 0],\n        scale: [0, 1, 0],\n        transition: { duration: 0.4, ease: 'easeInOut', delay: 0.2 },\n      },\n    },\n    burstLeft: {\n      initial: { opacity: 0, scale: 0 },\n      animate: {\n        opacity: [0, 1, 0],\n        scale: [0, 1, 0],\n        transition: { duration: 0.4, ease: 'easeInOut', delay: 0.2 },\n      },\n    },\n    burstBottom: {\n      initial: { opacity: 0, scale: 0 },\n      animate: {\n        opacity: [0, 1, 0],\n        scale: [0, 1, 0],\n        transition: { duration: 0.4, ease: 'easeInOut', delay: 0.2 },\n      },\n    },\n    burstRight: {\n      initial: { opacity: 0, scale: 0 },\n      animate: {\n        opacity: [0, 1, 0],\n        scale: [0, 1, 0],\n        transition: { duration: 0.4, ease: 'easeInOut', delay: 0.2 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n\n  // Pull apart: arcs move outward, line shrinks away\n  'unlink-loop': {\n    left: {\n      initial: { x: 0 },\n      animate: {\n        x: [-1, 0, -1],\n        transition: { duration: 0.6, ease: 'easeInOut' },\n      },\n    },\n    right: {\n      initial: { x: 0 },\n      animate: {\n        x: [1, 0, 1],\n        transition: { duration: 0.6, ease: 'easeInOut' },\n      },\n    },\n    middle: {\n      initial: { opacity: 1, scale: 1 },\n      animate: {\n        opacity: [1, 0, 1],\n        scale: [1, 0, 1],\n        transition: { duration: 0.6, ease: 'easeInOut', delay: 0.1 },\n      },\n    },\n    burstTop: {\n      initial: { opacity: 0, scale: 0 },\n      animate: {\n        opacity: [0, 1, 0, 0],\n        scale: [0, 1, 0, 0],\n        transition: { duration: 0.6, ease: 'easeInOut', delay: 0.2 },\n      },\n    },\n    burstLeft: {\n      initial: { opacity: 0, scale: 0 },\n      animate: {\n        opacity: [0, 1, 0, 0],\n        scale: [0, 1, 0, 0],\n        transition: { duration: 0.6, ease: 'easeInOut', delay: 0.2 },\n      },\n    },\n    burstBottom: {\n      initial: { opacity: 0, scale: 0 },\n      animate: {\n        opacity: [0, 1, 0, 0],\n        scale: [0, 1, 0, 0],\n        transition: { duration: 0.6, ease: 'easeInOut', delay: 0.2 },\n      },\n    },\n    burstRight: {\n      initial: { opacity: 0, scale: 0 },\n      animate: {\n        opacity: [0, 1, 0, 0],\n        scale: [0, 1, 0, 0],\n        transition: { duration: 0.6, ease: 'easeInOut', delay: 0.2 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n\n  // Emphasize link: arcs nudge toward center, line pulses slightly\n  link: {\n    left: {\n      initial: { x: 0 },\n      animate: {\n        x: [0, 1.5, 0],\n        transition: { duration: 0.4, ease: 'easeInOut' },\n      },\n    },\n    right: {\n      initial: { x: 0 },\n      animate: {\n        x: [0, -1.5, 0],\n        transition: { duration: 0.4, ease: 'easeInOut' },\n      },\n    },\n    burstTop: {\n      initial: { opacity: 0 },\n      animate: { opacity: 0 },\n    },\n    burstLeft: {\n      initial: { opacity: 0 },\n      animate: { opacity: 0 },\n    },\n    burstBottom: {\n      initial: { opacity: 0 },\n      animate: { opacity: 0 },\n    },\n    burstRight: {\n      initial: { opacity: 0 },\n      animate: { opacity: 0 },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: Link2Props) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns=\"http://www.w3.org/2000/svg\"\n      width={size}\n      height={size}\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      strokeWidth={2}\n      strokeLinecap=\"round\"\n      strokeLinejoin=\"round\"\n      {...props}\n    >\n      {/* Left arc */}\n      <motion.path\n        d=\"M9 17H7A5 5 0 0 1 7 7h2\"\n        variants={variants.left}\n        initial=\"initial\"\n        animate={controls}\n      />\n      {/* Right arc */}\n      <motion.path\n        d=\"M15 7h2a5 5 0 1 1 0 10h-2\"\n        variants={variants.right}\n        initial=\"initial\"\n        animate={controls}\n      />\n      {/* Middle line */}\n      <motion.line\n        x1={8}\n        y1={12}\n        x2={16}\n        y2={12}\n        style={{ transformOrigin: '12px 12px' }}\n        variants={variants.middle}\n        initial=\"initial\"\n        animate={controls}\n      />\n      {/* Explosion lines (shown in unlink) - rotated around center to avoid overlap */}\n      <motion.g style={{ rotate: 45, transformOrigin: '12px 12px' }}>\n        <motion.line\n          x1={8}\n          y1={2}\n          x2={8}\n          y2={5}\n          style={{ transformOrigin: '8px 3.5px' }}\n          variants={variants.burstTop}\n          initial=\"initial\"\n          animate={controls}\n        />\n        <motion.line\n          x1={2}\n          y1={8}\n          x2={5}\n          y2={8}\n          style={{ transformOrigin: '3.5px 8px' }}\n          variants={variants.burstLeft}\n          initial=\"initial\"\n          animate={controls}\n        />\n        <motion.line\n          x1={16}\n          y1={19}\n          x2={16}\n          y2={22}\n          style={{ transformOrigin: '16px 20.5px' }}\n          variants={variants.burstBottom}\n          initial=\"initial\"\n          animate={controls}\n        />\n        <motion.line\n          x1={19}\n          y1={16}\n          x2={22}\n          y2={16}\n          style={{ transformOrigin: '20.5px 16px' }}\n          variants={variants.burstRight}\n          initial=\"initial\"\n          animate={controls}\n        />\n      </motion.g>\n    </motion.svg>\n  );\n}\n\nfunction Link2(props: Link2Props) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  Link2,\n  Link2 as Link2Icon,\n  type Link2Props,\n  type Link2Props as Link2IconProps,\n};",
+      },
+    ],
+    keywords: [
+      'link',
+      'connect',
+      'chain',
+      'url',
+      'relation',
+      'union',
+      'attach',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/link-2/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-link-2';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-link-2',
   },
   'icons-list': {
     name: 'icons-list',
@@ -16144,7 +16957,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/icons/panel-bottom.tsx',
         content:
-          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelBottomProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 3, y1: 15, x2: 21, y2: 15 },\n      animate: {\n        x1: 3,\n        y1: 17,\n        x2: 21,\n        y2: 17,\n        transition: { type: \'spring\', damping: 20, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelBottomProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={3}\n        y1={15}\n        x2={21}\n        y2={15}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelBottom(props: PanelBottomProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelBottom,\n  PanelBottom as PanelBottomIcon,\n  type PanelBottomProps,\n  type PanelBottomProps as PanelBottomIconProps,\n};',
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelBottomProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 3, y1: 15, x2: 21, y2: 15 },\n      animate: {\n        x1: 3,\n        y1: 17,\n        x2: 21,\n        y2: 17,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelBottomProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={3}\n        y1={15}\n        x2={21}\n        y2={15}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelBottom(props: PanelBottomProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelBottom,\n  PanelBottom as PanelBottomIcon,\n  type PanelBottomProps,\n  type PanelBottomProps as PanelBottomIconProps,\n};',
       },
     ],
     keywords: ['sidebar', 'panel', 'bottom', 'menu', 'drawer', 'navigation'],
@@ -16167,6 +16980,98 @@ export const index: Record<string, any> = {
     })(),
     command: '@animate-ui/icons-panel-bottom',
   },
+  'icons-panel-bottom-close': {
+    name: 'icons-panel-bottom-close',
+    description: 'Panel bottom close icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/panel-bottom-close/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/panel-bottom-close.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelBottomCloseProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 3, y1: 15, x2: 21, y2: 15 },\n      animate: {\n        x1: 3,\n        y1: 17,\n        x2: 21,\n        y2: 17,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n    arrow: {\n      initial: { y: 0 },\n      animate: {\n        y: 2,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelBottomCloseProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={3}\n        y1={15}\n        x2={21}\n        y2={15}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="m15 8-3 3-3-3"\n        variants={variants.arrow}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelBottomClose(props: PanelBottomCloseProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelBottomClose,\n  PanelBottomClose as PanelBottomCloseIcon,\n  type PanelBottomCloseProps,\n  type PanelBottomCloseProps as PanelBottomCloseIconProps,\n};',
+      },
+    ],
+    keywords: [
+      'sidebar',
+      'panel',
+      'bottom',
+      'menu',
+      'drawer',
+      'navigation',
+      'close',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/icons/panel-bottom-close/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-panel-bottom-close';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-panel-bottom-close',
+  },
+  'icons-panel-bottom-open': {
+    name: 'icons-panel-bottom-open',
+    description: 'Panel bottom open icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/panel-bottom-open/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/panel-bottom-open.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelBottomOpenProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 3, y1: 15, x2: 21, y2: 15 },\n      animate: {\n        x1: 3,\n        y1: 13,\n        x2: 21,\n        y2: 13,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n    arrow: {\n      initial: { y: 0 },\n      animate: {\n        y: -2,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelBottomOpenProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={3}\n        y1={15}\n        x2={21}\n        y2={15}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="m9 10 3-3 3 3"\n        variants={variants.arrow}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelBottomOpen(props: PanelBottomOpenProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelBottomOpen,\n  PanelBottomOpen as PanelBottomOpenIcon,\n  type PanelBottomOpenProps,\n  type PanelBottomOpenProps as PanelBottomOpenIconProps,\n};',
+      },
+    ],
+    keywords: [
+      'sidebar',
+      'panel',
+      'bottom',
+      'menu',
+      'drawer',
+      'navigation',
+      'open',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/icons/panel-bottom-open/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-panel-bottom-open';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-panel-bottom-open',
+  },
   'icons-panel-left': {
     name: 'icons-panel-left',
     description: 'Panel left icon component.',
@@ -16180,7 +17085,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/icons/panel-left.tsx',
         content:
-          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelLeftProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 9, y1: 3, x2: 9, y2: 21 },\n      animate: {\n        x1: 7,\n        y1: 3,\n        x2: 7,\n        y2: 21,\n        transition: { type: \'spring\', damping: 20, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelLeftProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={9}\n        y1={3}\n        x2={9}\n        y2={21}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelLeft(props: PanelLeftProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelLeft,\n  PanelLeft as PanelLeftIcon,\n  type PanelLeftProps,\n  type PanelLeftProps as PanelLeftIconProps,\n};',
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelLeftProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 9, y1: 3, x2: 9, y2: 21 },\n      animate: {\n        x1: 7,\n        y1: 3,\n        x2: 7,\n        y2: 21,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelLeftProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={9}\n        y1={3}\n        x2={9}\n        y2={21}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelLeft(props: PanelLeftProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelLeft,\n  PanelLeft as PanelLeftIcon,\n  type PanelLeftProps,\n  type PanelLeftProps as PanelLeftIconProps,\n};',
       },
     ],
     keywords: ['sidebar', 'panel', 'left', 'menu', 'drawer', 'navigation'],
@@ -16203,6 +17108,94 @@ export const index: Record<string, any> = {
     })(),
     command: '@animate-ui/icons-panel-left',
   },
+  'icons-panel-left-close': {
+    name: 'icons-panel-left-close',
+    description: 'Panel left close icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/panel-left-close/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/panel-left-close.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelLeftCloseProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 9, y1: 3, x2: 9, y2: 21 },\n      animate: {\n        x1: 7,\n        y1: 3,\n        x2: 7,\n        y2: 21,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n    arrow: {\n      initial: { x: 0 },\n      animate: {\n        x: -2,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelLeftCloseProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={9}\n        y1={3}\n        x2={9}\n        y2={21}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="m16 15-3-3 3-3"\n        variants={variants.arrow}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelLeftClose(props: PanelLeftCloseProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelLeftClose,\n  PanelLeftClose as PanelLeftCloseIcon,\n  type PanelLeftCloseProps,\n  type PanelLeftCloseProps as PanelLeftCloseIconProps,\n};',
+      },
+    ],
+    keywords: [
+      'sidebar',
+      'panel',
+      'left',
+      'menu',
+      'drawer',
+      'navigation',
+      'close',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/panel-left-close/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-panel-left-close';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-panel-left-close',
+  },
+  'icons-panel-left-open': {
+    name: 'icons-panel-left-open',
+    description: 'Panel left open icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/panel-left-open/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/panel-left-open.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelLeftOpenProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 9, y1: 3, x2: 9, y2: 21 },\n      animate: {\n        x1: 11,\n        y1: 3,\n        x2: 11,\n        y2: 21,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n    arrow: {\n      initial: { x: 0 },\n      animate: {\n        x: 2,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelLeftOpenProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={9}\n        y1={3}\n        x2={9}\n        y2={21}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="m14 9 3 3-3 3"\n        variants={variants.arrow}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelLeftOpen(props: PanelLeftOpenProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelLeftOpen,\n  PanelLeftOpen as PanelLeftOpenIcon,\n  type PanelLeftOpenProps,\n  type PanelLeftOpenProps as PanelLeftOpenIconProps,\n};',
+      },
+    ],
+    keywords: [
+      'sidebar',
+      'panel',
+      'left',
+      'menu',
+      'drawer',
+      'navigation',
+      'open',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/panel-left-open/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-panel-left-open';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-panel-left-open',
+  },
   'icons-panel-right': {
     name: 'icons-panel-right',
     description: 'Panel right icon component.',
@@ -16216,7 +17209,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/icons/panel-right.tsx',
         content:
-          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelRightProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 15, y1: 3, x2: 15, y2: 21 },\n      animate: {\n        x1: 17,\n        y1: 3,\n        x2: 17,\n        y2: 21,\n        transition: { type: \'spring\', damping: 20, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelRightProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={15}\n        y1={3}\n        x2={15}\n        y2={21}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelRight(props: PanelRightProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelRight,\n  PanelRight as PanelRightIcon,\n  type PanelRightProps,\n  type PanelRightProps as PanelRightIconProps,\n};',
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelRightProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 15, y1: 3, x2: 15, y2: 21 },\n      animate: {\n        x1: 17,\n        y1: 3,\n        x2: 17,\n        y2: 21,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelRightProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={15}\n        y1={3}\n        x2={15}\n        y2={21}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelRight(props: PanelRightProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelRight,\n  PanelRight as PanelRightIcon,\n  type PanelRightProps,\n  type PanelRightProps as PanelRightIconProps,\n};',
       },
     ],
     keywords: ['sidebar', 'panel', 'right', 'menu', 'drawer', 'navigation'],
@@ -16239,6 +17232,96 @@ export const index: Record<string, any> = {
     })(),
     command: '@animate-ui/icons-panel-right',
   },
+  'icons-panel-right-close': {
+    name: 'icons-panel-right-close',
+    description: 'Panel right close icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/panel-right-close/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/panel-right-close.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelRightCloseProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 15, y1: 3, x2: 15, y2: 21 },\n      animate: {\n        x1: 17,\n        y1: 3,\n        x2: 17,\n        y2: 21,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n    arrow: {\n      initial: { x: 0 },\n      animate: {\n        x: 2,\n        transition: { type: \'spring\', damping: 20, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelRightCloseProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={15}\n        y1={3}\n        x2={15}\n        y2={21}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="m8 9 3 3-3 3"\n        variants={variants.arrow}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelRightClose(props: PanelRightCloseProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelRightClose,\n  PanelRightClose as PanelRightCloseIcon,\n  type PanelRightCloseProps,\n  type PanelRightCloseProps as PanelRightCloseIconProps,\n};',
+      },
+    ],
+    keywords: [
+      'sidebar',
+      'panel',
+      'right',
+      'menu',
+      'drawer',
+      'navigation',
+      'close',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/icons/panel-right-close/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-panel-right-close';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-panel-right-close',
+  },
+  'icons-panel-right-open': {
+    name: 'icons-panel-right-open',
+    description: 'Panel right open icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/panel-right-open/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/panel-right-open.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelRightOpenProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 15, y1: 3, x2: 15, y2: 21 },\n      animate: {\n        x1: 13,\n        y1: 3,\n        x2: 13,\n        y2: 21,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n    arrow: {\n      initial: { x: 0 },\n      animate: {\n        x: -2,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelRightOpenProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={15}\n        y1={3}\n        x2={15}\n        y2={21}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="m10 15-3-3 3-3"\n        variants={variants.arrow}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelRightOpen(props: PanelRightOpenProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelRightOpen,\n  PanelRightOpen as PanelRightOpenIcon,\n  type PanelRightOpenProps,\n  type PanelRightOpenProps as PanelRightOpenIconProps,\n};',
+      },
+    ],
+    keywords: [
+      'sidebar',
+      'panel',
+      'right',
+      'menu',
+      'drawer',
+      'navigation',
+      'open',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/panel-right-open/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-panel-right-open';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-panel-right-open',
+  },
   'icons-panel-top': {
     name: 'icons-panel-top',
     description: 'Panel top icon component.',
@@ -16252,7 +17335,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/icons/panel-top.tsx',
         content:
-          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelTopProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 3, y1: 9, x2: 21, y2: 9 },\n      animate: {\n        x1: 3,\n        y1: 7,\n        x2: 21,\n        y2: 7,\n        transition: { type: \'spring\', damping: 20, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelTopProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={3}\n        y1={9}\n        x2={21}\n        y2={9}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelTop(props: PanelTopProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelTop,\n  PanelTop as PanelTopIcon,\n  type PanelTopProps,\n  type PanelTopProps as PanelTopIconProps,\n};',
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelTopProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 3, y1: 9, x2: 21, y2: 9 },\n      animate: {\n        x1: 3,\n        y1: 7,\n        x2: 21,\n        y2: 7,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelTopProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={3}\n        y1={9}\n        x2={21}\n        y2={9}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelTop(props: PanelTopProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelTop,\n  PanelTop as PanelTopIcon,\n  type PanelTopProps,\n  type PanelTopProps as PanelTopIconProps,\n};',
       },
     ],
     keywords: ['sidebar', 'panel', 'top', 'menu', 'drawer', 'navigation'],
@@ -16274,6 +17357,94 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/icons-panel-top',
+  },
+  'icons-panel-top-close': {
+    name: 'icons-panel-top-close',
+    description: 'Panel top close icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/panel-top-close/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/panel-top-close.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelTopCloseProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 3, y1: 9, x2: 21, y2: 9 },\n      animate: {\n        x1: 3,\n        y1: 7,\n        x2: 21,\n        y2: 7,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n    arrow: {\n      initial: { y: 0 },\n      animate: {\n        y: -2,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelTopCloseProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={3}\n        y1={9}\n        x2={21}\n        y2={9}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="m9 16 3-3 3 3"\n        variants={variants.arrow}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelTopClose(props: PanelTopCloseProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelTopClose,\n  PanelTopClose as PanelTopCloseIcon,\n  type PanelTopCloseProps,\n  type PanelTopCloseProps as PanelTopCloseIconProps,\n};',
+      },
+    ],
+    keywords: [
+      'sidebar',
+      'panel',
+      'top',
+      'menu',
+      'drawer',
+      'navigation',
+      'close',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/panel-top-close/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-panel-top-close';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-panel-top-close',
+  },
+  'icons-panel-top-open': {
+    name: 'icons-panel-top-open',
+    description: 'Panel top open icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/panel-top-open/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/panel-top-open.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PanelTopOpenProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    rect: {},\n    line: {\n      initial: { x1: 3, y1: 9, x2: 21, y2: 9 },\n      animate: {\n        x1: 3,\n        y1: 11,\n        x2: 21,\n        y2: 11,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n    arrow: {\n      initial: { y: 0 },\n      animate: {\n        y: 2,\n        transition: { type: \'spring\', damping: 18, stiffness: 200 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PanelTopOpenProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.rect\n        width={18}\n        height={18}\n        x={3}\n        y={3}\n        rx={2}\n        ry={2}\n        variants={variants.rect}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.line\n        x1={3}\n        y1={9}\n        x2={21}\n        y2={9}\n        variants={variants.line}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="m15 14-3 3-3-3"\n        variants={variants.arrow}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PanelTopOpen(props: PanelTopOpenProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PanelTopOpen,\n  PanelTopOpen as PanelTopOpenIcon,\n  type PanelTopOpenProps,\n  type PanelTopOpenProps as PanelTopOpenIconProps,\n};',
+      },
+    ],
+    keywords: [
+      'sidebar',
+      'panel',
+      'top',
+      'menu',
+      'drawer',
+      'navigation',
+      'open',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/panel-top-open/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-panel-top-open';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-panel-top-open',
   },
   'icons-paperclip': {
     name: 'icons-paperclip',
@@ -16394,6 +17565,53 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/icons-pause',
+  },
+  'icons-phone-call': {
+    name: 'icons-phone-call',
+    description: 'Phone call icon with animated waves.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/phone-call/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/phone-call.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype PhoneCallProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: (() => {\n    const animation: Record<string, Variants> = {\n      phone: {},\n    };\n\n    for (let i = 1; i <= 2; i++) {\n      animation[`wave${i}`] = {\n        initial: { opacity: 1, scale: 1 },\n        animate: {\n          opacity: 0,\n          scale: 0,\n          transition: {\n            opacity: {\n              duration: 0.2,\n              ease: \'easeInOut\',\n              repeat: 1,\n              repeatType: \'reverse\',\n              repeatDelay: 0.2,\n              delay: 0.2 * (i - 1),\n            },\n            scale: {\n              duration: 0.2,\n              ease: \'easeInOut\',\n              repeat: 1,\n              repeatType: \'reverse\',\n              repeatDelay: 0.2,\n              delay: 0.2 * (i - 1),\n            },\n          },\n        },\n      };\n    }\n\n    return animation;\n  })() satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: PhoneCallProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      {/* Waves (inner first, then outer with delay) */}\n      <motion.path\n        d="M13 6a5 5 0 0 1 5 5"\n        variants={variants.wave1}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="M13 2a9 9 0 0 1 9 9"\n        variants={variants.wave2}\n        initial="initial"\n        animate={controls}\n      />\n      {/* Phone body */}\n      <motion.path\n        d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"\n        variants={variants.phone}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction PhoneCall(props: PhoneCallProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  PhoneCall,\n  PhoneCall as PhoneCallIcon,\n  type PhoneCallProps,\n  type PhoneCallProps as PhoneCallIconProps,\n};',
+      },
+    ],
+    keywords: [
+      'phone',
+      'call',
+      'ring',
+      'audio',
+      'dial',
+      'contact',
+      'communication',
+      'voice',
+      'waves',
+      'signal',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/phone-call/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-phone-call';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-phone-call',
   },
   'icons-pickaxe': {
     name: 'icons-pickaxe',
@@ -17629,6 +18847,88 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/icons-sliders-vertical',
+  },
+  'icons-sparkle': {
+    name: 'icons-sparkle',
+    description: 'Sparkle icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/sparkle/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/sparkle.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype SparkleProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    group: {\n      initial: {\n        scale: 1,\n      },\n      animate: {\n        scale: [1, 0.9, 1.2, 1],\n        transition: { duration: 0.6, ease: \'easeInOut\' },\n      },\n    },\n    path: {},\n  } satisfies Record<string, Variants>,\n  fill: {\n    group: {\n      initial: {\n        scale: 1,\n      },\n      animate: {\n        scale: [1, 0.9, 1.2, 1],\n        transition: { duration: 0.6, ease: \'easeInOut\' },\n      },\n    },\n    path: {\n      initial: {\n        fill: \'currentColor\',\n        fillOpacity: 0,\n      },\n      animate: {\n        fillOpacity: 1,\n        transition: { delay: 0.2 },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: SparkleProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      variants={variants.group}\n      initial="initial"\n      animate={controls}\n      {...props}\n    >\n      <motion.path\n        d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"\n        variants={variants.path}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction Sparkle(props: SparkleProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  Sparkle,\n  Sparkle as SparkleIcon,\n  type SparkleProps,\n  type SparkleProps as SparkleIconProps,\n};',
+      },
+    ],
+    keywords: [
+      'star',
+      'effect',
+      'filter',
+      'night',
+      'magic',
+      'shiny',
+      'glitter',
+      'twinkle',
+      'celebration',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/sparkle/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-sparkle';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-sparkle',
+  },
+  'icons-sparkles': {
+    name: 'icons-sparkles',
+    description: 'Sparkles icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/sparkles/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/sparkles.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { motion, type Variants } from 'motion/react';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from '@/components/animate-ui/icons/icon';\n\ntype SparklesProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    group: {\n      initial: {\n        scale: 1,\n      },\n      animate: {\n        scale: [1, 0.9, 1.1, 1],\n        transition: { duration: 0.6, ease: 'easeInOut' },\n      },\n    },\n    path: {},\n    plus: {\n      initial: { opacity: 1, scale: 1 },\n      animate: {\n        opacity: 0,\n        scale: 0,\n        transition: {\n          opacity: {\n            duration: 0.2,\n            ease: 'easeInOut',\n            repeat: 1,\n            repeatType: 'reverse',\n            repeatDelay: 0.2,\n            delay: 0.15,\n          },\n          scale: {\n            duration: 0.2,\n            ease: 'easeInOut',\n            repeat: 1,\n            repeatType: 'reverse',\n            repeatDelay: 0.2,\n            delay: 0.15,\n          },\n        },\n      },\n    },\n    circle: {\n      initial: { opacity: 1, scale: 1 },\n      animate: {\n        opacity: 0,\n        scale: 0,\n        transition: {\n          opacity: {\n            duration: 0.2,\n            ease: 'easeInOut',\n            repeat: 1,\n            repeatType: 'reverse',\n            repeatDelay: 0.2,\n          },\n          scale: {\n            duration: 0.2,\n            ease: 'easeInOut',\n            repeat: 1,\n            repeatType: 'reverse',\n            repeatDelay: 0.2,\n          },\n        },\n      },\n    },\n  } satisfies Record<string, Variants>,\n  fill: {\n    group: {\n      initial: {\n        scale: 1,\n      },\n      animate: {\n        scale: [1, 0.9, 1.1, 1],\n        transition: { duration: 0.6, ease: 'easeInOut' },\n      },\n    },\n    path: {\n      initial: {\n        fill: 'currentColor',\n        fillOpacity: 0,\n      },\n      animate: {\n        fillOpacity: 1,\n        transition: { delay: 0.2 },\n      },\n    },\n    plus: {\n      initial: { opacity: 1, scale: 1 },\n      animate: {\n        opacity: 0,\n        scale: 0,\n        transition: {\n          opacity: {\n            duration: 0.2,\n            ease: 'easeInOut',\n            repeat: 1,\n            repeatType: 'reverse',\n            repeatDelay: 0.2,\n            delay: 0.15,\n          },\n          scale: {\n            duration: 0.2,\n            ease: 'easeInOut',\n            repeat: 1,\n            repeatType: 'reverse',\n            repeatDelay: 0.2,\n            delay: 0.15,\n          },\n        },\n      },\n    },\n    circle: {\n      initial: {\n        fill: 'currentColor',\n        fillOpacity: 0,\n        opacity: 1,\n        scale: 1,\n      },\n      animate: {\n        fillOpacity: 1,\n        opacity: 0,\n        scale: 0,\n        transition: {\n          fillOpacity: { delay: 0.2 },\n          opacity: {\n            duration: 0.2,\n            ease: 'easeInOut',\n            repeat: 1,\n            repeatType: 'reverse',\n            repeatDelay: 0.2,\n          },\n          scale: {\n            duration: 0.2,\n            ease: 'easeInOut',\n            repeat: 1,\n            repeatType: 'reverse',\n            repeatDelay: 0.2,\n          },\n        },\n      },\n    },\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: SparklesProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns=\"http://www.w3.org/2000/svg\"\n      width={size}\n      height={size}\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      strokeWidth={2}\n      strokeLinecap=\"round\"\n      strokeLinejoin=\"round\"\n      {...props}\n    >\n      <motion.g variants={variants.group} initial=\"initial\" animate={controls}>\n        <motion.path\n          d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\"\n          variants={variants.path}\n          initial=\"initial\"\n          animate={controls}\n        />\n      </motion.g>\n      <motion.path\n        d=\"M20 2v4 M22 4h-4\"\n        variants={variants.plus}\n        initial=\"initial\"\n        animate={controls}\n      />\n      <motion.circle\n        cx=\"4\"\n        cy=\"20\"\n        r=\"2\"\n        variants={variants.circle}\n        initial=\"initial\"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction Sparkles(props: SparklesProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  Sparkles,\n  Sparkles as SparklesIcon,\n  type SparklesProps,\n  type SparklesProps as SparklesIconProps,\n};",
+      },
+    ],
+    keywords: ['stars', 'effect', 'filter', 'night', 'magic'],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/sparkles/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-sparkles';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-sparkles',
   },
   'icons-square-arrow-out-down-left': {
     name: 'icons-square-arrow-out-down-left',
@@ -19536,7 +20836,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/primitives/base/accordion.tsx',
         content:
-          "'use client';\n\nimport * as React from 'react';\nimport { Accordion as AccordionPrimitive } from '@base-ui-components/react/accordion';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype AccordionContextType = {\n  value: string | string[] | undefined;\n  setValue: (value: string | string[] | undefined) => void;\n};\n\ntype AccordionItemContextType = {\n  isOpen: boolean;\n  setIsOpen: (open: boolean) => void;\n};\n\nconst [AccordionProvider, useAccordion] =\n  getStrictContext<AccordionContextType>('AccordionContext');\n\nconst [AccordionItemProvider, useAccordionItem] =\n  getStrictContext<AccordionItemContextType>('AccordionItemContext');\n\ntype AccordionProps = React.ComponentProps<typeof AccordionPrimitive.Root>;\n\nfunction Accordion(props: AccordionProps) {\n  const [value, setValue] = useControlledState<string | string[] | undefined>({\n    value: props?.value,\n    defaultValue: props?.defaultValue,\n    onChange: props?.onValueChange as (\n      value: string | string[] | undefined,\n    ) => void,\n  });\n\n  return (\n    <AccordionProvider value={{ value, setValue }}>\n      <AccordionPrimitive.Root\n        data-slot=\"accordion\"\n        {...props}\n        onValueChange={setValue}\n      />\n    </AccordionProvider>\n  );\n}\n\ntype AccordionItemProps = React.ComponentProps<typeof AccordionPrimitive.Item>;\n\nfunction AccordionItem(props: AccordionItemProps) {\n  const { value } = useAccordion();\n  const [isOpen, setIsOpen] = React.useState(\n    value?.includes(props?.value) ?? false,\n  );\n\n  React.useEffect(() => {\n    setIsOpen(value?.includes(props?.value) ?? false);\n  }, [value, props?.value]);\n\n  return (\n    <AccordionItemProvider value={{ isOpen, setIsOpen }}>\n      <AccordionPrimitive.Item data-slot=\"accordion-item\" {...props} />\n    </AccordionItemProvider>\n  );\n}\n\ntype AccordionHeaderProps = React.ComponentProps<\n  typeof AccordionPrimitive.Header\n>;\n\nfunction AccordionHeader(props: AccordionHeaderProps) {\n  return <AccordionPrimitive.Header data-slot=\"accordion-header\" {...props} />;\n}\n\ntype AccordionTriggerProps = React.ComponentProps<\n  typeof AccordionPrimitive.Trigger\n>;\n\nfunction AccordionTrigger(props: AccordionTriggerProps) {\n  return (\n    <AccordionPrimitive.Trigger data-slot=\"accordion-trigger\" {...props} />\n  );\n}\n\ntype AccordionPanelProps = Omit<\n  React.ComponentProps<typeof AccordionPrimitive.Panel>,\n  'keepMounted' | 'render'\n> &\n  HTMLMotionProps<'div'> & {\n    keepRendered?: boolean;\n  };\n\nfunction AccordionPanel({\n  transition = { type: 'spring', stiffness: 150, damping: 22 },\n  hiddenUntilFound,\n  keepRendered = false,\n  ...props\n}: AccordionPanelProps) {\n  const { isOpen } = useAccordionItem();\n\n  return (\n    <AnimatePresence>\n      {keepRendered ? (\n        <AccordionPrimitive.Panel\n          hidden={false}\n          hiddenUntilFound={hiddenUntilFound}\n          keepMounted\n          render={\n            <motion.div\n              key=\"accordion-panel\"\n              data-slot=\"accordion-panel\"\n              initial={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n              animate={\n                isOpen\n                  ? { height: 'auto', opacity: 1, '--mask-stop': '100%' }\n                  : { height: 0, opacity: 0, '--mask-stop': '0%' }\n              }\n              transition={transition}\n              style={{\n                maskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                WebkitMaskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                overflow: 'hidden',\n              }}\n              {...props}\n            />\n          }\n        />\n      ) : (\n        isOpen && (\n          <AccordionPrimitive.Panel\n            hidden={false}\n            hiddenUntilFound={hiddenUntilFound}\n            keepMounted\n            render={\n              <motion.div\n                key=\"accordion-panel\"\n                data-slot=\"accordion-panel\"\n                initial={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n                animate={{ height: 'auto', opacity: 1, '--mask-stop': '100%' }}\n                exit={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n                transition={transition}\n                style={{\n                  maskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  WebkitMaskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  overflow: 'hidden',\n                }}\n                {...props}\n              />\n            }\n          />\n        )\n      )}\n    </AnimatePresence>\n  );\n}\n\nexport {\n  Accordion,\n  AccordionItem,\n  AccordionHeader,\n  AccordionTrigger,\n  AccordionPanel,\n  useAccordionItem,\n  type AccordionProps,\n  type AccordionItemProps,\n  type AccordionHeaderProps,\n  type AccordionTriggerProps,\n  type AccordionPanelProps,\n  type AccordionItemContextType,\n};",
+          "'use client';\n\nimport * as React from 'react';\nimport { Accordion as AccordionPrimitive } from '@base-ui-components/react/accordion';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype AccordionContextType = {\n  value: string | string[] | undefined;\n  setValue: (value: string | string[] | undefined) => void;\n};\n\ntype AccordionItemContextType = {\n  isOpen: boolean;\n  setIsOpen: (open: boolean) => void;\n};\n\nconst [AccordionProvider, useAccordion] =\n  getStrictContext<AccordionContextType>('AccordionContext');\n\nconst [AccordionItemProvider, useAccordionItem] =\n  getStrictContext<AccordionItemContextType>('AccordionItemContext');\n\ntype AccordionProps = React.ComponentProps<typeof AccordionPrimitive.Root>;\n\nfunction Accordion(props: AccordionProps) {\n  const [value, setValue] = useControlledState<string | string[] | undefined>({\n    value: props?.value,\n    defaultValue: props?.defaultValue,\n    onChange: props?.onValueChange as (\n      value: string | string[] | undefined,\n    ) => void,\n  });\n\n  return (\n    <AccordionProvider value={{ value, setValue }}>\n      <AccordionPrimitive.Root\n        data-slot=\"accordion\"\n        {...props}\n        onValueChange={setValue}\n      />\n    </AccordionProvider>\n  );\n}\n\ntype AccordionItemProps = React.ComponentProps<typeof AccordionPrimitive.Item>;\n\nfunction AccordionItem(props: AccordionItemProps) {\n  const { value } = useAccordion();\n  const [isOpen, setIsOpen] = React.useState(\n    value?.includes(props?.value) ?? false,\n  );\n\n  React.useEffect(() => {\n    setIsOpen(value?.includes(props?.value) ?? false);\n  }, [value, props?.value]);\n\n  return (\n    <AccordionItemProvider value={{ isOpen, setIsOpen }}>\n      <AccordionPrimitive.Item data-slot=\"accordion-item\" {...props} />\n    </AccordionItemProvider>\n  );\n}\n\ntype AccordionHeaderProps = React.ComponentProps<\n  typeof AccordionPrimitive.Header\n>;\n\nfunction AccordionHeader(props: AccordionHeaderProps) {\n  return <AccordionPrimitive.Header data-slot=\"accordion-header\" {...props} />;\n}\n\ntype AccordionTriggerProps = React.ComponentProps<\n  typeof AccordionPrimitive.Trigger\n>;\n\nfunction AccordionTrigger(props: AccordionTriggerProps) {\n  return (\n    <AccordionPrimitive.Trigger data-slot=\"accordion-trigger\" {...props} />\n  );\n}\n\ntype AccordionPanelProps = Omit<\n  React.ComponentProps<typeof AccordionPrimitive.Panel>,\n  'keepMounted' | 'render'\n> &\n  HTMLMotionProps<'div'> & {\n    keepRendered?: boolean;\n  };\n\nfunction AccordionPanel({\n  transition = { duration: 0.35, ease: 'easeInOut' },\n  hiddenUntilFound,\n  keepRendered = false,\n  ...props\n}: AccordionPanelProps) {\n  const { isOpen } = useAccordionItem();\n\n  return (\n    <AnimatePresence>\n      {keepRendered ? (\n        <AccordionPrimitive.Panel\n          hidden={false}\n          hiddenUntilFound={hiddenUntilFound}\n          keepMounted\n          render={\n            <motion.div\n              key=\"accordion-panel\"\n              data-slot=\"accordion-panel\"\n              initial={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n              animate={\n                isOpen\n                  ? { height: 'auto', opacity: 1, '--mask-stop': '100%', y: 0 }\n                  : { height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }\n              }\n              transition={transition}\n              style={{\n                maskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                WebkitMaskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                overflow: 'hidden',\n              }}\n              {...props}\n            />\n          }\n        />\n      ) : (\n        isOpen && (\n          <AccordionPrimitive.Panel\n            hidden={false}\n            hiddenUntilFound={hiddenUntilFound}\n            keepMounted\n            render={\n              <motion.div\n                key=\"accordion-panel\"\n                data-slot=\"accordion-panel\"\n                initial={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n                animate={{\n                  height: 'auto',\n                  opacity: 1,\n                  '--mask-stop': '100%',\n                  y: 0,\n                }}\n                exit={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n                transition={transition}\n                style={{\n                  maskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  WebkitMaskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  overflow: 'hidden',\n                }}\n                {...props}\n              />\n            }\n          />\n        )\n      )}\n    </AnimatePresence>\n  );\n}\n\nexport {\n  Accordion,\n  AccordionItem,\n  AccordionHeader,\n  AccordionTrigger,\n  AccordionPanel,\n  useAccordionItem,\n  type AccordionProps,\n  type AccordionItemProps,\n  type AccordionHeaderProps,\n  type AccordionTriggerProps,\n  type AccordionPanelProps,\n  type AccordionItemContextType,\n};",
       },
     ],
     keywords: [],
@@ -19659,7 +20959,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/primitives/base/collapsible.tsx',
         content:
-          "'use client';\n\nimport * as React from 'react';\nimport { Collapsible as CollapsiblePrimitive } from '@base-ui-components/react/collapsible';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype CollapsibleContextType = {\n  isOpen: boolean;\n  setIsOpen: CollapsibleProps['onOpenChange'];\n};\n\nconst [CollapsibleProvider, useCollapsible] =\n  getStrictContext<CollapsibleContextType>('CollapsibleContext');\n\ntype CollapsibleProps = React.ComponentProps<typeof CollapsiblePrimitive.Root>;\n\nfunction Collapsible(props: CollapsibleProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props?.open,\n    defaultValue: props?.defaultOpen,\n    onChange: props?.onOpenChange,\n  });\n\n  return (\n    <CollapsibleProvider value={{ isOpen, setIsOpen }}>\n      <CollapsiblePrimitive.Root\n        data-slot=\"collapsible\"\n        {...props}\n        onOpenChange={setIsOpen}\n      />\n    </CollapsibleProvider>\n  );\n}\n\ntype CollapsibleTriggerProps = React.ComponentProps<\n  typeof CollapsiblePrimitive.Trigger\n>;\n\nfunction CollapsibleTrigger(props: CollapsibleTriggerProps) {\n  return (\n    <CollapsiblePrimitive.Trigger data-slot=\"collapsible-trigger\" {...props} />\n  );\n}\n\ntype CollapsiblePanelProps = Omit<\n  React.ComponentProps<typeof CollapsiblePrimitive.Panel>,\n  'keepMounted' | 'render'\n> &\n  HTMLMotionProps<'div'> & {\n    keepRendered?: boolean;\n  };\n\nfunction CollapsiblePanel({\n  transition = { type: 'spring', stiffness: 150, damping: 22 },\n  hiddenUntilFound,\n  keepRendered = false,\n  ...props\n}: CollapsiblePanelProps) {\n  const { isOpen } = useCollapsible();\n\n  return (\n    <AnimatePresence>\n      {keepRendered ? (\n        <CollapsiblePrimitive.Panel\n          hidden={false}\n          hiddenUntilFound={hiddenUntilFound}\n          keepMounted\n          render={\n            <motion.div\n              key=\"collapsible-panel\"\n              data-slot=\"collapsible-panel\"\n              initial={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n              animate={\n                isOpen\n                  ? { height: 'auto', opacity: 1, '--mask-stop': '100%' }\n                  : { height: 0, opacity: 0, '--mask-stop': '0%' }\n              }\n              transition={transition}\n              style={{\n                maskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                WebkitMaskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                overflow: 'hidden',\n              }}\n              {...props}\n            />\n          }\n        />\n      ) : (\n        isOpen && (\n          <CollapsiblePrimitive.Panel\n            hidden={false}\n            hiddenUntilFound={hiddenUntilFound}\n            keepMounted\n            render={\n              <motion.div\n                key=\"collapsible-panel\"\n                data-slot=\"collapsible-panel\"\n                initial={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n                animate={{ height: 'auto', opacity: 1, '--mask-stop': '100%' }}\n                exit={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n                transition={transition}\n                style={{\n                  maskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  WebkitMaskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  overflow: 'hidden',\n                }}\n                {...props}\n              />\n            }\n          />\n        )\n      )}\n    </AnimatePresence>\n  );\n}\n\nexport {\n  Collapsible,\n  CollapsibleTrigger,\n  CollapsiblePanel,\n  useCollapsible,\n  type CollapsibleProps,\n  type CollapsibleTriggerProps,\n  type CollapsiblePanelProps,\n  type CollapsibleContextType,\n};",
+          "'use client';\n\nimport * as React from 'react';\nimport { Collapsible as CollapsiblePrimitive } from '@base-ui-components/react/collapsible';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype CollapsibleContextType = {\n  isOpen: boolean;\n  setIsOpen: CollapsibleProps['onOpenChange'];\n};\n\nconst [CollapsibleProvider, useCollapsible] =\n  getStrictContext<CollapsibleContextType>('CollapsibleContext');\n\ntype CollapsibleProps = React.ComponentProps<typeof CollapsiblePrimitive.Root>;\n\nfunction Collapsible(props: CollapsibleProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props?.open,\n    defaultValue: props?.defaultOpen,\n    onChange: props?.onOpenChange,\n  });\n\n  return (\n    <CollapsibleProvider value={{ isOpen, setIsOpen }}>\n      <CollapsiblePrimitive.Root\n        data-slot=\"collapsible\"\n        {...props}\n        onOpenChange={setIsOpen}\n      />\n    </CollapsibleProvider>\n  );\n}\n\ntype CollapsibleTriggerProps = React.ComponentProps<\n  typeof CollapsiblePrimitive.Trigger\n>;\n\nfunction CollapsibleTrigger(props: CollapsibleTriggerProps) {\n  return (\n    <CollapsiblePrimitive.Trigger data-slot=\"collapsible-trigger\" {...props} />\n  );\n}\n\ntype CollapsiblePanelProps = Omit<\n  React.ComponentProps<typeof CollapsiblePrimitive.Panel>,\n  'keepMounted' | 'render'\n> &\n  HTMLMotionProps<'div'> & {\n    keepRendered?: boolean;\n  };\n\nfunction CollapsiblePanel({\n  transition = { duration: 0.35, ease: 'easeInOut' },\n  hiddenUntilFound,\n  keepRendered = false,\n  ...props\n}: CollapsiblePanelProps) {\n  const { isOpen } = useCollapsible();\n\n  return (\n    <AnimatePresence>\n      {keepRendered ? (\n        <CollapsiblePrimitive.Panel\n          hidden={false}\n          hiddenUntilFound={hiddenUntilFound}\n          keepMounted\n          render={\n            <motion.div\n              key=\"collapsible-panel\"\n              data-slot=\"collapsible-panel\"\n              initial={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n              animate={\n                isOpen\n                  ? { height: 'auto', opacity: 1, '--mask-stop': '100%', y: 0 }\n                  : { height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }\n              }\n              transition={transition}\n              style={{\n                maskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                WebkitMaskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                overflow: 'hidden',\n              }}\n              {...props}\n            />\n          }\n        />\n      ) : (\n        isOpen && (\n          <CollapsiblePrimitive.Panel\n            hidden={false}\n            hiddenUntilFound={hiddenUntilFound}\n            keepMounted\n            render={\n              <motion.div\n                key=\"collapsible-panel\"\n                data-slot=\"collapsible-panel\"\n                initial={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n                animate={{\n                  height: 'auto',\n                  opacity: 1,\n                  '--mask-stop': '100%',\n                  y: 0,\n                }}\n                exit={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n                transition={transition}\n                style={{\n                  maskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  WebkitMaskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  overflow: 'hidden',\n                }}\n                {...props}\n              />\n            }\n          />\n        )\n      )}\n    </AnimatePresence>\n  );\n}\n\nexport {\n  Collapsible,\n  CollapsibleTrigger,\n  CollapsiblePanel,\n  useCollapsible,\n  type CollapsibleProps,\n  type CollapsibleTriggerProps,\n  type CollapsiblePanelProps,\n  type CollapsibleContextType,\n};",
       },
     ],
     keywords: [],
@@ -19742,7 +21042,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/primitives/base/files.tsx',
         content:
-          "'use client';\n\nimport * as React from 'react';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport {\n  Highlight,\n  HighlightItem,\n  type HighlightItemProps,\n  type HighlightProps,\n} from '@/components/animate-ui/primitives/effects/highlight';\nimport {\n  Accordion,\n  AccordionItem,\n  AccordionHeader,\n  AccordionTrigger,\n  AccordionPanel,\n  type AccordionProps,\n  type AccordionItemProps,\n  type AccordionHeaderProps,\n  type AccordionTriggerProps,\n  type AccordionPanelProps,\n} from '@/components/animate-ui/primitives/base/accordion';\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype FilesContextType = {\n  open: string[];\n};\n\ntype FolderContextType = {\n  isOpen: boolean;\n};\n\nconst [FilesProvider, useFiles] =\n  getStrictContext<FilesContextType>('FilesContext');\n\nconst [FolderProvider, useFolder] =\n  getStrictContext<FolderContextType>('FolderContext');\n\ntype FilesProps = {\n  children: React.ReactNode;\n  defaultOpen?: string[];\n  open?: string[];\n  onOpenChange?: (open: string[]) => void;\n} & Omit<AccordionProps, 'type' | 'defaultValue' | 'value' | 'onValueChange'>;\n\nfunction Files({\n  children,\n  defaultOpen,\n  open,\n  onOpenChange,\n  style,\n  ...props\n}: FilesProps) {\n  const [openValue, setOpenValue] = useControlledState({\n    value: open,\n    defaultValue: defaultOpen,\n    onChange: onOpenChange,\n  });\n\n  return (\n    <FilesProvider value={{ open: openValue ?? [] }}>\n      <Accordion\n        data-slot=\"files\"\n        openMultiple\n        defaultValue={defaultOpen}\n        value={open}\n        onValueChange={setOpenValue}\n        style={{\n          position: 'relative',\n          overflow: 'auto',\n          ...style,\n        }}\n        {...props}\n      >\n        {children}\n      </Accordion>\n    </FilesProvider>\n  );\n}\n\ntype FilesHighlightProps = Omit<HighlightProps, 'controlledItems' | 'mode'>;\n\nfunction FilesHighlight({ hover = true, ...props }: FilesHighlightProps) {\n  return (\n    <Highlight\n      data-slot=\"files-highlight\"\n      controlledItems\n      mode=\"parent\"\n      hover={hover}\n      {...props}\n    />\n  );\n}\n\ntype FolderItemProps = AccordionItemProps;\n\nfunction FolderItem({ value, ...props }: FolderItemProps) {\n  const { open } = useFiles();\n\n  return (\n    <FolderProvider value={{ isOpen: open.includes(value) }}>\n      <AccordionItem data-slot=\"folder-item\" value={value} {...props} />\n    </FolderProvider>\n  );\n}\n\ntype FolderHeaderProps = AccordionHeaderProps;\n\nfunction FolderHeader(props: FolderHeaderProps) {\n  return <AccordionHeader data-slot=\"folder-header\" {...props} />;\n}\n\ntype FolderTriggerProps = AccordionTriggerProps;\n\nfunction FolderTrigger(props: FolderTriggerProps) {\n  return <AccordionTrigger data-slot=\"folder-trigger\" {...props} />;\n}\n\ntype FolderPanelProps = AccordionPanelProps;\n\nfunction FolderPanel(props: FolderPanelProps) {\n  return <AccordionPanel data-slot=\"folder-panel\" {...props} />;\n}\n\ntype FileHighlightProps = HighlightItemProps;\n\nfunction FileHighlight(props: FileHighlightProps) {\n  return <HighlightItem data-slot=\"file-highlight\" {...props} />;\n}\n\ntype FileProps = React.ComponentProps<'div'>;\n\nfunction File(props: FileProps) {\n  return <div data-slot=\"file\" {...props} />;\n}\n\ntype FileIconProps = React.ComponentProps<'span'>;\n\nfunction FileIcon(props: FileIconProps) {\n  return <span data-slot=\"file-icon\" {...props} />;\n}\n\ntype FileLabelProps = React.ComponentProps<'span'>;\n\nfunction FileLabel(props: FileLabelProps) {\n  return <span data-slot=\"file-label\" {...props} />;\n}\n\ntype FolderHighlightProps = HighlightItemProps;\n\nfunction FolderHighlight(props: FolderHighlightProps) {\n  return <HighlightItem data-slot=\"folder-highlight\" {...props} />;\n}\n\ntype FolderProps = React.ComponentProps<'div'>;\n\nfunction Folder(props: FolderProps) {\n  return <div data-slot=\"folder\" {...props} />;\n}\n\ntype FolderIconProps = HTMLMotionProps<'span'> & {\n  closeIcon: React.ReactNode;\n  openIcon: React.ReactNode;\n};\n\nfunction FolderIcon({\n  closeIcon,\n  openIcon,\n  transition = { duration: 0.15 },\n  ...props\n}: FolderIconProps) {\n  const { isOpen } = useFolder();\n\n  return (\n    <AnimatePresence mode=\"wait\">\n      <motion.span\n        key={isOpen ? 'open' : 'close'}\n        data-slot=\"folder-icon\"\n        initial={{ scale: 0.9 }}\n        animate={{ scale: 1 }}\n        exit={{ scale: 0.9 }}\n        transition={transition}\n        {...props}\n      >\n        {isOpen ? openIcon : closeIcon}\n      </motion.span>\n    </AnimatePresence>\n  );\n}\n\ntype FolderLabelProps = React.ComponentProps<'span'>;\n\nfunction FolderLabel(props: FolderLabelProps) {\n  return <span data-slot=\"folder-label\" {...props} />;\n}\n\nexport {\n  Files,\n  FilesHighlight,\n  FolderItem,\n  FolderHeader,\n  FolderTrigger,\n  FolderPanel,\n  FileHighlight,\n  File,\n  FileIcon,\n  FileLabel,\n  FolderHighlight,\n  Folder,\n  FolderIcon,\n  FolderLabel,\n  useFiles,\n  useFolder,\n  type FilesProps,\n  type FilesHighlightProps,\n  type FolderItemProps,\n  type FolderHeaderProps,\n  type FolderTriggerProps,\n  type FolderPanelProps,\n  type FileHighlightProps,\n  type FileProps,\n  type FileIconProps,\n  type FileLabelProps,\n  type FolderHighlightProps,\n  type FolderProps,\n  type FolderIconProps,\n  type FolderLabelProps,\n  type FilesContextType,\n  type FolderContextType,\n};",
+          "'use client';\n\nimport * as React from 'react';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport {\n  Highlight,\n  HighlightItem,\n  type HighlightItemProps,\n  type HighlightProps,\n} from '@/components/animate-ui/primitives/effects/highlight';\nimport {\n  Accordion,\n  AccordionItem,\n  AccordionHeader,\n  AccordionTrigger,\n  AccordionPanel,\n  type AccordionProps,\n  type AccordionItemProps,\n  type AccordionHeaderProps,\n  type AccordionTriggerProps,\n  type AccordionPanelProps,\n} from '@/components/animate-ui/primitives/base/accordion';\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype FilesContextType = {\n  open: string[];\n};\n\ntype FolderContextType = {\n  isOpen: boolean;\n};\n\nconst [FilesProvider, useFiles] =\n  getStrictContext<FilesContextType>('FilesContext');\n\nconst [FolderProvider, useFolder] =\n  getStrictContext<FolderContextType>('FolderContext');\n\ntype FilesProps = {\n  children: React.ReactNode;\n  defaultOpen?: string[];\n  open?: string[];\n  onOpenChange?: (open: string[]) => void;\n} & Omit<AccordionProps, 'type' | 'defaultValue' | 'value' | 'onValueChange'>;\n\nfunction Files({\n  children,\n  defaultOpen,\n  open,\n  onOpenChange,\n  style,\n  ...props\n}: FilesProps) {\n  const [openValue, setOpenValue] = useControlledState({\n    value: open,\n    defaultValue: defaultOpen,\n    onChange: onOpenChange,\n  });\n\n  return (\n    <FilesProvider value={{ open: openValue ?? [] }}>\n      <Accordion\n        data-slot=\"files\"\n        multiple\n        defaultValue={defaultOpen}\n        value={open}\n        onValueChange={setOpenValue}\n        style={{\n          position: 'relative',\n          overflow: 'auto',\n          ...style,\n        }}\n        {...props}\n      >\n        {children}\n      </Accordion>\n    </FilesProvider>\n  );\n}\n\ntype FilesHighlightProps = Omit<HighlightProps, 'controlledItems' | 'mode'>;\n\nfunction FilesHighlight({ hover = true, ...props }: FilesHighlightProps) {\n  return (\n    <Highlight\n      data-slot=\"files-highlight\"\n      controlledItems\n      mode=\"parent\"\n      hover={hover}\n      {...props}\n    />\n  );\n}\n\ntype FolderItemProps = AccordionItemProps;\n\nfunction FolderItem({ value, ...props }: FolderItemProps) {\n  const { open } = useFiles();\n\n  return (\n    <FolderProvider value={{ isOpen: open.includes(value) }}>\n      <AccordionItem data-slot=\"folder-item\" value={value} {...props} />\n    </FolderProvider>\n  );\n}\n\ntype FolderHeaderProps = AccordionHeaderProps;\n\nfunction FolderHeader(props: FolderHeaderProps) {\n  return <AccordionHeader data-slot=\"folder-header\" {...props} />;\n}\n\ntype FolderTriggerProps = AccordionTriggerProps;\n\nfunction FolderTrigger(props: FolderTriggerProps) {\n  return <AccordionTrigger data-slot=\"folder-trigger\" {...props} />;\n}\n\ntype FolderPanelProps = AccordionPanelProps;\n\nfunction FolderPanel(props: FolderPanelProps) {\n  return <AccordionPanel data-slot=\"folder-panel\" {...props} />;\n}\n\ntype FileHighlightProps = HighlightItemProps;\n\nfunction FileHighlight(props: FileHighlightProps) {\n  return <HighlightItem data-slot=\"file-highlight\" {...props} />;\n}\n\ntype FileProps = React.ComponentProps<'div'>;\n\nfunction File(props: FileProps) {\n  return <div data-slot=\"file\" {...props} />;\n}\n\ntype FileIconProps = React.ComponentProps<'span'>;\n\nfunction FileIcon(props: FileIconProps) {\n  return <span data-slot=\"file-icon\" {...props} />;\n}\n\ntype FileLabelProps = React.ComponentProps<'span'>;\n\nfunction FileLabel(props: FileLabelProps) {\n  return <span data-slot=\"file-label\" {...props} />;\n}\n\ntype FolderHighlightProps = HighlightItemProps;\n\nfunction FolderHighlight(props: FolderHighlightProps) {\n  return <HighlightItem data-slot=\"folder-highlight\" {...props} />;\n}\n\ntype FolderProps = React.ComponentProps<'div'>;\n\nfunction Folder(props: FolderProps) {\n  return <div data-slot=\"folder\" {...props} />;\n}\n\ntype FolderIconProps = HTMLMotionProps<'span'> & {\n  closeIcon: React.ReactNode;\n  openIcon: React.ReactNode;\n};\n\nfunction FolderIcon({\n  closeIcon,\n  openIcon,\n  transition = { duration: 0.15 },\n  ...props\n}: FolderIconProps) {\n  const { isOpen } = useFolder();\n\n  return (\n    <AnimatePresence mode=\"wait\">\n      <motion.span\n        key={isOpen ? 'open' : 'close'}\n        data-slot=\"folder-icon\"\n        initial={{ scale: 0.9 }}\n        animate={{ scale: 1 }}\n        exit={{ scale: 0.9 }}\n        transition={transition}\n        {...props}\n      >\n        {isOpen ? openIcon : closeIcon}\n      </motion.span>\n    </AnimatePresence>\n  );\n}\n\ntype FolderLabelProps = React.ComponentProps<'span'>;\n\nfunction FolderLabel(props: FolderLabelProps) {\n  return <span data-slot=\"folder-label\" {...props} />;\n}\n\nexport {\n  Files,\n  FilesHighlight,\n  FolderItem,\n  FolderHeader,\n  FolderTrigger,\n  FolderPanel,\n  FileHighlight,\n  File,\n  FileIcon,\n  FileLabel,\n  FolderHighlight,\n  Folder,\n  FolderIcon,\n  FolderLabel,\n  useFiles,\n  useFolder,\n  type FilesProps,\n  type FilesHighlightProps,\n  type FolderItemProps,\n  type FolderHeaderProps,\n  type FolderTriggerProps,\n  type FolderPanelProps,\n  type FileHighlightProps,\n  type FileProps,\n  type FileIconProps,\n  type FileLabelProps,\n  type FolderHighlightProps,\n  type FolderProps,\n  type FolderIconProps,\n  type FolderLabelProps,\n  type FilesContextType,\n  type FolderContextType,\n};",
       },
     ],
     keywords: [],
@@ -19764,6 +21064,48 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/primitives-base-files',
+  },
+  'primitives-base-menu': {
+    name: 'primitives-base-menu',
+    description:
+      'A list of actions in a dropdown, enhanced with keyboard navigation.',
+    type: 'registry:ui',
+    dependencies: ['motion', '@base-ui-components/react'],
+    devDependencies: undefined,
+    registryDependencies: [
+      '@animate-ui/primitives-effects-highlight',
+      '@animate-ui/lib-get-strict-context',
+      '@animate-ui/hooks-use-controlled-state',
+      '@animate-ui/hooks-use-data-state',
+    ],
+    files: [
+      {
+        path: 'registry/primitives/base/menu/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/primitives/base/menu.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { Menu as MenuPrimitive } from '@base-ui-components/react/menu';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport {\n  Highlight,\n  HighlightItem,\n  type HighlightItemProps,\n  type HighlightProps,\n} from '@/components/animate-ui/primitives/effects/highlight';\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\nimport { useDataState } from '@/hooks/use-data-state';\n\ntype MenuActiveValueContextType = {\n  highlightedValue: string | null;\n  setHighlightedValue: (value: string | null) => void;\n};\n\ntype MenuContextType = {\n  isOpen: boolean;\n  setIsOpen: MenuProps['onOpenChange'];\n};\n\nconst [MenuActiveValueProvider, useMenuActiveValue] =\n  getStrictContext<MenuActiveValueContextType>('MenuActiveValueContext');\nconst [MenuProvider, useMenu] =\n  getStrictContext<MenuContextType>('MenuContext');\n\ntype MenuProps = React.ComponentProps<typeof MenuPrimitive.Root>;\n\nfunction Menu(props: MenuProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props?.open,\n    defaultValue: props?.defaultOpen,\n    onChange: props?.onOpenChange,\n  });\n  const [highlightedValue, setHighlightedValue] = React.useState<string | null>(\n    null,\n  );\n\n  return (\n    <MenuActiveValueProvider value={{ highlightedValue, setHighlightedValue }}>\n      <MenuProvider value={{ isOpen, setIsOpen }}>\n        <MenuPrimitive.Root\n          data-slot=\"menu\"\n          {...props}\n          onOpenChange={setIsOpen}\n        />\n      </MenuProvider>\n    </MenuActiveValueProvider>\n  );\n}\n\ntype MenuTriggerProps = React.ComponentProps<typeof MenuPrimitive.Trigger>;\n\nfunction MenuTrigger(props: MenuTriggerProps) {\n  return <MenuPrimitive.Trigger data-slot=\"menu-trigger\" {...props} />;\n}\n\ntype MenuPortalProps = Omit<\n  React.ComponentProps<typeof MenuPrimitive.Portal>,\n  'keepMounted'\n>;\n\nfunction MenuPortal(props: MenuPortalProps) {\n  const { isOpen } = useMenu();\n\n  return (\n    <AnimatePresence>\n      {isOpen && (\n        <MenuPrimitive.Portal keepMounted data-slot=\"menu-portal\" {...props} />\n      )}\n    </AnimatePresence>\n  );\n}\n\ntype MenuGroupProps = React.ComponentProps<typeof MenuPrimitive.Group>;\n\nfunction MenuGroup(props: MenuGroupProps) {\n  return <MenuPrimitive.Group data-slot=\"menu-group\" {...props} />;\n}\n\ntype MenuGroupLabelProps = React.ComponentProps<\n  typeof MenuPrimitive.GroupLabel\n>;\n\nfunction MenuGroupLabel(props: MenuGroupLabelProps) {\n  return <MenuPrimitive.GroupLabel data-slot=\"menu-group-label\" {...props} />;\n}\n\ntype MenuSubmenuProps = React.ComponentProps<typeof MenuPrimitive.SubmenuRoot>;\n\nfunction MenuSubmenu(props: MenuSubmenuProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props?.open,\n    defaultValue: props?.defaultOpen,\n    onChange: props?.onOpenChange,\n  });\n\n  return (\n    <MenuProvider value={{ isOpen, setIsOpen }}>\n      <MenuPrimitive.SubmenuRoot\n        data-slot=\"menu-submenu\"\n        {...props}\n        onOpenChange={setIsOpen}\n      />\n    </MenuProvider>\n  );\n}\n\ntype MenuSubmenuTriggerProps = Omit<\n  React.ComponentProps<typeof MenuPrimitive.SubmenuTrigger>,\n  'render'\n> &\n  HTMLMotionProps<'div'> & {\n    disabled?: boolean;\n  };\n\nfunction MenuSubmenuTrigger({\n  label,\n  id,\n  nativeButton,\n  ...props\n}: MenuSubmenuTriggerProps) {\n  const { setHighlightedValue } = useMenuActiveValue();\n  const [, highlightedRef] = useDataState<HTMLDivElement>(\n    'highlighted',\n    undefined,\n    (value) => {\n      if (value === true) {\n        const el = highlightedRef.current;\n        const v = el?.dataset.value || el?.id || null;\n        if (v) setHighlightedValue(v);\n      }\n    },\n  );\n\n  return (\n    <MenuPrimitive.SubmenuTrigger\n      ref={highlightedRef}\n      label={label}\n      id={id}\n      nativeButton={nativeButton}\n      data-slot=\"menu-submenu-trigger\"\n      {...props}\n    />\n  );\n}\n\ntype MenuHighlightProps = Omit<\n  HighlightProps,\n  'controlledItems' | 'enabled' | 'hover'\n> & {\n  animateOnHover?: boolean;\n};\n\nfunction MenuHighlight({\n  transition = { type: 'spring', stiffness: 350, damping: 35 },\n  ...props\n}: MenuHighlightProps) {\n  const { highlightedValue } = useMenuActiveValue();\n\n  return (\n    <Highlight\n      data-slot=\"menu-highlight\"\n      click={false}\n      controlledItems\n      transition={transition}\n      value={highlightedValue}\n      {...props}\n    />\n  );\n}\n\ntype MenuHighlightItemProps = HighlightItemProps;\n\nfunction MenuHighlightItem(props: MenuHighlightItemProps) {\n  return <HighlightItem data-slot=\"menu-highlight-item\" {...props} />;\n}\n\ntype MenuPositionerProps = React.ComponentProps<\n  typeof MenuPrimitive.Positioner\n>;\n\nfunction MenuPositioner(props: MenuPositionerProps) {\n  return <MenuPrimitive.Positioner data-slot=\"menu-positioner\" {...props} />;\n}\n\ntype MenuPopupProps = Omit<\n  React.ComponentProps<typeof MenuPrimitive.Popup>,\n  'render'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction MenuPopup({\n  finalFocus,\n  id,\n  transition = { duration: 0.2 },\n  style,\n  ...props\n}: MenuPopupProps) {\n  return (\n    <MenuPrimitive.Popup\n      finalFocus={finalFocus}\n      id={id}\n      render={\n        <motion.div\n          key=\"menu-popup\"\n          data-slot=\"menu-popup\"\n          initial={{ opacity: 0, scale: 0.95 }}\n          animate={{ opacity: 1, scale: 1 }}\n          exit={{ opacity: 0, scale: 0.95 }}\n          transition={transition}\n          style={{ willChange: 'opacity, transform', ...style }}\n          {...props}\n        />\n      }\n    />\n  );\n}\n\ntype MenuItemProps = Omit<\n  React.ComponentProps<typeof MenuPrimitive.Item>,\n  'render'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction MenuItem({\n  disabled,\n  label,\n  closeOnClick,\n  nativeButton,\n  id,\n  ...props\n}: MenuItemProps) {\n  const { setHighlightedValue } = useMenuActiveValue();\n  const [, highlightedRef] = useDataState<HTMLDivElement>(\n    'highlighted',\n    undefined,\n    (value) => {\n      if (value === true) {\n        const el = highlightedRef.current;\n        const v = el?.dataset.value || el?.id || null;\n        if (v) setHighlightedValue(v);\n      }\n    },\n  );\n\n  return (\n    <MenuPrimitive.Item\n      ref={highlightedRef}\n      label={label}\n      closeOnClick={closeOnClick}\n      nativeButton={nativeButton}\n      disabled={disabled}\n      id={id}\n      data-slot=\"menu-item\"\n      {...props}\n    />\n  );\n}\n\ntype MenuCheckboxItemProps = Omit<\n  React.ComponentProps<typeof MenuPrimitive.CheckboxItem>,\n  'render'\n>;\n\nfunction MenuCheckboxItem({\n  label,\n  defaultChecked,\n  checked,\n  onCheckedChange,\n  disabled,\n  closeOnClick,\n  nativeButton,\n  id,\n  ...props\n}: MenuCheckboxItemProps) {\n  const { setHighlightedValue } = useMenuActiveValue();\n  const [, highlightedRef] = useDataState<HTMLDivElement>(\n    'highlighted',\n    undefined,\n    (value) => {\n      if (value === true) {\n        const el = highlightedRef.current;\n        const v = el?.dataset.value || el?.id || null;\n        if (v) setHighlightedValue(v);\n      }\n    },\n  );\n  return (\n    <MenuPrimitive.CheckboxItem\n      ref={highlightedRef}\n      label={label}\n      checked={checked}\n      defaultChecked={defaultChecked}\n      onCheckedChange={onCheckedChange}\n      disabled={disabled}\n      closeOnClick={closeOnClick}\n      nativeButton={nativeButton}\n      id={id}\n      data-slot=\"menu-checkbox-item\"\n      {...props}\n    />\n  );\n}\n\ntype MenuCheckboxItemIndicatorProps = Omit<\n  React.ComponentProps<typeof MenuPrimitive.CheckboxItemIndicator>,\n  'render'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction MenuCheckboxItemIndicator({\n  keepMounted,\n  ...props\n}: MenuCheckboxItemIndicatorProps) {\n  return (\n    <MenuPrimitive.CheckboxItemIndicator\n      data-slot=\"menu-checkbox-item-indicator\"\n      keepMounted={keepMounted}\n      render={\n        <motion.div data-slot=\"menu-checkbox-item-indicator\" {...props} />\n      }\n    />\n  );\n}\n\ntype MenuRadioGroupProps = React.ComponentProps<\n  typeof MenuPrimitive.RadioGroup\n>;\n\nfunction MenuRadioGroup(props: MenuRadioGroupProps) {\n  return <MenuPrimitive.RadioGroup data-slot=\"menu-radio-group\" {...props} />;\n}\n\ntype MenuRadioItemProps = Omit<\n  React.ComponentProps<typeof MenuPrimitive.RadioItem>,\n  'render'\n>;\n\nfunction MenuRadioItem({\n  value,\n  disabled,\n  label,\n  closeOnClick,\n  nativeButton,\n  id,\n  ...props\n}: MenuRadioItemProps) {\n  const { setHighlightedValue } = useMenuActiveValue();\n  const [, highlightedRef] = useDataState<HTMLDivElement>(\n    'highlighted',\n    undefined,\n    (value) => {\n      if (value === true) {\n        const el = highlightedRef.current;\n        const v = el?.dataset.value || el?.id || null;\n        if (v) setHighlightedValue(v);\n      }\n    },\n  );\n  return (\n    <MenuPrimitive.RadioItem\n      ref={highlightedRef}\n      value={value}\n      disabled={disabled}\n      label={label}\n      closeOnClick={closeOnClick}\n      nativeButton={nativeButton}\n      id={id}\n      data-slot=\"menu-radio-item\"\n      {...props}\n    />\n  );\n}\n\ntype MenuRadioItemIndicatorProps = Omit<\n  React.ComponentProps<typeof MenuPrimitive.RadioItemIndicator>,\n  'render'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction MenuRadioItemIndicator({\n  keepMounted,\n  ...props\n}: MenuRadioItemIndicatorProps) {\n  return (\n    <MenuPrimitive.RadioItemIndicator\n      data-slot=\"menu-radio-item-indicator\"\n      keepMounted={keepMounted}\n      render={<motion.div data-slot=\"menu-radio-item-indicator\" {...props} />}\n    />\n  );\n}\n\ntype MenuShortcutProps = React.ComponentProps<'span'>;\n\nfunction MenuShortcut(props: MenuShortcutProps) {\n  return <span data-slot=\"menu-shortcut\" {...props} />;\n}\n\ntype MenuArrowProps = React.ComponentProps<typeof MenuPrimitive.Arrow>;\n\nfunction MenuArrow(props: MenuArrowProps) {\n  return <MenuPrimitive.Arrow data-slot=\"menu-arrow\" {...props} />;\n}\n\ntype MenuSeparatorProps = React.ComponentProps<typeof MenuPrimitive.Separator>;\n\nfunction MenuSeparator(props: MenuSeparatorProps) {\n  return <MenuPrimitive.Separator data-slot=\"menu-separator\" {...props} />;\n}\n\nexport {\n  Menu,\n  MenuTrigger,\n  MenuPortal,\n  MenuPositioner,\n  MenuPopup,\n  MenuArrow,\n  MenuItem,\n  MenuCheckboxItem,\n  MenuCheckboxItemIndicator,\n  MenuRadioGroup,\n  MenuRadioItem,\n  MenuRadioItemIndicator,\n  MenuGroup,\n  MenuGroupLabel,\n  MenuSeparator,\n  MenuShortcut,\n  MenuHighlight,\n  MenuHighlightItem,\n  MenuSubmenu,\n  MenuSubmenuTrigger,\n  useMenuActiveValue,\n  useMenu,\n  type MenuProps,\n  type MenuTriggerProps,\n  type MenuPortalProps,\n  type MenuPositionerProps,\n  type MenuPopupProps,\n  type MenuArrowProps,\n  type MenuItemProps,\n  type MenuCheckboxItemProps,\n  type MenuCheckboxItemIndicatorProps,\n  type MenuRadioItemProps,\n  type MenuRadioItemIndicatorProps,\n  type MenuRadioGroupProps,\n  type MenuGroupProps,\n  type MenuGroupLabelProps,\n  type MenuSeparatorProps,\n  type MenuShortcutProps,\n  type MenuHighlightProps,\n  type MenuHighlightItemProps,\n  type MenuSubmenuProps,\n  type MenuSubmenuTriggerProps,\n  type MenuActiveValueContextType,\n  type MenuContextType,\n};",
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/primitives/base/menu/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'primitives-base-menu';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/primitives-base-menu',
   },
   'primitives-base-popover': {
     name: 'primitives-base-popover',
@@ -20065,7 +21407,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/primitives/base/toggle-group.tsx',
         content:
-          "'use client';\n\nimport * as React from 'react';\nimport { Toggle as TogglePrimitive } from '@base-ui-components/react/toggle';\nimport { ToggleGroup as ToggleGroupPrimitive } from '@base-ui-components/react/toggle-group';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport {\n  Highlight,\n  HighlightItem,\n  type HighlightItemProps,\n  type HighlightProps,\n} from '@/components/animate-ui/primitives/effects/highlight';\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype ToggleGroupContextType = {\n  // eslint-disable-next-line @typescript-eslint/no-explicit-any\n  value: any[];\n  setValue: ToggleGroupProps['onValueChange'];\n  toggleMultiple: boolean | undefined;\n};\n\nconst [ToggleGroupProvider, useToggleGroup] =\n  getStrictContext<ToggleGroupContextType>('ToggleGroupContext');\n\ntype ToggleGroupProps = React.ComponentProps<typeof ToggleGroupPrimitive>;\n\nfunction ToggleGroup(props: ToggleGroupProps) {\n  const [value, setValue] = useControlledState({\n    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n    value: props.value as any[],\n    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n    defaultValue: props.defaultValue as any[],\n    onChange: props.onValueChange,\n  });\n\n  return (\n    <ToggleGroupProvider\n      value={{ value, setValue, toggleMultiple: props.toggleMultiple }}\n    >\n      <ToggleGroupPrimitive\n        data-slot=\"toggle-group\"\n        {...props}\n        onValueChange={setValue}\n      />\n    </ToggleGroupProvider>\n  );\n}\n\ntype ToggleProps = Omit<\n  React.ComponentProps<typeof TogglePrimitive>,\n  'render'\n> &\n  HTMLMotionProps<'button'>;\n\nfunction Toggle({\n  value,\n  pressed,\n  defaultPressed,\n  onPressedChange,\n  nativeButton,\n  disabled,\n  ...props\n}: ToggleProps) {\n  return (\n    <TogglePrimitive\n      value={value}\n      disabled={disabled}\n      pressed={pressed}\n      defaultPressed={defaultPressed}\n      onPressedChange={onPressedChange}\n      nativeButton={nativeButton}\n      render={\n        <motion.button\n          data-slot=\"toggle\"\n          whileTap={{ scale: 0.95 }}\n          {...props}\n        />\n      }\n    />\n  );\n}\n\ntype ToggleGroupHighlightProps = Omit<HighlightProps, 'controlledItems'>;\n\nfunction ToggleGroupHighlight({\n  transition = { type: 'spring', stiffness: 200, damping: 25 },\n  ...props\n}: ToggleGroupHighlightProps) {\n  const { value } = useToggleGroup();\n\n  return (\n    <Highlight\n      data-slot=\"toggle-group-highlight\"\n      controlledItems\n      value={value?.[0] ?? null}\n      exitDelay={0}\n      transition={transition}\n      {...props}\n    />\n  );\n}\n\ntype ToggleHighlightProps = HighlightItemProps &\n  HTMLMotionProps<'div'> & {\n    children: React.ReactElement;\n  };\n\nfunction ToggleHighlight({ children, style, ...props }: ToggleHighlightProps) {\n  const { toggleMultiple, value } = useToggleGroup();\n\n  if (!toggleMultiple) {\n    return (\n      <HighlightItem\n        data-slot=\"toggle-highlight\"\n        style={{ inset: 0, ...style }}\n        {...props}\n      >\n        {children}\n      </HighlightItem>\n    );\n  }\n\n  if (toggleMultiple && React.isValidElement(children)) {\n    const isActive = props.value && value && value.includes(props.value);\n\n    const element = children as React.ReactElement<React.ComponentProps<'div'>>;\n\n    return React.cloneElement(\n      children,\n      {\n        style: {\n          ...element.props.style,\n          position: 'relative',\n        },\n        ...element.props,\n      },\n      <>\n        <AnimatePresence>\n          {isActive && (\n            <motion.div\n              data-slot=\"toggle-highlight\"\n              style={{ position: 'absolute', inset: 0, zIndex: 0, ...style }}\n              initial={{ opacity: 0 }}\n              animate={{ opacity: 1 }}\n              exit={{ opacity: 0 }}\n              {...props}\n            />\n          )}\n        </AnimatePresence>\n\n        <div\n          style={{\n            position: 'relative',\n            zIndex: 1,\n          }}\n        >\n          {element.props.children}\n        </div>\n      </>,\n    );\n  }\n}\n\nexport {\n  ToggleGroup,\n  ToggleGroupHighlight,\n  Toggle,\n  ToggleHighlight,\n  useToggleGroup,\n  type ToggleGroupProps,\n  type ToggleGroupHighlightProps,\n  type ToggleProps,\n  type ToggleHighlightProps,\n  type ToggleGroupContextType,\n};",
+          "'use client';\n\nimport * as React from 'react';\nimport { Toggle as TogglePrimitive } from '@base-ui-components/react/toggle';\nimport { ToggleGroup as ToggleGroupPrimitive } from '@base-ui-components/react/toggle-group';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport {\n  Highlight,\n  HighlightItem,\n  type HighlightItemProps,\n  type HighlightProps,\n} from '@/components/animate-ui/primitives/effects/highlight';\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype ToggleGroupContextType = {\n  // eslint-disable-next-line @typescript-eslint/no-explicit-any\n  value: any[];\n  setValue: ToggleGroupProps['onValueChange'];\n  multiple: boolean | undefined;\n};\n\nconst [ToggleGroupProvider, useToggleGroup] =\n  getStrictContext<ToggleGroupContextType>('ToggleGroupContext');\n\ntype ToggleGroupProps = React.ComponentProps<typeof ToggleGroupPrimitive>;\n\nfunction ToggleGroup(props: ToggleGroupProps) {\n  const [value, setValue] = useControlledState({\n    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n    value: props.value as any[],\n    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n    defaultValue: props.defaultValue as any[],\n    onChange: props.onValueChange,\n  });\n\n  return (\n    <ToggleGroupProvider value={{ value, setValue, multiple: props.multiple }}>\n      <ToggleGroupPrimitive\n        data-slot=\"toggle-group\"\n        {...props}\n        onValueChange={setValue}\n      />\n    </ToggleGroupProvider>\n  );\n}\n\ntype ToggleProps = Omit<\n  React.ComponentProps<typeof TogglePrimitive>,\n  'render'\n> &\n  HTMLMotionProps<'button'>;\n\nfunction Toggle({\n  value,\n  pressed,\n  defaultPressed,\n  onPressedChange,\n  nativeButton,\n  disabled,\n  ...props\n}: ToggleProps) {\n  return (\n    <TogglePrimitive\n      value={value}\n      disabled={disabled}\n      pressed={pressed}\n      defaultPressed={defaultPressed}\n      onPressedChange={onPressedChange}\n      nativeButton={nativeButton}\n      render={\n        <motion.button\n          data-slot=\"toggle\"\n          whileTap={{ scale: 0.95 }}\n          {...props}\n        />\n      }\n    />\n  );\n}\n\ntype ToggleGroupHighlightProps = Omit<HighlightProps, 'controlledItems'>;\n\nfunction ToggleGroupHighlight({\n  transition = { type: 'spring', stiffness: 200, damping: 25 },\n  ...props\n}: ToggleGroupHighlightProps) {\n  const { value } = useToggleGroup();\n\n  return (\n    <Highlight\n      data-slot=\"toggle-group-highlight\"\n      controlledItems\n      value={value?.[0] ?? null}\n      exitDelay={0}\n      transition={transition}\n      {...props}\n    />\n  );\n}\n\ntype ToggleHighlightProps = HighlightItemProps &\n  HTMLMotionProps<'div'> & {\n    children: React.ReactElement;\n  };\n\nfunction ToggleHighlight({ children, style, ...props }: ToggleHighlightProps) {\n  const { multiple, value } = useToggleGroup();\n\n  if (!multiple) {\n    return (\n      <HighlightItem\n        data-slot=\"toggle-highlight\"\n        style={{ inset: 0, ...style }}\n        {...props}\n      >\n        {children}\n      </HighlightItem>\n    );\n  }\n\n  if (multiple && React.isValidElement(children)) {\n    const isActive = props.value && value && value.includes(props.value);\n\n    const element = children as React.ReactElement<React.ComponentProps<'div'>>;\n\n    return React.cloneElement(\n      children,\n      {\n        style: {\n          ...element.props.style,\n          position: 'relative',\n        },\n        ...element.props,\n      },\n      <>\n        <AnimatePresence>\n          {isActive && (\n            <motion.div\n              data-slot=\"toggle-highlight\"\n              style={{ position: 'absolute', inset: 0, zIndex: 0, ...style }}\n              initial={{ opacity: 0 }}\n              animate={{ opacity: 1 }}\n              exit={{ opacity: 0 }}\n              {...props}\n            />\n          )}\n        </AnimatePresence>\n\n        <div\n          style={{\n            position: 'relative',\n            zIndex: 1,\n          }}\n        >\n          {element.props.children}\n        </div>\n      </>,\n    );\n  }\n}\n\nexport {\n  ToggleGroup,\n  ToggleGroupHighlight,\n  Toggle,\n  ToggleHighlight,\n  useToggleGroup,\n  type ToggleGroupProps,\n  type ToggleGroupHighlightProps,\n  type ToggleProps,\n  type ToggleHighlightProps,\n  type ToggleGroupContextType,\n};",
       },
     ],
     keywords: [],
@@ -20539,6 +21881,44 @@ export const index: Record<string, any> = {
     })(),
     command: '@animate-ui/primitives-effects-highlight',
   },
+  'primitives-effects-image-zoom': {
+    name: 'primitives-effects-image-zoom',
+    description: 'An effect that allows you to zoom in on an image on hover.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: undefined,
+    files: [
+      {
+        path: 'registry/primitives/effects/image-zoom/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/primitives/effects/image-zoom.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { motion, type Transition } from 'motion/react';\n\ntype ImageZoomProps = {\n  zoomScale?: number;\n  transition?: Transition;\n  style?: React.CSSProperties;\n  zoomOnClick?: boolean;\n  zoomOnHover?: boolean;\n  disabled?: boolean;\n  width?: React.CSSProperties['width'];\n  height?: React.CSSProperties['height'];\n  children: React.ReactElement;\n} & React.ComponentProps<'div'>;\n\nexport function ImageZoom({\n  children,\n  zoomScale = 3,\n  transition = { type: 'spring', stiffness: 200, damping: 28 },\n  style,\n  zoomOnClick = true,\n  zoomOnHover = true,\n  disabled = false,\n  width = '100%',\n  height = '100%',\n  ...props\n}: ImageZoomProps) {\n  const [isZoomed, setIsZoomed] = React.useState(false);\n  const containerRef = React.useRef<HTMLDivElement | null>(null);\n  const isTouch =\n    typeof window !== 'undefined' && matchMedia('(pointer: coarse)').matches;\n\n  const setOriginFromEvent = React.useCallback(\n    (e: React.MouseEvent | React.TouchEvent) => {\n      if (!containerRef.current) return;\n      const rect = containerRef.current.getBoundingClientRect();\n      let clientX = 0;\n      let clientY = 0;\n\n      if ('touches' in e && e.touches[0]) {\n        clientX = e.touches[0].clientX;\n        clientY = e.touches[0].clientY;\n      } else if ('clientX' in e) {\n        clientX = (e as React.MouseEvent).clientX;\n        clientY = (e as React.MouseEvent).clientY;\n      }\n\n      const x = Math.max(0, Math.min(rect.width, clientX - rect.left));\n      const y = Math.max(0, Math.min(rect.height, clientY - rect.top));\n      const child = containerRef.current\n        .firstElementChild as HTMLElement | null;\n      if (!child) return;\n      child.style.transformOrigin = `${x}px ${y}px`;\n    },\n    [],\n  );\n\n  const handleMouseEnter = React.useCallback(() => {\n    if (disabled || isTouch || !zoomOnHover) return;\n    setIsZoomed(true);\n  }, [disabled, isTouch, zoomOnHover]);\n\n  const handleMouseLeave = React.useCallback(() => {\n    if (disabled || isTouch || !zoomOnHover) return;\n    setIsZoomed(false);\n  }, [disabled, isTouch, zoomOnHover]);\n\n  const handleMouseMove = React.useCallback(\n    (e: React.MouseEvent) => {\n      if (disabled || isTouch) return;\n      setOriginFromEvent(e);\n    },\n    [disabled, isTouch, setOriginFromEvent],\n  );\n\n  const handleClick = React.useCallback(\n    (e: React.MouseEvent) => {\n      if (disabled || !zoomOnClick) return;\n      setOriginFromEvent(e);\n      setIsZoomed((v) => !v);\n    },\n    [disabled, zoomOnClick, setOriginFromEvent],\n  );\n\n  const handleTouchStart = React.useCallback(\n    (e: React.TouchEvent) => {\n      if (disabled) return;\n      setOriginFromEvent(e);\n      if (zoomOnClick) setIsZoomed((v) => !v);\n      else setIsZoomed(true);\n    },\n    [disabled, zoomOnClick, setOriginFromEvent],\n  );\n\n  const handleTouchMove = React.useCallback(\n    (e: React.TouchEvent) => {\n      if (disabled) return;\n      setOriginFromEvent(e);\n    },\n    [disabled, setOriginFromEvent],\n  );\n\n  const handleTouchEnd = React.useCallback(() => {\n    if (disabled) return;\n    if (!zoomOnClick) setIsZoomed(false);\n  }, [disabled, zoomOnClick]);\n\n  return (\n    <div\n      ref={containerRef}\n      style={{\n        overflow: 'hidden',\n        position: 'relative',\n        width,\n        height,\n        touchAction: 'manipulation',\n        cursor: disabled ? 'default' : isZoomed ? 'zoom-out' : 'zoom-in',\n        ...style,\n      }}\n      onMouseEnter={handleMouseEnter}\n      onMouseLeave={handleMouseLeave}\n      onMouseMove={handleMouseMove}\n      onClick={handleClick}\n      onTouchStart={handleTouchStart}\n      onTouchMove={handleTouchMove}\n      onTouchEnd={handleTouchEnd}\n      role=\"img\"\n      {...props}\n    >\n      <motion.div\n        animate={{ scale: disabled ? 1 : isZoomed ? zoomScale : 1 }}\n        transition={transition}\n        style={{\n          width: '100%',\n          height: '100%',\n          display: 'flex',\n          alignItems: 'center',\n          justifyContent: 'center',\n          willChange: 'transform',\n        }}\n      >\n        {children}\n      </motion.div>\n    </div>\n  );\n}\n\ntype ImageProps<T extends React.ElementType = 'img'> = {\n  objectFit?: React.CSSProperties['objectFit'];\n  as?: T;\n} & React.ComponentProps<T>;\n\nexport function Image<T extends React.ElementType = 'img'>({\n  objectFit = 'cover',\n  as: Component = 'img',\n  ...props\n}: ImageProps<T>) {\n  return (\n    <Component\n      draggable={false}\n      style={{\n        width: '100%',\n        height: '100%',\n        objectFit,\n        userSelect: 'none',\n        pointerEvents: 'none',\n      }}\n      {...props}\n    />\n  );\n}",
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/primitives/effects/image-zoom/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'primitives-effects-image-zoom';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/primitives-effects-image-zoom',
+  },
   'primitives-effects-magnetic': {
     name: 'primitives-effects-magnetic',
     description:
@@ -20914,7 +22294,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/primitives/headless/disclosure.tsx',
         content:
-          "'use client';\n\nimport * as React from 'react';\nimport {\n  Disclosure as DisclosurePrimitive,\n  DisclosureButton as DisclosureButtonPrimitive,\n  DisclosurePanel as DisclosurePanelPrimitive,\n  type DisclosureProps as DisclosurePrimitiveProps,\n  type DisclosureButtonProps as DisclosureButtonPrimitiveProps,\n  type DisclosurePanelProps as DisclosurePanelPrimitiveProps,\n} from '@headlessui/react';\nimport { motion, AnimatePresence, type HTMLMotionProps } from 'motion/react';\n\nimport { getStrictContext } from '@/lib/get-strict-context';\n\ntype DisclosureContextType = {\n  isOpen: boolean;\n};\n\nconst [DisclosureProvider, useDisclosure] =\n  getStrictContext<DisclosureContextType>('DisclosureContext');\n\ntype DisclosureProps<TTag extends React.ElementType = 'div'> =\n  DisclosurePrimitiveProps<TTag> & {\n    as?: TTag;\n    className?: string;\n  };\n\nfunction Disclosure<TTag extends React.ElementType = 'div'>({\n  children,\n  ...props\n}: DisclosureProps<TTag>) {\n  return (\n    <DisclosurePrimitive data-slot=\"disclosure\" {...props}>\n      {(bag) => (\n        <DisclosureProvider value={{ isOpen: bag.open }}>\n          {typeof children === 'function' ? children(bag) : children}\n        </DisclosureProvider>\n      )}\n    </DisclosurePrimitive>\n  );\n}\n\ntype DisclosureButtonProps<TTag extends React.ElementType = 'button'> =\n  DisclosureButtonPrimitiveProps<TTag> & {\n    as?: TTag;\n  };\n\nfunction DisclosureButton<TTag extends React.ElementType = 'button'>(\n  props: DisclosureButtonProps<TTag>,\n) {\n  return <DisclosureButtonPrimitive data-slot=\"disclosure-button\" {...props} />;\n}\n\ntype DisclosurePanelProps<TTag extends React.ElementType = typeof motion.div> =\n  Pick<DisclosurePanelPrimitiveProps<TTag>, 'static' | 'unmount' | 'children'> &\n    Omit<HTMLMotionProps<'div'>, 'children'> & {\n      as?: TTag;\n      keepRendered?: boolean;\n    };\n\nfunction DisclosurePanel<TTag extends React.ElementType = typeof motion.div>(\n  props: DisclosurePanelProps<TTag>,\n) {\n  const {\n    children,\n    transition = { type: 'spring', stiffness: 150, damping: 22 },\n    as = motion.div,\n    unmount,\n    keepRendered = false,\n    ...rest\n  } = props;\n  const { isOpen } = useDisclosure();\n\n  return (\n    <AnimatePresence>\n      {keepRendered ? (\n        <DisclosurePanelPrimitive\n          static\n          as={as as React.ElementType}\n          unmount={unmount}\n        >\n          {(bag) => (\n            <motion.div\n              key=\"disclosure-panel\"\n              data-slot=\"disclosure-panel\"\n              initial={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n              animate={\n                isOpen\n                  ? { height: 'auto', opacity: 1, '--mask-stop': '100%' }\n                  : { height: 0, opacity: 0, '--mask-stop': '0%' }\n              }\n              transition={transition}\n              style={{\n                maskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                WebkitMaskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                overflow: 'hidden',\n              }}\n              {...rest}\n            >\n              {typeof children === 'function' ? children(bag) : children}\n            </motion.div>\n          )}\n        </DisclosurePanelPrimitive>\n      ) : (\n        isOpen && (\n          <DisclosurePanelPrimitive\n            static\n            as={as as React.ElementType}\n            unmount={unmount}\n          >\n            {(bag) => (\n              <motion.div\n                key=\"disclosure-panel\"\n                data-slot=\"disclosure-panel\"\n                initial={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n                animate={{ height: 'auto', opacity: 1, '--mask-stop': '100%' }}\n                exit={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n                transition={transition}\n                style={{\n                  maskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  WebkitMaskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  overflow: 'hidden',\n                }}\n                {...rest}\n              >\n                {typeof children === 'function' ? children(bag) : children}\n              </motion.div>\n            )}\n          </DisclosurePanelPrimitive>\n        )\n      )}\n    </AnimatePresence>\n  );\n}\n\nexport {\n  Disclosure,\n  DisclosureButton,\n  DisclosurePanel,\n  useDisclosure,\n  type DisclosureProps,\n  type DisclosureButtonProps,\n  type DisclosurePanelProps,\n};",
+          "'use client';\n\nimport * as React from 'react';\nimport {\n  Disclosure as DisclosurePrimitive,\n  DisclosureButton as DisclosureButtonPrimitive,\n  DisclosurePanel as DisclosurePanelPrimitive,\n  type DisclosureProps as DisclosurePrimitiveProps,\n  type DisclosureButtonProps as DisclosureButtonPrimitiveProps,\n  type DisclosurePanelProps as DisclosurePanelPrimitiveProps,\n} from '@headlessui/react';\nimport { motion, AnimatePresence, type HTMLMotionProps } from 'motion/react';\n\nimport { getStrictContext } from '@/lib/get-strict-context';\n\ntype DisclosureContextType = {\n  isOpen: boolean;\n};\n\nconst [DisclosureProvider, useDisclosure] =\n  getStrictContext<DisclosureContextType>('DisclosureContext');\n\ntype DisclosureProps<TTag extends React.ElementType = 'div'> =\n  DisclosurePrimitiveProps<TTag> & {\n    as?: TTag;\n    className?: string;\n  };\n\nfunction Disclosure<TTag extends React.ElementType = 'div'>({\n  children,\n  ...props\n}: DisclosureProps<TTag>) {\n  return (\n    <DisclosurePrimitive data-slot=\"disclosure\" {...props}>\n      {(bag) => (\n        <DisclosureProvider value={{ isOpen: bag.open }}>\n          {typeof children === 'function' ? children(bag) : children}\n        </DisclosureProvider>\n      )}\n    </DisclosurePrimitive>\n  );\n}\n\ntype DisclosureButtonProps<TTag extends React.ElementType = 'button'> =\n  DisclosureButtonPrimitiveProps<TTag> & {\n    as?: TTag;\n  };\n\nfunction DisclosureButton<TTag extends React.ElementType = 'button'>(\n  props: DisclosureButtonProps<TTag>,\n) {\n  return <DisclosureButtonPrimitive data-slot=\"disclosure-button\" {...props} />;\n}\n\ntype DisclosurePanelProps<TTag extends React.ElementType = typeof motion.div> =\n  Pick<DisclosurePanelPrimitiveProps<TTag>, 'static' | 'unmount' | 'children'> &\n    Omit<HTMLMotionProps<'div'>, 'children'> & {\n      as?: TTag;\n      keepRendered?: boolean;\n    };\n\nfunction DisclosurePanel<TTag extends React.ElementType = typeof motion.div>(\n  props: DisclosurePanelProps<TTag>,\n) {\n  const {\n    children,\n    transition = { duration: 0.35, ease: 'easeInOut' },\n    as = motion.div,\n    unmount,\n    keepRendered = false,\n    ...rest\n  } = props;\n  const { isOpen } = useDisclosure();\n\n  return (\n    <AnimatePresence>\n      {keepRendered ? (\n        <DisclosurePanelPrimitive\n          static\n          as={as as React.ElementType}\n          unmount={unmount}\n        >\n          {(bag) => (\n            <motion.div\n              key=\"disclosure-panel\"\n              data-slot=\"disclosure-panel\"\n              initial={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n              animate={\n                isOpen\n                  ? { height: 'auto', opacity: 1, '--mask-stop': '100%', y: 0 }\n                  : { height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }\n              }\n              transition={transition}\n              style={{\n                maskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                WebkitMaskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                overflow: 'hidden',\n              }}\n              {...rest}\n            >\n              {typeof children === 'function' ? children(bag) : children}\n            </motion.div>\n          )}\n        </DisclosurePanelPrimitive>\n      ) : (\n        isOpen && (\n          <DisclosurePanelPrimitive\n            static\n            as={as as React.ElementType}\n            unmount={unmount}\n          >\n            {(bag) => (\n              <motion.div\n                key=\"disclosure-panel\"\n                data-slot=\"disclosure-panel\"\n                initial={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n                animate={{\n                  height: 'auto',\n                  opacity: 1,\n                  '--mask-stop': '100%',\n                  y: 0,\n                }}\n                exit={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n                transition={transition}\n                style={{\n                  maskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  WebkitMaskImage:\n                    'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                  overflow: 'hidden',\n                }}\n                {...rest}\n              >\n                {typeof children === 'function' ? children(bag) : children}\n              </motion.div>\n            )}\n          </DisclosurePanelPrimitive>\n        )\n      )}\n    </AnimatePresence>\n  );\n}\n\nexport {\n  Disclosure,\n  DisclosureButton,\n  DisclosurePanel,\n  useDisclosure,\n  type DisclosureProps,\n  type DisclosureButtonProps,\n  type DisclosurePanelProps,\n};",
       },
     ],
     keywords: [],
@@ -21077,7 +22457,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/primitives/radix/accordion.tsx',
         content:
-          "'use client';\n\nimport * as React from 'react';\nimport { Accordion as AccordionPrimitive } from 'radix-ui';\nimport { motion, AnimatePresence, type HTMLMotionProps } from 'motion/react';\n\nimport { useControlledState } from '@/hooks/use-controlled-state';\nimport { getStrictContext } from '@/lib/get-strict-context';\n\ntype AccordionContextType = {\n  value: string | string[] | undefined;\n  setValue: (value: string | string[] | undefined) => void;\n};\n\ntype AccordionItemContextType = {\n  value: string;\n  isOpen: boolean;\n  setIsOpen: (open: boolean) => void;\n};\n\nconst [AccordionProvider, useAccordion] =\n  getStrictContext<AccordionContextType>('AccordionContext');\n\nconst [AccordionItemProvider, useAccordionItem] =\n  getStrictContext<AccordionItemContextType>('AccordionItemContext');\n\ntype AccordionProps = React.ComponentProps<typeof AccordionPrimitive.Root>;\n\nfunction Accordion(props: AccordionProps) {\n  const [value, setValue] = useControlledState<string | string[] | undefined>({\n    value: props?.value,\n    defaultValue: props?.defaultValue,\n    onChange: props?.onValueChange as (\n      value: string | string[] | undefined,\n    ) => void,\n  });\n\n  return (\n    <AccordionProvider value={{ value, setValue }}>\n      <AccordionPrimitive.Root\n        data-slot=\"accordion\"\n        {...props}\n        onValueChange={setValue}\n      />\n    </AccordionProvider>\n  );\n}\n\ntype AccordionItemProps = React.ComponentProps<typeof AccordionPrimitive.Item>;\n\nfunction AccordionItem(props: AccordionItemProps) {\n  const { value } = useAccordion();\n  const [isOpen, setIsOpen] = React.useState(\n    value?.includes(props?.value) ?? false,\n  );\n\n  React.useEffect(() => {\n    setIsOpen(value?.includes(props?.value) ?? false);\n  }, [value, props?.value]);\n\n  return (\n    <AccordionItemProvider value={{ isOpen, setIsOpen, value: props.value }}>\n      <AccordionPrimitive.Item data-slot=\"accordion-item\" {...props} />\n    </AccordionItemProvider>\n  );\n}\n\ntype AccordionHeaderProps = React.ComponentProps<\n  typeof AccordionPrimitive.Header\n>;\n\nfunction AccordionHeader(props: AccordionHeaderProps) {\n  return <AccordionPrimitive.Header data-slot=\"accordion-header\" {...props} />;\n}\n\ntype AccordionTriggerProps = React.ComponentProps<\n  typeof AccordionPrimitive.Trigger\n>;\n\nfunction AccordionTrigger(props: AccordionTriggerProps) {\n  return (\n    <AccordionPrimitive.Trigger data-slot=\"accordion-trigger\" {...props} />\n  );\n}\n\ntype AccordionContentProps = Omit<\n  React.ComponentProps<typeof AccordionPrimitive.Content>,\n  'asChild' | 'forceMount'\n> &\n  HTMLMotionProps<'div'> & {\n    keepRendered?: boolean;\n  };\n\nfunction AccordionContent({\n  keepRendered = false,\n  transition = { type: 'spring', stiffness: 150, damping: 22 },\n  ...props\n}: AccordionContentProps) {\n  const { isOpen } = useAccordionItem();\n\n  return (\n    <AnimatePresence>\n      {keepRendered ? (\n        <AccordionPrimitive.Content asChild forceMount>\n          <motion.div\n            key=\"accordion-content\"\n            data-slot=\"accordion-content\"\n            initial={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n            animate={\n              isOpen\n                ? { height: 'auto', opacity: 1, '--mask-stop': '100%' }\n                : { height: 0, opacity: 0, '--mask-stop': '0%' }\n            }\n            transition={transition}\n            style={{\n              maskImage:\n                'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n              WebkitMaskImage:\n                'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n              overflow: 'hidden',\n            }}\n            {...props}\n          />\n        </AccordionPrimitive.Content>\n      ) : (\n        isOpen && (\n          <AccordionPrimitive.Content asChild forceMount>\n            <motion.div\n              key=\"accordion-content\"\n              data-slot=\"accordion-content\"\n              initial={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n              animate={{ height: 'auto', opacity: 1, '--mask-stop': '100%' }}\n              exit={{ height: 0, opacity: 0, '--mask-stop': '0%' }}\n              transition={transition}\n              style={{\n                maskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                WebkitMaskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                overflow: 'hidden',\n              }}\n              {...props}\n            />\n          </AccordionPrimitive.Content>\n        )\n      )}\n    </AnimatePresence>\n  );\n}\n\nexport {\n  Accordion,\n  AccordionItem,\n  AccordionHeader,\n  AccordionTrigger,\n  AccordionContent,\n  useAccordion,\n  useAccordionItem,\n  type AccordionProps,\n  type AccordionItemProps,\n  type AccordionHeaderProps,\n  type AccordionTriggerProps,\n  type AccordionContentProps,\n  type AccordionContextType,\n  type AccordionItemContextType,\n};",
+          "'use client';\n\nimport * as React from 'react';\nimport { Accordion as AccordionPrimitive } from 'radix-ui';\nimport { motion, AnimatePresence, type HTMLMotionProps } from 'motion/react';\n\nimport { useControlledState } from '@/hooks/use-controlled-state';\nimport { getStrictContext } from '@/lib/get-strict-context';\n\ntype AccordionContextType = {\n  value: string | string[] | undefined;\n  setValue: (value: string | string[] | undefined) => void;\n};\n\ntype AccordionItemContextType = {\n  value: string;\n  isOpen: boolean;\n  setIsOpen: (open: boolean) => void;\n};\n\nconst [AccordionProvider, useAccordion] =\n  getStrictContext<AccordionContextType>('AccordionContext');\n\nconst [AccordionItemProvider, useAccordionItem] =\n  getStrictContext<AccordionItemContextType>('AccordionItemContext');\n\ntype AccordionProps = React.ComponentProps<typeof AccordionPrimitive.Root>;\n\nfunction Accordion(props: AccordionProps) {\n  const [value, setValue] = useControlledState<string | string[] | undefined>({\n    value: props?.value,\n    defaultValue: props?.defaultValue,\n    onChange: props?.onValueChange as (\n      value: string | string[] | undefined,\n    ) => void,\n  });\n\n  return (\n    <AccordionProvider value={{ value, setValue }}>\n      <AccordionPrimitive.Root\n        data-slot=\"accordion\"\n        {...props}\n        onValueChange={setValue}\n      />\n    </AccordionProvider>\n  );\n}\n\ntype AccordionItemProps = React.ComponentProps<typeof AccordionPrimitive.Item>;\n\nfunction AccordionItem(props: AccordionItemProps) {\n  const { value } = useAccordion();\n  const [isOpen, setIsOpen] = React.useState(\n    value?.includes(props?.value) ?? false,\n  );\n\n  React.useEffect(() => {\n    setIsOpen(value?.includes(props?.value) ?? false);\n  }, [value, props?.value]);\n\n  return (\n    <AccordionItemProvider value={{ isOpen, setIsOpen, value: props.value }}>\n      <AccordionPrimitive.Item data-slot=\"accordion-item\" {...props} />\n    </AccordionItemProvider>\n  );\n}\n\ntype AccordionHeaderProps = React.ComponentProps<\n  typeof AccordionPrimitive.Header\n>;\n\nfunction AccordionHeader(props: AccordionHeaderProps) {\n  return <AccordionPrimitive.Header data-slot=\"accordion-header\" {...props} />;\n}\n\ntype AccordionTriggerProps = React.ComponentProps<\n  typeof AccordionPrimitive.Trigger\n>;\n\nfunction AccordionTrigger(props: AccordionTriggerProps) {\n  return (\n    <AccordionPrimitive.Trigger data-slot=\"accordion-trigger\" {...props} />\n  );\n}\n\ntype AccordionContentProps = Omit<\n  React.ComponentProps<typeof AccordionPrimitive.Content>,\n  'asChild' | 'forceMount'\n> &\n  HTMLMotionProps<'div'> & {\n    keepRendered?: boolean;\n  };\n\nfunction AccordionContent({\n  keepRendered = false,\n  transition = { duration: 0.35, ease: 'easeInOut' },\n  ...props\n}: AccordionContentProps) {\n  const { isOpen } = useAccordionItem();\n\n  return (\n    <AnimatePresence>\n      {keepRendered ? (\n        <AccordionPrimitive.Content asChild forceMount>\n          <motion.div\n            key=\"accordion-content\"\n            data-slot=\"accordion-content\"\n            initial={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n            animate={\n              isOpen\n                ? { height: 'auto', opacity: 1, '--mask-stop': '100%', y: 0 }\n                : { height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }\n            }\n            transition={transition}\n            style={{\n              maskImage:\n                'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n              WebkitMaskImage:\n                'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n              overflow: 'hidden',\n            }}\n            {...props}\n          />\n        </AccordionPrimitive.Content>\n      ) : (\n        isOpen && (\n          <AccordionPrimitive.Content asChild forceMount>\n            <motion.div\n              key=\"accordion-content\"\n              data-slot=\"accordion-content\"\n              initial={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n              animate={{\n                height: 'auto',\n                opacity: 1,\n                '--mask-stop': '100%',\n                y: 0,\n              }}\n              exit={{ height: 0, opacity: 0, '--mask-stop': '0%', y: 20 }}\n              transition={transition}\n              style={{\n                maskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                WebkitMaskImage:\n                  'linear-gradient(black var(--mask-stop), transparent var(--mask-stop))',\n                overflow: 'hidden',\n              }}\n              {...props}\n            />\n          </AccordionPrimitive.Content>\n        )\n      )}\n    </AnimatePresence>\n  );\n}\n\nexport {\n  Accordion,\n  AccordionItem,\n  AccordionHeader,\n  AccordionTrigger,\n  AccordionContent,\n  useAccordion,\n  useAccordionItem,\n  type AccordionProps,\n  type AccordionItemProps,\n  type AccordionHeaderProps,\n  type AccordionTriggerProps,\n  type AccordionContentProps,\n  type AccordionContextType,\n  type AccordionItemContextType,\n};",
       },
     ],
     keywords: [],
@@ -21202,7 +22582,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/primitives/radix/collapsible.tsx',
         content:
-          "'use client';\n\nimport * as React from 'react';\nimport { Collapsible as CollapsiblePrimitive } from 'radix-ui';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype CollapsibleContextType = {\n  isOpen: boolean;\n  setIsOpen: (isOpen: boolean) => void;\n};\n\nconst [CollapsibleProvider, useCollapsible] =\n  getStrictContext<CollapsibleContextType>('CollapsibleContext');\n\ntype CollapsibleProps = React.ComponentProps<typeof CollapsiblePrimitive.Root>;\n\nfunction Collapsible(props: CollapsibleProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props?.open,\n    defaultValue: props?.defaultOpen,\n    onChange: props?.onOpenChange,\n  });\n\n  return (\n    <CollapsibleProvider value={{ isOpen, setIsOpen }}>\n      <CollapsiblePrimitive.Root\n        data-slot=\"collapsible\"\n        {...props}\n        onOpenChange={setIsOpen}\n      />\n    </CollapsibleProvider>\n  );\n}\n\ntype CollapsibleTriggerProps = React.ComponentProps<\n  typeof CollapsiblePrimitive.Trigger\n>;\n\nfunction CollapsibleTrigger(props: CollapsibleTriggerProps) {\n  return (\n    <CollapsiblePrimitive.Trigger data-slot=\"collapsible-trigger\" {...props} />\n  );\n}\n\ntype CollapsibleContentProps = Omit<\n  React.ComponentProps<typeof CollapsiblePrimitive.Content>,\n  'asChild' | 'forceMount'\n> &\n  HTMLMotionProps<'div'> & {\n    keepRendered?: boolean;\n  };\n\nfunction CollapsibleContent({\n  keepRendered = false,\n  transition = { type: 'spring', stiffness: 150, damping: 22 },\n  ...props\n}: CollapsibleContentProps) {\n  const { isOpen } = useCollapsible();\n\n  return (\n    <AnimatePresence>\n      {keepRendered ? (\n        <CollapsiblePrimitive.Content asChild forceMount>\n          <motion.div\n            key=\"collapsible-content\"\n            data-slot=\"collapsible-content\"\n            layout\n            initial={{ opacity: 0, height: 0, overflow: 'hidden' }}\n            animate={\n              isOpen\n                ? { opacity: 1, height: 'auto', overflow: 'hidden' }\n                : { opacity: 0, height: 0, overflow: 'hidden' }\n            }\n            transition={transition}\n            {...props}\n          />\n        </CollapsiblePrimitive.Content>\n      ) : (\n        isOpen && (\n          <CollapsiblePrimitive.Content asChild forceMount>\n            <motion.div\n              key=\"collapsible-content\"\n              data-slot=\"collapsible-content\"\n              layout\n              initial={{ opacity: 0, height: 0, overflow: 'hidden' }}\n              animate={{ opacity: 1, height: 'auto', overflow: 'hidden' }}\n              exit={{ opacity: 0, height: 0, overflow: 'hidden' }}\n              transition={transition}\n              {...props}\n            />\n          </CollapsiblePrimitive.Content>\n        )\n      )}\n    </AnimatePresence>\n  );\n}\n\nexport {\n  Collapsible,\n  CollapsibleTrigger,\n  CollapsibleContent,\n  useCollapsible,\n  type CollapsibleProps,\n  type CollapsibleTriggerProps,\n  type CollapsibleContentProps,\n  type CollapsibleContextType,\n};",
+          "'use client';\n\nimport * as React from 'react';\nimport { Collapsible as CollapsiblePrimitive } from 'radix-ui';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype CollapsibleContextType = {\n  isOpen: boolean;\n  setIsOpen: (isOpen: boolean) => void;\n};\n\nconst [CollapsibleProvider, useCollapsible] =\n  getStrictContext<CollapsibleContextType>('CollapsibleContext');\n\ntype CollapsibleProps = React.ComponentProps<typeof CollapsiblePrimitive.Root>;\n\nfunction Collapsible(props: CollapsibleProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props?.open,\n    defaultValue: props?.defaultOpen,\n    onChange: props?.onOpenChange,\n  });\n\n  return (\n    <CollapsibleProvider value={{ isOpen, setIsOpen }}>\n      <CollapsiblePrimitive.Root\n        data-slot=\"collapsible\"\n        {...props}\n        onOpenChange={setIsOpen}\n      />\n    </CollapsibleProvider>\n  );\n}\n\ntype CollapsibleTriggerProps = React.ComponentProps<\n  typeof CollapsiblePrimitive.Trigger\n>;\n\nfunction CollapsibleTrigger(props: CollapsibleTriggerProps) {\n  return (\n    <CollapsiblePrimitive.Trigger data-slot=\"collapsible-trigger\" {...props} />\n  );\n}\n\ntype CollapsibleContentProps = Omit<\n  React.ComponentProps<typeof CollapsiblePrimitive.Content>,\n  'asChild' | 'forceMount'\n> &\n  HTMLMotionProps<'div'> & {\n    keepRendered?: boolean;\n  };\n\nfunction CollapsibleContent({\n  keepRendered = false,\n  transition = { duration: 0.35, ease: 'easeInOut' },\n  ...props\n}: CollapsibleContentProps) {\n  const { isOpen } = useCollapsible();\n\n  return (\n    <AnimatePresence>\n      {keepRendered ? (\n        <CollapsiblePrimitive.Content asChild forceMount>\n          <motion.div\n            key=\"collapsible-content\"\n            data-slot=\"collapsible-content\"\n            layout\n            initial={{ opacity: 0, height: 0, overflow: 'hidden', y: 20 }}\n            animate={\n              isOpen\n                ? { opacity: 1, height: 'auto', overflow: 'hidden', y: 0 }\n                : { opacity: 0, height: 0, overflow: 'hidden', y: 20 }\n            }\n            transition={transition}\n            {...props}\n          />\n        </CollapsiblePrimitive.Content>\n      ) : (\n        isOpen && (\n          <CollapsiblePrimitive.Content asChild forceMount>\n            <motion.div\n              key=\"collapsible-content\"\n              data-slot=\"collapsible-content\"\n              layout\n              initial={{ opacity: 0, height: 0, overflow: 'hidden', y: 20 }}\n              animate={{ opacity: 1, height: 'auto', overflow: 'hidden', y: 0 }}\n              exit={{ opacity: 0, height: 0, overflow: 'hidden', y: 20 }}\n              transition={transition}\n              {...props}\n            />\n          </CollapsiblePrimitive.Content>\n        )\n      )}\n    </AnimatePresence>\n  );\n}\n\nexport {\n  Collapsible,\n  CollapsibleTrigger,\n  CollapsibleContent,\n  useCollapsible,\n  type CollapsibleProps,\n  type CollapsibleTriggerProps,\n  type CollapsibleContentProps,\n  type CollapsibleContextType,\n};",
       },
     ],
     keywords: [],
@@ -21279,6 +22659,7 @@ export const index: Record<string, any> = {
     registryDependencies: [
       '@animate-ui/primitives-effects-highlight',
       '@animate-ui/hooks-use-controlled-state',
+      '@animate-ui/hooks-use-data-state',
       '@animate-ui/lib-get-strict-context',
     ],
     files: [
@@ -21287,7 +22668,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/primitives/radix/dropdown-menu.tsx',
         content:
-          "'use client';\n\nimport * as React from 'react';\nimport { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport {\n  Highlight,\n  HighlightItem,\n  type HighlightItemProps,\n  type HighlightProps,\n} from '@/components/animate-ui/primitives/effects/highlight';\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype DropdownMenuContextType = {\n  isOpen: boolean;\n  setIsOpen: (o: boolean) => void;\n};\n\nconst [DropdownMenuProvider, useDropdownMenu] =\n  getStrictContext<DropdownMenuContextType>('DropdownMenuContext');\n\nconst [DropdownMenuSubProvider, useDropdownMenuSub] =\n  getStrictContext<DropdownMenuContextType>('DropdownMenuSubContext');\n\ntype DropdownMenuProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Root\n>;\n\nfunction DropdownMenu(props: DropdownMenuProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props?.open,\n    defaultValue: props?.defaultOpen,\n    onChange: props?.onOpenChange,\n  });\n\n  return (\n    <DropdownMenuProvider value={{ isOpen, setIsOpen }}>\n      <DropdownMenuPrimitive.Root\n        data-slot=\"dropdown-menu\"\n        {...props}\n        onOpenChange={setIsOpen}\n      />\n    </DropdownMenuProvider>\n  );\n}\n\ntype DropdownMenuTriggerProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Trigger\n>;\n\nfunction DropdownMenuTrigger(props: DropdownMenuTriggerProps) {\n  return (\n    <DropdownMenuPrimitive.Trigger\n      data-slot=\"dropdown-menu-trigger\"\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuPortalProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Portal\n>;\n\nfunction DropdownMenuPortal(props: DropdownMenuPortalProps) {\n  return (\n    <DropdownMenuPrimitive.Portal data-slot=\"dropdown-menu-portal\" {...props} />\n  );\n}\n\ntype DropdownMenuGroupProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Group\n>;\n\nfunction DropdownMenuGroup(props: DropdownMenuGroupProps) {\n  return (\n    <DropdownMenuPrimitive.Group data-slot=\"dropdown-menu-group\" {...props} />\n  );\n}\n\ntype DropdownMenuSubProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Sub\n>;\n\nfunction DropdownMenuSub(props: DropdownMenuSubProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props?.open,\n    defaultValue: props?.defaultOpen,\n    onChange: props?.onOpenChange,\n  });\n\n  return (\n    <DropdownMenuSubProvider value={{ isOpen, setIsOpen }}>\n      <DropdownMenuPrimitive.Sub\n        data-slot=\"dropdown-menu-sub\"\n        {...props}\n        onOpenChange={setIsOpen}\n      />\n    </DropdownMenuSubProvider>\n  );\n}\n\ntype DropdownMenuRadioGroupProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.RadioGroup\n>;\n\nfunction DropdownMenuRadioGroup(props: DropdownMenuRadioGroupProps) {\n  return (\n    <DropdownMenuPrimitive.RadioGroup\n      data-slot=\"dropdown-menu-radio-group\"\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuSubTriggerProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.SubTrigger>,\n  'asChild'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuSubTrigger({\n  disabled,\n  textValue,\n  ...props\n}: DropdownMenuSubTriggerProps) {\n  return (\n    <DropdownMenuPrimitive.SubTrigger\n      disabled={disabled}\n      textValue={textValue}\n      asChild\n    >\n      <motion.div\n        data-slot=\"dropdown-menu-sub-trigger\"\n        data-disabled={disabled}\n        {...props}\n      />\n    </DropdownMenuPrimitive.SubTrigger>\n  );\n}\n\ntype DropdownMenuSubContentProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>,\n  'forceMount' | 'asChild'\n> &\n  Omit<\n    React.ComponentProps<typeof DropdownMenuPrimitive.Portal>,\n    'forceMount'\n  > &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuSubContent({\n  loop,\n  onEscapeKeyDown,\n  onPointerDownOutside,\n  onFocusOutside,\n  onInteractOutside,\n  sideOffset,\n  alignOffset,\n  avoidCollisions,\n  collisionBoundary,\n  collisionPadding,\n  arrowPadding,\n  sticky,\n  hideWhenDetached,\n  transition = { duration: 0.2 },\n  style,\n  container,\n  ...props\n}: DropdownMenuSubContentProps) {\n  const { isOpen } = useDropdownMenuSub();\n\n  return (\n    <AnimatePresence>\n      {isOpen && (\n        <DropdownMenuPortal forceMount container={container}>\n          <DropdownMenuPrimitive.SubContent\n            asChild\n            forceMount\n            loop={loop}\n            onEscapeKeyDown={onEscapeKeyDown}\n            onPointerDownOutside={onPointerDownOutside}\n            onFocusOutside={onFocusOutside}\n            onInteractOutside={onInteractOutside}\n            sideOffset={sideOffset}\n            alignOffset={alignOffset}\n            avoidCollisions={avoidCollisions}\n            collisionBoundary={collisionBoundary}\n            collisionPadding={collisionPadding}\n            arrowPadding={arrowPadding}\n            sticky={sticky}\n            hideWhenDetached={hideWhenDetached}\n          >\n            <motion.div\n              key=\"dropdown-menu-sub-content\"\n              data-slot=\"dropdown-menu-sub-content\"\n              initial={{ opacity: 0, scale: 0.95 }}\n              animate={{ opacity: 1, scale: 1 }}\n              exit={{ opacity: 0, scale: 0.95 }}\n              transition={transition}\n              style={{ willChange: 'opacity, transform', ...style }}\n              {...props}\n            />\n          </DropdownMenuPrimitive.SubContent>\n        </DropdownMenuPortal>\n      )}\n    </AnimatePresence>\n  );\n}\n\ntype DropdownMenuHighlightProps = Omit<\n  HighlightProps,\n  'controlledItems' | 'enabled' | 'hover'\n> & {\n  animateOnHover?: boolean;\n};\n\nfunction DropdownMenuHighlight({\n  transition = { type: 'spring', stiffness: 350, damping: 35 },\n  animateOnHover = true,\n  ...props\n}: DropdownMenuHighlightProps) {\n  return (\n    <Highlight\n      hover\n      controlledItems\n      enabled={animateOnHover}\n      transition={transition}\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuContentProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.Content>,\n  'forceMount' | 'asChild'\n> &\n  Omit<\n    React.ComponentProps<typeof DropdownMenuPrimitive.Portal>,\n    'forceMount'\n  > &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuContent({\n  loop,\n  onCloseAutoFocus,\n  onEscapeKeyDown,\n  onPointerDownOutside,\n  onFocusOutside,\n  onInteractOutside,\n  side,\n  sideOffset,\n  align,\n  alignOffset,\n  avoidCollisions,\n  collisionBoundary,\n  collisionPadding,\n  arrowPadding,\n  sticky,\n  hideWhenDetached,\n  transition = { duration: 0.2 },\n  style,\n  container,\n  ...props\n}: DropdownMenuContentProps) {\n  const { isOpen } = useDropdownMenu();\n\n  return (\n    <AnimatePresence>\n      {isOpen && (\n        <DropdownMenuPortal forceMount container={container}>\n          <DropdownMenuPrimitive.Content\n            asChild\n            loop={loop}\n            onCloseAutoFocus={onCloseAutoFocus}\n            onEscapeKeyDown={onEscapeKeyDown}\n            onPointerDownOutside={onPointerDownOutside}\n            onFocusOutside={onFocusOutside}\n            onInteractOutside={onInteractOutside}\n            side={side}\n            sideOffset={sideOffset}\n            align={align}\n            alignOffset={alignOffset}\n            avoidCollisions={avoidCollisions}\n            collisionBoundary={collisionBoundary}\n            collisionPadding={collisionPadding}\n            arrowPadding={arrowPadding}\n            sticky={sticky}\n            hideWhenDetached={hideWhenDetached}\n          >\n            <motion.div\n              key=\"dropdown-menu-content\"\n              data-slot=\"dropdown-menu-content\"\n              initial={{ opacity: 0, scale: 0.95 }}\n              animate={{ opacity: 1, scale: 1 }}\n              exit={{\n                opacity: 0,\n                scale: 0.95,\n                transition: { ...transition, delay: 0.3 },\n              }}\n              transition={transition}\n              style={{ willChange: 'opacity, transform', ...style }}\n              {...props}\n            />\n          </DropdownMenuPrimitive.Content>\n        </DropdownMenuPortal>\n      )}\n    </AnimatePresence>\n  );\n}\n\ntype DropdownMenuHighlightItemProps = HighlightItemProps;\n\nfunction DropdownMenuHighlightItem(props: DropdownMenuHighlightItemProps) {\n  return <HighlightItem data-slot=\"dropdown-menu-highlight-item\" {...props} />;\n}\n\ntype DropdownMenuItemProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.Item>,\n  'asChild'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuItem({\n  disabled,\n  onSelect,\n  textValue,\n  ...props\n}: DropdownMenuItemProps) {\n  return (\n    <DropdownMenuPrimitive.Item\n      disabled={disabled}\n      onSelect={onSelect}\n      textValue={textValue}\n      asChild\n    >\n      <motion.div\n        data-slot=\"dropdown-menu-item\"\n        data-disabled={disabled}\n        {...props}\n      />\n    </DropdownMenuPrimitive.Item>\n  );\n}\n\ntype DropdownMenuCheckboxItemProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.CheckboxItem\n> &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuCheckboxItem({\n  checked,\n  onCheckedChange,\n  disabled,\n  onSelect,\n  textValue,\n  ...props\n}: DropdownMenuCheckboxItemProps) {\n  return (\n    <DropdownMenuPrimitive.CheckboxItem\n      checked={checked}\n      onCheckedChange={onCheckedChange}\n      disabled={disabled}\n      onSelect={onSelect}\n      textValue={textValue}\n      asChild\n    >\n      <motion.div\n        data-slot=\"dropdown-menu-checkbox-item\"\n        data-disabled={disabled}\n        {...props}\n      />\n    </DropdownMenuPrimitive.CheckboxItem>\n  );\n}\n\ntype DropdownMenuRadioItemProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.RadioItem>,\n  'asChild'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuRadioItem({\n  value,\n  disabled,\n  onSelect,\n  textValue,\n  ...props\n}: DropdownMenuRadioItemProps) {\n  return (\n    <DropdownMenuPrimitive.RadioItem\n      value={value}\n      disabled={disabled}\n      onSelect={onSelect}\n      textValue={textValue}\n      asChild\n    >\n      <motion.div\n        data-slot=\"dropdown-menu-radio-item\"\n        data-disabled={disabled}\n        {...props}\n      />\n    </DropdownMenuPrimitive.RadioItem>\n  );\n}\n\ntype DropdownMenuLabelProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Label\n>;\n\nfunction DropdownMenuLabel(props: DropdownMenuLabelProps) {\n  return (\n    <DropdownMenuPrimitive.Label data-slot=\"dropdown-menu-label\" {...props} />\n  );\n}\n\ntype DropdownMenuSeparatorProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Separator\n>;\n\nfunction DropdownMenuSeparator(props: DropdownMenuSeparatorProps) {\n  return (\n    <DropdownMenuPrimitive.Separator\n      data-slot=\"dropdown-menu-separator\"\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuShortcutProps = React.ComponentProps<'span'>;\n\nfunction DropdownMenuShortcut(props: DropdownMenuShortcutProps) {\n  return <span data-slot=\"dropdown-menu-shortcut\" {...props} />;\n}\n\ntype DropdownMenuItemIndicatorProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.ItemIndicator>,\n  'asChild'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuItemIndicator(props: DropdownMenuItemIndicatorProps) {\n  return (\n    <DropdownMenuPrimitive.ItemIndicator\n      data-slot=\"dropdown-menu-item-indicator\"\n      asChild\n    >\n      <motion.div {...props} />\n    </DropdownMenuPrimitive.ItemIndicator>\n  );\n}\n\nexport {\n  DropdownMenu,\n  DropdownMenuTrigger,\n  DropdownMenuHighlight,\n  DropdownMenuContent,\n  DropdownMenuItem,\n  DropdownMenuItemIndicator,\n  DropdownMenuHighlightItem,\n  DropdownMenuCheckboxItem,\n  DropdownMenuRadioItem,\n  DropdownMenuLabel,\n  DropdownMenuSeparator,\n  DropdownMenuShortcut,\n  DropdownMenuGroup,\n  DropdownMenuPortal,\n  DropdownMenuSub,\n  DropdownMenuSubContent,\n  DropdownMenuSubTrigger,\n  DropdownMenuRadioGroup,\n  useDropdownMenu,\n  useDropdownMenuSub,\n  type DropdownMenuProps,\n  type DropdownMenuTriggerProps,\n  type DropdownMenuHighlightProps,\n  type DropdownMenuContentProps,\n  type DropdownMenuItemProps,\n  type DropdownMenuItemIndicatorProps,\n  type DropdownMenuHighlightItemProps,\n  type DropdownMenuCheckboxItemProps,\n  type DropdownMenuRadioItemProps,\n  type DropdownMenuLabelProps,\n  type DropdownMenuSeparatorProps,\n  type DropdownMenuShortcutProps,\n  type DropdownMenuGroupProps,\n  type DropdownMenuPortalProps,\n  type DropdownMenuSubProps,\n  type DropdownMenuSubContentProps,\n  type DropdownMenuSubTriggerProps,\n  type DropdownMenuRadioGroupProps,\n  type DropdownMenuContextType,\n};",
+          "'use client';\n\nimport * as React from 'react';\nimport { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport {\n  Highlight,\n  HighlightItem,\n  type HighlightItemProps,\n  type HighlightProps,\n} from '@/components/animate-ui/primitives/effects/highlight';\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\nimport { useDataState } from '@/hooks/use-data-state';\n\ntype DropdownMenuContextType = {\n  isOpen: boolean;\n  setIsOpen: (o: boolean) => void;\n  highlightedValue: string | null;\n  setHighlightedValue: (value: string | null) => void;\n};\n\ntype DropdownMenuSubContextType = {\n  isOpen: boolean;\n  setIsOpen: (o: boolean) => void;\n};\n\nconst [DropdownMenuProvider, useDropdownMenu] =\n  getStrictContext<DropdownMenuContextType>('DropdownMenuContext');\n\nconst [DropdownMenuSubProvider, useDropdownMenuSub] =\n  getStrictContext<DropdownMenuSubContextType>('DropdownMenuSubContext');\n\ntype DropdownMenuProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Root\n>;\n\nfunction DropdownMenu(props: DropdownMenuProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props?.open,\n    defaultValue: props?.defaultOpen,\n    onChange: props?.onOpenChange,\n  });\n  const [highlightedValue, setHighlightedValue] = React.useState<string | null>(\n    null,\n  );\n\n  return (\n    <DropdownMenuProvider\n      value={{ isOpen, setIsOpen, highlightedValue, setHighlightedValue }}\n    >\n      <DropdownMenuPrimitive.Root\n        data-slot=\"dropdown-menu\"\n        {...props}\n        onOpenChange={setIsOpen}\n      />\n    </DropdownMenuProvider>\n  );\n}\n\ntype DropdownMenuTriggerProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Trigger\n>;\n\nfunction DropdownMenuTrigger(props: DropdownMenuTriggerProps) {\n  return (\n    <DropdownMenuPrimitive.Trigger\n      data-slot=\"dropdown-menu-trigger\"\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuPortalProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Portal\n>;\n\nfunction DropdownMenuPortal(props: DropdownMenuPortalProps) {\n  return (\n    <DropdownMenuPrimitive.Portal data-slot=\"dropdown-menu-portal\" {...props} />\n  );\n}\n\ntype DropdownMenuGroupProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Group\n>;\n\nfunction DropdownMenuGroup(props: DropdownMenuGroupProps) {\n  return (\n    <DropdownMenuPrimitive.Group data-slot=\"dropdown-menu-group\" {...props} />\n  );\n}\n\ntype DropdownMenuSubProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Sub\n>;\n\nfunction DropdownMenuSub(props: DropdownMenuSubProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props?.open,\n    defaultValue: props?.defaultOpen,\n    onChange: props?.onOpenChange,\n  });\n\n  return (\n    <DropdownMenuSubProvider value={{ isOpen, setIsOpen }}>\n      <DropdownMenuPrimitive.Sub\n        data-slot=\"dropdown-menu-sub\"\n        {...props}\n        onOpenChange={setIsOpen}\n      />\n    </DropdownMenuSubProvider>\n  );\n}\n\ntype DropdownMenuRadioGroupProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.RadioGroup\n>;\n\nfunction DropdownMenuRadioGroup(props: DropdownMenuRadioGroupProps) {\n  return (\n    <DropdownMenuPrimitive.RadioGroup\n      data-slot=\"dropdown-menu-radio-group\"\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuSubTriggerProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.SubTrigger>,\n  'asChild'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuSubTrigger({\n  disabled,\n  textValue,\n  ...props\n}: DropdownMenuSubTriggerProps) {\n  const { setHighlightedValue } = useDropdownMenu();\n  const [, highlightedRef] = useDataState<HTMLDivElement>(\n    'highlighted',\n    undefined,\n    (value) => {\n      if (value === true) {\n        const el = highlightedRef.current;\n        const v = el?.dataset.value || el?.id || null;\n        if (v) setHighlightedValue(v);\n      }\n    },\n  );\n\n  return (\n    <DropdownMenuPrimitive.SubTrigger\n      ref={highlightedRef}\n      disabled={disabled}\n      textValue={textValue}\n      asChild\n    >\n      <motion.div\n        data-slot=\"dropdown-menu-sub-trigger\"\n        data-disabled={disabled}\n        {...props}\n      />\n    </DropdownMenuPrimitive.SubTrigger>\n  );\n}\n\ntype DropdownMenuSubContentProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>,\n  'forceMount' | 'asChild'\n> &\n  Omit<\n    React.ComponentProps<typeof DropdownMenuPrimitive.Portal>,\n    'forceMount'\n  > &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuSubContent({\n  loop,\n  onEscapeKeyDown,\n  onPointerDownOutside,\n  onFocusOutside,\n  onInteractOutside,\n  sideOffset,\n  alignOffset,\n  avoidCollisions,\n  collisionBoundary,\n  collisionPadding,\n  arrowPadding,\n  sticky,\n  hideWhenDetached,\n  transition = { duration: 0.2 },\n  style,\n  container,\n  ...props\n}: DropdownMenuSubContentProps) {\n  const { isOpen } = useDropdownMenuSub();\n\n  return (\n    <AnimatePresence>\n      {isOpen && (\n        <DropdownMenuPortal forceMount container={container}>\n          <DropdownMenuPrimitive.SubContent\n            asChild\n            forceMount\n            loop={loop}\n            onEscapeKeyDown={onEscapeKeyDown}\n            onPointerDownOutside={onPointerDownOutside}\n            onFocusOutside={onFocusOutside}\n            onInteractOutside={onInteractOutside}\n            sideOffset={sideOffset}\n            alignOffset={alignOffset}\n            avoidCollisions={avoidCollisions}\n            collisionBoundary={collisionBoundary}\n            collisionPadding={collisionPadding}\n            arrowPadding={arrowPadding}\n            sticky={sticky}\n            hideWhenDetached={hideWhenDetached}\n          >\n            <motion.div\n              key=\"dropdown-menu-sub-content\"\n              data-slot=\"dropdown-menu-sub-content\"\n              initial={{ opacity: 0, scale: 0.95 }}\n              animate={{ opacity: 1, scale: 1 }}\n              exit={{ opacity: 0, scale: 0.95 }}\n              transition={transition}\n              style={{ willChange: 'opacity, transform', ...style }}\n              {...props}\n            />\n          </DropdownMenuPrimitive.SubContent>\n        </DropdownMenuPortal>\n      )}\n    </AnimatePresence>\n  );\n}\n\ntype DropdownMenuHighlightProps = Omit<\n  HighlightProps,\n  'controlledItems' | 'enabled' | 'hover'\n> & {\n  animateOnHover?: boolean;\n};\n\nfunction DropdownMenuHighlight({\n  transition = { type: 'spring', stiffness: 350, damping: 35 },\n  ...props\n}: DropdownMenuHighlightProps) {\n  const { highlightedValue } = useDropdownMenu();\n\n  return (\n    <Highlight\n      data-slot=\"dropdown-menu-highlight\"\n      click={false}\n      controlledItems\n      transition={transition}\n      value={highlightedValue}\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuContentProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.Content>,\n  'forceMount' | 'asChild'\n> &\n  Omit<\n    React.ComponentProps<typeof DropdownMenuPrimitive.Portal>,\n    'forceMount'\n  > &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuContent({\n  loop,\n  onCloseAutoFocus,\n  onEscapeKeyDown,\n  onPointerDownOutside,\n  onFocusOutside,\n  onInteractOutside,\n  side,\n  sideOffset,\n  align,\n  alignOffset,\n  avoidCollisions,\n  collisionBoundary,\n  collisionPadding,\n  arrowPadding,\n  sticky,\n  hideWhenDetached,\n  transition = { duration: 0.2 },\n  style,\n  container,\n  ...props\n}: DropdownMenuContentProps) {\n  const { isOpen } = useDropdownMenu();\n\n  return (\n    <AnimatePresence>\n      {isOpen && (\n        <DropdownMenuPortal forceMount container={container}>\n          <DropdownMenuPrimitive.Content\n            asChild\n            loop={loop}\n            onCloseAutoFocus={onCloseAutoFocus}\n            onEscapeKeyDown={onEscapeKeyDown}\n            onPointerDownOutside={onPointerDownOutside}\n            onFocusOutside={onFocusOutside}\n            onInteractOutside={onInteractOutside}\n            side={side}\n            sideOffset={sideOffset}\n            align={align}\n            alignOffset={alignOffset}\n            avoidCollisions={avoidCollisions}\n            collisionBoundary={collisionBoundary}\n            collisionPadding={collisionPadding}\n            arrowPadding={arrowPadding}\n            sticky={sticky}\n            hideWhenDetached={hideWhenDetached}\n          >\n            <motion.div\n              key=\"dropdown-menu-content\"\n              data-slot=\"dropdown-menu-content\"\n              initial={{ opacity: 0, scale: 0.95 }}\n              animate={{ opacity: 1, scale: 1 }}\n              exit={{ opacity: 0, scale: 0.95 }}\n              transition={transition}\n              style={{ willChange: 'opacity, transform', ...style }}\n              {...props}\n            />\n          </DropdownMenuPrimitive.Content>\n        </DropdownMenuPortal>\n      )}\n    </AnimatePresence>\n  );\n}\n\ntype DropdownMenuHighlightItemProps = HighlightItemProps;\n\nfunction DropdownMenuHighlightItem(props: DropdownMenuHighlightItemProps) {\n  return <HighlightItem data-slot=\"dropdown-menu-highlight-item\" {...props} />;\n}\n\ntype DropdownMenuItemProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.Item>,\n  'asChild'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuItem({\n  disabled,\n  onSelect,\n  textValue,\n  ...props\n}: DropdownMenuItemProps) {\n  const { setHighlightedValue } = useDropdownMenu();\n  const [, highlightedRef] = useDataState<HTMLDivElement>(\n    'highlighted',\n    undefined,\n    (value) => {\n      if (value === true) {\n        const el = highlightedRef.current;\n        const v = el?.dataset.value || el?.id || null;\n        if (v) setHighlightedValue(v);\n      }\n    },\n  );\n\n  return (\n    <DropdownMenuPrimitive.Item\n      ref={highlightedRef}\n      disabled={disabled}\n      onSelect={onSelect}\n      textValue={textValue}\n      asChild\n    >\n      <motion.div\n        data-slot=\"dropdown-menu-item\"\n        data-disabled={disabled}\n        {...props}\n      />\n    </DropdownMenuPrimitive.Item>\n  );\n}\n\ntype DropdownMenuCheckboxItemProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>,\n  'asChild'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuCheckboxItem({\n  checked,\n  onCheckedChange,\n  disabled,\n  onSelect,\n  textValue,\n  ...props\n}: DropdownMenuCheckboxItemProps) {\n  const { setHighlightedValue } = useDropdownMenu();\n  const [, highlightedRef] = useDataState<HTMLDivElement>(\n    'highlighted',\n    undefined,\n    (value) => {\n      if (value === true) {\n        const el = highlightedRef.current;\n        const v = el?.dataset.value || el?.id || null;\n        if (v) setHighlightedValue(v);\n      }\n    },\n  );\n\n  return (\n    <DropdownMenuPrimitive.CheckboxItem\n      ref={highlightedRef}\n      checked={checked}\n      onCheckedChange={onCheckedChange}\n      disabled={disabled}\n      onSelect={onSelect}\n      textValue={textValue}\n      asChild\n    >\n      <motion.div\n        data-slot=\"dropdown-menu-checkbox-item\"\n        data-disabled={disabled}\n        {...props}\n      />\n    </DropdownMenuPrimitive.CheckboxItem>\n  );\n}\n\ntype DropdownMenuRadioItemProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.RadioItem>,\n  'asChild'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuRadioItem({\n  value,\n  disabled,\n  onSelect,\n  textValue,\n  ...props\n}: DropdownMenuRadioItemProps) {\n  const { setHighlightedValue } = useDropdownMenu();\n  const [, highlightedRef] = useDataState<HTMLDivElement>(\n    'highlighted',\n    undefined,\n    (value) => {\n      if (value === true) {\n        const el = highlightedRef.current;\n        const v = el?.dataset.value || el?.id || null;\n        if (v) setHighlightedValue(v);\n      }\n    },\n  );\n\n  return (\n    <DropdownMenuPrimitive.RadioItem\n      ref={highlightedRef}\n      value={value}\n      disabled={disabled}\n      onSelect={onSelect}\n      textValue={textValue}\n      asChild\n    >\n      <motion.div\n        data-slot=\"dropdown-menu-radio-item\"\n        data-disabled={disabled}\n        {...props}\n      />\n    </DropdownMenuPrimitive.RadioItem>\n  );\n}\n\ntype DropdownMenuLabelProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Label\n>;\n\nfunction DropdownMenuLabel(props: DropdownMenuLabelProps) {\n  return (\n    <DropdownMenuPrimitive.Label data-slot=\"dropdown-menu-label\" {...props} />\n  );\n}\n\ntype DropdownMenuSeparatorProps = React.ComponentProps<\n  typeof DropdownMenuPrimitive.Separator\n>;\n\nfunction DropdownMenuSeparator(props: DropdownMenuSeparatorProps) {\n  return (\n    <DropdownMenuPrimitive.Separator\n      data-slot=\"dropdown-menu-separator\"\n      {...props}\n    />\n  );\n}\n\ntype DropdownMenuShortcutProps = React.ComponentProps<'span'>;\n\nfunction DropdownMenuShortcut(props: DropdownMenuShortcutProps) {\n  return <span data-slot=\"dropdown-menu-shortcut\" {...props} />;\n}\n\ntype DropdownMenuItemIndicatorProps = Omit<\n  React.ComponentProps<typeof DropdownMenuPrimitive.ItemIndicator>,\n  'asChild'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction DropdownMenuItemIndicator(props: DropdownMenuItemIndicatorProps) {\n  return (\n    <DropdownMenuPrimitive.ItemIndicator\n      data-slot=\"dropdown-menu-item-indicator\"\n      asChild\n    >\n      <motion.div {...props} />\n    </DropdownMenuPrimitive.ItemIndicator>\n  );\n}\n\nexport {\n  DropdownMenu,\n  DropdownMenuTrigger,\n  DropdownMenuHighlight,\n  DropdownMenuContent,\n  DropdownMenuItem,\n  DropdownMenuItemIndicator,\n  DropdownMenuHighlightItem,\n  DropdownMenuCheckboxItem,\n  DropdownMenuRadioItem,\n  DropdownMenuLabel,\n  DropdownMenuSeparator,\n  DropdownMenuShortcut,\n  DropdownMenuGroup,\n  DropdownMenuPortal,\n  DropdownMenuSub,\n  DropdownMenuSubContent,\n  DropdownMenuSubTrigger,\n  DropdownMenuRadioGroup,\n  useDropdownMenu,\n  useDropdownMenuSub,\n  type DropdownMenuProps,\n  type DropdownMenuTriggerProps,\n  type DropdownMenuHighlightProps,\n  type DropdownMenuContentProps,\n  type DropdownMenuItemProps,\n  type DropdownMenuItemIndicatorProps,\n  type DropdownMenuHighlightItemProps,\n  type DropdownMenuCheckboxItemProps,\n  type DropdownMenuRadioItemProps,\n  type DropdownMenuLabelProps,\n  type DropdownMenuSeparatorProps,\n  type DropdownMenuShortcutProps,\n  type DropdownMenuGroupProps,\n  type DropdownMenuPortalProps,\n  type DropdownMenuSubProps,\n  type DropdownMenuSubContentProps,\n  type DropdownMenuSubTriggerProps,\n  type DropdownMenuRadioGroupProps,\n  type DropdownMenuContextType,\n  type DropdownMenuSubContextType,\n};",
       },
     ],
     keywords: [],

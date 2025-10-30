@@ -11,7 +11,10 @@ const config = {
       },
       {
         hostname: 'ui.paceui.com',
-      }
+      },
+      {
+        hostname: 'images.pexels.com',
+      },
     ],
   },
   reactStrictMode: false,
