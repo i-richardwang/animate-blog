@@ -1,17 +1,55 @@
 ---
 title: CCusage Dashboard
-description: CCusage 开源工具的公开展示页面，实时展示 Claude Code 的使用统计和成本分析
+description: Claude Code 使用统计和成本分析仪表板，实时监控 AI 编程工具的使用情况和效率
 date: 2024-04-05
-category: showcase
+category: product
+logo: /projects/ccusage/ccusage.svg
 tech:
   - Next.js
   - TypeScript
   - Node.js
 links:
-  url: https://ccusage.richardwang.me/
+  url: https://ccusage.richardwang.me
+  github: https://github.com/i-richardwang/MyCCusage
 featured: false
 ---
 
-基于 CCusage 开源工具的公开展示页面，实时展示 Claude Code 的使用统计、成本分析和缓存命中率等数据，配有美观的图表和趋势分析。
+一个专为监控 Claude Code 使用情况而设计的可视化仪表板，实时展示使用统计、成本分析和缓存命中率等关键数据。通过美观的图表和趋势分析，帮助开发者直观了解 AI 辅助编程工具的使用效率和投资回报率。
 
-作为 AI 辅助编程的实践者，通过这个仪表板可以直观了解 AI 工具的使用情况和效率优化成果。
+## 订阅 ROI 分析
+
+![订阅 ROI 仪表板](/projects/ccusage/ccusage_01.png)
+
+清晰展示 Claude Code 订阅的投资回报率，实时计算 API 价值消耗与订阅费用的对比。仪表板显示已消耗的 API 价值、相对于不同订阅计划的盈余金额、订阅天数等关键指标。帮助开发者一目了然地了解订阅的实际价值，判断是否物有所值。
+
+## 使用趋势可视化
+
+![成本和 Token 使用趋势](/projects/ccusage/ccusage_02.png)
+
+通过时间线图表展示成本趋势和 Token 使用量变化。直观显示每日总成本、累计 Token 消耗、平均每日成本和 Token 处理速率。支持多设备数据对比（如 MacOS16 和 MBP14PRO），帮助识别使用高峰时段和消费模式，为成本优化提供数据支持。
+
+## 效率分析与洞察
+
+![输入/输出比率和使用洞察](/projects/ccusage/ccusage_03.png)
+
+深度分析输入输出 Token 比率的趋势变化，监控代码生成效率。展示三大核心指标：
+
+- **使用活动**：100% 活跃度表明持续高频使用
+- **缓存命中率**：75.6% 的缓存命中率显著降低成本
+- **Token 单价**：实时追踪每百万 Token 的平均成本
+
+这些指标帮助开发者了解工具使用效率，识别优化空间。
+
+## 详细活动记录
+
+![最近活动数据表](/projects/ccusage/ccusage_04.png)
+
+完整的历史活动数据表，按日期记录每天的成本、Token 消耗、输入输出量和缓存数据。支持分页浏览和数据导出，方便进行长期趋势分析和成本审计。为预算规划和使用习惯分析提供可靠的数据基础。
+
+## 技术特性
+
+基于 Next.js 构建的现代化 Web 应用，采用 TypeScript 确保类型安全。使用 Node.js 后端进行数据采集和处理，实现实时数据更新和可靠的数据存储。响应式设计适配各种屏幕尺寸，图表库提供流畅的交互体验。
+
+## 适用场景
+
+个人开发者监控 AI 工具使用、团队成本管理和优化、AI 辅助编程效率分析、开发成本控制和预算规划、订阅价值评估和决策支持。

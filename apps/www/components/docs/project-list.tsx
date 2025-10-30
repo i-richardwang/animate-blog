@@ -52,9 +52,9 @@ export function ProjectList({ projects }: ProjectListProps) {
               )}
 
               <div className="p-6">
-                <div className="flex items-start gap-3 mb-3">
+                <div className="flex items-center gap-3 mb-3">
                   {project.logo && (
-                    <div className="flex-shrink-0 size-10 flex items-center justify-center">
+                    <div className="flex-shrink-0 size-6 flex items-center justify-center">
                       <img
                         src={project.logo}
                         alt={`${project.title} logo`}

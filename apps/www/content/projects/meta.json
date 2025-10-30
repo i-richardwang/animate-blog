@@ -2,7 +2,6 @@
   "pages": [
     "---个人展示---",
     "homelab-services",
-    "ccusage-dashboard",
     "richardos",
     "---开源项目---",
     "llm-textkit",
@@ -15,6 +14,7 @@
     "sitesnapper",
     "excelwhisper",
     "agent-toolbox",
+    "ccusage-dashboard",
     "promptkeep"
   ]
 }
