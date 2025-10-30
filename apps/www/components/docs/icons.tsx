@@ -159,6 +159,40 @@ const addedIcons = [
       'icons-list',
     ],
   },
+  {
+    date: '2025-10-18',
+    icons: ['icons-arrow-up-down'],
+  },
+  {
+    date: '2025-10-21',
+    icons: [
+      'icons-between-horizontal-end',
+      'icons-between-horizontal-start',
+      'icons-between-vertical-end',
+      'icons-between-vertical-start',
+    ],
+  },
+  {
+    date: '2025-10-27',
+    icons: [
+      'icons-phone-call',
+      'icons-link-2',
+      'icons-sparkle',
+      'icons-sparkles',
+      'icons-panel-bottom-close',
+      'icons-panel-bottom-open',
+      'icons-panel-left-close',
+      'icons-panel-left-open',
+      'icons-panel-right-close',
+      'icons-panel-right-open',
+      'icons-panel-top-close',
+      'icons-panel-top-open',
+      'icons-gallery-horizontal',
+      'icons-gallery-horizontal-end',
+      'icons-gallery-vertical',
+      'icons-gallery-vertical-end',
+    ],
+  },
 ];
 
 const thirtyDaysAgo = new Date();
@@ -262,8 +296,10 @@ export const Icons = () => {
   const searchedIcons = useMemo(() => {
     const q = search?.trim();
     if (!q) return filteredIcons;
-    return fuse.search(q).map((result) => result.item);
-  }, [search, fuse, filteredIcons]);
+    const results = fuse.search(q).map((result) => result.item);
+    if (filter === 'all') return results;
+    return results.filter((icon) => newIcons.includes(icon.name));
+  }, [search, fuse, filteredIcons, filter]);
 
   const searchedNewIcons = useMemo(() => {
     if (!search?.trim()) return newIcons;
