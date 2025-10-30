@@ -1,0 +1,20 @@
+{
+  "pages": [
+    "---个人展示---",
+    "homelab-services",
+    "ccusage-dashboard",
+    "richardos",
+    "---开源项目---",
+    "llm-textkit",
+    "literesearch",
+    "querybot",
+    "agentic-table-playground",
+    "openmlstudio",
+    "---独立开发产品---",
+    "gitseek",
+    "sitesnapper",
+    "excelwhisper",
+    "agent-toolbox",
+    "promptkeep"
+  ]
+}

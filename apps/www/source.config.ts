@@ -51,9 +51,8 @@ export const blog = defineCollections({
   }),
 });
 
-export const project = defineCollections({
-  type: 'doc',
-  dir: 'content/projects',
+export const projects = defineDocs({
+  docs: {
   schema: frontmatterSchema.extend({
     date: z.coerce.date(),
     tech: z.array(z.string()).default([]),
@@ -68,6 +67,11 @@ export const project = defineCollections({
     featured: z.boolean().default(false),
     category: z.enum(['showcase', 'opensource', 'product']).optional(),
   }),
+  },
+  meta: {
+    schema: metaSchema,
+  },
+  dir: 'content/projects',
 });
 
 export default defineConfig({

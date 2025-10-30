@@ -4,22 +4,12 @@ import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import { Nav } from '@/components/docs/nav';
 import { baseOptions } from '@/app/layout.config';
 import { ThemeSwitcher } from '@/components/animate/theme-switcher';
-import { getSortedProjects } from '@/lib/source';
-import type { PageTree } from 'fumadocs-core/server';
+import { projects } from '@/lib/source';
 import { DocsSidebar } from '@/components/docs/sidebar';
 import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 
-const projectTree: PageTree.Root = {
-  name: 'Projects',
-  children: getSortedProjects().map((project) => ({
-    type: 'page',
-    name: project.data.title,
-    url: project.url,
-  })),
-};
-
 const PROJECTS_LAYOUT_PROPS: DocsLayoutProps = {
-  tree: projectTree,
+  tree: projects.pageTree,
   githubUrl: 'https://github.com/i-richardwang/animate-blog',
   themeSwitch: {
     component: <ThemeSwitcher />,

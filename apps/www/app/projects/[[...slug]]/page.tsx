@@ -1,4 +1,4 @@
-import { projects, getSortedProjects } from '@/lib/source';
+import { projects } from '@/lib/source';
 import {
   DocsPage,
   DocsBody,
@@ -21,18 +21,40 @@ export default async function Page(props: {
   const { slug = [] } = await props.params;
 
   if (slug.length === 0) {
-    const projectsData = getSortedProjects().map((project) => ({
-      url: project.url,
-      title: project.data.title,
-      description: project.data.description,
-      date: new Date(project.data.date),
-      tech: project.data.tech,
-      links: project.data.links,
-      image: project.data.image,
-      logo: project.data.logo,
-      featured: project.data.featured,
-      category: project.data.category,
-    }));
+    // Get pages in the order defined by pageTree (which follows meta.json)
+    const tree = projects.pageTree;
+    const orderedUrls: string[] = [];
+    
+    // Extract URLs from pageTree in order, skipping separators
+    for (const node of tree.children) {
+      if (node.type === 'page') {
+        orderedUrls.push(node.url);
+      }
+    }
+
+    // Create a map for quick lookup
+    const pagesMap = new Map(
+      projects.getPages().map((page) => [page.url, page])
+    );
+
+    // Build projectsData in the correct order
+    const projectsData = orderedUrls
+      .map((url) => {
+        const project = pagesMap.get(url);
+        if (!project) return null;
+        return {
+          url: project.url,
+          title: project.data.title,
+          description: project.data.description,
+          tech: project.data.tech,
+          links: project.data.links,
+          image: project.data.image,
+          logo: project.data.logo,
+          featured: project.data.featured,
+          category: project.data.category,
+        };
+      })
+      .filter((p): p is NonNullable<typeof p> => p !== null);
 
     const showcaseProjects = projectsData.filter(
       (project) => project.category === 'showcase',
@@ -62,21 +84,21 @@ export default async function Page(props: {
               </section>
             )}
 
-            {productProjects.length > 0 && (
-              <section className="mb-12">
-                <h2 className="text-xl font-medium mb-6 text-foreground">
-                  独立开发产品
-                </h2>
-                <ProjectList projects={productProjects} />
-              </section>
-            )}
-
             {openSourceProjects.length > 0 && (
-              <section>
+              <section className="mb-12">
                 <h2 className="text-xl font-medium mb-6 text-foreground">
                   开源项目
                 </h2>
                 <ProjectList projects={openSourceProjects} />
+              </section>
+            )}
+
+            {productProjects.length > 0 && (
+              <section>
+                <h2 className="text-xl font-medium mb-6 text-foreground">
+                  独立开发产品
+                </h2>
+                <ProjectList projects={productProjects} />
               </section>
             )}
           </DocsBody>

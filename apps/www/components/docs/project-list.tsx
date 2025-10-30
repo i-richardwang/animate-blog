@@ -9,7 +9,6 @@ interface Project {
   url: string;
   title: string;
   description?: string;
-  date: Date;
   tech?: string[];
   links?: {
     github?: string;
@@ -18,6 +17,7 @@ interface Project {
   image?: string;
   logo?: string;
   featured?: boolean;
+  category?: string;
 }
 
 interface ProjectListProps {
