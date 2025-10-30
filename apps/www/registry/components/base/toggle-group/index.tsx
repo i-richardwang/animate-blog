@@ -36,7 +36,6 @@ function ToggleGroup({
         'group/toggle-group flex gap-0.5 w-fit items-center rounded-lg data-[variant=outline]:shadow-xs data-[variant=outline]:border data-[variant=outline]:p-0.5',
         className,
       )}
-      multiple={multiple}
       {...props}
     >
       <ToggleGroupProvider value={{ variant, size }}>
