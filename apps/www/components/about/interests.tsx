@@ -1,90 +1,116 @@
 'use client';
 
-import { motion } from 'motion/react';
+import * as React from 'react';
 import { MotionEffect } from '@/components/effects/motion-effect';
 import { Sparkles, Camera, Server, Headphones, Film } from 'lucide-react';
-import { ImageGallery } from './image-gallery';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@workspace/ui/components/carousel';
+import Image from 'next/image';
+import Autoplay from 'embla-carousel-autoplay';
+
+interface InterestItem {
+  image: string;
+  caption: string;
+}
 
 interface Interest {
   icon: React.ElementType;
   title: string;
-  timeline: string;
-  description: string;
-  highlights?: string[];
-  images?: string[]; // Array of image URLs
+  items: InterestItem[];
 }
 
 const INTERESTS: Interest[] = [
   {
     icon: Sparkles,
-    title: 'Science Fiction Reader',
-    timeline: '2010 - Present',
-    description:
-      'Fascinated by worlds beyond our own, from classic Asimov to modern Liu Cixin. Science fiction shapes how I think about technology, society, and the future of humanity.',
-    highlights: [
-      'Hard sci-fi enthusiast',
-      'Foundation series favorite',
-      'Annual reading goal: 20+ books',
+    title: '科幻爱好者',
+    items: [
+      {
+        image: '/about/placeholder.webp',
+        caption: '2006年开始在《科幻世界》上追读《三体》连载',
+      },
+      {
+        image: '/about/placeholder.webp',
+        caption: '最喜欢的作家：王晋康',
+      },
     ],
-    images: [],
   },
   {
     icon: Camera,
-    title: 'Photography Hobbyist',
-    timeline: '2015 - Present',
-    description:
-      'Started with a simple point-and-shoot, now shooting with a mirrorless setup. Street photography and landscapes are my main focus. The best camera is the one you have with you.',
-    highlights: [
-      'Street & landscape photography',
-      'Mirrorless camera system',
-      'Film photography experiments',
+    title: '摄影器材党',
+    items: [
+      {
+        image: '/about/placeholder.webp',
+        caption: '10+台数码相机，10+支镜头',
+      },
+      {
+        image: '/about/placeholder.webp',
+        caption: '当前主力：富士XT4 + 35mm F1.4',
+      },
     ],
-    images: [],
   },
   {
     icon: Server,
-    title: 'Self-Hosting Tinkerer',
-    timeline: '2012 - Present',
-    description:
-      'Running my own servers and services at home. From media servers to home automation, there\'s something satisfying about controlling your own digital infrastructure.',
-    highlights: [
-      'Home lab setup',
-      'Docker enthusiast',
-      'Privacy-focused solutions',
+    title: 'Self-Hosted 爱好者',
+    items: [
+      {
+        image: '/about/placeholder.webp',
+        caption: '初中起读《电脑报》《电脑爱好者》《微型计算机》',
+      },
+      {
+        image: '/about/placeholder.webp',
+        caption: '家庭网络：3x 2.5G + 1x 万兆交换机',
+      },
+      {
+        image: '/about/placeholder.webp',
+        caption: '自攒服务器 + 软路由 + NAS',
+      },
     ],
-    images: [],
   },
   {
     icon: Headphones,
-    title: 'Music Listener',
-    timeline: '2008 - Present',
-    description:
-      'From discovering new artists on streaming platforms to diving deep into vinyl collecting. Music is a constant companion, whether working, traveling, or just relaxing.',
-    highlights: [
-      'Diverse genre tastes',
-      'Vinyl collection growing',
-      'Concert attendance: 30+ shows',
+    title: '音乐发烧友',
+    items: [
+      {
+        image: '/about/placeholder.webp',
+        caption: '音响：KEF LSX',
+      },
+      {
+        image: '/about/placeholder.webp',
+        caption: '播放器：海贝 RS6',
+      },
+      {
+        image: '/about/placeholder.webp',
+        caption: '耳机：达音科 3001',
+      },
+      {
+        image: '/about/placeholder.webp',
+        caption: '耳放：拓品 DX7 Pro',
+      },
     ],
-    images: [],
   },
   {
     icon: Film,
-    title: 'Film Watcher',
-    timeline: 'Always',
-    description:
-      'Enjoy everything from blockbusters to indie films, classic cinema to modern experimental works. Every film offers a different perspective and story to explore.',
-    highlights: [
-      '500+ films watched',
-      'Criterion Collection fan',
-      'Weekend movie marathons',
+    title: '电影爱好者',
+    items: [
+      {
+        image: '/about/placeholder.webp',
+        caption: '豆瓣标记超过 800 部影视作品',
+      },
+      {
+        image: '/about/placeholder.webp',
+        caption: '最常去的电影院：中国电影博物馆',
+      },
     ],
-    images: [],
   },
 ];
 
 const InterestCard = ({
   interest,
-  index,
 }: {
   interest: Interest;
   index: number;
@@ -98,53 +124,56 @@ const InterestCard = ({
       }}
       fade
       zoom
-      delay={0.6 + 0.1 * index}
+      delay={0.2}
       inView
     >
-      <motion.div
-        className="relative dark:bg-neutral-800 bg-neutral-100 rounded-2xl p-6 sm:p-8"
-        whileHover={{ scale: 1.01 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      >
-        {/* Icon and Timeline Badge */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-4">
-            <div className="size-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary">
-              <Icon className="size-6" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-semibold text-foreground">
-                {interest.title}
-              </h3>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                {interest.timeline}
-              </p>
-            </div>
+      <div className="relative">
+        {/* Icon and Title - Centered */}
+        <div className="flex items-center justify-center gap-4 mb-12">
+          <div className="size-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary">
+            <Icon className="size-6" />
           </div>
+          <h3 className="text-2xl font-semibold text-foreground">
+            {interest.title}
+          </h3>
         </div>
 
-        {/* Description */}
-        <p className="text-base text-foreground/80 leading-relaxed mb-4">
-          {interest.description}
-        </p>
-
-        {/* Highlights */}
-        {interest.highlights && interest.highlights.length > 0 && (
-          <div className="space-y-2 mb-4">
-            {interest.highlights.map((highlight, idx) => (
-              <div key={idx} className="flex items-center gap-2">
-                <div className="size-1.5 rounded-full bg-primary/60" />
-                <span className="text-sm text-muted-foreground">
-                  {highlight}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Image Gallery */}
-        <ImageGallery images={interest.images} className="mt-4" />
-      </motion.div>
+        {/* Images Carousel */}
+        <div className="px-12">
+          <Carousel
+            plugins={[Autoplay({ delay: 3000, stopOnInteraction: false })]}
+            opts={{
+              align: 'start',
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {interest.items.map((item, idx) => (
+                <CarouselItem key={idx} className="pl-2 md:pl-4 basis-1/2">
+                  <div className="space-y-2">
+                    {/* Caption above image */}
+                    <p className="text-sm text-foreground/80 leading-relaxed min-h-[2.5rem] text-center">
+                      {item.caption}
+                    </p>
+                    {/* Image */}
+                    <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-neutral-200 dark:bg-neutral-700">
+                      <Image
+                        src={item.image}
+                        alt={item.caption}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+        </div>
+      </div>
     </MotionEffect>
   );
 };
@@ -153,25 +182,7 @@ export const AboutInterests = () => {
   return (
     <div className="relative px-5 pb-20">
       <div className="max-w-4xl mx-auto">
-        <MotionEffect
-          slide={{
-            direction: 'down',
-          }}
-          fade
-          zoom
-          delay={0.45}
-          inView
-        >
-          <h2 className="text-3xl font-bold text-center mb-4">
-            Things I Love
-          </h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-            A collection of passions, hobbies, and interests that have shaped my
-            journey over the years.
-          </p>
-        </MotionEffect>
-
-        <div className="space-y-6">
+        <div className="space-y-20">
           {INTERESTS.map((interest, index) => (
             <InterestCard key={index} interest={interest} index={index} />
           ))}

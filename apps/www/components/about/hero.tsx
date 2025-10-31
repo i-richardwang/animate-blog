@@ -1,10 +1,12 @@
+'use client';
+
 import { motion } from 'motion/react';
 import { SplittingText } from '@/registry/primitives/texts/splitting';
 import { MotionEffect } from '@/components/effects/motion-effect';
+import Image from 'next/image';
 
 const TITLE = 'About Me';
-const SUBTITLE =
-  'Developer, designer, and digital creator. Building things on the internet and sharing what I learn along the way.';
+const SUBTITLE = 'Learning, Building, Sharing.';
 
 export const AboutHero = () => {
   return (
@@ -56,7 +58,7 @@ export const AboutHero = () => {
           </p>
         </MotionEffect>
 
-        {/* Avatar placeholder - you can add image here */}
+        {/* Avatar */}
         <MotionEffect
           slide={{
             direction: 'down',
@@ -67,12 +69,17 @@ export const AboutHero = () => {
         >
           <div className="mt-12 relative">
             <motion.div
-              className="size-32 rounded-full bg-gradient-to-br from-neutral-300 to-neutral-400 dark:from-neutral-700 dark:to-neutral-800 flex items-center justify-center text-4xl font-bold text-neutral-600 dark:text-neutral-400"
+              className="size-32 rounded-full overflow-hidden"
               whileHover={{ scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
-              {/* Replace with <img src="..." /> or keep as placeholder */}
-              RW
+              <Image
+                src="/about/header-round.png"
+                alt="Richard Wang"
+                width={128}
+                height={128}
+                className="size-full object-cover"
+              />
             </motion.div>
           </div>
         </MotionEffect>
