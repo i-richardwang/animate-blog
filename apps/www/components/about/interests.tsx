@@ -30,11 +30,11 @@ const INTERESTS: Interest[] = [
     title: '科幻爱好者',
     items: [
       {
-        image: '/og-image.png',
+        image: '/about/placeholder.webp',
         caption: '2006年开始在《科幻世界》上追读《三体》连载',
       },
       {
-        image: '/og-image.png',
+        image: '/about/placeholder.webp',
         caption: '最喜欢的作家：王晋康',
       },
     ],
@@ -44,11 +44,11 @@ const INTERESTS: Interest[] = [
     title: '摄影器材党',
     items: [
       {
-        image: '/og-image.png',
+        image: '/about/placeholder.webp',
         caption: '10+台数码相机，10+支镜头',
       },
       {
-        image: '/og-image.png',
+        image: '/about/placeholder.webp',
         caption: '当前主力：富士XT4 + 35mm F1.4',
       },
     ],
@@ -58,15 +58,15 @@ const INTERESTS: Interest[] = [
     title: 'Self-Hosted 爱好者',
     items: [
       {
-        image: '/og-image.png',
+        image: '/about/placeholder.webp',
         caption: '初中起读《电脑报》《电脑爱好者》《微型计算机》',
       },
       {
-        image: '/og-image.png',
+        image: '/about/placeholder.webp',
         caption: '家庭网络：3x 2.5G + 1x 万兆交换机',
       },
       {
-        image: '/og-image.png',
+        image: '/about/placeholder.webp',
         caption: '自攒服务器 + 软路由 + NAS',
       },
     ],
@@ -76,12 +76,20 @@ const INTERESTS: Interest[] = [
     title: '音乐发烧友',
     items: [
       {
-        image: '/og-image.png',
-        caption: '大学时代收藏：HD650、AKG K701、拜亚动力DT880',
+        image: '/about/placeholder.webp',
+        caption: '音响：KEF LSX',
       },
       {
-        image: '/og-image.png',
-        caption: '当前：AirPods Pro 2，从发烧到极简',
+        image: '/about/placeholder.webp',
+        caption: '播放器：海贝 RS6',
+      },
+      {
+        image: '/about/placeholder.webp',
+        caption: '耳机：达音科 3001',
+      },
+      {
+        image: '/about/placeholder.webp',
+        caption: '耳放：拓品 DX7 Pro',
       },
     ],
   },
@@ -90,11 +98,11 @@ const INTERESTS: Interest[] = [
     title: '电影爱好者',
     items: [
       {
-        image: '/og-image.png',
-        caption: '豆瓣标记 350+ 部影视作品',
+        image: '/about/placeholder.webp',
+        caption: '豆瓣标记超过 800 部影视作品',
       },
       {
-        image: '/og-image.png',
+        image: '/about/placeholder.webp',
         caption: '最常去的电影院：中国电影博物馆',
       },
     ],
@@ -103,7 +111,6 @@ const INTERESTS: Interest[] = [
 
 const InterestCard = ({
   interest,
-  index,
 }: {
   interest: Interest;
   index: number;
