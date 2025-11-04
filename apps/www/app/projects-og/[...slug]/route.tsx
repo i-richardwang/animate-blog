@@ -1,4 +1,4 @@
-import { source } from '@/lib/source';
+import { projects } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { ImageResponse } from 'next/og';
 
@@ -23,7 +23,7 @@ async function loadGoogleFont(font: string, text: string) {
 
 export async function GET(_req: Request, { params }: any) {
   const { slug } = await params;
-  const page = source.getPage(slug.slice(0, -1));
+  const page = projects.getPage(slug.slice(0, -1));
   if (!page) notFound();
 
   return new ImageResponse(
@@ -109,8 +109,9 @@ export async function GET(_req: Request, { params }: any) {
 export function generateStaticParams(): {
   slug: string[];
 }[] {
-  return source.generateParams().map((page) => ({
+  return projects.generateParams().map((page) => ({
     ...page,
     slug: [...page.slug, 'image.png'],
   }));
 }
+
