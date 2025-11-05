@@ -49,6 +49,16 @@ export const metadata: Metadata = {
     },
   ],
   publisher: "Richard's Page",
+  alternates: {
+    types: {
+      'application/rss+xml': [
+        {
+          title: "Richard's Page - All Updates",
+          url: 'https://richardwang.me/rss.xml',
+        },
+      ],
+    },
+  },
   openGraph: {
     title: "Richard's Page",
     description:
