@@ -74,7 +74,7 @@ export function ProjectList({ projects }: ProjectListProps) {
                 )}
 
                 {project.tech && project.tech.length > 0 && (
-                  <TechStackIcons tech={project.tech} maxDisplay={5} />
+                  <TechStackIcons tech={project.tech} maxDisplay={7} />
                 )}
               </div>
             </motion.div>
