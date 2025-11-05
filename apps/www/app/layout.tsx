@@ -101,7 +101,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           // 'screenshot-mode',
         )}
       >
-        <RootProvider theme={{ defaultTheme: 'dark' }}>
+        <RootProvider theme={{ defaultTheme: 'system' }}>
           <NuqsAdapter>{children}</NuqsAdapter>
         </RootProvider>
         <Analytics />
