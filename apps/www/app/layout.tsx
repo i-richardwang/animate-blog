@@ -7,6 +7,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { jsonLd } from '@/lib/json-ld';
 import { cn } from '@workspace/ui/lib/utils';
+import { Analytics } from '@/lib/analytics';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://richardwang.me'),
@@ -103,6 +104,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <RootProvider theme={{ defaultTheme: 'dark' }}>
           <NuqsAdapter>{children}</NuqsAdapter>
         </RootProvider>
+        <Analytics />
       </body>
     </html>
   );
