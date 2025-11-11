@@ -66,6 +66,7 @@
     "backgrounds/bubble",
     "backgrounds/fireworks",
     "backgrounds/gradient",
+    "backgrounds/gravity-stars",
     "backgrounds/hexagon",
     "backgrounds/hole",
     "backgrounds/stars",
@@ -75,6 +76,7 @@
     "community/notification-list",
     "community/pin-list",
     "community/playful-todolist",
+    "community/radial-intro",
     "community/radial-nav",
     "community/share-button",
     "community/user-presence-avatar"
