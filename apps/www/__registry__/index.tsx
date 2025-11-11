@@ -419,6 +419,46 @@ export const index: Record<string, any> = {
     })(),
     command: '@animate-ui/components-backgrounds-gradient',
   },
+  'components-backgrounds-gravity-stars': {
+    name: 'components-backgrounds-gravity-stars',
+    description:
+      'A background component featuring a subtle yet engaging animated gravity stars effect.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: undefined,
+    files: [
+      {
+        path: 'registry/components/backgrounds/gravity-stars/index.tsx',
+        type: 'registry:ui',
+        target:
+          'components/animate-ui/components/backgrounds/gravity-stars.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\n\nimport { cn } from '@/lib/utils';\n\ntype MouseGravity = 'attract' | 'repel';\ntype GlowAnimation = 'instant' | 'ease' | 'spring';\ntype StarsInteractionType = 'bounce' | 'merge';\n\ntype GravityStarsProps = {\n  starsCount?: number;\n  starsSize?: number;\n  starsOpacity?: number;\n  glowIntensity?: number;\n  glowAnimation?: GlowAnimation;\n  movementSpeed?: number;\n  mouseInfluence?: number;\n  mouseGravity?: MouseGravity;\n  gravityStrength?: number;\n  starsInteraction?: boolean;\n  starsInteractionType?: StarsInteractionType;\n} & React.ComponentProps<'div'>;\n\ntype Particle = {\n  x: number;\n  y: number;\n  vx: number;\n  vy: number;\n  size: number;\n  opacity: number;\n  baseOpacity: number;\n  mass: number;\n  glowMultiplier?: number;\n  glowVelocity?: number;\n};\n\nfunction GravityStarsBackground({\n  starsCount = 75,\n  starsSize = 2,\n  starsOpacity = 0.75,\n  glowIntensity = 15,\n  glowAnimation = 'ease',\n  movementSpeed = 0.3,\n  mouseInfluence = 100,\n  mouseGravity = 'attract',\n  gravityStrength = 75,\n  starsInteraction = false,\n  starsInteractionType = 'bounce',\n  className,\n  ...props\n}: GravityStarsProps) {\n  const containerRef = React.useRef<HTMLDivElement | null>(null);\n  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);\n  const animRef = React.useRef<number | null>(null);\n  const starsRef = React.useRef<Particle[]>([]);\n  const mouseRef = React.useRef<{ x: number; y: number }>({ x: 0, y: 0 });\n  const [dpr, setDpr] = React.useState(1);\n  const [canvasSize, setCanvasSize] = React.useState({\n    width: 800,\n    height: 600,\n  });\n\n  const readColor = React.useCallback(() => {\n    const el = containerRef.current;\n    if (!el) return '#ffffff';\n    const cs = getComputedStyle(el);\n    return cs.color || '#ffffff';\n  }, []);\n\n  const initStars = React.useCallback(\n    (w: number, h: number) => {\n      starsRef.current = Array.from({ length: starsCount }).map(() => {\n        const angle = Math.random() * Math.PI * 2;\n        const speed = movementSpeed * (0.5 + Math.random() * 0.5);\n        return {\n          x: Math.random() * w,\n          y: Math.random() * h,\n          vx: Math.cos(angle) * speed,\n          vy: Math.sin(angle) * speed,\n          size: Math.random() * starsSize + 1,\n          opacity: starsOpacity,\n          baseOpacity: starsOpacity,\n          mass: Math.random() * 0.5 + 0.5,\n          glowMultiplier: 1,\n          glowVelocity: 0,\n        };\n      });\n    },\n    [starsCount, movementSpeed, starsOpacity, starsSize],\n  );\n\n  const redistributeStars = React.useCallback((w: number, h: number) => {\n    starsRef.current.forEach((p) => {\n      p.x = Math.random() * w;\n      p.y = Math.random() * h;\n    });\n  }, []);\n\n  const resizeCanvas = React.useCallback(() => {\n    const canvas = canvasRef.current;\n    const container = containerRef.current;\n    if (!canvas || !container) return;\n    const rect = container.getBoundingClientRect();\n    const nextDpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));\n    setDpr(nextDpr);\n    canvas.width = Math.max(1, Math.floor(rect.width * nextDpr));\n    canvas.height = Math.max(1, Math.floor(rect.height * nextDpr));\n    canvas.style.width = `${rect.width}px`;\n    canvas.style.height = `${rect.height}px`;\n    setCanvasSize({ width: rect.width, height: rect.height });\n    if (starsRef.current.length === 0) {\n      initStars(rect.width, rect.height);\n    } else {\n      redistributeStars(rect.width, rect.height);\n    }\n  }, [initStars, redistributeStars]);\n\n  const handlePointerMove = React.useCallback(\n    (e: React.MouseEvent | React.TouchEvent) => {\n      const canvas = canvasRef.current;\n      if (!canvas) return;\n      const rect = canvas.getBoundingClientRect();\n      let clientX = 0;\n      let clientY = 0;\n      if ('touches' in e) {\n        const t = e.touches[0];\n        if (!t) return;\n        clientX = t.clientX;\n        clientY = t.clientY;\n      } else {\n        clientX = e.clientX;\n        clientY = e.clientY;\n      }\n      mouseRef.current = { x: clientX - rect.left, y: clientY - rect.top };\n    },\n    [],\n  );\n\n  const updateStars = React.useCallback(() => {\n    const w = canvasSize.width;\n    const h = canvasSize.height;\n    const mouse = mouseRef.current;\n\n    for (let i = 0; i < starsRef.current.length; i++) {\n      const p = starsRef.current[i];\n\n      const dx = mouse.x - p.x;\n      const dy = mouse.y - p.y;\n      const dist = Math.hypot(dx, dy);\n\n      if (dist < mouseInfluence && dist > 0) {\n        const force = (mouseInfluence - dist) / mouseInfluence;\n        const nx = dx / dist;\n        const ny = dy / dist;\n        const g = force * (gravityStrength * 0.001);\n\n        if (mouseGravity === 'attract') {\n          p.vx += nx * g;\n          p.vy += ny * g;\n        } else if (mouseGravity === 'repel') {\n          p.vx -= nx * g;\n          p.vy -= ny * g;\n        }\n\n        p.opacity = Math.min(1, p.baseOpacity + force * 0.4);\n\n        const targetGlow = 1 + force * 2;\n        const currentGlow = p.glowMultiplier || 1;\n\n        if (glowAnimation === 'instant') {\n          p.glowMultiplier = targetGlow;\n        } else if (glowAnimation === 'ease') {\n          const ease = 0.15;\n          p.glowMultiplier = currentGlow + (targetGlow - currentGlow) * ease;\n        } else {\n          const spring = (targetGlow - currentGlow) * 0.2;\n          const damping = 0.85;\n          p.glowVelocity = (p.glowVelocity || 0) * damping + spring;\n          p.glowMultiplier = currentGlow + (p.glowVelocity || 0);\n        }\n      } else {\n        p.opacity = Math.max(p.baseOpacity * 0.3, p.opacity - 0.02);\n        const targetGlow = 1;\n        const currentGlow = p.glowMultiplier || 1;\n        if (glowAnimation === 'instant') {\n          p.glowMultiplier = targetGlow;\n        } else if (glowAnimation === 'ease') {\n          const ease = 0.08;\n          p.glowMultiplier = Math.max(\n            1,\n            currentGlow + (targetGlow - currentGlow) * ease,\n          );\n        } else {\n          const spring = (targetGlow - currentGlow) * 0.15;\n          const damping = 0.9;\n          p.glowVelocity = (p.glowVelocity || 0) * damping + spring;\n          p.glowMultiplier = Math.max(1, currentGlow + (p.glowVelocity || 0));\n        }\n      }\n\n      if (starsInteraction) {\n        for (let j = i + 1; j < starsRef.current.length; j++) {\n          const o = starsRef.current[j];\n          const dx2 = o.x - p.x;\n          const dy2 = o.y - p.y;\n          const d = Math.hypot(dx2, dy2);\n          const minD = p.size + o.size + 5;\n          if (d < minD && d > 0) {\n            if (starsInteractionType === 'bounce') {\n              const nx = dx2 / d;\n              const ny = dy2 / d;\n              const rvx = p.vx - o.vx;\n              const rvy = p.vy - o.vy;\n              const speed = rvx * nx + rvy * ny;\n              if (speed < 0) continue;\n              const impulse = (2 * speed) / (p.mass + o.mass);\n              p.vx -= impulse * o.mass * nx;\n              p.vy -= impulse * o.mass * ny;\n              o.vx += impulse * p.mass * nx;\n              o.vy += impulse * p.mass * ny;\n              const overlap = minD - d;\n              const sx = nx * overlap * 0.5;\n              const sy = ny * overlap * 0.5;\n              p.x -= sx;\n              p.y -= sy;\n              o.x += sx;\n              o.y += sy;\n            } else {\n              const mergeForce = (minD - d) / minD;\n              p.glowMultiplier = (p.glowMultiplier || 1) + mergeForce * 0.5;\n              o.glowMultiplier = (o.glowMultiplier || 1) + mergeForce * 0.5;\n              const af = mergeForce * 0.01;\n              p.vx += dx2 * af;\n              p.vy += dy2 * af;\n              o.vx -= dx2 * af;\n              o.vy -= dy2 * af;\n            }\n          }\n        }\n      }\n\n      p.x += p.vx;\n      p.y += p.vy;\n\n      p.vx += (Math.random() - 0.5) * 0.001;\n      p.vy += (Math.random() - 0.5) * 0.001;\n\n      p.vx *= 0.999;\n      p.vy *= 0.999;\n\n      if (p.x < 0) p.x = w;\n      if (p.x > w) p.x = 0;\n      if (p.y < 0) p.y = h;\n      if (p.y > h) p.y = 0;\n    }\n  }, [\n    canvasSize.width,\n    canvasSize.height,\n    mouseInfluence,\n    mouseGravity,\n    gravityStrength,\n    glowAnimation,\n    starsInteraction,\n    starsInteractionType,\n  ]);\n\n  const drawStars = React.useCallback(\n    (ctx: CanvasRenderingContext2D) => {\n      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);\n      const color = readColor();\n      for (const p of starsRef.current) {\n        ctx.save();\n        ctx.shadowColor = color;\n        ctx.shadowBlur = glowIntensity * (p.glowMultiplier || 1) * 2;\n        ctx.globalAlpha = p.opacity;\n        ctx.fillStyle = color;\n        ctx.beginPath();\n        ctx.arc(p.x * dpr, p.y * dpr, p.size * dpr, 0, Math.PI * 2);\n        ctx.fill();\n        ctx.restore();\n      }\n    },\n    [dpr, glowIntensity, readColor],\n  );\n\n  const animate = React.useCallback(() => {\n    const canvas = canvasRef.current;\n    if (!canvas) return;\n    const ctx = canvas.getContext('2d');\n    if (!ctx) return;\n    updateStars();\n    drawStars(ctx);\n    animRef.current = requestAnimationFrame(animate);\n  }, [updateStars, drawStars]);\n\n  React.useEffect(() => {\n    resizeCanvas();\n    const container = containerRef.current;\n    const ro =\n      typeof ResizeObserver !== 'undefined'\n        ? new ResizeObserver(resizeCanvas)\n        : null;\n    if (container && ro) ro.observe(container);\n    const onResize = () => resizeCanvas();\n    window.addEventListener('resize', onResize);\n    return () => {\n      window.removeEventListener('resize', onResize);\n      if (ro && container) ro.disconnect();\n    };\n  }, [resizeCanvas]);\n\n  React.useEffect(() => {\n    if (starsRef.current.length === 0) {\n      initStars(canvasSize.width, canvasSize.height);\n    } else {\n      starsRef.current.forEach((p) => {\n        p.baseOpacity = starsOpacity;\n        p.opacity = starsOpacity;\n        const spd = Math.hypot(p.vx, p.vy);\n        if (spd > 0) {\n          const ratio = movementSpeed / spd;\n          p.vx *= ratio;\n          p.vy *= ratio;\n        }\n      });\n    }\n  }, [\n    starsCount,\n    starsOpacity,\n    movementSpeed,\n    canvasSize.width,\n    canvasSize.height,\n    initStars,\n  ]);\n\n  React.useEffect(() => {\n    if (animRef.current) cancelAnimationFrame(animRef.current);\n    animRef.current = requestAnimationFrame(animate);\n    return () => {\n      if (animRef.current) cancelAnimationFrame(animRef.current);\n      animRef.current = null;\n    };\n  }, [animate]);\n\n  return (\n    <div\n      ref={containerRef}\n      data-slot=\"gravity-stars-background\"\n      className={cn('relative size-full overflow-hidden', className)}\n      onMouseMove={(e) => handlePointerMove(e)}\n      onTouchMove={(e) => handlePointerMove(e)}\n      {...props}\n    >\n      <canvas ref={canvasRef} className=\"block w-full h-full\" />\n    </div>\n  );\n}\n\nexport { GravityStarsBackground, type GravityStarsProps };",
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/components/backgrounds/gravity-stars/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'components-backgrounds-gravity-stars';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/components-backgrounds-gravity-stars',
+  },
   'components-backgrounds-hexagon': {
     name: 'components-backgrounds-hexagon',
     description:
@@ -1580,6 +1620,45 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/components-community-playful-todolist',
+  },
+  'components-community-radial-intro': {
+    name: 'components-community-radial-intro',
+    description:
+      'A circular intro animation component that arranges elements in a radial layout, smoothly transitioning them into orbit with looping motion.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: [],
+    files: [
+      {
+        path: 'registry/components/community/radial-intro/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/components/community/radial-intro.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport {\n  LayoutGroup,\n  motion,\n  useAnimate,\n  delay,\n  type Transition,\n  type AnimationSequence,\n} from 'motion/react';\n\ninterface ComponentProps {\n  orbitItems: OrbitItem[];\n  stageSize?: number;\n  imageSize?: number;\n}\n\ntype OrbitItem = {\n  id: number;\n  name: string;\n  src: string;\n};\n\nconst transition: Transition = {\n  delay: 0,\n  stiffness: 300,\n  damping: 35,\n  type: 'spring',\n  restSpeed: 0.01,\n  restDelta: 0.01,\n};\n\nconst spinConfig = {\n  duration: 30,\n  ease: 'linear' as const,\n  repeat: Infinity,\n};\n\nconst qsa = (root: Element, sel: string) =>\n  Array.from(root.querySelectorAll(sel));\n\nconst angleOf = (el: Element) => Number((el as HTMLElement).dataset.angle || 0);\n\nconst armOfImg = (img: Element) =>\n  (img as HTMLElement).closest('[data-arm]') as HTMLElement | null;\n\nfunction RadialIntro({\n  orbitItems,\n  stageSize = 320,\n  imageSize = 60,\n}: ComponentProps) {\n  const step = 360 / orbitItems.length;\n  const [scope, animate] = useAnimate();\n\n  React.useEffect(() => {\n    const root = scope.current;\n    if (!root) return;\n\n    // get arm and image elements\n    const arms = qsa(root, '[data-arm]');\n    const imgs = qsa(root, '[data-arm-image]');\n    const stops: Array<() => void> = [];\n\n    // image lift-in\n    delay(() => animate(imgs, { top: 0 }, transition), 250);\n\n    // build sequence for orbit placement\n    const orbitPlacementSequence: AnimationSequence = [\n      ...arms.map((el): [Element, Record<string, any>, any] => [\n        el,\n        { rotate: angleOf(el) },\n        { ...transition, at: 0 },\n      ]),\n      ...imgs.map((img): [Element, Record<string, any>, any] => [\n        img,\n        { rotate: -angleOf(armOfImg(img)!), opacity: 1 },\n        { ...transition, at: 0 },\n      ]),\n    ];\n\n    // play placement sequence\n    delay(() => animate(orbitPlacementSequence), 700);\n\n    // start continuous spin for arms and images\n    delay(() => {\n      // arms spin clockwise\n      arms.forEach((el) => {\n        const angle = angleOf(el);\n        const ctrl = animate(el, { rotate: [angle, angle + 360] }, spinConfig);\n        stops.push(() => ctrl.cancel());\n      });\n\n      // images counter-spin to stay upright\n      imgs.forEach((img) => {\n        const arm = armOfImg(img);\n        const angle = arm ? angleOf(arm) : 0;\n        const ctrl = animate(\n          img,\n          { rotate: [-angle, -angle - 360] },\n          spinConfig,\n        );\n        stops.push(() => ctrl.cancel());\n      });\n    }, 1300);\n\n    return () => stops.forEach((stop) => stop());\n  }, []);\n\n  return (\n    <LayoutGroup>\n      <motion.div\n        ref={scope}\n        className=\"relative overflow-visible\"\n        style={{ width: stageSize, height: stageSize }}\n        initial={false}\n      >\n        {orbitItems.map((item, i) => (\n          <motion.div\n            key={item.id}\n            data-arm\n            className=\"will-change-transform absolute inset-0\"\n            style={{ zIndex: orbitItems.length - i }}\n            data-angle={i * step}\n            layoutId={`arm-${item.id}`}\n          >\n            <motion.img\n              data-arm-image\n              className=\"rounded-full object-fill absolute left-1/2 top-1/2 aspect-square translate -translate-x-1/2\"\n              style={{\n                width: imageSize,\n                height: imageSize,\n                opacity: i === 0 ? 1 : 0,\n              }}\n              src={item.src}\n              alt={item.name}\n              draggable={false}\n              layoutId={`arm-img-${item.id}`}\n            />\n          </motion.div>\n        ))}\n      </motion.div>\n    </LayoutGroup>\n  );\n}\n\nexport { RadialIntro };",
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/components/community/radial-intro/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'components-community-radial-intro';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/components-community-radial-intro',
   },
   'components-community-radial-nav': {
     name: 'components-community-radial-nav',
@@ -3103,6 +3182,45 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/demo-components-backgrounds-gradient',
+  },
+  'demo-components-backgrounds-gravity-stars': {
+    name: 'demo-components-backgrounds-gravity-stars',
+    description: 'Demo showing a gravity stars background.',
+    type: 'registry:ui',
+    dependencies: undefined,
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/components-backgrounds-gravity-stars'],
+    files: [
+      {
+        path: 'registry/demo/components/backgrounds/gravity-stars/index.tsx',
+        type: 'registry:ui',
+        target:
+          'components/animate-ui/demo/components/backgrounds/gravity-stars.tsx',
+        content:
+          'import { GravityStarsBackground } from \'@/components/animate-ui/components/backgrounds/gravity-stars\';\n\nexport const GravityStarsBackgroundDemo = () => {\n  return (\n    <GravityStarsBackground className="absolute inset-0 flex items-center justify-center rounded-xl" />\n  );\n};',
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/demo/components/backgrounds/gravity-stars/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'demo-components-backgrounds-gravity-stars';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/demo-components-backgrounds-gravity-stars',
   },
   'demo-components-backgrounds-hexagon': {
     name: 'demo-components-backgrounds-hexagon',
@@ -4698,6 +4816,45 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/demo-components-community-playful-todolist',
+  },
+  'demo-components-community-radial-intro': {
+    name: 'demo-components-community-radial-intro',
+    description: 'Demo showing radial intro.',
+    type: 'registry:ui',
+    dependencies: undefined,
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/components-community-radial-intro'],
+    files: [
+      {
+        path: 'registry/demo/components/community/radial-intro/index.tsx',
+        type: 'registry:ui',
+        target:
+          'components/animate-ui/demo/components/community/radial-intro.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\n\nimport { RadialIntro } from '@/components/animate-ui/components/community/radial-intro';\n\nconst ITEMS = [\n  {\n    id: 1,\n    name: 'Framer University',\n    src: 'https://pbs.twimg.com/profile_images/1602734731728142336/9Bppcs67_400x400.jpg',\n  },\n  {\n    id: 2,\n    name: 'arhamkhnz',\n    src: 'https://pbs.twimg.com/profile_images/1897311929028255744/otxpL-ke_400x400.jpg',\n  },\n  {\n    id: 3,\n    name: 'Skyleen',\n    src: 'https://pbs.twimg.com/profile_images/1948770261848756224/oPwqXMD6_400x400.jpg',\n  },\n  {\n    id: 4,\n    name: 'Shadcn',\n    src: 'https://pbs.twimg.com/profile_images/1593304942210478080/TUYae5z7_400x400.jpg',\n  },\n  {\n    id: 5,\n    name: 'Adam Wathan',\n    src: 'https://pbs.twimg.com/profile_images/1677042510839857154/Kq4tpySA_400x400.jpg',\n  },\n  {\n    id: 6,\n    name: 'Guillermo Rauch',\n    src: 'https://pbs.twimg.com/profile_images/1783856060249595904/8TfcCN0r_400x400.jpg',\n  },\n  {\n    id: 7,\n    name: 'Jhey',\n    src: 'https://pbs.twimg.com/profile_images/1534700564810018816/anAuSfkp_400x400.jpg',\n  },\n  {\n    id: 8,\n    name: 'David Haz',\n    src: 'https://pbs.twimg.com/profile_images/1927474594102784000/Al0g-I6o_400x400.jpg',\n  },\n  {\n    id: 9,\n    name: 'Matt Perry',\n    src: 'https://pbs.twimg.com/profile_images/1690345911149375488/wfD0Ai9j_400x400.jpg',\n  },\n];\n\nexport const RadialIntroDemo = () => <RadialIntro orbitItems={ITEMS} />;",
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/demo/components/community/radial-intro/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'demo-components-community-radial-intro';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/demo-components-community-radial-intro',
   },
   'demo-components-community-radial-nav': {
     name: 'demo-components-community-radial-nav',
