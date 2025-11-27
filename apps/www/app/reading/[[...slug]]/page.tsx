@@ -1,4 +1,4 @@
-import { blogs, getSortedBlogPosts } from '@/lib/source';
+import { reading, getSortedReadingPosts } from '@/lib/source';
 import {
   DocsPage,
   DocsBody,
@@ -8,14 +8,17 @@ import {
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import { Metadata } from 'next';
-import { DocsAuthor } from '@/components/docs/docs-author';
 import { Footer } from '@/components/footer';
 import { Button } from '@/registry/components/buttons/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import { BlogList } from '@/components/docs/blog-list';
+import { ReadingList } from '@/components/docs/reading-list';
+import { DocsAuthor } from '@/components/docs/docs-author';
+import { Shine } from '@/registry/primitives/effects/shine';
+import { cn } from '@workspace/ui/lib/utils';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -23,24 +26,26 @@ export default async function Page(props: {
   const { slug = [] } = await props.params;
 
   if (slug.length === 0) {
-    const posts = getSortedBlogPosts().map((post) => ({
+    const posts = getSortedReadingPosts().map((post) => ({
       url: post.url,
       title: post.data.title,
       description: post.data.description,
       date: new Date(post.data.date),
-      tags: post.data.tags,
+      author: post.data.author,
+      originalUrl: post.data.originalUrl,
+      image: post.data.image,
     }));
 
     return (
       <>
         <DocsPage toc={[]} article={{ className: '!max-w-[1124px]' }}>
-          <DocsTitle className="font-medium">博客</DocsTitle>
+          <DocsTitle className="font-medium">推荐阅读</DocsTitle>
           <DocsDescription className="mb-1 font-normal">
-            记录思考与探索的足迹
+            精选优质文章，中文翻译呈现
           </DocsDescription>
 
           <DocsBody id="docs-body" className="pb-10 pt-4">
-            <BlogList posts={posts} />
+            <ReadingList readings={posts} />
           </DocsBody>
         </DocsPage>
         <Footer />
@@ -48,14 +53,14 @@ export default async function Page(props: {
     );
   }
 
-  const page = blogs.getPage(slug);
+  const page = reading.getPage(slug);
   if (!page) notFound();
 
   const MDXContent = page.data.body;
   const date = new Date(page.data.date);
 
   // Get sorted posts for navigation (newest first)
-  const sortedPosts = getSortedBlogPosts();
+  const sortedPosts = getSortedReadingPosts();
   const currentIndex = sortedPosts.findIndex((p) => p.url === page.url);
 
   // Previous is newer (lower index), Next is older (higher index)
@@ -136,18 +141,27 @@ export default async function Page(props: {
           >
             {format(date, 'MMM d, yyyy', { locale: enUS })}
           </time>
-          {page.data.tags && page.data.tags.length > 0 && (
-            <>
-              {page.data.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
-                >
-                  {tag}
-                </span>
-              ))}
-            </>
-          )}
+        </div>
+
+        <div className="flex flex-row gap-2 items-center">
+          <Shine enableOnHover duration={1200} asChild>
+            <a
+              href={page.data.originalUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={cn(
+                buttonVariants({
+                  color: 'ghost',
+                  size: 'sm',
+                  className:
+                    'gap-2 [&_svg]:size-3.5 bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 hover:text-primary-foreground border-0',
+                }),
+              )}
+            >
+              <ExternalLink />
+              View Original
+            </a>
+          </Shine>
         </div>
 
         <DocsBody id="docs-body" className="pb-10 pt-4">
@@ -160,7 +174,7 @@ export default async function Page(props: {
 }
 
 export async function generateStaticParams() {
-  return blogs.generateParams();
+  return reading.generateParams();
 }
 
 export async function generateMetadata(props: {
@@ -170,12 +184,12 @@ export async function generateMetadata(props: {
 
   if (slug.length === 0) {
     return {
-      title: '博客',
-      description: '记录思考与探索的足迹',
+      title: '推荐阅读',
+      description: '精选优质文章，中文翻译呈现',
       openGraph: {
-        title: '博客',
-        description: '记录思考与探索的足迹',
-        url: 'https://richardwang.me/blog',
+        title: '推荐阅读',
+        description: '精选优质文章，中文翻译呈现',
+        url: 'https://richardwang.me/reading',
         siteName: "Richard's Page",
         type: 'website',
         locale: 'zh_CN',
@@ -183,10 +197,10 @@ export async function generateMetadata(props: {
     };
   }
 
-  const page = blogs.getPage(slug);
+  const page = reading.getPage(slug);
   if (!page) notFound();
 
-  const image = ['/blog-og', ...slug, 'image.png'].join('/');
+  const image = page.data.image || ['/reading-og', ...slug, 'image.png'].join('/');
 
   return {
     title: page.data.title,
@@ -210,14 +224,14 @@ export async function generateMetadata(props: {
       type: 'article',
       publishedTime: new Date(page.data.date).toISOString(),
       locale: 'zh_CN',
-      images: page.data.image || image,
+      images: image,
     },
     twitter: {
       card: 'summary_large_image',
       site: '@richard2wang',
       title: page.data.title,
       description: page.data.description,
-      images: page.data.image || image,
+      images: image,
     },
   };
 }

@@ -1,0 +1,300 @@
+---
+title: 面向 Agent 的上下文工程：核心策略与设计模式
+description: 介绍什么是上下文工程，以及如何通过「写入、选择、压缩、隔离」四种策略，让 Agent 在合适的时刻看到合适的上下文
+date: 2024-07-02
+author:
+  name: LangChain Team
+  url: https://blog.langchain.com
+originalUrl: https://blog.langchain.com/context-engineering-for-agents/
+image: https://blog.langchain.com/content/images/size/w1200/2025/10/Context-Engineering.png
+---
+
+## TL;DR
+
+Agent 想做好事情，离不开「合适的上下文」。
+上下文工程，就是一门**在每一步，为 Agent 的上下文窗口填入「刚好对的那部分信息」**的艺术和科学。
+
+在这篇文章里，我们会：
+
+- 把上下文工程拆成四种通用动作：**写入（write）、选择（select）、压缩（compress）、隔离（isolate）**
+- 从多个真实 Agent / 论文的设计里，总结这些动作是如何被组合使用的
+- 展示在 LangGraph 里，如何用统一的状态管理和节点编排，把这些模式落成工程化的实现
+
+📺 **视频讲解**：[观看 YouTube 视频](https://youtu.be/4GiqzUHD5AA?ref=blog.langchain.com)
+
+![上下文工程的四种类别](https://blog.langchain.com/content/images/2025/07/image.png)
+
+## 什么是「上下文工程」？
+
+Andrej Karpathy 有个很形象的类比：**LLM 像一个新的操作系统**。
+
+- LLM 本身更像 CPU —— 负责推理和执行
+- 上下文窗口（context window）更像 RAM —— 它是模型的工作内存，只能容纳有限的信息
+
+操作系统会小心决定：**此刻哪些数据应该放进 RAM，哪些留在磁盘/网络上**。
+同样地，Agent 工程师也要习惯思考：**此刻模型的上下文窗口里，必须有哪些信息？哪些可以暂存到别的地方？**
+
+从这个角度看，「上下文工程」就是：
+
+> 在整个 Agent 轨迹（trajectory）的每一步，精心安排「什么东西进上下文」「什么东西留在外部」，以及「如何在两者之间来回搬运」。
+
+通常我们需要管理的上下文，可以粗略分成三类：
+
+- **指令（Instructions）**：系统提示、few-shot 示例、工具说明、策略文档等
+- **知识（Knowledge）**：事实、文档、记忆等（包括短期/长期记忆）
+- **工具反馈（Tools）**：搜索结果、API 响应、代码执行输出等
+
+上下文工程就是在这三类信息之间，持续做「写入 / 选择 / 压缩 / 隔离」四种动作。
+
+![LLM 应用常见的上下文类型](https://blog.langchain.com/content/images/2025/07/image-1.png)
+
+## 为什么 Agent 特别需要上下文工程？
+
+经典的 RAG 还只是「一次问答 + 一次检索」；而 **Agent 是一条长链路**：
+
+1. 模型观察当前状态和目标
+2. 决定调用哪个工具、用什么参数
+3. 根据工具反馈更新计划
+4. 重复上述过程，直到完成任务
+
+![Agent 架构示意图](https://blog.langchain.com/content/images/2025/07/image-2.png)
+
+在这个过程中：
+
+- 工具会不断产出新的上下文（网页内容、API 结果、本地文件等）
+- 模型会不断产生中间想法、草稿和计划
+- 用户也可能多次追加约束或反馈
+
+![上下文积累过程](https://blog.langchain.com/content/images/2025/07/image-3.png)
+
+如果不做上下文工程，常见的问题就会出现：
+
+- **上下文缺失**：关键文档从未被读入上下文窗口
+- **上下文错误**：选错了文档或版本，导致结论错误
+- **上下文爆炸**：把所有工具结果都堆进上下文窗口，最终 token 爆掉、成本飙升、质量下降
+
+所以，高质量的 Agent 几乎都在做一件事：
+**围绕「写入 / 选择 / 压缩 / 隔离」这四类操作，反复设计和调优上下文流。**
+
+## 四种核心策略：写入 / 选择 / 压缩 / 隔离
+
+![四种策略分类](https://blog.langchain.com/content/images/2025/07/image-4.png)
+
+### 1. 写入上下文（Write）
+
+**写入**的核心思想是：
+不要把所有信息都塞在对话历史里，而是**写到一个外部的「工作空间」**，需要时再取回来。
+
+常见做法包括：
+
+- **草稿本（Scratchpads）**：把大段搜索结果 / 文档全文写入文件系统或数据库，而不是直接放进消息历史。正如人类做研究时会记笔记，Agent 也可以"保存计划到记忆中以持久化上下文"
+
+- **记忆系统（Memories）**：像 [Reflexion](https://arxiv.org/abs/2303.11366) 和 [Generative Agents](https://arxiv.org/abs/2304.03442) 这样的系统，让 Agent 可以创建自我生成的记忆，跨会话保留。ChatGPT、Cursor、Windsurf 等产品都从交互中自动生成长期记忆
+
+![记忆生成示例](https://blog.langchain.com/content/images/2025/07/image-5.png)
+
+- **子 Agent 协作**：对长时间任务的计划、阶段性结论、todo 列表，写成独立的「计划文件」或「记忆条目」。子 Agent 之间，通过共享的存储（而不是对话）交换中间产物，减少「传话游戏」
+
+这样做的好处：
+
+- 上下文窗口里只放**当前这一步必要的信息**
+- 历史信息依然被完整保留，可以在之后通过检索或搜索重新召回
+
+**相关资源**：
+- [Filesystem MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) - 文件系统工具
+- [LangGraph 文档](https://langchain-ai.github.io/langgraph/tutorials/introduction/) - 状态管理
+
+### 2. 选择上下文（Select）
+
+把东西写出去之后，下一步就是**在需要的时候，把正确的那一小部分选回来**。
+
+![记忆选择策略](https://blog.langchain.com/content/images/2025/07/image-6.png)
+
+常见的选择方式包括：
+
+#### 从草稿本选择
+
+Agent 通过工具调用或选择性状态暴露来检索保存的信息。
+
+#### 从记忆选择
+
+选择机制必须识别相关内容 - 可能是：
+- **情节性（Episodic）**：过去的例子
+- **程序性（Procedural）**：指令
+- **语义性（Semantic）**：事实
+
+像 Claude Code 这样的工具使用专门的文件（`CLAUDE.md`），而管理更大记忆集合的产品则采用嵌入或知识图谱。
+
+#### 工具选择
+
+对工具描述应用 RAG 可以将选择准确率提高三倍，解决工具过多导致的混淆问题。这就是所谓的"Big Tool"模式。
+
+**相关资源**：
+- [LangGraph Bigtool library](https://github.com/langchain-ai/langgraph/tree/main/libs/bigtool) - 大规模工具选择
+
+#### 知识检索
+
+代码 Agent 是生产级 RAG 的典范，利用"AST 解析代码并沿语义边界分块"，结合 grep、知识图谱和重排序。
+
+这里的核心是：
+**不是所有可用的上下文都要进窗口，只要对当前这一步「决策或生成」有用的那一小撮。**
+
+### 3. 压缩上下文（Compress）
+
+当「必要的信息本身就很长」时，仅靠选择还不够，这时需要**压缩**：
+
+![压缩策略要点](https://blog.langchain.com/content/images/2025/07/image-7.png)
+
+#### 总结（Summarization）
+
+多轮交互受益于压缩。Claude Code 的"自动压缩"功能会在上下文超过 95% 容量时总结轨迹。策略包括递归或分层总结，应用于 Agent 转换或工具调用后。
+
+常见做法：
+- 把对话历史压缩成更短的「研究简报 / 工作纪要」
+- 把长篇搜索结果压缩成关键 bullet points
+- 对阶段性结果做总结，提炼出后续步骤真正需要携带的少量事实
+
+#### 修剪（Trimming）
+
+硬编码启发式方法过滤上下文，例如删除旧消息。像 Provence 这样的工具对问答应用训练修剪策略。
+
+压缩是一种「有损保存」：
+你刻意丢掉那些**对后续推理帮助不大的细节**，只保留真正会影响决策的信号。
+
+在 LangGraph 这类框架里，这通常表现为：
+
+- 在图里插入「总结节点」，定期对状态中的某个字段做 summarize
+- 为特定工具调用结果写后处理逻辑（例如自动抽取结论和来源链接）
+
+### 4. 隔离上下文（Isolate）
+
+有些上下文**只在局部有用**，如果让它们一路跟随整个 Agent 轨迹：
+
+- 不仅浪费 token，还会让模型在无关细节上「分心」
+
+隔离上下文的典型方式包括：
+
+#### 多 Agent 架构
+
+![多 Agent 上下文分离](https://blog.langchain.com/content/images/2025/07/image-8.png)
+
+把任务拆成多个子 Agent，每个 Agent 只看到自己需要的那部分状态。Anthropic 的多 Agent 研究系统证明，"子 Agent 在各自的上下文窗口中并行操作"比单一 Agent 方法表现更好。
+
+**相关资源**：
+- [OpenAI Swarm library](https://github.com/openai/swarm) - 多 Agent 编排
+- [LangGraph multi-agent tutorials](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/) - 监督者/群体模式
+
+#### 环境隔离
+
+![沙箱隔离示例](https://blog.langchain.com/content/images/2025/07/image-9.png)
+
+在受限的执行环境中运行工具调用 / 代码执行，把结果与主上下文隔离开。这种方法允许"将图像/音频或其他对象存储为变量"而不消耗 token。
+
+**相关资源**：
+- [E2B sandbox integration](https://github.com/langchain-ai/langgraph/tree/main/libs/langgraph/langgraph/prebuilt/e2b) - E2B 沙箱
+- [Pyodide sandboxing](https://langchain-ai.github.io/langgraph/how-tos/code-execution-with-pyodide/) - Python 沙箱
+
+#### 状态分区
+
+在 LangGraph 的 state 里，把不同用途的上下文放在不同字段，只在需要时显式合并。运行时状态模式将信息隔离在特定字段中，在每一步只暴露必要的上下文给 LLM。
+
+![邮件 Agent 状态示例](https://blog.langchain.com/content/images/2025/07/image-10.png)
+
+隔离做得好，可以同时提升：
+
+- **可控性**：不同模块的行为更可预测
+- **可维护性**：每个 Agent 的提示词和状态结构都更简洁
+- **成本**：不必在每次调用里重复携带与当前步骤无关的大量上下文
+
+## 在 LangGraph 里实践上下文工程
+
+LangGraph 是一个低层的 Agent 编排框架，它的核心抽象有两个：
+
+- **状态（State）**：你定义一个结构化的状态对象，用来存放对话、工具结果、记忆等
+- **节点（Nodes）**：每个节点可以读取 / 更新状态，再把状态传给下一个节点
+
+这种设计非常适合实现上下文工程的四种策略。
+
+### 基础步骤
+
+1. **可观测性** - LangSmith 提供跟踪功能，追踪 Agent 间的 token 使用
+2. **评估** - 测试上下文工程是否提升或损害性能
+
+### 写入：把重要信息写进状态或外部存储
+
+**短期上下文**：
+- LangGraph 的检查点（checkpointing）功能跨步骤持久化 Agent 状态，充当草稿本
+- 在节点里，把搜索结果、工具调用输出等，写入 `state.research_notes` / `state.files` 等字段
+
+**长期上下文**：
+- 灵活的持久化支持基于文件（配置、规则）或基于集合的记忆
+- LangMem 提供记忆管理抽象
+- 对于更长久的知识，可以直接写入向量数据库或文件系统，由其它节点在需要时检索
+
+**相关资源**：
+- [LangGraph persistence tutorial](https://langchain-ai.github.io/langgraph/tutorials/introduction/)
+- [LangMem documentation](https://github.com/langchain-ai/langmem)
+
+### 选择：在节点中显式地「拉取」上下文
+
+LangGraph 的节点编排支持细粒度的状态访问控制：
+
+- 在进入「回答问题」或「生成报告」的节点前，先用检索节点，从外部存储拉取最相关的文档片段
+- 长期记忆支持文件获取和基于嵌入的集合检索
+- 对于工具/技能，可以使用 Bigtool 库对大型工具集进行语义搜索
+- 提供多个 RAG 教程
+
+**相关资源**：
+- [RAG tutorials](https://langchain-ai.github.io/langgraph/tutorials/rag/)
+- [Bigtool for large tool sets](https://github.com/langchain-ai/langgraph/tree/main/libs/bigtool)
+
+### 压缩：在图中插入「总结节点」
+
+LangGraph 的节点编排支持通过以下方式压缩：
+
+- 每经过若干步，就调用一个专门的「总结节点」，压缩对话历史或研究笔记
+- 使用内置工具总结消息列表
+- 定期修剪逻辑
+- 后处理工具输出
+- 专门的总结节点
+
+**相关资源**：
+- [Summarization utilities](https://langchain-ai.github.io/langgraph/how-tos/memory/summary-messages/)
+
+### 隔离：用状态字段和多 Agent 结构划分上下文
+
+- 状态模式在特定字段中隔离上下文
+- 通过 E2B 和 Pyodide 支持沙箱
+- 多 Agent 库（supervisor、swarm）用于分布式架构
+- 把「用户对话」「内部规划」「工具日志」分别放在不同的字段里
+- 让某些子图只看到局部字段，比如「代码执行子图」只访问 `state.code_context`
+- 使用 LangGraph 的 supervisor / swarm 等模式，组织多 Agent 协作，同时保持各自的上下文干净
+
+**相关资源**：
+- [Multi-agent architectures](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/)
+- [Sandbox support](https://github.com/langchain-ai/langgraph/tree/main/libs/langgraph/langgraph/prebuilt/e2b)
+
+## 小结
+
+上下文工程正快速从「模糊概念」变成 Agent 工程师需要掌握的一门手艺。
+
+正如研究人员所言："上下文工程实际上是构建 AI Agent 的工程师的首要工作。"
+
+在这篇文章里，我们把大多数优秀 Agent 共同做的事情，总结成四个动作：
+
+- **写入（Write）**：把信息写到上下文窗口之外
+- **选择（Select）**：在需要时把合适的部分拉回上下文
+- **压缩（Compress）**：只保留完成任务所需的最少 token
+- **隔离（Isolate）**：按照用途和阶段拆分上下文，避免相互干扰
+
+LangGraph 提供了统一的状态与节点抽象，LangSmith 则帮助你观测和评估上下文的使用情况。
+结合起来，你可以形成一个闭环：**发现上下文问题 → 设计新的上下文工程策略 → 落地到图里 → 通过数据验证 → 再次迭代。**
+
+这就是构建可靠、高效 Agent 的核心能力之一。
+
+---
+
+**相关阅读**：
+- [How agents can use filesystems for context engineering](https://blog.langchain.com/how-agents-can-use-filesystems-for-context-engineering/)
+- [LangGraph 文档](https://langchain-ai.github.io/langgraph/)
+- [LangSmith 文档](https://docs.smith.langchain.com/)

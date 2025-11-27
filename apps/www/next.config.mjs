@@ -15,6 +15,9 @@ const config = {
       {
         hostname: 'images.pexels.com',
       },
+      {
+        hostname: 'blog.langchain.com',
+      },
     ],
   },
   reactStrictMode: false,

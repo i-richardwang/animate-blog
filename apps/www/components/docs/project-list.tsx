@@ -26,7 +26,7 @@ interface ProjectListProps {
 
 export function ProjectList({ projects }: ProjectListProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 not-prose">
       {projects.map((project, index) => (
         <MotionEffect
           key={project.url}

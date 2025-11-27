@@ -43,6 +43,14 @@ export const NAV_ITEMS = [
     title: '博客',
     url: '/blog',
   },
+  {
+    title: '推荐阅读',
+    url: '/reading',
+  },
+  {
+    title: '关于我',
+    url: '/about',
+  },
 ];
 
 const NavItem = ({ title, url }: { title: string; url: string }) => {

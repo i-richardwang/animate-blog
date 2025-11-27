@@ -74,6 +74,22 @@ export const projects = defineDocs({
   dir: 'content/projects',
 });
 
+export const reading = defineCollections({
+  type: 'doc',
+  dir: 'content/reading',
+  schema: frontmatterSchema.extend({
+    date: z.coerce.date(),
+    author: z
+      .object({
+        name: z.string(),
+        url: z.string().optional(),
+      })
+      .optional(),
+    originalUrl: z.string(),
+    image: z.string().optional(),
+  }),
+});
+
 export default defineConfig({
   lastModifiedTime: 'git',
   mdxOptions: {

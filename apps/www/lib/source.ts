@@ -1,4 +1,4 @@
-import { docs, blog, projects as projectsSource } from '@/.source';
+import { docs, blog, projects as projectsSource, reading as readingSource } from '@/.source';
 import { LucideIcons } from '@/components/icons/lucide-icons';
 import { attachFile } from '@/lib/attach-file';
 import { attachSeparator } from '@/lib/attach-separator';
@@ -205,7 +205,23 @@ export const getLatestContent = (limit: number = 3) => {
   return allContent.slice(0, limit);
 };
 
+export const reading = loader({
+  baseUrl: '/reading',
+  source: createMDXSource(readingSource),
+});
+
+// Helper to get reading posts sorted by date (newest first)
+export const getSortedReadingPosts = () => {
+  return reading
+    .getPages()
+    .sort(
+      (a, b) =>
+        new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+    );
+};
+
 export type Page = InferPageType<typeof source>;
 export type Meta = InferMetaType<typeof source>;
 export type BlogPage = InferPageType<typeof blogs>;
 export type ProjectPage = InferPageType<typeof projects>;
+export type ReadingPage = InferPageType<typeof reading>;
