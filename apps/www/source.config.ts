@@ -93,6 +93,12 @@ export const reading = defineCollections({
 export default defineConfig({
   lastModifiedTime: 'git',
   mdxOptions: {
+    // Disable remote image size fetching for external URLs
+    // to avoid build-time network failures in environments
+    // without outbound network access.
+    remarkImageOptions: {
+      external: false,
+    },
     rehypePlugins: [],
   },
 });
