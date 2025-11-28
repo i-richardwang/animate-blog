@@ -1,5 +1,5 @@
 ---
-title: Open Deep Research：深度调研 Agent 的架构与实现
+title: Open Deep Research：开源深度调研 Agent 的架构与实现
 description: 介绍我们基于 LangGraph 构建的开源深度调研 Agent，支持自带模型、搜索工具和 MCP 服务器，生成结构化的深度研究报告
 date: 2024-07-16
 author:
@@ -9,185 +9,185 @@ originalUrl: https://blog.langchain.com/open-deep-research/
 image: https://blog.langchain.com/content/images/2025/07/Open-Deep-Research-1.webp
 ---
 
-### TL;DR
+## TL;DR
 
-深度调研（Deep Research）已成为最流行的 Agent 应用之一。[OpenAI](https://openai.com/index/introducing-deep-research/?ref=blog.langchain.com)、[Anthropic](https://www.anthropic.com/engineering/built-multi-agent-research-system?ref=blog.langchain.com)、[Perplexity](https://www.perplexity.ai/hub/blog/introducing-perplexity-deep-research?ref=blog.langchain.com) 和 [Google](https://gemini.google/overview/deep-research/?hl=en&ref=blog.langchain.com) 都有深度调研产品，这些产品使用[各种](https://www.anthropic.com/news/research?ref=blog.langchain.com)上下文来源生成综合报告。还有许多[开源](https://huggingface.co/blog/open-deep-research?ref=blog.langchain.com) [实现](https://github.com/google-gemini/gemini-fullstack-langgraph-quickstart?ref=blog.langchain.com)。
+深度调研（Deep Research）已成为目前最热门的 Agent 应用领域之一。[OpenAI](https://openai.com/index/introducing-deep-research/?ref=blog.langchain.com)、[Anthropic](https://www.anthropic.com/engineering/built-multi-agent-research-system?ref=blog.langchain.com)、[Perplexity](https://www.perplexity.ai/hub/blog/introducing-perplexity-deep-research?ref=blog.langchain.com) 和 [Google](https://gemini.google/overview/deep-research/?hl=en&ref=blog.langchain.com) 都推出了深度调研产品，利用[多种上下文来源](https://www.anthropic.com/news/research?ref=blog.langchain.com)生成综合报告。此外，社区中也涌现出许多[开源](https://huggingface.co/blog/open-deep-research?ref=blog.langchain.com)[实现](https://github.com/google-gemini/gemini-fullstack-langgraph-quickstart?ref=blog.langchain.com)。
 
-我们构建了一个[开源深度研究员](https://github.com/langchain-ai/open_deep_research?ref=blog.langchain.com)，它简单且可配置，允许用户带上自己的模型、搜索工具和 MCP 服务器。
+我们构建了一个[开源深度研究员（Open Deep Research）](https://github.com/langchain-ai/open_deep_research?ref=blog.langchain.com)，它简单且高度可配置，允许用户使用自己的模型、搜索工具和 MCP 服务器。
 
-- Open Deep Research 基于 LangGraph 构建。在[这里](https://github.com/langchain-ai/open_deep_research?ref=blog.langchain.com)查看代码！
+- Open Deep Research 基于 LangGraph 构建。查看[代码](https://github.com/langchain-ai/open_deep_research?ref=blog.langchain.com)！
 - 在 [Open Agent Platform](https://oap.langchain.com/?ref=blog.langchain.com) 上试用
 
-![Open Deep Research 概览](https://blog.langchain.com/content/images/2025/07/overview.png)
+![Open Deep Research 概览](/reading/2025/07/overview.png)
 
-### 挑战
+## 挑战
 
-研究是一项开放式任务；回答用户请求的最佳策略无法轻易预知。请求可能需要不同的研究策略和不同程度的搜索深度。
+研究是一项开放式任务；要回答用户的请求，往往难以预知最佳策略。不同的请求可能需要不同的研究策略和各异的搜索深度。
 
-> *"比较这两个产品"*
+> *“比较这两款产品”*
 
-比较通常受益于对每个产品进行搜索，然后是一个综合步骤来比较它们。
+比较类任务通常需要对每款产品进行独立搜索，然后再通过一个综合步骤来进行对比。
 
-> *"找出这个职位的前 20 名候选人"*
+> *“找出这个职位的前 20 名候选人”*
 
-列出和排名请求通常需要开放式搜索，然后是综合和排名。
+列表和排名类请求通常需要进行发散式搜索，然后进行整合与排名。
 
-> *"X 真的是真的吗？"*
+> *“X 真的是真的吗？”*
 
-验证问题可能需要对特定领域进行迭代深入研究，其中来源的质量比搜索的广度更重要。
+验证类问题可能需要对特定领域进行迭代式的深度研究，此时来源的质量远比搜索的广度更重要。
 
-考虑到这些点，开源深度研究的一个关键设计原则是**灵活性**，以便根据请求探索不同的研究策略。
+基于这些考量，开源深度研究的一个核心设计原则就是**灵活性**，即根据请求探索不同研究策略的能力。
 
-### 架构概览
+## 架构概览
 
-[Agent](https://langchain-ai.github.io/langgraph/tutorials/workflows/?ref=blog.langchain.com#agent) 非常适合研究，因为它们可以灵活应用不同的策略，利用中间结果来指导探索。Open Deep Research 使用一个 Agent 来进行研究，作为三步过程的一部分：
+[Agent](https://langchain-ai.github.io/langgraph/tutorials/workflows/?ref=blog.langchain.com#agent) 非常适合研究任务，因为它们可以灵活应用不同的策略，利用中间结果来引导探索方向。Open Deep Research 使用一个 Agent 来执行研究，整个过程分为三步：
 
-- **界定范围 (Scope)** – *阐明研究范围*
+- **界定范围 (Scope)** – *明确研究范围*
 - **开展研究 (Research)** – *执行研究活动*
 - **撰写报告 (Write)** – *生成最终报告*
 
-![三阶段架构](https://blog.langchain.com/content/images/2025/07/simple.png)
+![三阶段架构](/reading/2025/07/simple.png)
 
-#### 阶段 1：界定范围 (Scope)
+### 阶段 1：界定范围 (Scope)
 
-界定范围的目的是收集研究所需的所有用户上下文。这是一个两步流程，执行**用户澄清**和**简报生成**。
+界定范围旨在收集研究所需的所有用户上下文。这是一个两步流程，包括**用户澄清（User Clarification）**和**简报生成（Brief Generation）**。
 
-![Scope 阶段流程](https://blog.langchain.com/content/images/2025/07/scope.png)
+![Scope 阶段流程](/reading/2025/07/scope.png)
 
 **用户澄清**
 
-[OpenAI 指出](https://youtu.be/bNEvJYzoa8A?feature=shared&t=1265&ref=blog.langchain.com)，用户很少在研究请求中提供足够的上下文。我们在必要时使用聊天模型询问额外的上下文。
+[OpenAI 指出](https://youtu.be/bNEvJYzoa8A?feature=shared&t=1265&ref=blog.langchain.com)，用户在提出研究请求时，往往无法提供充足的上下文。我们在必要时会使用聊天模型来询问更多背景信息。
 
-![用户澄清交互](https://blog.langchain.com/content/images/2025/07/brief.png)
+![用户澄清交互](/reading/2025/07/brief.png)
 
 **简报生成**
 
-聊天交互可能包括澄清问题、后续行动或用户提供的示例（例如，之前的深度研究报告）。因为交互可能非常冗长且 Token 密集，我们将它转化为一份全面而集中的研究简报。研究简报作为我们成功的北极星指标，我们在整个研究和写作阶段都会参考它。
+聊天交互可能包含澄清问题、后续追问或用户提供的示例（例如之前的深度研究报告）。由于这些交互可能非常冗长且消耗大量 Token，我们将它转化为一份全面而聚焦的研究简报。研究简报是我们衡量成功的北极星指标，在整个研究和撰写阶段都会反复参考。
 
-![研究简报示例](https://blog.langchain.com/content/images/2025/07/actualbrief.png)
+![研究简报示例](/reading/2025/07/actualbrief.png)
 
-💡
+<Callout type="info">
+我们将研究员与用户的聊天交互转化为一份聚焦的简报，供研究监督者（Supervisor）作为衡量标准。
+</Callout>
 
-*我们将研究员与用户的聊天交互转化为一个集中的简报，供研究监督者衡量。*
+### 阶段 2：开展研究 (Research)
 
-#### 阶段 2：开展研究 (Research)
+研究的目标是收集简报中要求的上下文信息。我们使用一个[监督者 Agent（Supervisor Agent）](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/agent_supervisor/?ref=blog.langchain.com) 来主导研究。
 
-研究的目标是收集研究简报要求的上下文。我们使用一个[监督者 Agent](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/agent_supervisor/?ref=blog.langchain.com) 进行研究。
-
-![Research 阶段架构](https://blog.langchain.com/content/images/2025/07/research.png)
+![Research 阶段架构](/reading/2025/07/research.png)
 
 **研究监督者 (Research Supervisor)**
 
-监督者的工作很简单：将研究任务委派给适当数量的子 Agent。监督者确定研究简报是否可以分解为独立的子主题，并委派给具有隔离上下文窗口的子 Agent。这很有用，因为它允许系统并行化研究工作，更快地找到更多信息。
+监督者的工作很简单：将研究任务委派给适当数量的子 Agent。监督者判断研究简报是否可以拆分为独立的子主题，并将其委派给拥有隔离上下文窗口的子 Agent。这非常有价值，因为它允许系统并行化研究工作，从而更快地获取更多信息。
 
 **研究子 Agent (Research Sub-Agents)**
 
-每个研究子 Agent 都会从监督者那里收到一个子主题。子 Agent 被提示只关注特定主题，而不必担心研究简报的完整范围——那是监督者的工作。每个子 Agent 通过工具调用循环进行研究，利用用户配置的搜索工具和/或 MCP 工具。
+每个研究子 Agent 都会从监督者那里接收一个子主题。子 Agent 接收到的 Prompt 是只关注特定主题，而不必操心研究简报的完整范围——那是监督者的职责。每个子 Agent 通过工具调用循环（tool-calling loop）进行研究，利用用户配置的搜索工具和/或 MCP 工具。
 
-当每个子 Agent 完成时，它会进行最后一次 LLM 调用，对其提出的子问题写出详细的答案，考虑到它的所有研究并引用有用的来源。这很重要，因为从工具调用反馈中收集到的信息可能包含大量原始（例如抓取的网页）和不相关（例如失败的工具调用或不相关的网站）信息。
+当每个子 Agent 完成任务时，它会进行最后一次 LLM 调用，对其负责的子问题撰写详细答案，其中需包含其所有研究成果并引用有价值的来源。这一点至关重要，因为从工具调用反馈中收集到的信息可能包含大量原始数据（如抓取的网页）和无关信息（如失败的工具调用或不相关的网站）。
 
-💡
+<Callout type="info">
+我们增加了一次额外的 LLM 调用来清洗子 Agent 的研究发现，以便为监督者提供干净、经过处理的信息。
+</Callout>
 
-*我们进行额外的 LLM 调用来清理子 Agent 的研究发现，以便为监督者提供干净、经过处理的信息。*
+如果我们把这些原始信息直接返回给监督者，Token 使用量可能会显著膨胀，迫使监督者处理更多 Token 才能分离出最有用的信息。因此，我们的子 Agent 会先清洗其发现，然后再返回给监督者。
 
-如果我们把这些原始信息返回给监督者，Token 使用量可能会显著膨胀，监督者不得不解析更多的 Token 以隔离最有用的信息。因此，我们的子 Agent 会清理其发现并将其返回给监督者。
-
-![研究监督迭代流程](https://blog.langchain.com/content/images/2025/07/big-research.png)
+![研究监督迭代流程](/reading/2025/07/big-research.png)
 
 **研究监督者迭代**
 
-监督者推理子 Agent 的发现是否充分解决了简报中的工作范围。如果监督者想要更深入，它可以生成更多的子 Agent 来进行更多的研究。随着监督者委派研究并反思结果，它可以灵活地识别缺少的内容并通过后续研究填补这些空白。
+监督者会推理子 Agent 的发现是否充分覆盖了简报中的工作范围。如果监督者认为需要更深入的研究，它可以生成更多的子 Agent。随着监督者委派研究并反思结果，它可以灵活地识别缺失的内容，并通过后续研究填补这些空白。
 
-#### 阶段 3：撰写报告 (Write)
+### 阶段 3：撰写报告 (Write)
 
-报告撰写的目标是使用从子 Agent 收集的上下文来满足研究简报的请求。当监督者认为收集到的发现足以满足研究简报中的请求时，我们就继续撰写报告。
+报告撰写的目标是利用从子 Agent 收集的上下文来满足研究简报的要求。当监督者认为收集到的发现足以回应研究简报中的请求时，我们就会进入报告撰写阶段。
 
-为了撰写报告，我们向 LLM 提供研究简报和子 Agent 返回的所有研究发现。这最后的 LLM 调用一次性生成输出，由简报引导并用研究发现回答。
+为了撰写报告，我们将研究简报和子 Agent 返回的所有研究发现提供给 LLM。这最后一次 LLM 调用会一次性（one-shot）生成输出，该输出由简报引导，并基于研究发现进行回答。
 
-![报告写作阶段](https://blog.langchain.com/content/images/2025/07/one-shot.png)
+![报告写作阶段](/reading/2025/07/one-shot.png)
 
-### 经验教训
+## 经验教训
 
-#### **仅对易于并行化的任务使用多 Agent**
+### **仅在易于并行的任务上使用多 Agent**
 
-多 Agent 与单 Agent 是一个重要的设计考虑因素。Cognition [反对多 Agent](https://cognition.ai/blog/dont-build-multi-agents?ref=blog.langchain.com)，因为并行工作的子 Agent 可能难以协调。如果任务（例如构建应用程序）需要多 Agent 输出协同工作，那么协调就是一个风险。
+选择多 Agent 还是单 Agent 是一个重要的设计考量。Cognition [反对多 Agent](https://cognition.ai/blog/dont-build-multi-agents?ref=blog.langchain.com)，因为并行工作的子 Agent 可能难以协调。如果任务（例如构建应用程序）需要多 Agent 的输出协同工作，那么协调就是一个风险点。
 
-我们也吸取了这个教训。我们研究 Agent 的早期版本与子 Agent 并行编写最终报告的章节。虽然速度很快，但我们遇到了 Cognition 提出的问题：报告是不连贯的，因为编写章节的 Agent 协调得不好。我们通过仅将多 Agent 用于研究任务本身，在所有研究完成后进行写作，解决了这个问题。
+我们也吸取了这个教训。我们研究 Agent 的早期版本让子 Agent 并行撰写最终报告的各个章节。虽然速度很快，但我们遇到了 Cognition 提出的问题：报告缺乏连贯性，因为负责撰写章节的 Agent 之间协调不畅。我们通过仅将多 Agent 用于研究任务本身，而在所有研究完成后统一进行撰写，解决了这个问题。
 
-💡
+<Callout type="info">
+多 Agent 难以协调，如果并行撰写报告章节可能会表现不佳。我们将多 Agent 限制在研究阶段，并一次性撰写报告。
+</Callout>
 
-*多 Agent 难以协调，如果并行编写报告章节可能会表现不佳。我们将多 Agent 限制在研究阶段，并一次性撰写报告。*
+### 多 Agent 能够隔离子研究主题的上下文
 
-#### 多 Agent 能够隔离子研究主题的上下文
+我们的实验表明，如果请求包含多个子主题（例如，比较 A、B 和 C），单 Agent 的响应质量会受到影响。直觉很简单：单个上下文窗口需要存储和推理所有子主题的工具反馈。这些工具反馈通常是 Token 密集型的。随着上下文窗口积累了跨越许多不同子主题的工具调用，[无数的失效模式](https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html?ref=blog.langchain.com)，例如[上下文冲突（Context Clash）](https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html?ref=blog.langchain.com#context-clash)，就会变得普遍。
 
-我们的实验表明，如果请求包含多个子主题（例如，比较 A、B 和 C），单 Agent 的响应质量会受到影响。直觉很简单：单个上下文窗口需要存储和推理所有子主题的工具反馈。此工具反馈通常是 Token 密集的。随着上下文窗口积累跨许多不同子主题的工具调用，[无数的失败模式](https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html?ref=blog.langchain.com)，例如[上下文冲突](https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html?ref=blog.langchain.com#context-clash)，变得普遍。
+#### 让我们看一个具体例子
 
-**让我们看一个具体例子**
+*“比较 OpenAI、Anthropic 和 Google DeepMind 在 AI 安全方面的方法。我想了解它们不同的哲学框架、研究优先级以及它们如何思考对齐问题。”*
 
-*比较 OpenAI、Anthropic 和 Google DeepMind 在 AI 安全方面的方法。我想了解它们不同的哲学框架、研究优先级以及它们如何思考对齐问题。*
+我们的 **单 Agent** 实现使用其搜索工具*同时*发送关于每个前沿实验室的独立查询。
 
-我们的 **单 Agent** 实现使用其搜索工具*同时*发送关于每个前沿实验室的单独查询。
-
-- 'OpenAI AI 安全和对齐的哲学框架'
-- 'Anthropic AI 安全和对齐的哲学框架'
-- 'Google DeepMind AI 安全和对齐的哲学框架’
+- 'OpenAI philosophical framework for AI safety and alignment'
+- 'Anthropic philosophical framework for AI safety and alignment'
+- 'Google DeepMind philosophical framework for AI safety and alignment’
 
 搜索工具在一个*单一的冗长字符串*中返回了关于所有三个实验室的结果。我们的单 Agent 推理了所有三个前沿实验室的结果，并再次调用搜索工具，询问每个实验室的独立查询。
 
-- 'DeepMind 关于社会选择和政治哲学的声明'
-- 'Anthropic 关于技术对齐挑战的声明'
-- 'OpenAI 关于递归奖励建模的技术报告'
+- 'DeepMind statements on social choice and political philosophy'
+- 'Anthropic statements on technical alignment challenges'
+- 'OpenAI technical reports on recursive reward modeling'
 
-在每次工具调用迭代中，单 Agent 都要处理来自三个独立线程的上下文。从 Token 和延迟的角度来看，这很浪费。我们不需要关于 OpenAI 递归奖励建模方法的 Token 来帮助我们生成关于 DeepMind 对齐哲学的下一个查询。另一个重要的观察是，处理多个主题的单 Agent 在选择完成之前，自然会对每个主题进行*较浅*（搜索查询数量较少）的研究。
+在每次工具调用迭代中，单 Agent 都要处理来自三个独立线程的上下文。从 Token 和延迟的角度来看，这是一种浪费。我们不需要关于 OpenAI 递归奖励建模方法的 Token 来帮助我们生成关于 DeepMind 对齐哲学的下一个查询。另一个重要的观察是，处理多个主题的单 Agent 在选择结束之前，自然会对每个主题进行*较浅*（搜索查询数量较少）的研究。
 
-![多 Agent vs 单 Agent 对比](https://blog.langchain.com/content/images/2025/07/multi-agent.png)
+![多 Agent vs 单 Agent 对比](/reading/2025/07/multi-agent.png)
 
-多 Agent 方法允许多个子 Agent 并行运行，每个子 Agent 都致力于一个独立的、专注的任务。将多 Agent 方法应用于研究捕获了 [Anthropic 报告](https://www.anthropic.com/engineering/built-multi-agent-research-system?ref=blog.langchain.com)的益处，并在我们要自己的评估中得到了强调：子主题上下文可以在每个子 Agent 中被隔离。
+多 Agent 方法允许多个子 Agent 并行运行，每个子 Agent 都致力于一个独立的、专注的任务。将多 Agent 方法应用于研究，捕捉到了 [Anthropic 报告](https://www.anthropic.com/engineering/built-multi-agent-research-system?ref=blog.langchain.com)中所述的益处，并在我们自己的评估中得到了印证：子主题上下文可以在每个子 Agent 中被隔离。
 
-💡
+<Callout type="info">
+在研究期间隔离子主题的上下文可以避免各种长上下文失效模式。
+</Callout>
 
-*在研究期间隔离子主题的上下文可以避免各种长上下文失败模式。*
+### **多 Agent 监督者使系统能够调整所需的研究深度**
 
-#### **多 Agent 监督者使系统能够调整所需的研究深度**
+用户不希望简单的请求花费 10 分钟以上。但是，有些请求确实需要高 Token 利用率和高延迟的研究，[正如 Anthropic 很好地展示的那样](https://www.anthropic.com/engineering/built-multi-agent-research-system?ref=blog.langchain.com)。
 
-用户不希望简单的请求花费 10 分钟以上。但是，有一些请求需要具有更高 Token 利用率和延迟的研究，[正如 Anthropic 很好地展示的那样](https://www.anthropic.com/engineering/built-multi-agent-research-system?ref=blog.langchain.com)。
+监督者可以通过选择性地生成子 Agent 来处理这两种情况，以调整请求所需的研究深度。监督者被提示使用启发式方法来推理何时应该并行化研究，以及何时单线程研究就足够了。我们的深度研究 Agent 可以灵活地选择是否并行化研究。
 
-监督者可以通过选择性地生成子 Agent 来处理这两种情况，以调整请求所需的研究深度水平。监督者被提示使用启发式方法来推理何时应该并行化研究，以及何时单线程研究就足够了。我们的深度研究 Agent 可以灵活地选择是否并行化研究。
+<Callout type="info">
+多 Agent 监督者带来了搜索策略的灵活性。
+</Callout>
 
-💡
+### 上下文工程对于缓解 Token 膨胀和引导行为至关重要
 
-*多 Agent 监督者允许搜索策略的灵活性。*
+研究是一项 Token 密集型的任务。Anthropic 报告说，他们的多 Agent 系统[使用的 Token 是典型聊天应用程序的 15 倍](https://www.anthropic.com/engineering/built-multi-agent-research-system?ref=blog.langchain.com)！我们使用[上下文工程](https://blog.langchain.com/context-engineering-for-agents/)来缓解这个问题。
 
-#### 上下文工程对于减轻 Token 膨胀和引导行为很重要
+我们将聊天记录压缩成一份研究简报，这防止了先前消息导致的 Token 膨胀。子 Agent 在返回给监督者之前会修剪其研究发现，以移除不相关的 Token 和信息。
 
-研究是一项 Token 密集的任务。Anthropic 报告说，他们的多 Agent 系统[使用的 Token 是典型聊天应用程序的 15 倍](https://www.anthropic.com/engineering/built-multi-agent-research-system?ref=blog.langchain.com)！我们使用[上下文工程](https://blog.langchain.com/context-engineering-for-agents/)来缓解这个问题。
+如果没有足够的上下文工程，我们的 Agent 很容易因为冗长的原始工具调用结果而触及上下文窗口限制。实际上，这也有助于节省 Token 开销，并有助于避免触及模型速率限制 (TPM)。
 
-我们将聊天记录压缩成一份研究简报，这防止了先前消息导致的 Token 膨胀。子 Agent 在返回给监督者之前修剪其研究发现，以删除不相关的 Token 和信息。
+<Callout type="info">
+上下文工程有许多实际好处。它节省 Token，帮助避免触及上下文窗口限制，并帮助保持在模型速率限制之下。
+</Callout>
 
-如果没有足够的上下文工程，我们的 Agent 很容易因为冗长的原始工具调用结果而遇到上下文窗口限制。实际上，这也有助于节省 Token 支出，并有助于避免触及模型速率限制 (TPM)。
-
-💡
-
-*上下文工程有许多实际好处。它节省 Token，帮助避免上下文窗口限制，并帮助保持在模型速率限制之下。*
-
-### 下一步
+## 下一步
 
 Open Deep Research 是一个活跃的项目，我们有一些想法想要尝试。这些是我们正在思考的一些开放性问题。
 
 - 处理 Token 密集型工具响应的最佳方法是什么？过滤掉不相关上下文以减少不必要 Token 支出的最佳方法是什么？
-- 是否值得在 Agent 的热路径中运行任何评估以确保高质量的响应？
-- 深度研究报告很有价值且创建成本相对较高，我们能否存储这项工作并在未来利用长期记忆来利用它们？
+- 是否值得在 Agent 的关键路径（hot path）中运行任何评估以确保高质量的响应？
+- 深度研究报告很有价值且创建成本相对较高，我们能否存储这项工作并在未来利用长期记忆来复用它们？
 
-### 使用 Open Deep Research
+## 使用 Open Deep Research
 
-#### LangGraph Studio
+### LangGraph Studio
 
-你可以克隆我们的 LangGraph [代码](https://github.com/langchain-ai/open_deep_research?ref=blog.langchain.com)并使用 LangGraph Studio 本地运行 Open Deep Research。你可以使用 Studio 测试提示词和架构，并针对你的用例进行更具体的定制！
+你可以克隆我们的 LangGraph [代码](https://github.com/langchain-ai/open_deep_research?ref=blog.langchain.com)并使用 LangGraph Studio 本地运行 Open Deep Research。你可以使用 Studio 测试 Prompt 和架构，并针对你的用例进行更具体的定制！
 
 [查看代码仓库！](https://github.com/langchain-ai/open_deep_research?ref=blog.langchain.com)
 
-#### Open Agent Platform
+### Open Agent Platform
 
-我们已将 Open Deep Research 托管在我们的 Open Agent Platform (OAP) 演示实例上。OAP 是一个公民开发者平台，允许用户构建、原型设计和使用 Agent——你所要做的就是传入你的 API 密钥。你还可以部署自己的 [OAP](https://docs.oap.langchain.com/?ref=blog.langchain.com) 实例，以与其他 LangGraph Agent 一起托管 Deep Research！
+我们已将 Open Deep Research 托管在我们的 Open Agent Platform (OAP) 演示实例上。OAP 是一个公民开发者（citizen developer）平台，允许用户构建、原型设计和使用 Agent——你所要做的就是传入你的 API Key。你还可以部署自己的 [OAP](https://docs.oap.langchain.com/?ref=blog.langchain.com) 实例，以与其他 LangGraph Agent 一起托管 Deep Research！
 
 [在 Open Agent Platform 上试用！](https://oap.langchain.com/?ref=blog.langchain.com)

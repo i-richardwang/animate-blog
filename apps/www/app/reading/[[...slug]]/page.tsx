@@ -32,7 +32,6 @@ export default async function Page(props: {
       description: post.data.description,
       date: new Date(post.data.date),
       author: post.data.author,
-      originalUrl: post.data.originalUrl,
       image: post.data.image,
     }));
 
