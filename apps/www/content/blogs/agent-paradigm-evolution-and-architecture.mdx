@@ -1,0 +1,238 @@
+---
+title: Agent 范式的演进与架构抉择
+description: 从 Chat 到自主 Agent，探讨 LLM 应用的演进路径与工作流、Agent 架构的选择策略
+date: 2025-09-20
+author:
+  name: Richard Wang
+  url: https://github.com/i-richardwang
+---
+
+自 2023 年起，大语言模型（LLM）在企业应用中的角色经历了深刻的演变。从最初被视为增强型聊天机器人或文本处理器，到后来被编排进复杂的工作流，直至如今具备自主决策能力的智能 Agent，这一进程既是技术能力的跃迁，也重塑了人机协作的范式。
+
+本文基于构建数十个实际应用 Agent 的实践经验，探讨这一演进路径中的关键思考与架构选择。
+
+## 基础能力：交互与执行
+
+LLM 的核心优势在于强大的语义理解能力。若要将其融入自动化作业流程，必须攻克两个基础命题：确立机器可理解的通信协议（结构化输出），以及赋予模型干预现实世界的能力（工具调用）。
+
+### 结构化输出：确立通信契约
+
+实际工程应用中，非结构化的自然语言输出往往成为自动化链路的阻碍。若无明确约束，模型返回的结果可能包含"正向情绪"、"用户态度：正向"或"情感分析结果：正向"等多种变体。这些回复虽然在语义上正确，却因格式的随意性而难以被下游程序解析。
+
+确立通信契约的通用方案是强制模型输出 JSON 格式。通过在 Prompt 中预置 Schema 定义：
+
+```markdown
+Output your answer as a JSON object that conforms to the following schema:
+
+{schema}
+```
+
+模型便能生成符合规范的数据结构：
+
+![structured-output-examples](/blogs/2025/09/structured-output-examples.png)
+
+标准化的 JSON 输出消除了歧义，为后续的自动化处理奠定了基础。
+
+在 Qwen2 等早期模型阶段，结构化输出的稳定性尚显不足，常出现 JSON 中夹带注释或 Schema 定义的现象。为确保输出的纯净度，我们曾采用严苛的负向约束：
+
+```markdown
+Important instructions:
+1. Ensure your JSON is valid and properly formatted.
+2. Do not include the schema definition in your answer.
+3. Only output the data instance that matches the schema.
+4. Do not include any explanations or comments within the JSON output.
+```
+
+随着 OpenAI 推出 JSON mode 和 Structured Outputs，各大模型厂商及推理框架纷纷跟进，结构化输出如今已成为开箱即用的基础设施，极大地降低了工程落地的门槛。
+
+### 工具调用：延伸能力边界
+
+OpenAI 的 Function Calling 功能让模型具备了"手"和"脚"。在开源生态尚未完善之时，通过自定义 Prompt 与解析器亦能实现类似效果。
+
+以数据分析场景为例，为解决 Excel 处理的痛点，我们封装了"宽表转长表"等原子操作：
+
+```python
+def reshape_wide_to_long(df, columns_to_compress, new_column_for_old_headers, new_column_for_values):
+    """
+    将宽表数据框重塑为长表格式。此过程通常称为"melting"或"unpivoting"（反透视）。
+    
+    参数说明：
+    - df: 原始的宽表数据
+    - columns_to_compress: 要转换的列名列表（比如 ['1月', '2月', '3月']）
+    - new_column_for_old_headers: 新建一列存放原列名（比如叫 '月份'）
+    - new_column_for_values: 新建一列存放对应的值（比如叫 '销售额'）
+    
+    返回：转换后的长表数据
+    """
+```
+
+在 Prompt 中，我们将工具描述与参数定义注入上下文，要求 AI 按特定 JSON 格式生成调用指令：
+
+```markdown
+(系统预设指令...)
+
+可用的表格操作工具函数如下：
+{tools_description}
+
+当前用户上传的表格及其信息：
+{dataframe_info}
+
+用户输入：
+{user_input}
+
+Output your answer as a JSON object that conforms to the following schema:
+{output_schema}
+
+(其他约束指令...)
+```
+
+当用户意图将多年绩效数据合并时，模型会根据上述上下文，生成如下精确的操作指令：
+
+```json
+{
+  "operation": [
+    {
+      "tool_name": "reshape_wide_to_long",
+      "tool_args": {
+        "df": "performance_results",
+        "columns_to_compress": ["2023_performance", "2024_performance"],
+        "new_column_for_old_headers": "year",
+        "new_column_for_values": "performance"
+      },
+      "output_df_names": ["multi_year_performance_single_column"]
+    }
+  ]
+}
+```
+
+系统解析该 JSON 并执行相应函数，即完成了从自然语言意图到代码执行的映射。现今，工具调用已成为大模型的标准配置，其底层逻辑与早期的自定义实现一脉相承。
+
+## 演进模式一：工作流 (Workflow)
+
+掌握基础能力后，通过逻辑编排将多个能力节点串联，辅以循环与条件判断，便构成了"工作流"。Dify、Langflow 及 LangGraph 等工具的涌现，正是为了解决这一编排需求。实践中，三种典型的应用范式逐渐清晰：
+
+### 单轮任务：个性化服务
+
+此模式常用于 SQL 查询、Excel 助手或知识库问答。其特点在于输入的多样性与泛化性。为应对用户千变万化的表达，工作流需内置大量防御性逻辑，用于意图确认、术语对齐及权限校验。例如，一个健壮的 SQL 查询助手，其背后的工作流可能包含十余个处理节点，以覆盖各类边界情况。
+
+![data-query-agent-pipeline](/blogs/2025/09/data-query-agent-pipeline.png)
+
+### 并行任务：规模化吞吐
+
+在结构化提取或数据清洗等对稳定性要求极高的场景中，并行架构能显著提升效率。我们基于视觉大模型构建的简历解析工具便采用了三级并行策略：
+
+1. 顶层：多份简历并发处理；
+2. 中层：单份简历的多页 PDF 并发转图与 OCR；
+3. 底层：完整文本的各维度信息（基本信息、工作经历等）并发抽取。
+
+![resume-extraction-workflow](/blogs/2025/09/resume-extraction-workflow.png)
+
+### 迭代任务：海量数据处理
+
+面对数千条员工反馈的主题提炼或非标岗位归类等海量文本任务，单轮对话往往力有不逮。迭代处理器（Iterative Processor）应运而生：将数据随机打散并分批，逐次逼近最终结果。
+
+在主题提炼场景中，两种迭代策略被证明行之有效：
+1. **增量迭代**：将上一批次的聚类结果作为上下文传入下一轮，模型结合新数据实时更新聚类体系。
+2. **分治归并**：独立处理每一批次数据，最后通过 MapReduce 式的逻辑汇总全局结果。
+
+![iteration-workflow](/blogs/2025/09/iteration-workflow.png)
+
+> 构建高效工作流的本质，是将人类隐性知识显性化的过程。例如，人类专家熟知的行业术语，在工作流中必须通过知识库检索等手段显式注入，模型方能准确理解。
+
+## 演进模式二：智能 Agent
+
+工作流固然高效，但在面对高度开放、路径不确定的任务时，其局限性便暴露无遗。若试图用固定的流程图来穷举所有决策分支，系统复杂度将呈指数级爆炸，最终陷入维护的泥沼。
+
+以公司名称标准化为例，对于同一家公司，往往存在众多合同主体，而业务方希望了解其背后的统一归属。按照工作流的线性思维，理想流程通常设计如下：输入名称 -> 网络搜索 -> 提取标准名 -> 输出。
+
+![company_name_standardization_workflow](/blogs/2025/09/company_name_standardization_workflow.png)
+
+然而，真实世界的复杂性远超预设：
+
+1.  **输入无效**：用户可能填写的是"某国企"这种模糊指代，而非有效实体名。
+2.  **搜索失败**：单次搜索往往无功而返，需要切换关键词，或遍历百科、工商系统、新闻报道等多源信道。
+3.  **关系复杂**：面对隐藏较深的实体，甚至需要向上追溯 2-3 层股权关系才能识别真正的母公司。
+
+除此之外，如果需求升级为获取行业属性或企业性质，通过静态编排 Workflow 来覆盖所有边缘情况几乎是不可能的任务。
+
+随着 Qwen3、Kimi-K2 等模型推理能力的增强，我们将此类任务重构为 Agent 模式。AI 的角色由"按图索骥"的执行者，转变为"审时度势"的研究员。
+
+与工作流的线性路径不同，Agent 模式的核心在于动态的推理循环（Reasoning Loop）。
+
+![Agent_Reasoning_Loop](/blogs/2025/09/Agent_Reasoning_Loop.png)
+
+在公司名称标准化任务中，Agent 不再遵循预设脚本。它会根据每一步获得的结果，自主规划下一步行动——或是更换搜索关键词，或是追溯母公司，或是将新发现存入记忆。这种由"思考-行动-观察"构成的闭环不断迭代，直至最终达成任务目标。
+
+## 构建高可用 Agent 的关键要素
+
+构建 Agent 并非简单的函数封装，而更近似于培养一名初级研究员。我们需要为其配置完备的认知环境，这主要体现在指令范式、记忆机制与工具设计三个维度。
+
+### 指令范式：定义问题空间
+
+Prompting Paradigm 的重心已从过程导向（How）转向目标导向（What）。
+
+早期试图通过 Prompt 详尽规定 Agent 每一步操作的尝试，往往导致模型行为僵化，或在未预见场景下失效，迫使开发者陷入不断修补 Prompt 的恶性循环。
+
+更优的策略是重新定义 Prompt 的职能，聚焦于明确三要素：
+- **目标 (Goal)**：任务的终局状态。
+- **资源 (Tools/Environment)**：可调用的工具与信息边界。
+- **规则 (Rules/Constraints)**：必须恪守的行为底线。
+
+![Agent_Prompting_Paradigms](/blogs/2025/09/Agent_Prompting_Paradigms.png)
+
+这种范式转变将开发者的角色从微观管理者提升为架构师：我们定义问题空间，而将路径规划的权利让渡给 Agent。这不仅提升了系统的鲁棒性，也让应用能更充分地受益于模型推理能力的进化。
+
+### 记忆机制：知识的动态演进
+
+在 Agent 架构中，记忆（Memory）超越了简单的上下文检索（RAG），演变为具备读写能力的动态状态（Dynamic Memory）。
+
+借鉴 MemGPT 的设计思路，在文本聚类任务中，Agent 维护着两类截然不同的记忆：
+
+![Hybrid_Memory_Architecture](/blogs/2025/09/Hybrid_Memory_Architecture.png)
+
+1. **静态记忆（Read-Only Context）**：如业务背景、项目目标及术语定义。这是 Agent 的先验知识，在单次任务中保持不变。
+2. **动态记忆（Read-Write State）**：如当前生成的主题列表、典型样本及聚类置信度。这是 Agent 在任务执行中持续更新的认知状态。
+
+动态记忆机制赋予了 Agent "学习"与"积累"的能力，使其在多轮交互中保持逻辑连贯，并能基于历史反馈优化后续决策。
+
+动态记忆的应用疆域远不止于此。例如，我们可以探索将**历史对话**本身转化为可检索的记忆单元，以此构建有状态智能体（Stateful Agent）。这种机制让 Agent 能够逐步构建用户画像，理解长期的需求偏好，从而提供超越单次会话的个性化服务。
+
+### 工具设计：认知负荷与抽象的平衡
+
+工具是 Agent 感知与改造世界的触手。工具设计的优劣，直接决定了 Agent 能力的上限。
+
+![Effective_Agent_Tooling](/blogs/2025/09/Effective_Agent_Tooling.png)
+
+**极简原则**
+工具并非多多益善。过载的工具箱不仅消耗上下文窗口，更会增加模型的决策干扰。最佳实践是根据任务上下文，动态加载最小可用工具集。
+
+**语义对齐**
+工具命名与描述本质上是面向模型的 API 文档。从技术视角的 `query_database` 优化为意图视角的 `get_memories`，能显著提升调用的准确率。
+
+**抽象的艺术**
+工具设计需在通用性与专用性之间寻找平衡。过于通用的工具（如 `execute_sql`）带来了高风险与高认知负荷，而过于专用的工具则丧失了灵活性。理想的抽象应封装底层技术细节，同时暴露业务所需的必要参数（如 `get_sales(year, city)`），让 Agent 专注于业务逻辑而非技术实现。
+
+## 架构决策：确定性与自主性的权衡
+
+工作流（Workflow）与智能体（Agent）并非二元对立，而是互补的架构组件。复杂系统的构建，往往是两者的有机结合。核心在于根据具体环节的特性，选择最匹配的模式。
+
+### 决策维度
+
+| 决策维度 | 倾向工作流 (Workflow) | 倾向智能 Agent |
+| --- | --- | --- |
+| **路径确定性** | **高**：流程固定，逻辑分支清晰 | **低**：需动态探索，路径未知 |
+| **结果稳定性** | **高**：要求 100% 可预测与透明 | **中**：关注最终目标达成，容忍过程波动 |
+| **成本敏感度** | **高**：追求极致的 Token 效率 | **低**：愿意为智能决策支付推理成本 |
+| **可调试性** | **高**：状态流转清晰，易于排查 | **低**：需具备调试 AI 复杂推理链的能力 |
+
+### 混合模式的实践
+
+在实际工程中，混合架构（Hybrid Architecture）往往更具生命力：
+
+1. **Workflow 嵌套 Agent**：在确定性流程中，将诸如"生成核心洞察"等需要创造性的环节外包给 Agent 节点。
+2. **Agent 调用 Workflow**：将复杂但标准化的数据处理流程封装为工具（如 `generate_market_analysis_report`），供 Agent 一键调用，既保留了 Agent 的灵活性，又复用了工作流的高效性。
+3. **动态路由**：在系统入口设置智能路由节点，根据用户意图的复杂度，动态分发至固定工作流或自主 Agent。
+
+**先发散，后收敛**的策略在实践中屡试不爽：在原型探索阶段，优先采用 Agent 模式以快速验证价值边界；待核心路径明确后，再将高频、固定的环节沉淀为工作流，以在生产环境中实现成本与稳定性的最优解。
+
+必须正视的是，智能往往伴随着成本。Agent 的每一次"反思"与"规划"都是对算力的消耗。因此，在追求系统智能化的同时，保持对"智能溢价"的审慎评估，是架构师不可或缺的素养。

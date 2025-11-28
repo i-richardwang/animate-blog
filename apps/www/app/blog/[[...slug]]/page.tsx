@@ -28,7 +28,6 @@ export default async function Page(props: {
       title: post.data.title,
       description: post.data.description,
       date: new Date(post.data.date),
-      tags: post.data.tags,
     }));
 
     return (
@@ -129,26 +128,12 @@ export default async function Page(props: {
           />
         )}
 
-        <div className="flex flex-row gap-2 items-center">
-          <time
-            dateTime={date.toISOString()}
-            className="text-sm text-muted-foreground"
-          >
-            {format(date, 'MMM d, yyyy', { locale: enUS })}
-          </time>
-          {page.data.tags && page.data.tags.length > 0 && (
-            <>
-              {page.data.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
-                >
-                  {tag}
-                </span>
-              ))}
-            </>
-          )}
-        </div>
+        <time
+          dateTime={date.toISOString()}
+          className="text-sm text-muted-foreground"
+        >
+          {format(date, 'MMM d, yyyy', { locale: enUS })}
+        </time>
 
         <DocsBody id="docs-body" className="pb-10 pt-4">
           <MDXContent components={getMDXComponents()} />
