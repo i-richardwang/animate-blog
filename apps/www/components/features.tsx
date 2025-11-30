@@ -1,7 +1,7 @@
 import { Dancing_Script } from 'next/font/google';
 import { MotionEffect } from './effects/motion-effect';
 import { cn } from '@workspace/ui/lib/utils';
-import { About } from './icons/about';
+import { Reading } from './icons/reading';
 import { Projects } from './icons/projects';
 import { Blog } from './icons/blog';
 import { Notes } from './icons/notes';
@@ -84,12 +84,6 @@ import { motion } from 'motion/react';
 
 const COMPONENTS = [
   {
-    name: 'About Me',
-    description: '关于我',
-    href: '/about',
-    icon: <About />,
-  },
-  {
     name: 'Projects',
     description: '项目展示',
     href: '/projects',
@@ -106,6 +100,12 @@ const COMPONENTS = [
     description: '学习笔记',
     href: '/docs',
     icon: <Notes />,
+  },
+  {
+    name: 'Reading',
+    description: '推荐阅读',
+    href: '/reading',
+    icon: <Reading />,
   },
 ];
 

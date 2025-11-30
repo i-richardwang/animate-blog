@@ -118,7 +118,7 @@ export const Hero = ({ latestContent }: HeroProps) => {
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button size="lg" className="w-full" variant="accent" asChild>
-                <Link href="/blog">博客文章</Link>
+                <Link href="/about">About Me</Link>
               </Button>
             </motion.div>
           </MotionEffect>

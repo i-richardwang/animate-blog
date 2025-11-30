@@ -1,11 +1,11 @@
-import { UsersIcon } from '@/registry/icons/users';
+import { BadgeCheckIcon } from '@/registry/icons/badge-check';
 import { AnimateIcon } from '@/registry/icons/icon';
 
-export const About = () => {
+export const Reading = () => {
   return (
     <AnimateIcon asChild animateOnHover>
       <div className="w-full flex justify-center items-center h-full aspect-[350/190] dark:text-neutral-500 text-neutral-400">
-        <UsersIcon animation="default" className="size-20" />
+        <BadgeCheckIcon animation="default" className="size-20" />
       </div>
     </AnimateIcon>
   );

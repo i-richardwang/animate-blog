@@ -1,22 +1,20 @@
 ---
 title: 欢迎
-description: 数字花园，记录技术探索的点滴
+description: 技术手札，记录探索的点滴
 ---
 
-import { Brain, BarChart3, Code2 } from 'lucide-react';
+import { Brain, BarChart3, Code2, FolderGit2, PenLine, BookMarked, User } from 'lucide-react';
 
-这是一座数字花园，记录技术探索的点滴，分享见解，公开构建。
+这是一本技术手札，记录探索的点滴，分享见解，公开构建。
 
 ## 探索领域
-
-内容分为三个主要方向：
 
 <Cards>
   <Card
     icon={<Brain />}
     href="/docs/ai"
     title="AI 探索"
-    description="深入机器学习、大语言模型和 AI 应用实践"
+    description="机器学习、大语言模型和 AI 应用实践"
   />
   <Card
     icon={<BarChart3 />}
@@ -32,31 +30,49 @@ import { Brain, BarChart3, Code2 } from 'lucide-react';
   />
 </Cards>
 
+## 更多内容
+
+<Cards>
+  <Card
+    icon={<FolderGit2 />}
+    href="/projects"
+    title="项目"
+    description="开源项目和个人作品"
+  />
+  <Card
+    icon={<PenLine />}
+    href="/blog"
+    title="博客"
+    description="技术文章和经验分享"
+  />
+  <Card
+    icon={<BookMarked />}
+    href="/reading"
+    title="推荐阅读"
+    description="值得一读的外部文章"
+  />
+  <Card
+    icon={<User />}
+    href="/about"
+    title="关于我"
+    description="个人介绍和联系方式"
+  />
+</Cards>
+
 ## 关于这里
 
-这不只是博客，更是不断演进的笔记、实验与学习的集合。你会找到：
-
-- **深度技术探索** - 深入剖析技术概念
-- **实践指南** - 实用教程和最佳实践
-- **项目文档** - 完整的实战案例
-- **思考与反思** - 关于技术与学习的思考
-
-欢迎探索，如想讨论任何话题，随时联系！
+这里是学习笔记、实验记录和思考的集合。内容会持续更新和完善，欢迎探索。如有问题或想法，随时联系。
 
 ## 基于 Animate UI 构建
 
-本站基于 [Animate UI](https://animate-ui.com) 构建，这是一个出色的开源 React 组件库，拥有精美的动画效果。感谢 Animate UI 团队创建了如此强大和灵活的基础。
-
-## 使用此模板
-
-想用这个模板创建个人网站？这里有详细的改造过程和定制方法。
+本站基于 [Animate UI](https://animate-ui.com) 构建，感谢 Animate UI 团队。
 
 <Cards>
   <Card
     href="/blog/building-personal-site-with-animate-ui"
-    title="📝 使用 Animate UI 构建个人网站"
+    title="使用 Animate UI 构建个人网站"
     description="改造历程与定制指南"
   />
 </Cards>
 
-文章涵盖设计决策、架构变更和定制步骤。查看 [GitHub 仓库](https://github.com/i-richardwang/animate-blog) 了解完整实现。
+查看 [GitHub 仓库](https://github.com/i-richardwang/animate-blog) 了解完整实现。
