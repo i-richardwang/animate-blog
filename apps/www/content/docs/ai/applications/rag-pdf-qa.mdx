@@ -4,7 +4,7 @@ description: 详解使用LangChain搭建RAG基础步骤，实现对PDF文档内�
 releaseDate: 2024-04-27
 author:
   name: Richard Wang
-  url: https://imrichard.com
+  url: https://richardwang.me
 ---
 
 在数据分析工作中，尤其是进行行业对标和竞品分析时，我们需要频繁从各类研究报告中提取关键信息，包括竞争对手的财务数据和战略动向。然而，面对信息量庞大、结构多样的文档（尤其是 PDF 格式的财报、研报），手动查找和提取信息不仅耗时低效，还容易产生错误。
@@ -77,7 +77,7 @@ print(f"分割后的片段 (Splits) 数量: {len(splits)}")
 
 <Callout type="info">
   如果您对向量化技术还不熟悉，欢迎参考我的另一篇文章《[理解向量化 Embedding –
-  让机器捕捉文本关联性的核心技术](https://imrichard.com/understanding-vector-embedding/)》。
+  让机器捕捉文本关联性的核心技术](https://richardwang.me/understanding-vector-embedding/)》。
 </Callout>
 
 选择合适的 Embedding 模型（如针对中文优化的 **`bge-large-zh`**）是关键。接下来，我们将文本片段及其向量存入向量数据库（本示例使用内存型 **`Chroma`**）。

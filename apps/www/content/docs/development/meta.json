@@ -8,6 +8,9 @@
     "self-hosted/pve-installation-pcie-passthrough",
     "self-hosted/pve-vm-gpu-passthrough-cuda-setup",
     "self-hosted/datalore-deployment-overview",
+    "self-hosted/dolphinscheduler",
+    "self-hosted/hadoop-deployment",
+    "self-hosted/hive-on-spark",
     "---独立开发---",
     "indie-hacking/simplelogin-custom-domain-email"
   ]

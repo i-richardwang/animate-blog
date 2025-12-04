@@ -1,0 +1,557 @@
+---
+title: Hadoop 集群部署
+description: 基于 Linux 环境的三节点 Hadoop 完全分布式集群部署指南，涵盖 HDFS 和 YARN 组件的配置与启动
+releaseDate: 2022-06-11
+author:
+  name: Richard Wang
+  url: https://richardwang.me
+---
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+<Callout type="warn">
+这是一篇早年学习大数据知识时的折腾笔记，实操了 Hadoop 集群部署的详细过程。由于时间较早，部分内容可能已经过时，仅供参考。
+</Callout>
+
+Apache Hadoop 是一个开源的分布式计算平台，由 HDFS（分布式文件系统）和 YARN（资源调度框架）等核心组件构成。**尽管新兴技术不断涌现，Hadoop 至今仍是众多大型企业构建大数据基础设施的基石。**本文将以三台 Rocky Linux 8 虚拟机为例（主机名分别为 `hadoop01`、`hadoop02`、`hadoop03`），演示基于 **Hadoop 3.3.4** 和 **JDK 1.8** 的完全分布式集群部署流程。
+
+## 环境准备
+
+### 虚拟机创建
+
+<Callout type="info">
+若多台虚拟机使用克隆的方式创建，需要按如下步骤分别修改主机名和静态 IP 地址，避免冲突。若各个虚拟机采用独立安装，则可在安装时直接配置好主机名和静态 IP 地址。
+</Callout>
+
+<Steps>
+<Step>
+**修改主机名**
+
+```bash
+hostnamectl set-hostname hadoop01 # 对应修改 hadoop02、hadoop03
+```
+</Step>
+
+<Step>
+**修改静态 IP 地址**
+
+编辑网络配置文件：
+
+```bash
+vim /etc/sysconfig/network-scripts/ifcfg-ens33
+```
+
+修改如下配置（IP 地址根据实际网络环境调整）：
+
+```bash
+BOOTPROTO=static
+IPADDR="192.168.1.2"    # 每台虚拟机的 IP 地址不同
+NETMASK="255.255.255.0" # 子网掩码
+GATEWAY="192.168.1.1"   # 网关地址
+DNS1="192.168.1.1"      # DNS 地址
+```
+</Step>
+</Steps>
+
+### 用户配置
+
+<Callout type="warn">
+建议使用 Xshell 等工具的 "发送键入到所有会话窗口" 功能，同时在三台主机上执行以下命令，简化操作。
+</Callout>
+
+<Steps>
+<Step>
+**配置 hosts 映射**
+
+编辑 `/etc/hosts` 文件，添加集群节点映射：
+
+```bash
+vim /etc/hosts
+```
+
+```text
+192.168.100.61 hadoop01
+192.168.100.62 hadoop02
+192.168.100.63 hadoop03
+```
+</Step>
+
+<Step>
+**配置 root 用户免密登录**
+
+1. 生成密钥对：
+
+    ```bash
+    ssh-keygen -t rsa
+    ```
+
+2. 分发公钥到各个节点：
+
+    ```bash
+    ssh-copy-id hadoop01
+    ssh-copy-id hadoop02
+    ssh-copy-id hadoop03
+    ```
+</Step>
+
+<Step>
+**创建 hadoop 用户**
+
+```bash
+useradd hadoop
+passwd hadoop
+```
+</Step>
+
+<Step>
+**配置 sudo 权限**
+
+```bash
+vim /etc/sudoers
+```
+
+在 `%wheel ALL=(ALL) ALL` 行之后添加：
+
+```text
+hadoop ALL=(ALL) NOPASSWD: ALL
+```
+
+<Callout type="warn">
+配置必须添加在 `%wheel` 组配置之后，否则会被覆盖导致无效。
+</Callout>
+</Step>
+
+<Step>
+**配置 hadoop 用户免密登录**
+
+1. 切换到 hadoop 用户：
+    ```bash
+    su - hadoop
+    ```
+
+2. 生成密钥对：
+    ```bash
+    ssh-keygen -t rsa
+    ```
+
+3. 分发公钥：
+    ```bash
+    ssh-copy-id hadoop01
+    ssh-copy-id hadoop02
+    ssh-copy-id hadoop03
+    ```
+</Step>
+</Steps>
+
+### 系统配置
+
+<Steps>
+<Step>
+**关闭防火墙**
+
+```bash
+systemctl stop firewalld
+systemctl disable firewalld.service
+```
+</Step>
+
+<Step>
+**关闭 SELinux**
+
+编辑 `/etc/selinux/config`：
+
+```bash
+SELINUX=disabled
+```
+</Step>
+
+<Step>
+**关闭 Swap**
+
+临时关闭 swap 并修改 `/etc/fstab` 永久关闭：
+
+```bash
+swapoff -a
+vim /etc/fstab
+```
+
+注释掉 swap 挂载行：
+
+```text
+#/dev/mapper/cl-swap swap                    swap    defaults        0 0
+```
+</Step>
+
+<Step>
+**配置时间同步**
+
+Rocky Linux 9 默认使用 chrony。编辑配置文件：
+
+```bash
+vim /etc/chrony.conf
+```
+
+添加时间服务器：
+
+```text
+server ntp.aliyun.com iburst
+```
+
+重启服务：
+
+```bash
+systemctl restart chronyd && systemctl status chronyd
+systemctl start chronyd
+systemctl enable chronyd
+```
+</Step>
+</Steps>
+
+### 安装 JDK
+
+<Steps>
+<Step>
+**创建目录并授权**
+
+```bash
+mkdir -p /opt/bigdata # 存放软件
+mkdir -p /opt/software # 存放安装包
+chown -R hadoop:hadoop /opt/bigdata
+chown -R hadoop:hadoop /opt/software
+```
+</Step>
+
+<Step>
+**解压 JDK**
+
+将 `jdk-8u212-linux-x64.tar.gz` 上传至 `/opt/software` 后解压：
+
+```bash
+tar -zxvf /opt/software/jdk-8u212-linux-x64.tar.gz -C /opt/bigdata
+```
+</Step>
+
+<Step>
+**创建软链接**
+
+```bash
+ln -s /opt/bigdata/jdk1.8.0_212 /opt/bigdata/jdk
+```
+</Step>
+
+<Step>
+**配置环境变量**
+
+创建 `/etc/profile.d/bigdata.sh`：
+
+```bash
+export JAVA_HOME=/opt/bigdata/jdk
+export PATH=$PATH:$JAVA_HOME/bin
+```
+</Step>
+
+<Step>
+**生效配置**
+
+```bash
+source /etc/profile.d/bigdata.sh
+```
+</Step>
+
+<Step>
+**创建程序软链接（可选）**
+
+```bash
+ln -s /opt/bigdata/jdk/bin/java /usr/bin/java
+ln -s /opt/bigdata/jdk/bin/jps /usr/bin/jps
+```
+</Step>
+</Steps>
+
+## HDFS 部署
+
+### 节点规划
+
+| 主机名   | 角色                        |
+| -------- | --------------------------- |
+| hadoop01 | NameNode、DataNode          |
+| hadoop02 | DataNode                    |
+| hadoop03 | DataNode、SecondaryNameNode |
+
+### 安装与配置
+
+<Steps>
+<Step>
+**下载与解压**
+
+下载 Hadoop 程序包（建议使用国内镜像）：
+
+```bash
+cd /opt/software
+wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.4/hadoop-3.3.4.tar.gz
+```
+
+解压并创建软链接：
+
+```bash
+tar -zxvf /opt/software/hadoop-3.3.4.tar.gz -C /opt/bigdata
+ln -s /opt/bigdata/hadoop-3.3.4 /opt/bigdata/hadoop
+```
+</Step>
+
+<Step>
+**配置环境变量**
+
+编辑 `/etc/profile.d/bigdata.sh`，追加 Hadoop 配置：
+
+```bash
+export HADOOP_HOME=/opt/bigdata/hadoop
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+```
+
+生效配置：
+
+```bash
+source /etc/profile.d/bigdata.sh
+```
+</Step>
+
+<Step>
+**配置 workers**
+
+编辑 `/opt/bigdata/hadoop/etc/hadoop/workers`，指定 DataNode 节点：
+
+```text
+hadoop01
+hadoop02
+hadoop03
+```
+</Step>
+
+<Step>
+**配置 core-site.xml**
+
+编辑 `/opt/bigdata/hadoop/etc/hadoop/core-site.xml`：
+
+```xml
+<property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://hadoop01:8020</value>
+</property>
+```
+</Step>
+
+<Step>
+**配置 hdfs-site.xml**
+
+编辑 `/opt/bigdata/hadoop/etc/hadoop/hdfs-site.xml`：
+
+```xml
+<!-- namenode 地址 -->
+<property>
+    <name>dfs.namenode.http-address</name>
+    <value>hadoop01:9870</value>
+</property>
+<!-- secondarynamenode 地址 -->
+<property>
+    <name>dfs.namenode.secondary.http-address</name>
+    <value>hadoop03:9868</value>
+</property>
+<!-- 副本数量：单机/测试环境设为 1，生产环境通常为 3 -->
+<property>
+    <name>dfs.replication</name>
+    <value>1</value>
+</property>
+<!-- 指定哪些节点作为 NameNode -->
+<property>
+    <name>dfs.namenode.hosts</name>
+    <value>hadoop01, hadoop02, hadoop03</value>
+</property>
+```
+</Step>
+
+<Step>
+**分发程序到集群节点**
+
+使用 `xsync` 或 `scp` 将 Hadoop 目录分发到其他节点。
+
+<Callout type="warn">
+分发操作必须在集群**初次启动之前**进行。若集群已启动，DataNode 会生成唯一的 ID，此时再分发会导致 ID 冲突和集群损坏。
+</Callout>
+
+```bash
+xsync /opt/bigdata/hadoop-3.3.4
+```
+</Step>
+</Steps>
+
+### 启动与验证
+
+<Steps>
+<Step>
+**格式化 NameNode**
+
+**仅在首次启动前执行一次**：
+
+```bash
+su - hadoop
+hdfs namenode -format
+```
+</Step>
+
+<Step>
+**启动 HDFS**
+
+```bash
+start-dfs.sh
+```
+</Step>
+
+<Step>
+**验证进程**
+
+```bash
+jps
+```
+</Step>
+
+<Step>
+**Web UI 访问**
+
+- **NameNode**: `http://hadoop01:9870`
+- **DataNode**: `http://hadoop02:9864`
+- **SecondaryNameNode**: `http://hadoop03:9868`
+</Step>
+</Steps>
+
+## YARN 部署
+
+### 节点规划
+
+| 主机名   | 角色                         |
+| -------- | ---------------------------- |
+| hadoop01 | NodeManager                  |
+| hadoop02 | ResourceManager、NodeManager |
+| hadoop03 | NodeManager                  |
+
+### 配置步骤
+
+<Steps>
+<Step>
+**配置 yarn-site.xml**
+
+编辑 `/opt/bigdata/hadoop/etc/hadoop/yarn-site.xml`：
+
+```xml
+<!-- 为 MapReduce 开启 shuffle 服务 -->
+<property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+</property>
+<!-- 设置 ResourceManager 的节点 -->
+<property>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>hadoop02</value>
+</property>
+<!-- 设置环境变量的继承 -->
+<property>
+    <name>yarn.nodemanager.env-whitelist</name>
+    <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_MAPRED_HOME</value>
+</property>
+<!-- 关闭虚拟内存检查 -->
+<property>
+    <name>yarn.nodemanager.vmem-check-enabled</name>
+    <value>false</value>
+</property>
+<!-- 开启日志聚合 -->
+<property>
+    <name>yarn.log-aggregation-enable</name>
+    <value>true</value>
+</property>
+<!-- 设置历史服务器日志聚合 URL -->
+<property>
+    <name>yarn.log.server.url</name>
+    <value>http://hadoop01:19888/jobhistory/logs</value>
+</property>
+<!-- 日志保留 30 天 -->
+<property>
+    <name>yarn.log-aggregation.retain-seconds</name>
+    <value>2592000</value>
+</property>
+<!-- 使用公平调度器 -->
+<property>
+    <name>yarn.resourcemanager.scheduler.class</name>
+    <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler</value>
+</property>
+```
+</Step>
+
+<Step>
+**配置 mapred-site.xml**
+
+编辑 `/opt/bigdata/hadoop/etc/hadoop/mapred-site.xml`：
+
+```xml
+<!-- 设置 MapReduce 运行在 YARN 上 -->
+<property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+</property>
+<!-- JobHistoryServer 地址 -->
+<property>
+    <name>mapreduce.jobhistory.address</name>
+    <value>hadoop01:10020</value>
+</property>
+<!-- JobHistoryServer Web 地址 -->
+<property>
+    <name>mapreduce.jobhistory.webapp.address</name>
+    <value>hadoop01:19888</value>
+</property>
+```
+</Step>
+
+<Step>
+**分发配置文件**
+
+将配置文件同步到所有节点：
+
+<Callout type="info">
+注意只分发配置文件夹 `/etc/hadoop`，不要同步整个安装目录，以免覆盖数据。
+</Callout>
+
+```bash
+xsync /opt/bigdata/hadoop-3.3.4/etc/hadoop
+```
+</Step>
+</Steps>
+
+### 启动与验证
+
+<Steps>
+<Step>
+**启动 YARN**
+
+在 **ResourceManager 节点 (hadoop02)** 上执行：
+
+```bash
+start-yarn.sh
+```
+</Step>
+
+<Step>
+**启动历史服务器**
+
+在 **HistoryServer 节点 (hadoop01)** 上执行：
+
+```bash
+hadoop --daemon start historyserver
+```
+</Step>
+
+<Step>
+**Web UI 访问**
+
+- **ResourceManager**: `http://hadoop02:8088`
+- **HistoryServer**: `http://hadoop01:19888`
+</Step>
+</Steps>
