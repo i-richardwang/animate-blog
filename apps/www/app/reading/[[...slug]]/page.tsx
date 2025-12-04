@@ -40,7 +40,7 @@ export default async function Page(props: {
         <DocsPage toc={[]} article={{ className: '!max-w-[1124px]' }}>
           <DocsTitle className="font-medium">推荐阅读</DocsTitle>
           <DocsDescription className="mb-1 font-normal">
-            精选优质文章，中文翻译呈现
+            每周一篇深度好文，扩展技术与认知边界。
           </DocsDescription>
 
           <DocsBody id="docs-body" className="pb-10 pt-4">
@@ -185,10 +185,10 @@ export async function generateMetadata(props: {
   if (slug.length === 0) {
     return {
       title: '推荐阅读',
-      description: '精选优质文章，中文翻译呈现',
+      description: '每周一篇深度好文，扩展技术与认知边界。',
       openGraph: {
         title: '推荐阅读',
-        description: '精选优质文章，中文翻译呈现',
+        description: '每周一篇深度好文，扩展技术与认知边界。',
         url: 'https://richardwang.me/reading',
         siteName: "Richard's Page",
         type: 'website',
