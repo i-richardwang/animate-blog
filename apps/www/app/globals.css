@@ -311,15 +311,15 @@
   }
 
   #nd-docs-layout {
-    @apply relative 3xl:!w-full 3xl:!mx-auto 3xl:!max-w-[1670px];
+    @apply relative;
   }
 
   #nd-page article {
-    @apply max-2xl:max-w-[860px] !pt-23 3xl:!ml-[262px] 2xl:!max-w-[1124px];
+    @apply !pt-23;
   }
 
   #nd-page {
-    @apply !pt-0 2xl:!max-w-none;
+    @apply !pt-0;
   }
 
   #nd-toc {

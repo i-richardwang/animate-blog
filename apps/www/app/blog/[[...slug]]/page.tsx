@@ -78,6 +78,7 @@ export default async function Page(props: {
     <>
       <DocsPage
         toc={page.data.toc}
+        article={{ className: '!max-w-[860px]' }}
         footer={{
           items: {
             previous: prevNav

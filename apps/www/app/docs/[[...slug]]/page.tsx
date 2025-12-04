@@ -117,6 +117,7 @@ export default async function Page(props: {
     <DocsPage
       toc={page.data.toc}
       full={page.data.full}
+      article={{ className: '!max-w-[860px]' }}
       // Original footer with lastUpdate info (replaced with built-in navigation)
       // footer={{
       //   component: (
