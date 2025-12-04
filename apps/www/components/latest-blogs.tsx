@@ -66,9 +66,9 @@ export const LatestBlogs = ({ content }: LatestBlogsProps) => {
       zoom
       delay={0.75}
     >
-      <div className="dark:bg-neutral-800 bg-neutral-100 rounded-2xl h-11 px-4 md:w-[576px] w-full max-w-full mx-auto">
+      <div className="bg-card rounded-md h-11 px-4 md:w-[576px] w-full max-w-full mx-auto">
         <div className="flex items-center gap-3 h-full">
-          <span className="h-6 px-2 bg-primary text-xs text-primary-foreground rounded-full flex gap-1 items-center justify-center whitespace-nowrap">
+          <span className="h-6 px-2 bg-primary text-xs text-primary-foreground rounded flex gap-1 items-center justify-center whitespace-nowrap">
             Latest
             <PartyPopper delay={500} className="size-3.5" animate />
           </span>

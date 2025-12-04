@@ -142,7 +142,7 @@ export const Features = () => {
                     damping: 20,
                   }}
                   className={cn(
-                    'relative w-full dark:bg-neutral-800 bg-neutral-100 rounded-2xl overflow-hidden',
+                    'relative w-full bg-card rounded-md overflow-hidden',
                     !component?.href && 'opacity-50 cursor-not-allowed',
                   )}
                 >

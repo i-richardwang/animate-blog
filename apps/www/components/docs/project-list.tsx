@@ -39,10 +39,10 @@ export function ProjectList({ projects }: ProjectListProps) {
             <motion.div
               whileHover={{ y: -4 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="h-full group dark:bg-neutral-800 bg-neutral-100 rounded-2xl overflow-hidden cursor-pointer"
+              className="h-full group bg-card rounded-md overflow-hidden cursor-pointer"
             >
               {project.image && (
-                <div className="relative w-full aspect-[16/9] overflow-hidden bg-neutral-200 dark:bg-neutral-700">
+                <div className="relative w-full aspect-[16/9] overflow-hidden bg-muted">
                   <img
                     src={project.image}
                     alt={project.title}
