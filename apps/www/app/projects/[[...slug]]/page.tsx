@@ -214,7 +214,7 @@ export default async function Page(props: {
           />
         </div>
 
-        <DocsBody id="docs-body" className="pb-10 pt-4">
+        <DocsBody id="docs-body" className="prose-lg-content pb-10 pt-4">
           <MDXContent components={getMDXComponents()} />
         </DocsBody>
       </DocsPage>

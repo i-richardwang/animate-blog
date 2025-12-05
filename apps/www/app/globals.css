@@ -347,6 +347,11 @@
     @apply !font-medium;
   }
 
+  /* Larger prose text for blog/project/reading pages (desktop only) */
+  #docs-body.prose-lg-content {
+    @apply md:!text-lg;
+  }
+
   @keyframes blink {
     50% {
       opacity: 0.6;
