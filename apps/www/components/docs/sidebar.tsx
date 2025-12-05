@@ -32,6 +32,19 @@ import { NOTES_ITEMS } from './notes-menu';
 import { SquareMenu } from 'lucide-react';
 import { useIsMobile } from '@workspace/ui/hooks/use-mobile';
 
+const CONTENT_SECTIONS = ['/blog', '/projects', '/reading'] as const;
+const DOCS_SECTIONS = [
+  '/docs/ai',
+  '/docs/data-science',
+  '/docs/development',
+] as const;
+
+const isContentSection = (pathname: string) =>
+  CONTENT_SECTIONS.some((section) => pathname.startsWith(section));
+
+const isDocsSection = (pathname: string) =>
+  DOCS_SECTIONS.some((section) => pathname.startsWith(section));
+
 const MENU_ITEMS = [
   {
     name: 'Menu',
@@ -300,32 +313,20 @@ export const DocsSidebar = ({
   );
   const pathname = usePathname();
   const links = getLinks(props.links ?? [], props.githubUrl);
-
-  // Original path check (commented out for upstream sync)
-  // const isMenu =
-  //   !pathname.startsWith('/docs/primitives') &&
-  //   !pathname.startsWith('/docs/components') &&
-  //   !pathname.startsWith('/docs/icons');
-
-  const isMenu =
-    !pathname.startsWith('/docs/ai') &&
-    !pathname.startsWith('/docs/data-science') &&
-    !pathname.startsWith('/docs/development') &&
-    !pathname.startsWith('/blog') &&
-    !pathname.startsWith('/projects');
   const isMobile = useIsMobile();
-  const isBlogOrProjects =
-    pathname.startsWith('/blog') || pathname.startsWith('/projects');
+
+  const isContentPage = isContentSection(pathname);
+  const showMobileMenu = isContentPage || isDocsSection(pathname);
 
   return (
     <>
       <Sidebar
         collapsible={false}
-        className={cn('md:mt-20', isBlogOrProjects && 'md:hidden')}
+        className={cn('md:mt-20', isContentPage && 'md:hidden')}
         {...sidebarProps}
       >
         <SidebarViewport className="md:[&_[data-radix-scroll-area-viewport]]:pb-14 [&_[data-radix-scroll-area-viewport]]:pb-4 max-md:pt-2">
-          {!isBlogOrProjects &&
+          {!isContentPage &&
             links
               .filter((v) => v.type !== 'icon')
               .map((item, i, list) => (
@@ -339,7 +340,7 @@ export const DocsSidebar = ({
                 />
               ))}
 
-          {isBlogOrProjects && isMobile ? (
+          {showMobileMenu && isMobile && (
             <div>
               {MENU_ITEMS.map((item, i) => (
                 <SidebarLinkItem
@@ -353,31 +354,14 @@ export const DocsSidebar = ({
                 />
               ))}
             </div>
-          ) : (
-            !isMenu &&
-            isMobile && (
-              <div>
-                {MENU_ITEMS.map((item, i) => (
-                  <SidebarLinkItem
-                    key={i}
-                    item={item as LinkItemType}
-                    className={cn(
-                      sidebarItemClassName,
-                      i === 0 && 'mt-4',
-                      i === MENU_ITEMS.length - 1 && 'mb-4',
-                    )}
-                  />
-                ))}
-              </div>
-            )
           )}
 
-          {!isBlogOrProjects && (
+          {!isContentPage && (
             <SidebarPageTree components={sidebarComponents} />
           )}
         </SidebarViewport>
 
-        {!isBlogOrProjects && (
+        {!isContentPage && (
           <HideIfEmpty>
             <SidebarFooter className="data-[empty=true]:hidden md:hidden border-0">
               <div className="flex items-center justify-end empty:hidden">

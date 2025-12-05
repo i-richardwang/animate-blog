@@ -5,6 +5,7 @@ import { Nav } from '@/components/docs/nav';
 import { baseOptions } from '@/app/layout.config';
 import { ThemeSwitcher } from '@/components/animate/theme-switcher';
 import { reading } from '@/lib/source';
+import { DocsSidebar } from '@/components/docs/sidebar';
 import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 
 const READING_LAYOUT_PROPS: DocsLayoutProps = {
@@ -31,6 +32,8 @@ export default function ReadingLayout({ children }: { children: ReactNode }) {
       >
         {children}
       </DocsLayout>
+      {/* Mobile-only sidebar overlay for Reading routes */}
+      <DocsSidebar {...READING_LAYOUT_PROPS} />
     </>
   );
 }
