@@ -86,6 +86,7 @@ export const reading = defineCollections({
       })
       .optional(),
     originalUrl: z.string(),
+    originalTitle: z.string(),
     image: z.string().optional(),
     category: z.enum(['tech', 'humanity']).optional(),
     subtitle: z.string().optional(),

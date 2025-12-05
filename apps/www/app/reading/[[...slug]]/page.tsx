@@ -84,7 +84,7 @@ export default async function Page(props: {
   return (
     <>
       <DocsPage
-        toc={page.data.toc}
+        toc={[]}
         article={{ className: '!max-w-[860px]' }}
         footer={{
           items: {
@@ -163,7 +163,7 @@ export default async function Page(props: {
               )}
             >
               <ExternalLink />
-              View Original
+              阅读原文:《{page.data.originalTitle}》by {page.data.author?.name}
             </a>
           </Shine>
         </div>

@@ -147,7 +147,7 @@ export default async function Page(props: {
   return (
     <>
       <DocsPage
-        toc={page.data.toc}
+        toc={[]}
         article={{ className: '!max-w-[860px]' }}
         breadcrumb={{ enabled: true, includeSeparator: true }}
         footer={{
