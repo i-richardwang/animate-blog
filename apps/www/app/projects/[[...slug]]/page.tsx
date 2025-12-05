@@ -149,6 +149,7 @@ export default async function Page(props: {
       <DocsPage
         toc={page.data.toc}
         article={{ className: '!max-w-[860px]' }}
+        breadcrumb={{ enabled: true, includeSeparator: true }}
         footer={{
           items: {
             previous: prevNav

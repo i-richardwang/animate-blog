@@ -118,6 +118,7 @@ export default async function Page(props: {
       toc={page.data.toc}
       full={page.data.full}
       article={{ className: '!max-w-[860px]' }}
+      breadcrumb={{ enabled: true, includeSeparator: true }}
       // Original footer with lastUpdate info (replaced with built-in navigation)
       // footer={{
       //   component: (
