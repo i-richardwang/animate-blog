@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { ReadingList } from '@/components/docs/reading-list';
 import { DocsAuthor } from '@/components/docs/docs-author';
+import { CategoryBreadcrumb } from '@/components/docs/category-breadcrumb';
 import { Shine } from '@/registry/primitives/effects/shine';
 import { cn } from '@workspace/ui/lib/utils';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
@@ -93,6 +94,7 @@ export default async function Page(props: {
           },
         }}
       >
+        <CategoryBreadcrumb category={page.data.category} />
         <div className="flex flex-row gap-2 items-start w-full justify-between">
           <DocsTitle className="font-medium">{page.data.title}</DocsTitle>
           {(prevNav || nextNav) && (
