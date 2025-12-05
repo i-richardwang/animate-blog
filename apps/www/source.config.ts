@@ -88,6 +88,7 @@ export const reading = defineCollections({
     originalUrl: z.string(),
     image: z.string().optional(),
     category: z.enum(['tech', 'humanity']).optional(),
+    subtitle: z.string().optional(),
   }),
 });
 

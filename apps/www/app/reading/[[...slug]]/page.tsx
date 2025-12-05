@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { ReadingList } from '@/components/docs/reading-list';
 import { DocsAuthor } from '@/components/docs/docs-author';
+import { DocsSubtitle } from '@/components/docs/docs-subtitle';
 import { CategoryBreadcrumb } from '@/components/docs/category-breadcrumb';
 import { Shine } from '@/registry/primitives/effects/shine';
 import { cn } from '@workspace/ui/lib/utils';
@@ -126,6 +127,7 @@ export default async function Page(props: {
             </div>
           )}
         </div>
+        <DocsSubtitle>{page.data.subtitle}</DocsSubtitle>
         <DocsDescription className="mb-1 font-normal">
           {page.data.description}
         </DocsDescription>
