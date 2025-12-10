@@ -1,0 +1,373 @@
+---
+title: 企业级自然语言SQL助手
+description: 分享如何利用 LangGraph 工作流引擎和向量搜索构建智能 SQL 助手，实现从自然语言到精准 SQL 查询的转换，让非技术人员也能轻松查询数据库
+releaseDate: 2025-03-20
+author:
+  name: Richard Wang
+  url: https://richardwang.me
+---
+
+在实际开发 Text-to-SQL 应用时，直接让 LLM 生成 SQL 往往很难满足业务需求，因为用户的提问方式通常很模糊，且涉及复杂的表结构和权限控制。
+
+为了解决这些问题，我基于 LangGraph 开发了 QueryBot。它的核心思路是不追求"一步到位"，而是将整个流程拆解为 13 个具体的处理节点，包括意图分析、术语映射、权限检查和自动修复等。这篇文章主要记录了这套系统的设计思路和实现细节。
+
+## 系统整体架构
+
+QueryBot 的工作流并没有什么黑科技，本质上就是把人工写 SQL 的思维过程代码化了：
+
+![QueryBot 整体架构流程图](/projects/querybot/querybot.png)
+
+**为什么需要这么多步骤？**
+
+传统的方案通常试图把所有上下文（问题+全库表结构）一次性丢给 LLM。这种方式在简单 Demo 里跑得通，但在真实业务里会有很多坑：
+
+- **意图模糊**：用户说的"最近"到底是最近一周还是一个月？
+
+- **术语不一致**：口头说的"技术部"，库里存的可能是"研发中心"。
+
+- **幻觉问题**：模型很容易编造不存在的字段。
+
+- **权限风险**：不能让普通员工查到薪资表。
+
+- **报错处理**：SQL 写错一个标点，系统能不能自己修好？
+
+QueryBot 的核心思路是**将复杂任务拆解为多个专门化的处理节点**，每个节点专注解决一个具体问题，通过状态流转串联起来。这种设计的好处：
+
+- **可观测性**：每个节点的输入输出都清晰可见，便于调试和优化
+- **可控性**：可以在任意节点设置条件分支，实现精细的流程控制
+- **可迭代性**：优化某个环节不会影响其他部分，迭代成本低
+
+## 一、意图理解：先把问题搞清楚
+
+用户的原始提问往往是口语化的、不完整的。如果输入质量差，生成的 SQL 肯定不对。所以前几个节点不涉及数据库，只做文本分析。
+
+### 意图分析节点
+
+当用户输入"查一下技术部最近的招聘情况"时，系统会分析这段话的完整度：
+
+```python
+def intent_analysis_node(state: SQLAssistantState) -> dict:
+    # 调 LLM 分析意图
+    analysis = llm.invoke(user_query)
+
+    # 如果缺少必要条件（如时间范围、统计指标），直接打回
+    if not analysis["is_clear"]:
+        return {
+            "is_intent_clear": False,
+            "messages": ["您指的'最近'具体是多久？'情况'是指人数还是通过率？"]
+        }
+
+    return {"is_intent_clear": True}
+```
+
+LLM 会从以下维度评估意图清晰度：
+
+- **查询目标**：用户想获取什么信息？是列表、统计还是对比？
+- **筛选条件**：时间范围、部门、状态等条件是否明确？
+- **数据粒度**：是要汇总数据还是明细数据？
+
+如果判断信息不足，系统会生成针对性的澄清问题：
+
+> "您好！关于'最近的招聘情况'，请问：
+>
+> 1. '最近'具体指多长时间范围？（如最近一个月、一个季度）
+> 2. 您想了解哪些具体信息？（如候选人数量、面试通过率、offer 发放情况等）"
+
+通过一到两轮对话，系统就能获得足够清晰的查询意图。
+
+### 关键词提取与术语映射
+
+意图确认后，最大的障碍是"黑话"。业务说的词和数据库里的字段往往不一样，需要把"人话"翻译成"机器话"。
+
+```python
+# 关键词提取
+keywords = ["技术部", "2024年Q4", "招聘"]
+
+# 术语映射（通过向量搜索）
+mappings = {
+    "技术部": "研发中心",      # 部门别名映射
+    "2024年Q4": "2024-10-01 ~ 2024-12-31",  # 时间范围解析
+    "招聘": "recruitment_campaign"  # 业务概念映射
+}
+```
+
+这一步的关键是**向量语义搜索**。我们预先将所有业务术语及其别名存入 Milvus 向量数据库，当用户使用非标准表述时，系统能通过语义相似度找到对应的标准术语。
+
+### 查询重写
+
+最后，LLM 会结合上面的信息，把用户的原始问题重写成一个非常规范的描述：
+
+```
+原始查询："查一下技术部最近的招聘情况"
+重写后："查询研发中心 2024 年第四季度所有招聘活动的详细信息，包括候选人数量、面试情况和录用结果"
+```
+
+重写后的查询语义明确、术语标准，后续的 SQL 生成就有了可靠的输入。
+
+## 二、数据源定位：缩小搜索范围
+
+企业数据库通常有成百上千张表，把所有表结构都塞进 Prompt 显然不现实。解决办法是建立表结构的向量索引，通过语义搜索定位相关表。
+
+### 数据源识别
+
+```python
+def data_source_node(state: SQLAssistantState) -> dict:
+    # 用重写后的查询去搜相关的表描述
+    matched_tables = milvus.search(
+        collection="table_descriptions",
+        query=state["rewritten_query"],
+        top_k=5
+    )
+
+    if not matched_tables:
+        return {"has_relevant_tables": False, "msg": "没找到相关数据表"}
+
+    return {"matched_tables": matched_tables[:3]} # 只取最相关的3张
+
+```
+
+我们为每张表维护一份描述文档，包含：
+
+- 表名和中文说明
+- 主要字段及其含义
+- 典型的业务场景
+- 与其他表的关联关系
+
+这些描述文档被向量化后存入 Milvus，当用户查询进来时，系统通过语义相似度匹配最相关的表。
+
+### 可行性检查
+
+找到表之后，先别急着写 SQL。这步增加了一个 Check 环节：让 LLM 判断一下，**根据这几张表的字段，到底能不能查出用户想要的数据？**
+
+```python
+def feasibility_check_node(state: SQLAssistantState) -> dict:
+    # 让 LLM 判断字段覆盖率和关联条件
+    check = llm.invoke({
+        "query": state["rewritten_query"],
+        "tables": state["matched_tables"]
+    })
+
+    if not check["is_feasible"]:
+        return {
+            "feasibility_check": False,
+            "messages": [check["reason"]] # e.g., "缺少'面试通过率'相关字段"
+        }
+
+    return {"feasibility_check": True}
+```
+
+可行性检查会评估：
+
+- **字段覆盖**：查询所需的信息是否都能从现有字段获取？
+- **数据完整性**：相关数据是否存在？时间范围是否覆盖？
+- **关联可行性**：如需多表关联，关联字段是否存在？
+
+如果检查不通过，系统会给出明确的反馈，而不是生成一个注定会失败的 SQL。
+
+## 三、SQL 生成：结合示例写代码
+
+即使有了清晰的意图和正确的表，生成高质量的 SQL 仍然不容易。为了让 LLM 发挥更稳定，我们引入了**Few-Shot（少样本学习）**机制。
+
+### 查询示例检索
+
+在生成 SQL 前，系统会去向量库里搜一下：**以前有没有人问过类似的问题？**
+
+```python
+def query_example_node(state: SQLAssistantState) -> dict:
+    # 检索相似的历史 SQL（人工验证过的）
+    examples = milvus.search(
+        collection="query_examples",
+        query=state["rewritten_query"],
+        top_k=3
+    )
+    return {"query_examples": examples}
+```
+
+这些示例不仅提供了 SQL 的写法参考，更重要的是展示了**业务逻辑的正确实现方式**。比如"招聘成功率"应该用哪些字段计算、"在职员工"的筛选条件是什么等。
+
+### SQL 生成节点
+
+```python
+def sql_generation_node(state: SQLAssistantState) -> dict:
+    context = {
+        "user_query": state["rewritten_query"],
+        "table_structures": format_tables(state["matched_tables"]),
+        "query_examples": format_examples(state["query_examples"]),
+        "database_type": "PostgreSQL"
+    }
+
+    # LLM 生成 SQL 和解释
+    result = llm_sql_chain.invoke(context)
+
+    return {
+        "generated_sql": {
+            "sql": result["sql"],
+            "explanation": result["explanation"]
+        }
+    }
+```
+
+SQL 生成的 Prompt 中包含详细的编写规范：
+
+```
+## SQL 编写规范
+
+1. 优先使用单表查询，仅在必要时使用 JOIN
+2. 所有表名和字段名必须来自提供的表结构，禁止编造
+3. 使用表别名提高可读性
+4. 添加合理的排序和数量限制
+5. 对于聚合查询，确保 GROUP BY 包含所有非聚合字段
+6. 根据数据库类型（MySQL/PostgreSQL）使用正确的语法
+```
+
+生成的 SQL 会附带解释说明，方便用户理解查询逻辑。
+
+## 四、权限控制：必须做在执行前
+
+企业环境中，不同用户能看到的数据范围不同。销售经理只能看自己团队的数据，HR 只能看本部门的员工信息。这就需要在 SQL 执行前注入权限过滤条件。
+
+这是整个系统中最复杂、代码量最大的一块，负责解析 SQL 并注入权限条件：
+
+```python
+def permission_control_node(state: SQLAssistantState) -> dict:
+    sql = state["generated_sql"]["sql"]
+    user = state["user_context"]
+
+    # 1. 表级检查：这几张表用户能不能看？
+    tables = extract_tables(sql)
+    if not check_table_permission(user, tables):
+        return {"error": "无权访问相关数据表"}
+
+    # 2. 行级控制 (RLS)：注入 Where 条件
+    # 比如给 SQL 加上 AND dept_path LIKE '/company/tech/%'
+    secured_sql = inject_row_level_security(
+        sql=sql,
+        dept_path=user["dept_path"]
+    )
+
+    return {"generated_sql": {"sql": secured_sql}}
+```
+
+权限控制分为两个层次：
+
+**表级权限**：用户是否有权访问某张表
+
+**行级权限**：用户能看到表中的哪些数据行
+
+行级权限通过在 WHERE 子句中注入部门路径过滤来实现：
+
+```sql
+-- 原始 SQL
+SELECT * FROM employees WHERE status = 'active'
+
+-- 注入权限条件后
+SELECT * FROM employees
+WHERE status = 'active'
+  AND dept_path LIKE '/company/tech/%'  -- 只能看技术部门的数据
+```
+
+## 五、错误处理：LLM 自己修 Bug
+
+SQL 执行可能因各种原因失败：语法错误、字段不存在、数据类型不匹配等。如果一报错就让用户重来，体验太差。所以需要设计错误分析和自动修复机制。
+
+我们设计了一个自动修复流程：
+
+```python
+def error_analysis_node(state: SQLAssistantState) -> dict:
+    error_msg = state["execution_result"]["error"]
+    bad_sql = state["generated_sql"]["sql"]
+
+    # 让 LLM 分析错误原因并尝试修复
+    fix_result = llm_fix_chain.invoke({
+        "sql": bad_sql,
+        "error": error_msg,
+        "tables": state["matched_tables"]
+    })
+
+    if fix_result["is_fixable"]:
+        # 更新 SQL 并增加重试计数
+        return {
+            "generated_sql": {"sql": fix_result["fixed_sql"]},
+            "retry_count": state["retry_count"] + 1
+        }
+    else:
+        return {"messages": ["抱歉，遇到无法修复的错误..."]}
+```
+
+错误分为两类：
+
+**可修复错误**：字段名拼写错误、缺少引号或括号、函数使用不当
+
+**不可修复错误**：权限不足、数据不存在、业务逻辑错误
+
+对于可修复错误，系统会自动尝试修复并重新执行。对于不可修复错误，则生成用户友好的反馈信息。
+
+## 六、结果呈现
+
+拿到数据后，直接把表格丢给用户并不直观。最后一步是把查询结果（Data）和原始问题（Query）再交给 LLM，让它生成一段简短的总结。
+
+```python
+def result_generation_node(state: SQLAssistantState) -> dict:
+    data = state["execution_result"]["data"]
+
+    # 结合问题和数据生成自然语言回答
+    summary = llm_summary_chain.invoke({
+        "query": state["rewritten_query"],
+        "data": data[:20] # 只传前20条用于总结
+    })
+
+    return {
+        "final_response": summary,
+        "data_preview": data
+    }
+```
+
+结果生成会根据数据特点调整呈现方式：
+
+- **少量数据**：详细列出每条记录
+- **统计数据**：突出关键指标和趋势
+- **大量数据**：提供摘要和下载建议
+
+同时，系统会把执行的 SQL 也返回给用户，方便有技术背景的用户验证和复用。
+
+## **技术实现小结**
+
+这套系统主要利用了 **LangGraph** 进行工作流编排。它的核心在于定义清楚状态（State）和节点（Node）之间的流转关系。
+
+```python
+# LangGraph 编排示例
+from langgraph.graph import StateGraph, END
+
+# 定义状态
+class SQLState(TypedDict):
+    messages: List[BaseMessage]
+    generated_sql: str
+    retry_count: int
+    # ... 其他字段
+
+graph = StateGraph(SQLState)
+
+# 添加节点
+graph.add_node("intent_analysis", intent_analysis_node)
+graph.add_node("sql_generation", sql_generation_node)
+graph.add_node("error_analysis", error_analysis_node)
+# ... 添加其他节点
+
+# 定义条件路由：执行失败去修 bug，成功去生成结果
+def route_after_execution(state):
+    if state.get("execution_error"):
+        return "error_analysis"
+    return "result_generation"
+
+graph.add_conditional_edges("execute_sql", route_after_execution)
+
+# 编译运行
+app = graph.compile()
+```
+
+### 核心经验
+
+1. **拆解是核心**：13 个节点看起来多，但每个节点只做一件事，逻辑简单，调试起来非常容易。哪里出问题（比如表找错了，还是 SQL 写错了）一目了然。
+2. **向量搜索是外挂大脑**：不要试图把所有业务知识都塞进 Prompt。把表结构、术语解释、常用查询存在向量库里，让 LLM 不需要"记住"所有信息，只需要在需要时检索即可。
+
+Text-to-SQL 现阶段还做不到 100% 完美，虽然一定程度上能够满足准确率问题，但代价是延迟增加了。对于一个简单的查询，走完完整流程可能需要几十秒，这对用户心智是个挑战。
