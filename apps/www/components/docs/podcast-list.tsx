@@ -117,54 +117,57 @@ function PodcastCard({ podcast, index }: { podcast: Podcast; index: number }) {
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="h-full group bg-card rounded-md overflow-hidden cursor-pointer"
         >
-          {podcast.image && (
-            <div className="relative w-full aspect-square overflow-hidden bg-muted">
-              <img
-                src={podcast.image}
-                alt={podcast.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-          )}
-
-          <div className="p-6">
-            <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
-              <span>{podcast.podcastName}</span>
-              {podcast.duration && (
-                <>
-                  <span className="text-muted-foreground/50">·</span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="size-3" />
-                    {podcast.duration}
-                  </span>
-                </>
-              )}
-            </div>
-
-            <h2 className="text-lg md:text-xl font-medium group-hover:text-primary transition-colors line-clamp-2 mb-3">
-              {podcast.title}
-            </h2>
-
-            {podcast.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                {podcast.description}
-              </p>
+          <div className="flex flex-row">
+            {podcast.image && (
+              <div className="relative w-[160px] h-[160px] flex-shrink-0 overflow-hidden bg-muted">
+                <img
+                  src={podcast.image}
+                  alt={podcast.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
             )}
 
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                {podcast.hosts.length > 0 && (
-                  <span>{podcast.hosts[0]}</span>
-                )}
-                {podcast.guests.length > 0 && (
-                  <span className="text-muted-foreground/50">
-                    {' '}x {podcast.guests[0]}
-                  </span>
+            <div className="flex-1 p-4 flex flex-col justify-center min-w-0">
+              <div className="flex items-center gap-2 mb-1.5 text-xs text-muted-foreground">
+                <span className="truncate">{podcast.podcastName}</span>
+                {podcast.duration && (
+                  <>
+                    <span className="text-muted-foreground/50">·</span>
+                    <span className="flex items-center gap-1 flex-shrink-0">
+                      <Clock className="size-3" />
+                      {podcast.duration}
+                    </span>
+                  </>
                 )}
               </div>
-              <time dateTime={podcast.date.toISOString()}>
-                {format(podcast.date, 'MMM d, yyyy', { locale: enUS })}
-              </time>
+
+              <h2 className="text-lg font-medium group-hover:text-primary transition-colors line-clamp-2 mb-1.5">
+                {podcast.title}
+              </h2>
+
+              {podcast.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                  {podcast.description}
+                </p>
+              )}
+
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto">
+                <div className="flex items-center gap-1 truncate">
+                  {podcast.hosts.length > 0 && (
+                    <span>{podcast.hosts[0]}</span>
+                  )}
+                  {podcast.guests.length > 0 && (
+                    <span className="text-muted-foreground/50">
+                      {' '}x {podcast.guests[0]}
+                    </span>
+                  )}
+                </div>
+                <span className="text-muted-foreground/50">·</span>
+                <time dateTime={podcast.date.toISOString()} className="flex-shrink-0">
+                  {format(podcast.date, 'MMM d, yyyy', { locale: enUS })}
+                </time>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -185,7 +188,7 @@ export function PodcastList({ podcasts }: PodcastListProps) {
       {rest.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-muted-foreground">往期推荐</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {rest.map((podcast, index) => (
               <PodcastCard key={podcast.url} podcast={podcast} index={index} />
             ))}
