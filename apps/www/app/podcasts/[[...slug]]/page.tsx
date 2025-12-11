@@ -228,6 +228,21 @@ export async function generateMetadata(props: {
         siteName: "Richard's Page",
         type: 'website',
         locale: 'zh_CN',
+        images: [
+          {
+            url: 'https://richardwang.me/og-image.png',
+            width: 1200,
+            height: 630,
+            alt: "Richard's Page",
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        site: '@richard2wang',
+        title: '推荐播客',
+        description: '每周一期精选播客，聆听深度对话与思想碰撞。',
+        images: ['https://richardwang.me/og-image.png'],
       },
     };
   }
