@@ -11,6 +11,8 @@ import { Films } from './icons/films';
 import { Books } from './icons/books';
 import Link from 'next/link';
 import { motion } from 'motion/react';
+import { AnimateIcon } from '@/registry/icons/icon';
+
 
 // Original icons (commented out for upstream sync)
 // import { Primitives } from './icons/primitives';
@@ -167,39 +169,44 @@ const FeatureCard = ({
     >
       {/* @ts-ignore */}
       <Component {...(component.href ? { href: component.href } : {})}>
-        <motion.div
-          whileHover={{
-            scale: component.href ? 1.025 : 1,
-          }}
-          whileTap={{
-            scale: component.href ? 0.925 : 1,
-          }}
-          transition={{
-            type: 'spring',
-            stiffness: 200,
-            damping: 20,
-          }}
-          className={cn(
-            'relative w-full bg-card rounded-md overflow-hidden',
-            !component?.href && 'opacity-50 cursor-not-allowed',
-          )}
-        >
-          <div className="pt-3 pb-1 px-4 flex flex-col items-center gap-1.5">
-            <p
-              className={cn(
-                dancing.className,
-                'text-[24px] font-black text-muted-foreground leading-none',
-              )}
-            >
-              {component.name}
-            </p>
-            <p className="text-sm font-medium text-muted-foreground/70 leading-tight font-serif">
-              {component.description}
-            </p>
-          </div>
-
-          {component.icon}
-        </motion.div>
+        <AnimateIcon animateOnHover asChild>
+          <motion.div
+            whileHover={{
+              scale: component.href ? 1.025 : 1,
+            }}
+            whileTap={{
+              scale: component.href ? 0.925 : 1,
+            }}
+            transition={{
+              type: 'spring',
+              stiffness: 200,
+              damping: 20,
+            }}
+            className={cn(
+              'relative w-full bg-card rounded-md overflow-hidden',
+              !component?.href && 'opacity-50 cursor-not-allowed',
+            )}
+          >
+            <div className="w-full h-[140px] flex flex-row items-center">
+              <div className="flex-1 flex flex-col items-center justify-center gap-0.5">
+                <p
+                  className={cn(
+                    dancing.className,
+                    'text-[22px] font-black text-muted-foreground leading-none',
+                  )}
+                >
+                  {component.name}
+                </p>
+                <p className="text-sm font-medium text-muted-foreground/70 leading-tight font-serif">
+                  {component.description}
+                </p>
+              </div>
+              <div className="flex-1 flex items-center justify-center">
+                {component.icon}
+              </div>
+            </div>
+          </motion.div>
+        </AnimateIcon>
       </Component>
     </MotionEffect>
   );
