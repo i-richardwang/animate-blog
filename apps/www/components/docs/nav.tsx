@@ -51,10 +51,10 @@ export const NAV_ITEMS = [
     title: '推荐播客',
     url: '/podcasts',
   },
-  {
-    title: '关于我',
-    url: '/about',
-  },
+  // {
+  //   title: '关于我',
+  //   url: '/about',
+  // },
 ];
 
 const NavItem = ({ title, url }: { title: string; url: string }) => {

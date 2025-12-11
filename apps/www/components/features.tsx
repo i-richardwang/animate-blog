@@ -5,6 +5,10 @@ import { Reading } from './icons/reading';
 import { Projects } from './icons/projects';
 import { Blog } from './icons/blog';
 import { Notes } from './icons/notes';
+import { About } from './icons/about';
+import { Podcasts } from './icons/podcasts';
+import { Films } from './icons/films';
+import { Books } from './icons/books';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 
@@ -82,7 +86,7 @@ import { motion } from 'motion/react';
 //   },
 // ];
 
-const COMPONENTS = [
+const COMPONENTS_ROW1 = [
   {
     name: 'Projects',
     description: '项目展示',
@@ -102,70 +106,132 @@ const COMPONENTS = [
     icon: <Notes />,
   },
   {
+    name: 'About',
+    description: '关于我',
+    icon: <About />,
+  },
+];
+
+const COMPONENTS_ROW2 = [
+  {
     name: 'Reading',
     description: '推荐阅读',
     href: '/reading',
     icon: <Reading />,
   },
+  {
+    name: 'Podcasts',
+    description: '推荐播客',
+    href: '/podcasts',
+    icon: <Podcasts />,
+  },
+  {
+    name: 'Films',
+    description: '推荐影视',
+    icon: <Films />,
+  },
+  {
+    name: 'Books',
+    description: '推荐书籍',
+    icon: <Books />,
+  },
 ];
 
 const dancing = Dancing_Script({ subsets: ['latin'] });
 
+type FeatureItem = {
+  name: string;
+  description: string;
+  href?: string;
+  icon: React.ReactNode;
+};
+
+const FeatureCard = ({
+  component,
+  index,
+  baseDelay = 1,
+}: {
+  component: FeatureItem;
+  index: number;
+  baseDelay?: number;
+}) => {
+  const Component = component.href ? Link : 'div';
+  return (
+    <MotionEffect
+      slide={{
+        direction: 'down',
+      }}
+      fade
+      zoom
+      delay={baseDelay + 0.15 * index}
+    >
+      {/* @ts-ignore */}
+      <Component {...(component.href ? { href: component.href } : {})}>
+        <motion.div
+          whileHover={{
+            scale: component.href ? 1.025 : 1,
+          }}
+          whileTap={{
+            scale: component.href ? 0.925 : 1,
+          }}
+          transition={{
+            type: 'spring',
+            stiffness: 200,
+            damping: 20,
+          }}
+          className={cn(
+            'relative w-full bg-card rounded-md overflow-hidden',
+            !component?.href && 'opacity-50 cursor-not-allowed',
+          )}
+        >
+          <div className="pt-3 pb-1 px-4 flex flex-col items-center gap-1.5">
+            <p
+              className={cn(
+                dancing.className,
+                'text-[24px] font-black text-muted-foreground leading-none',
+              )}
+            >
+              {component.name}
+            </p>
+            <p className="text-sm font-medium text-muted-foreground/70 leading-tight font-serif">
+              {component.description}
+            </p>
+          </div>
+
+          {component.icon}
+        </motion.div>
+      </Component>
+    </MotionEffect>
+  );
+};
+
 export const Features = () => {
   return (
     <div className="relative pt-16 pb-10 px-5 flex flex-col items-center justify-center mt-auto">
-      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 sm:gap-6 gap-4 w-full max-w-7xl sm:max-lg:max-w-2xl mx-auto">
-        {COMPONENTS.map((component, index) => {
-          const Component = component.href ? Link : 'div';
-          return (
-            <MotionEffect
-              slide={{
-                direction: 'down',
-              }}
-              fade
-              zoom
-              delay={1 + 0.15 * index}
-              key={index}
-            >
-              {/* @ts-ignore */}
-              <Component {...(component.href ? { href: component.href } : {})}>
-                <motion.div
-                  whileHover={{
-                    scale: component.href ? 1.025 : 1,
-                  }}
-                  whileTap={{
-                    scale: component.href ? 0.925 : 1,
-                  }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 200,
-                    damping: 20,
-                  }}
-                  className={cn(
-                    'relative w-full bg-card rounded-md overflow-hidden',
-                    !component?.href && 'opacity-50 cursor-not-allowed',
-                  )}
-                >
-                  <div className="pt-3 pb-1 px-4 flex flex-col items-center gap-1.5">
-                    <p
-                      className={cn(
-                        dancing.className,
-                        'text-[24px] font-black text-muted-foreground leading-none',
-                      )}
-                    >
-                      {component.name}
-                    </p>
-                    <p className="text-sm font-medium text-muted-foreground/70 leading-tight font-serif">
-                      {component.description}
-                    </p>
-                  </div>
+      <div className="flex flex-col sm:gap-6 gap-4 w-full max-w-7xl sm:max-lg:max-w-2xl mx-auto">
+        {/* Row 1: 4 cards */}
+        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 sm:gap-6 gap-4">
+          {COMPONENTS_ROW1.map((component, index) => (
+            <FeatureCard
+              key={component.name}
+              component={component}
+              index={index}
+              baseDelay={1}
+            />
+          ))}
+        </div>
 
-                  {component.icon}
-                </motion.div>
-              </Component>
-            </MotionEffect>
-          );
-        })}
+        {/* Row 2: 4 cards */}
+        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 sm:gap-6 gap-4">
+          {COMPONENTS_ROW2.map((component, index) => (
+            <FeatureCard
+              key={component.name}
+              component={component}
+              index={index}
+              baseDelay={1.6}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

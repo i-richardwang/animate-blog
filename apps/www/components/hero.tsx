@@ -116,9 +116,14 @@ export const Hero = ({ latestContent }: HeroProps) => {
             zoom
             delay={0.6}
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button size="lg" className="w-full" variant="accent" asChild>
-                <Link href="/about">About Me</Link>
+            <motion.div>
+              <Button
+                size="lg"
+                className="w-full opacity-50 cursor-not-allowed"
+                variant="accent"
+                disabled
+              >
+                About Me
               </Button>
             </motion.div>
           </MotionEffect>
