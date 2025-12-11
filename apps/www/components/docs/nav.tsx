@@ -48,6 +48,10 @@ export const NAV_ITEMS = [
     url: '/reading',
   },
   {
+    title: '推荐播客',
+    url: '/podcasts',
+  },
+  {
     title: '关于我',
     url: '/about',
   },

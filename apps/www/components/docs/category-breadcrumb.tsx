@@ -1,6 +1,10 @@
 const CATEGORY_LABELS: Record<string, string> = {
+  // Reading categories
   tech: '技术博文',
   humanity: '科技与人文',
+  // Podcast categories
+  business: '商业洞察',
+  other: '其他',
 };
 
 export const CategoryBreadcrumb = ({

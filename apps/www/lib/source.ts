@@ -1,4 +1,4 @@
-import { docs, blog, projects as projectsSource, reading as readingSource } from '@/.source';
+import { docs, blog, projects as projectsSource, reading as readingSource, podcasts as podcastsSource } from '@/.source';
 import { LucideIcons } from '@/components/icons/lucide-icons';
 import { attachFile } from '@/lib/attach-file';
 import { attachSeparator } from '@/lib/attach-separator';
@@ -220,8 +220,24 @@ export const getSortedReadingPosts = () => {
     );
 };
 
+export const podcasts = loader({
+  baseUrl: '/podcasts',
+  source: createMDXSource(podcastsSource),
+});
+
+// Helper to get podcast posts sorted by date (newest first)
+export const getSortedPodcastPosts = () => {
+  return podcasts
+    .getPages()
+    .sort(
+      (a, b) =>
+        new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+    );
+};
+
 export type Page = InferPageType<typeof source>;
 export type Meta = InferMetaType<typeof source>;
 export type BlogPage = InferPageType<typeof blogs>;
 export type ProjectPage = InferPageType<typeof projects>;
 export type ReadingPage = InferPageType<typeof reading>;
+export type PodcastPage = InferPageType<typeof podcasts>;

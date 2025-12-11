@@ -93,6 +93,24 @@ export const reading = defineCollections({
   }),
 });
 
+export const podcasts = defineCollections({
+  type: 'doc',
+  dir: 'content/podcasts',
+  schema: frontmatterSchema.extend({
+    date: z.coerce.date(),
+    podcastName: z.string(),
+    episodeTitle: z.string(),
+    hosts: z.array(z.string()).default([]),
+    guests: z.array(z.string()).default([]),
+    duration: z.string().optional(),
+    applePodcastUrl: z.string(),
+    applePodcastId: z.string(),
+    episodeId: z.string(),
+    image: z.string().optional(),
+    category: z.enum(['tech', 'business', 'humanity', 'other']).optional(),
+  }),
+});
+
 export default defineConfig({
   lastModifiedTime: 'git',
     mdxOptions: {
