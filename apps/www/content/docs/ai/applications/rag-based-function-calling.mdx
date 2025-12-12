@@ -1,0 +1,402 @@
+---
+title: 动态工具调用架构拆解
+description: 深入拆解 AI Agent 的工具调用机制。介绍如何手动实现 Function Calling，并借助工具检索和示例增强技巧，构建一套能精准理解用户意图、并生成严谨操作指令的表格处理工具。
+releaseDate: 2024-03-17
+author:
+  name: Richard Wang
+  url: https://richardwang.me
+---
+
+这是一次在 AI Agent 发展早期的技术探索。当时的目标是构建一个**自然语言驱动的表格处理助手**，让非技术用户无需编写代码，仅通过中文描述即可完成表格合并、差异比对、数据清洗等操作。
+
+在技术实现上，核心挑战在于如何让 LLM 根据用户模糊的需求，精准选择数据处理函数并生成正确的调用参数。当时 OpenAI 刚推出 Function Calling 功能，但生态尚未成熟：许多开源或闭源模型对该特性的支持参差不齐，有的完全不支持，有的虽然支持但稳定性堪忧。
+
+在这样的背景下，我决定**手动实现一套工具调用机制**。这不仅是为了兼容更多的模型，更是一个拆解并深入理解 Function Calling 底层原理的绝佳机会。在设计过程中，我借鉴了 RAG（检索增强生成）的思路，引入了 **Tool Selector** 和 **Example Selector**，并通过数据增强技术显著提升了系统的鲁棒性。
+
+最终的产物是一个自然语言驱动的表格助手。但本文不赘述其功能，而是聚焦于**这套架构的设计哲学，以及对 Function Calling 本质的深度思考**。
+
+## Function Calling 的本质
+
+抛开各家 API 的具体实现，Function Calling 本质上就是让 LLM 做两件事：
+
+1. **工具选择**：根据用户输入，从可用工具中选择合适的工具
+2. **参数生成**：为选中的工具生成符合 schema 的调用参数
+
+OpenAI 的原生实现是把工具 schema 放进 `tools` 参数，模型会返回结构化的调用指令。但如果模型不支持这个特性，我们完全可以通过 Prompt Engineering 来实现同样的效果——让模型输出特定格式的 JSON，然后自己解析执行。
+
+既然要自己实现，不如做得更好一些。原生 Function Calling 有几个可以改进的地方：
+
+**限制一：上下文限制与干扰**
+
+原生模式要求将所有工具的描述一次性塞入 Prompt。当工具库膨胀时，不仅消耗大量 Token 增加成本与延迟，过多的无关信息还会导致模型注意力分散，产生"幻觉"。
+
+**限制二：缺乏具体示例**
+
+原生 API 通常只定义"有什么工具"，难以展示"如何使用工具"。对于参数复杂的函数，缺乏具体的 Usage Example 往往导致模型生成的参数格式错误或逻辑偏差。
+
+**限制三：流程控制僵化**
+
+无法在工具选择前做预处理，也无法在参数生成后做校验。
+
+基于这些思考，我设计了一套结合 RAG 思路的实现方案。
+
+## 整体架构设计
+
+系统的核心处理流程如下：
+
+![动态工具调用架构图](/projects/table-playground/architecture.png)
+
+**与原生 Function Calling 的关键区别：**
+
+| 方面 | 原生 Function Calling | 本项目实现 |
+|------|----------------------|-----------|
+| 工具描述 | 全部放入 Prompt | 动态检索最相关的 |
+| 使用示例 | 无 | 检索相似历史示例 |
+| 输出格式 | 模型内置处理 | Pydantic Schema 约束 |
+| 工具调用 | API 自动处理 | 手动解析 JSON 执行 |
+
+## 一、手动实现 Function Calling 的核心机制
+
+### 定义输出格式
+
+首先，用 Pydantic 定义 LLM 的输出格式。这是整个机制的基础：
+
+```python
+from pydantic import BaseModel, Field
+from typing import Dict, Any, Literal, Optional, List
+
+class OperationStep(BaseModel):
+    """单个操作步骤"""
+    tool_name: str = Field(..., description="要调用的工具函数名")
+    tool_args: Dict[str, Any] = Field(..., description="工具函数的调用参数")
+    output_df_names: List[str] = Field(..., description="操作结果的输出变量名列表")
+
+class AssistantResponse(BaseModel):
+    """AI 助手的响应格式"""
+    next_step: Literal["need_more_info", "execute_operation", "out_of_scope"] = Field(
+        ..., description="决策下一步的操作类型"
+    )
+    operation: Optional[List[OperationStep]] = Field(
+        None, description="当 next_step 为 execute_operation 时，包含具体的执行步骤"
+    )
+    message: Optional[str] = Field(
+        None, description="当需要追问或超出能力范围时，回复给用户的消息"
+    )
+```
+
+这个设计有几个要点：
+
+1. **`next_step` 字段**：让模型先判断当前情况，而不是直接生成操作。这样可以处理信息不足或超出能力范围的情况。
+
+2. **`operation` 是列表**：支持多步骤操作，一个复杂需求可以分解为多个工具调用。
+
+3. **每个步骤包含 `output_df_names`**：为输出命名，使得多步骤之间可以引用前面步骤的结果。
+
+### 构建 LLM Chain
+
+使用 LangChain 构建一个会输出结构化 JSON 的 Chain：
+
+```python
+from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+
+class LanguageModelChain:
+    def __init__(self, model_cls, sys_msg, user_msg, model):
+        """
+        构建结构化输出的 LLM Chain
+        """
+        self.parser = JsonOutputParser(pydantic_object=model_cls)
+
+        # 核心：将 Pydantic Schema 转换为 Prompt 中的格式指令
+        format_instructions = self.parser.get_format_instructions()
+
+        self.prompt_template = ChatPromptTemplate.from_messages([
+            ("system", sys_msg + "\n\n" + format_instructions),
+            ("human", user_msg),
+        ])
+
+        # 组装流水线: Prompt -> Model -> Parser
+        self.chain = self.prompt_template | model | self.parser
+
+    def __call__(self):
+        return self.chain
+```
+
+`JsonOutputParser` 在这里扮演了关键角色：它不仅自动生成格式说明注入 Prompt，还能在后处理阶段对 LLM 输出的 JSON 字符串进行解析和校验。
+
+### 执行工具调用
+
+获得结构化 JSON 后，我们需要手动接管执行逻辑：
+
+```python
+def _handle_execute_operation(self, result: Dict[str, Any]):
+    """解析决策结果并执行工具链"""
+    operation_steps = result.get("operation", [])
+
+    for step in operation_steps:
+        tool_name = step.get("tool_name")
+        tool_args = step.get("tool_args", {})
+        output_df_names = step.get("output_df_names", [])
+
+        # 1. 路由：获取对应的 Python 函数
+        tool_function = self._get_tool_function(tool_name)
+
+        # 2. 绑定：处理参数中的变量引用，替换为内存中的 DataFrame 对象
+        self._replace_dataframe_names_with_objects(tool_args)
+
+        # 3. 执行：调用函数
+        step_result = tool_function.invoke(tool_args)
+
+        # 4. 存储：保存结果至上下文，供后续步骤调用
+        self._process_step_result(step_result, output_df_names)
+```
+
+这种"手动档"模式虽然代码量稍多，但换来了**完全的控制权**：可以在执行前进行参数清洗，可以精细处理工具间的依赖关系，也可以统一管理异常和日志。
+
+## 二、Tool Selector：用 RAG 思路选择工具
+
+这是本项目最核心的设计之一。不把所有工具描述都塞进 Prompt，而是根据用户查询动态检索最相关的工具。
+
+### 为什么需要 Tool Selector？
+
+<Callout type="info">
+需要说明的是，当时开源模型的上下文窗口普遍只有 4K-8K，模型能力也相对较弱。以现在动辄 128K 上下文、能力大幅提升的模型来看，这种简单的工具选择任务已无需如此复杂的处理。但这些检索增强的思路在工具数量庞大、或需要精细控制的场景下仍然有效。
+</Callout>
+
+假设有 6 个工具，每个工具的完整描述（功能说明 + 参数说明 + 使用场景）大约 500 Token。如果全部放入 Prompt：
+
+- 占用 3000 Token，增加成本和延迟
+- LLM 需要从大量信息中筛选，容易遗漏或混淆
+- 无关工具的描述是噪音，可能干扰决策
+
+用 RAG 思路：
+
+- 只检索最相关的 3 个工具，减少到 1500 Token
+- LLM 看到的都是高相关度的信息，决策更准确
+- 可以为每个工具准备更详细的描述，不用担心总长度
+
+### 实现 Tool Selector
+
+```python
+def get_similar_tools(query: str, top_k: int = 3) -> str:
+    """
+    根据用户 Query 检索最相关的工具描述
+    """
+    # 1. 初始化向量存储
+    connect_to_milvus(db_name="examples")
+    collection = initialize_vector_store("tools_description")
+
+    # 2. Query 向量化
+    embeddings = create_embeddings()
+    query_vector = embeddings.embed_query(query)
+
+    # 3. 语义检索 (取 3 倍数量用于后续去重)
+    results = search_in_milvus(collection, query_vector, "description", top_k * 3)
+
+    # 4. 逻辑去重
+    unique_tools = []
+    seen_tools = set()
+    for result in results:
+        tool_name = result["tool_name"]
+        if tool_name not in seen_tools and len(unique_tools) < top_k:
+            unique_tools.append(result)
+            seen_tools.add(tool_name)
+
+    # 5. 组装 Prompt 片段
+    tools_description = ""
+    for result in unique_tools:
+        tools_description += f"Function Name:\n{result['tool_name']}\n\n"
+        tools_description += f"Description:\n{result['full_description']}\n\n"
+        tools_description += f"Parameters:\n{result['args']}\n\n"
+
+    return tools_description.strip()
+```
+
+### 向量库的数据结构
+
+工具描述在 Milvus 中的存储结构经过了精心设计：
+
+```json
+{
+    "name": "tools_description",
+    "fields": [
+        {"name": "tool_name", "type": "str"},
+        {"name": "description", "type": "str", "is_vector": true},
+        {"name": "full_description", "type": "str"},
+        {"name": "args", "type": "str"}
+    ],
+    "embedding_fields": ["description"]
+}
+```
+
+注意区分 `description` 和 `full_description`：
+
+- **description**：简短、核心的语义描述，专门用于**向量化和检索**。
+- **full_description**：详尽的操作指南，用于检索命中后**展示给 LLM**。
+
+## 三、数据增强：提升检索召回率
+
+这是一个容易被忽视，但对系统可用性至关重要的环节。用户的自然语言表达千变万化，如果工具描述过于单一，很容易导致检索失败（Recall 低）。
+
+### 问题：表述的多样性
+
+以"表格合并"这个需求为例，用户可能会说：
+
+- "把这两个表合并"
+- "根据 ID 把信息匹配起来"
+- "用员工信息表补充订单表的数据"
+- "类似 Excel 的 VLOOKUP"
+
+如果 `join_dataframes` 工具只有一句"合并两个表格"的描述，当用户问"匹配信息"时，语义相似度可能不足以触发检索。
+
+### 解决方案：多角度描述增强
+
+在 `Tools_Description.csv` 中，我为同一个工具撰写了多条侧重点不同的描述记录：
+
+```csv
+tool_name,description,full_description,args
+join_dataframes,"Joins two dataframes based on specified columns...",...
+join_dataframes,"Matches related information based on common fields...",...
+join_dataframes,"Enriches the primary dataset with additional information...",...
+```
+
+同一个工具 `join_dataframes` 有三条记录：
+
+1. **技术视角**："Joins two dataframes based on specified columns"
+2. **操作视角**："Matches related information based on common fields"
+3. **业务视角**："Enriches the primary dataset with additional information"
+
+这样，无论用户用哪种方式描述需求，都更可能检索到正确的工具。
+
+### 数据增强的效果
+
+| 用户查询 | 无增强（1条描述） | 有增强（3条描述） |
+|---------|------------------|------------------|
+| "合并两个表" | ✓ 命中 | ✓ 命中 |
+| "按 ID 匹配信息" | ✗ 可能遗漏 | ✓ 命中第 2 条 |
+| "补充额外字段" | ✗ 可能遗漏 | ✓ 命中第 3 条 |
+
+这种数据增强的思路来源于 RAG 实践中的文档处理：为了提升召回率，会对文档进行多角度的描述或生成问题。将此思路迁移至 Tool RAG 中，能以极低的成本显著提升系统的意图理解能力。
+
+## 四、Example Selector：用示例指导 LLM
+
+光有工具描述还不够。对于复杂的操作，对于复杂的逻辑，一个鲜活的例子胜过千言万语。
+
+### 实现 Example Selector
+
+我们建立了一个示例库，存储了"用户提问"与"标准答案（JSON）"的对应关系。运行时，根据用户当前问题，检索最相似的历史操作：
+
+```python
+def get_similar_example(query: str, collection_name: str = "data_operation_examples") -> Dict[str, str]:
+    """
+    检索 One-Shot 示例
+    """
+    # ... 连接 Milvus ...
+    # ... Embedding ...
+
+    # 策略：只取 Top-1 最相似示例
+    results = search_in_milvus(collection, query_vector, "user_query", top_k=1)
+
+    if results:
+        return {
+            "User uploaded tables": results[0].get("user_tables"),
+            "User query": results[0].get("user_query"),
+            "Output": results[0].get("output"),
+        }
+    return {}
+```
+
+每条示例包含：
+
+- **user_tables**：用户的表格信息（元数据）
+- **user_query**：用户的自然语言查询
+- **output**：正确的操作步骤（JSON 格式）
+
+### 示例如何发挥作用
+
+在 Prompt 中，检索到的示例会作为 Reference 呈现：
+
+```
+Here is an example for reference:
+
+{
+User uploaded tables:
+dict_items([('performance_results', {'shape': (10, 3), ...})])
+
+User query:
+I want to convert multi-year performance data into a single column
+
+Output:
+{"next_step": "execute_operation", "operation": [{"tool_name": "reshape_wide_to_long", ...}]}
+}
+```
+
+这给 LLM 提供了一个具体的参照：
+
+1. **格式参照**：输出应该是什么结构
+2. **参数参照**：类似场景下参数应该怎么填
+3. **逻辑参照**：这类需求应该用哪个工具
+
+当然，Prompt 中也会提醒 LLM 不要直接复制示例，而是根据当前用户的实际需求生成操作步骤。
+
+## 五、完整的处理流程
+
+将上述组件串联，即构成了 Agent 的大脑运作流程：
+
+```python
+def process_user_query(assistant_chain, user_input, dataframe_info):
+    # 1. Tool Selector：根据意图检索工具
+    tools_description = get_similar_tools(user_input)
+
+    # 2. Example Selector：检索相似的历史操作
+    similar_example = get_similar_example(user_input)
+    example_str = format_example(similar_example)
+
+    # 3. 上下文组装
+    input_data = {
+        "user_input": user_input,
+        "example": example_str,                 # 动态检索的示例
+        "tools_description": tools_description, # 动态检索的工具
+        "dataframe_info": format_dataframe_info(dataframe_info),
+    }
+
+    # 4. LLM 推理
+    result = assistant_chain.invoke(input_data)
+
+    return result
+```
+
+LLM 收到的 Prompt 大致是这样的结构：
+
+```
+[System Message]
+你是一个专业的数据处理助手...
+请严格按以下 JSON 格式输出: {schema}
+
+[Human Message]
+【可用工具】(由 Tool Selector 提供):
+{tools_description}
+
+【参考示例】(由 Example Selector 提供):
+{example}
+
+【当前数据上下文】:
+{dataframe_info}
+
+【用户需求】:
+{user_input}
+```
+
+## 总结
+
+随着模型能力的进化，各家 LLM 对 Function Calling 的原生支持已日趋完善，LangChain 等框架也推出了非常多标准化组件。但这套**"手动 RAG + Function Calling"**的架构设计思路并未过时。
+
+Agent 系统的核心挑战，始终是如何**让 LLM 在正确的时机，调用正确的工具，并传入正确的参数**。无论是更好的 Prompt 设计、检索增强（RAG）、数据增强还是结构化输出，本质上都是为了在这个不确定性的过程中增加确定性。
+
+## 开源项目
+
+Agentic Table Playground 已经开源，如果你对实现细节感兴趣，可以通过以下方式了解更多：
+
+- [Agentic Table Playground 项目详情](/projects/agentic-table-playground) - 查看完整的技术架构和使用说明
+- [在线 Demo](https://agentictableplayground.streamlit.app) - 体验 Agentic Table Playground 的实际效果
+- [GitHub 仓库](https://github.com/i-richardwang/agentic-table-playground) - 获取完整源代码
