@@ -16,7 +16,7 @@ type HeroProps = {
 
 export const Hero = ({ latestContent }: HeroProps) => {
   return (
-    <div className="relative overflow-x-hidden flex flex-col items-center px-5">
+    <div className="relative overflow-hidden flex flex-col items-center px-5">
       <div className="relative z-10 flex flex-col items-center justify-center pt-40">
         {/* Original banner (commented out for cleaner design) */}
         {/* <MotionEffect

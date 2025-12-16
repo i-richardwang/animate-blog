@@ -1579,6 +1579,51 @@ export const index: Record<string, any> = {
     })(),
     command: '@animate-ui/components-community-management-bar',
   },
+  'components-community-motion-carousel': {
+    name: 'components-community-motion-carousel',
+    description:
+      'A carousel built on top of Embla Carousel with smooth Motion-powered animations. Each slide scales dynamically based on its active state, and the pagination uses animated pill-style dot buttons for an interactive, fluid experience.',
+    type: 'registry:ui',
+    dependencies: [
+      'motion',
+      'lucide-react',
+      'embla-carousel',
+      'embla-carousel-react',
+    ],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/components-buttons-button'],
+    files: [
+      {
+        path: 'registry/components/community/motion-carousel/index.tsx',
+        type: 'registry:ui',
+        target:
+          'components/animate-ui/components/community/motion-carousel.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Transition } from \'motion/react\';\nimport { EmblaOptionsType, EmblaCarouselType } from \'embla-carousel\';\nimport useEmblaCarousel from \'embla-carousel-react\';\nimport { Button } from \'@/components/animate-ui/components/buttons/button\';\nimport { ChevronRight, ChevronLeft } from \'lucide-react\';\n\ntype PropType = {\n  slides: number[];\n  options?: EmblaOptionsType;\n};\n\ntype EmblaControls = {\n  selectedIndex: number;\n  scrollSnaps: number[];\n  prevDisabled: boolean;\n  nextDisabled: boolean;\n  onDotClick: (index: number) => void;\n  onPrev: () => void;\n  onNext: () => void;\n};\n\ntype DotButtonProps = {\n  selected?: boolean;\n  label: string;\n  onClick: () => void;\n};\n\nconst transition: Transition = {\n  type: \'spring\',\n  stiffness: 240,\n  damping: 24,\n  mass: 1,\n};\n\nconst useEmblaControls = (\n  emblaApi: EmblaCarouselType | undefined,\n): EmblaControls => {\n  const [selectedIndex, setSelectedIndex] = React.useState(0);\n  const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([]);\n  const [prevDisabled, setPrevDisabled] = React.useState(true);\n  const [nextDisabled, setNextDisabled] = React.useState(true);\n\n  const onDotClick = React.useCallback(\n    (index: number) => emblaApi?.scrollTo(index),\n    [emblaApi],\n  );\n\n  const onPrev = React.useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);\n  const onNext = React.useCallback(() => emblaApi?.scrollNext(), [emblaApi]);\n\n  const updateSelectionState = (api: EmblaCarouselType) => {\n    setSelectedIndex(api.selectedScrollSnap());\n    setPrevDisabled(!api.canScrollPrev());\n    setNextDisabled(!api.canScrollNext());\n  };\n\n  const onInit = React.useCallback((api: EmblaCarouselType) => {\n    setScrollSnaps(api.scrollSnapList());\n    updateSelectionState(api);\n  }, []);\n\n  const onSelect = React.useCallback((api: EmblaCarouselType) => {\n    updateSelectionState(api);\n  }, []);\n\n  React.useEffect(() => {\n    if (!emblaApi) return;\n\n    onInit(emblaApi);\n    emblaApi.on(\'reInit\', onInit).on(\'select\', onSelect);\n\n    return () => {\n      emblaApi.off(\'reInit\', onInit).off(\'select\', onSelect);\n    };\n  }, [emblaApi, onInit, onSelect]);\n\n  return {\n    selectedIndex,\n    scrollSnaps,\n    prevDisabled,\n    nextDisabled,\n    onDotClick,\n    onPrev,\n    onNext,\n  };\n};\n\nfunction MotionCarousel(props: PropType) {\n  const { slides, options } = props;\n  const [emblaRef, emblaApi] = useEmblaCarousel(options);\n  const {\n    selectedIndex,\n    scrollSnaps,\n    prevDisabled,\n    nextDisabled,\n    onDotClick,\n    onPrev,\n    onNext,\n  } = useEmblaControls(emblaApi);\n\n  return (\n    <div className="w-full space-y-4 [--slide-height:9rem] sm:[--slide-height:13rem] md:[--slide-height:18rem] [--slide-spacing:1.5rem] [--slide-size:55%]">\n      <div className="overflow-hidden" ref={emblaRef}>\n        <div className="flex touch-pan-y touch-pinch-zoom">\n          {slides.map((index) => {\n            const isActive = index === selectedIndex;\n\n            return (\n              <motion.div\n                key={index}\n                className="h-[var(--slide-height)] mr-[var(--slide-spacing)] basis-[var(--slide-size)] flex-none flex min-w-0"\n              >\n                <motion.div\n                  className="size-full flex items-center justify-center text-3xl md:text-5xl font-semibold select-none border-4 rounded-xl"\n                  initial={false}\n                  animate={{\n                    scale: isActive ? 1 : 0.9,\n                  }}\n                  transition={transition}\n                >\n                  {index + 1}\n                </motion.div>\n              </motion.div>\n            );\n          })}\n        </div>\n      </div>\n\n      <div className="flex justify-between">\n        <Button size="icon" onClick={onPrev} disabled={prevDisabled}>\n          <ChevronLeft className="size-5" />\n        </Button>\n\n        <div className="flex flex-wrap justify-end items-center gap-2">\n          {scrollSnaps.map((_, index) => (\n            <DotButton\n              key={index}\n              label={`Slide ${index + 1}`}\n              selected={index === selectedIndex}\n              onClick={() => onDotClick(index)}\n            />\n          ))}\n        </div>\n\n        <Button size="icon" onClick={onNext} disabled={nextDisabled}>\n          <ChevronRight className="size-5" />\n        </Button>\n      </div>\n    </div>\n  );\n}\n\nfunction DotButton({ selected = false, label, onClick }: DotButtonProps) {\n  return (\n    <motion.button\n      type="button"\n      onClick={onClick}\n      layout\n      initial={false}\n      className="flex cursor-pointer select-none items-center justify-center rounded-full border-none bg-primary text-primary-foreground text-sm"\n      animate={{\n        width: selected ? 68 : 12,\n        height: selected ? 28 : 12,\n      }}\n      transition={transition}\n    >\n      <motion.span\n        layout\n        initial={false}\n        className="block whitespace-nowrap px-3 py-1"\n        animate={{\n          opacity: selected ? 1 : 0,\n          scale: selected ? 1 : 0,\n          filter: selected ? \'blur(0)\' : \'blur(4px)\',\n        }}\n        transition={transition}\n      >\n        {label}\n      </motion.span>\n    </motion.button>\n  );\n}\n\nexport { MotionCarousel };',
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/components/community/motion-carousel/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'components-community-motion-carousel';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/components-community-motion-carousel',
+  },
   'components-community-notification-list': {
     name: 'components-community-notification-list',
     description:
@@ -4968,6 +5013,45 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/demo-components-community-management-bar',
+  },
+  'demo-components-community-motion-carousel': {
+    name: 'demo-components-community-motion-carousel',
+    description: 'Demo showing motion carousel.',
+    type: 'registry:ui',
+    dependencies: undefined,
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/components-community-motion-carousel'],
+    files: [
+      {
+        path: 'registry/demo/components/community/motion-carousel/index.tsx',
+        type: 'registry:ui',
+        target:
+          'components/animate-ui/demo/components/community/motion-carousel.tsx',
+        content:
+          "'use client';\n\nimport * as React from 'react';\nimport { MotionCarousel } from '@/components/animate-ui/components/community/motion-carousel';\nimport { EmblaOptionsType } from 'embla-carousel';\n\nexport const MotionCarouselDemo = () => {\n  const OPTIONS: EmblaOptionsType = { loop: true };\n  const SLIDE_COUNT = 6;\n  const SLIDES = Array.from(Array(SLIDE_COUNT).keys());\n\n  return <MotionCarousel slides={SLIDES} options={OPTIONS} />;\n};",
+      },
+    ],
+    keywords: [],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import(
+          '@/registry/demo/components/community/motion-carousel/index.tsx'
+        );
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'demo-components-community-motion-carousel';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/demo-components-community-motion-carousel',
   },
   'demo-components-community-notification-list': {
     name: 'demo-components-community-notification-list',
@@ -15264,6 +15348,51 @@ export const index: Record<string, any> = {
     })(),
     command: '@animate-ui/icons-kanban',
   },
+  'icons-key': {
+    name: 'icons-key',
+    description: 'Key icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/key/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/key.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype KeyProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    group: {\n      initial: {\n        rotate: 0,\n        scale: 1,\n        originX: \'12px\',\n        originY: \'12px\',\n      },\n      animate: {\n        rotate: [0, -20, 0],\n        scale: [1, 0.95, 1],\n        transition: {\n          duration: 0.6,\n          ease: \'easeInOut\',\n        },\n      },\n    },\n    stem: {},\n    teeth: {},\n    circle: {},\n  } satisfies Record<string, Variants>,\n  wiggle: {\n    group: {\n      initial: {\n        rotate: 0,\n        scale: 1,\n        originX: \'12px\',\n        originY: \'12px\',\n      },\n      animate: {\n        rotate: [0, -10, 10, -10, 0],\n        transition: {\n          duration: 0.5,\n          ease: \'easeInOut\',\n        },\n      },\n    },\n    stem: {},\n    teeth: {},\n    circle: {},\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: KeyProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      {...props}\n    >\n      <motion.g variants={variants.group} initial="initial" animate={controls}>\n        <motion.path\n          d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"\n          variants={variants.stem}\n          initial="initial"\n          animate={controls}\n        />\n        <motion.path\n          d="m21 2-9.6 9.6"\n          variants={variants.teeth}\n          initial="initial"\n          animate={controls}\n        />\n        <motion.circle\n          cx="7.5"\n          cy="15.5"\n          r="5.5"\n          variants={variants.circle}\n          initial="initial"\n          animate={controls}\n        />\n      </motion.g>\n    </motion.svg>\n  );\n}\n\nfunction Key(props: KeyProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  Key,\n  Key as KeyIcon,\n  type KeyProps,\n  type KeyProps as KeyIconProps,\n};',
+      },
+    ],
+    keywords: [
+      'password',
+      'login',
+      'authentication',
+      'secure',
+      'unlock',
+      'keychain',
+      'key ring',
+      'fob',
+    ],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/key/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-key';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-key',
+  },
   'icons-layers': {
     name: 'icons-layers',
     description: 'Layers icon component.',
@@ -18864,6 +18993,42 @@ export const index: Record<string, any> = {
       return LazyComp;
     })(),
     command: '@animate-ui/icons-rotate-ccw',
+  },
+  'icons-rotate-ccw-key': {
+    name: 'icons-rotate-ccw-key',
+    description: 'Rotate Ccw Key icon component.',
+    type: 'registry:ui',
+    dependencies: ['motion'],
+    devDependencies: undefined,
+    registryDependencies: ['@animate-ui/icons-icon'],
+    files: [
+      {
+        path: 'registry/icons/rotate-ccw-key/index.tsx',
+        type: 'registry:ui',
+        target: 'components/animate-ui/icons/rotate-ccw-key.tsx',
+        content:
+          '\'use client\';\n\nimport * as React from \'react\';\nimport { motion, type Variants } from \'motion/react\';\n\nimport {\n  getVariants,\n  useAnimateIconContext,\n  IconWrapper,\n  type IconProps,\n} from \'@/components/animate-ui/icons/icon\';\n\ntype RotateCcwKeyProps = IconProps<keyof typeof animations>;\n\nconst animations = {\n  default: {\n    group: {\n      initial: {\n        rotate: 0,\n        transition: { type: \'spring\', stiffness: 150, damping: 25 },\n      },\n      animate: {\n        rotate: -45,\n        transition: { type: \'spring\', stiffness: 150, damping: 25 },\n      },\n    },\n    arrowArc: {},\n    arrowHead: {},\n    keyPart1: {},\n    keyPart2: {},\n    circle: {},\n  } satisfies Record<string, Variants>,\n  rotate: {\n    group: {\n      initial: {\n        rotate: 0,\n        transition: { type: \'spring\', stiffness: 150, damping: 25 },\n      },\n      animate: {\n        rotate: -360,\n        transition: { type: \'spring\', stiffness: 150, damping: 25 },\n      },\n    },\n    arrowArc: {},\n    arrowHead: {},\n    keyPart1: {},\n    keyPart2: {},\n    circle: {},\n  } satisfies Record<string, Variants>,\n} as const;\n\nfunction IconComponent({ size, ...props }: RotateCcwKeyProps) {\n  const { controls } = useAnimateIconContext();\n  const variants = getVariants(animations);\n\n  return (\n    <motion.svg\n      xmlns="http://www.w3.org/2000/svg"\n      width={size}\n      height={size}\n      viewBox="0 0 24 24"\n      fill="none"\n      stroke="currentColor"\n      strokeWidth={2}\n      strokeLinecap="round"\n      strokeLinejoin="round"\n      variants={variants.group}\n      initial="initial"\n      animate={controls}\n      {...props}\n    >\n      <motion.path\n        d="m14.5 9.5 1 1"\n        variants={variants.keyPart1}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="m15.5 8.5-4 4"\n        variants={variants.keyPart2}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="M3 12a9 9 0 1 0 9-9 9.74 9.74 0 0 0-6.74 2.74L3 8"\n        variants={variants.arrowArc}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.path\n        d="M3 3v5h5"\n        variants={variants.arrowHead}\n        initial="initial"\n        animate={controls}\n      />\n      <motion.circle\n        cx="10"\n        cy="14"\n        r="2"\n        variants={variants.circle}\n        initial="initial"\n        animate={controls}\n      />\n    </motion.svg>\n  );\n}\n\nfunction RotateCcwKey(props: RotateCcwKeyProps) {\n  return <IconWrapper icon={IconComponent} {...props} />;\n}\n\nexport {\n  animations,\n  RotateCcwKey,\n  RotateCcwKey as RotateCcwKeyIcon,\n  type RotateCcwKeyProps,\n  type RotateCcwKeyProps as RotateCcwKeyIconProps,\n};',
+      },
+    ],
+    keywords: ['password', 'key', 'refresh', 'change'],
+    component: (function () {
+      const LazyComp = React.lazy(async () => {
+        const mod = await import('@/registry/icons/rotate-ccw-key/index.tsx');
+        const exportName =
+          Object.keys(mod).find(
+            (key) =>
+              typeof mod[key] === 'function' || typeof mod[key] === 'object',
+          ) || 'icons-rotate-ccw-key';
+        const Comp = mod.default || mod[exportName];
+        if (mod.animations) {
+          (LazyComp as any).animations = mod.animations;
+        }
+        return { default: Comp };
+      });
+      LazyComp.demoProps = {};
+      return LazyComp;
+    })(),
+    command: '@animate-ui/icons-rotate-ccw-key',
   },
   'icons-rotate-cw': {
     name: 'icons-rotate-cw',
@@ -22704,6 +22869,7 @@ export const index: Record<string, any> = {
     registryDependencies: [
       '@animate-ui/primitives-animate-slot',
       '@animate-ui/hooks-use-is-in-view',
+      '@animate-ui/lib-get-strict-context',
     ],
     files: [
       {
@@ -23694,7 +23860,7 @@ export const index: Record<string, any> = {
         type: 'registry:ui',
         target: 'components/animate-ui/primitives/radix/sheet.tsx',
         content:
-          "'use client';\n\nimport * as React from 'react';\nimport { Dialog as SheetPrimitive } from 'radix-ui';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype SheetContextType = {\n  isOpen: boolean;\n  setIsOpen: (isOpen: boolean) => void;\n};\n\nconst [SheetProvider, useSheet] =\n  getStrictContext<SheetContextType>('SheetContext');\n\ntype SheetProps = React.ComponentProps<typeof SheetPrimitive.Root>;\n\nfunction Sheet(props: SheetProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props.open,\n    defaultValue: props.defaultOpen,\n    onChange: props.onOpenChange,\n  });\n\n  return (\n    <SheetProvider value={{ isOpen, setIsOpen }}>\n      <SheetPrimitive.Root\n        data-slot=\"sheet\"\n        {...props}\n        onOpenChange={setIsOpen}\n      />\n    </SheetProvider>\n  );\n}\n\ntype SheetTriggerProps = React.ComponentProps<typeof SheetPrimitive.Trigger>;\n\nfunction SheetTrigger(props: SheetTriggerProps) {\n  return <SheetPrimitive.Trigger data-slot=\"sheet-trigger\" {...props} />;\n}\n\ntype SheetCloseProps = React.ComponentProps<typeof SheetPrimitive.Close>;\n\nfunction SheetClose(props: SheetCloseProps) {\n  return <SheetPrimitive.Close data-slot=\"sheet-close\" {...props} />;\n}\n\ntype SheetPortalProps = React.ComponentProps<typeof SheetPrimitive.Portal>;\n\nfunction SheetPortal(props: SheetPortalProps) {\n  const { isOpen } = useSheet();\n\n  return (\n    <AnimatePresence>\n      {isOpen && (\n        <SheetPrimitive.Portal forceMount data-slot=\"sheet-portal\" {...props} />\n      )}\n    </AnimatePresence>\n  );\n}\n\ntype SheetOverlayProps = Omit<\n  React.ComponentProps<typeof SheetPrimitive.Overlay>,\n  'asChild' | 'forceMount'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction SheetOverlay({\n  transition = { duration: 0.2, ease: 'easeInOut' },\n  ...props\n}: SheetOverlayProps) {\n  return (\n    <SheetPrimitive.Overlay asChild forceMount>\n      <motion.div\n        key=\"sheet-overlay\"\n        data-slot=\"sheet-overlay\"\n        initial={{ opacity: 0, filter: 'blur(4px)' }}\n        animate={{ opacity: 1, filter: 'blur(0px)' }}\n        exit={{ opacity: 0, filter: 'blur(4px)' }}\n        transition={transition}\n        {...props}\n      />\n    </SheetPrimitive.Overlay>\n  );\n}\n\ntype Side = 'top' | 'bottom' | 'left' | 'right';\n\ntype SheetContentProps = React.ComponentProps<typeof SheetPrimitive.Content> &\n  HTMLMotionProps<'div'> & {\n    side?: Side;\n  };\n\nfunction SheetContent({\n  side = 'right',\n  transition = { type: 'spring', stiffness: 150, damping: 22 },\n  style,\n  ...props\n}: SheetContentProps) {\n  const axis = side === 'left' || side === 'right' ? 'x' : 'y';\n\n  const offscreen: Record<Side, { x?: string; y?: string; opacity: number }> = {\n    right: { x: '100%', opacity: 0 },\n    left: { x: '-100%', opacity: 0 },\n    top: { y: '-100%', opacity: 0 },\n    bottom: { y: '100%', opacity: 0 },\n  };\n\n  const positionStyle: Record<Side, React.CSSProperties> = {\n    right: { insetBlock: 0, right: 0 },\n    left: { insetBlock: 0, left: 0 },\n    top: { insetInline: 0, top: 0 },\n    bottom: { insetInline: 0, bottom: 0 },\n  };\n\n  return (\n    <SheetPrimitive.Content asChild forceMount {...props}>\n      <motion.div\n        key=\"sheet-content\"\n        data-slot=\"sheet-content\"\n        data-side={side}\n        initial={offscreen[side]}\n        animate={{ [axis]: 0, opacity: 1 }}\n        exit={offscreen[side]}\n        style={{\n          position: 'fixed',\n          ...positionStyle[side],\n          ...style,\n        }}\n        transition={transition}\n      />\n    </SheetPrimitive.Content>\n  );\n}\n\ntype SheetHeaderProps = React.ComponentProps<'div'>;\n\nfunction SheetHeader(props: SheetHeaderProps) {\n  return <div data-slot=\"sheet-header\" {...props} />;\n}\n\ntype SheetFooterProps = React.ComponentProps<'div'>;\n\nfunction SheetFooter(props: SheetFooterProps) {\n  return <div data-slot=\"sheet-footer\" {...props} />;\n}\n\ntype SheetTitleProps = React.ComponentProps<typeof SheetPrimitive.Title>;\n\nfunction SheetTitle(props: SheetTitleProps) {\n  return <SheetPrimitive.Title data-slot=\"sheet-title\" {...props} />;\n}\n\ntype SheetDescriptionProps = React.ComponentProps<\n  typeof SheetPrimitive.Description\n>;\n\nfunction SheetDescription(props: SheetDescriptionProps) {\n  return (\n    <SheetPrimitive.Description data-slot=\"sheet-description\" {...props} />\n  );\n}\n\nexport {\n  useSheet,\n  Sheet,\n  SheetPortal,\n  SheetOverlay,\n  SheetTrigger,\n  SheetClose,\n  SheetContent,\n  SheetHeader,\n  SheetFooter,\n  SheetTitle,\n  SheetDescription,\n  type SheetProps,\n  type SheetPortalProps,\n  type SheetOverlayProps,\n  type SheetTriggerProps,\n  type SheetCloseProps,\n  type SheetContentProps,\n  type SheetHeaderProps,\n  type SheetFooterProps,\n  type SheetTitleProps,\n  type SheetDescriptionProps,\n};",
+          "'use client';\n\nimport * as React from 'react';\nimport { Dialog as SheetPrimitive } from 'radix-ui';\nimport { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react';\n\nimport { getStrictContext } from '@/lib/get-strict-context';\nimport { useControlledState } from '@/hooks/use-controlled-state';\n\ntype SheetContextType = {\n  isOpen: boolean;\n  setIsOpen: (isOpen: boolean) => void;\n};\n\nconst [SheetProvider, useSheet] =\n  getStrictContext<SheetContextType>('SheetContext');\n\ntype SheetProps = React.ComponentProps<typeof SheetPrimitive.Root>;\n\nfunction Sheet(props: SheetProps) {\n  const [isOpen, setIsOpen] = useControlledState({\n    value: props.open,\n    defaultValue: props.defaultOpen,\n    onChange: props.onOpenChange,\n  });\n\n  return (\n    <SheetProvider value={{ isOpen, setIsOpen }}>\n      <SheetPrimitive.Root\n        data-slot=\"sheet\"\n        {...props}\n        onOpenChange={setIsOpen}\n      />\n    </SheetProvider>\n  );\n}\n\ntype SheetTriggerProps = React.ComponentProps<typeof SheetPrimitive.Trigger>;\n\nfunction SheetTrigger(props: SheetTriggerProps) {\n  return <SheetPrimitive.Trigger data-slot=\"sheet-trigger\" {...props} />;\n}\n\ntype SheetCloseProps = React.ComponentProps<typeof SheetPrimitive.Close>;\n\nfunction SheetClose(props: SheetCloseProps) {\n  return <SheetPrimitive.Close data-slot=\"sheet-close\" {...props} />;\n}\n\ntype SheetPortalProps = React.ComponentProps<typeof SheetPrimitive.Portal>;\n\nfunction SheetPortal(props: SheetPortalProps) {\n  const { isOpen } = useSheet();\n\n  return (\n    <AnimatePresence>\n      {isOpen && (\n        <SheetPrimitive.Portal forceMount data-slot=\"sheet-portal\" {...props} />\n      )}\n    </AnimatePresence>\n  );\n}\n\ntype SheetOverlayProps = Omit<\n  React.ComponentProps<typeof SheetPrimitive.Overlay>,\n  'asChild' | 'forceMount'\n> &\n  HTMLMotionProps<'div'>;\n\nfunction SheetOverlay({\n  transition = { duration: 0.2, ease: 'easeInOut' },\n  ...props\n}: SheetOverlayProps) {\n  return (\n    <SheetPrimitive.Overlay asChild forceMount>\n      <motion.div\n        key=\"sheet-overlay\"\n        data-slot=\"sheet-overlay\"\n        initial={{ opacity: 0, filter: 'blur(4px)' }}\n        animate={{ opacity: 1, filter: 'blur(0px)' }}\n        exit={{ opacity: 0, filter: 'blur(4px)' }}\n        transition={transition}\n        {...props}\n      />\n    </SheetPrimitive.Overlay>\n  );\n}\n\ntype Side = 'top' | 'bottom' | 'left' | 'right';\n\ntype SheetContentProps = React.ComponentProps<typeof SheetPrimitive.Content> &\n  HTMLMotionProps<'div'> & {\n    side?: Side;\n  };\n\nfunction SheetContent({\n  side = 'right',\n  transition = { type: 'spring', stiffness: 150, damping: 22 },\n  style,\n  children,\n  ...props\n}: SheetContentProps) {\n  const axis = side === 'left' || side === 'right' ? 'x' : 'y';\n\n  const offscreen: Record<Side, { x?: string; y?: string; opacity: number }> = {\n    right: { x: '100%', opacity: 0 },\n    left: { x: '-100%', opacity: 0 },\n    top: { y: '-100%', opacity: 0 },\n    bottom: { y: '100%', opacity: 0 },\n  };\n\n  const positionStyle: Record<Side, React.CSSProperties> = {\n    right: { insetBlock: 0, right: 0 },\n    left: { insetBlock: 0, left: 0 },\n    top: { insetInline: 0, top: 0 },\n    bottom: { insetInline: 0, bottom: 0 },\n  };\n\n  return (\n    <SheetPrimitive.Content asChild forceMount {...props}>\n      <motion.div\n        key=\"sheet-content\"\n        data-slot=\"sheet-content\"\n        data-side={side}\n        initial={offscreen[side]}\n        animate={{ [axis]: 0, opacity: 1 }}\n        exit={offscreen[side]}\n        style={{\n          position: 'fixed',\n          ...positionStyle[side],\n          ...style,\n        }}\n        transition={transition}\n      >\n        {children}\n      </motion.div>\n    </SheetPrimitive.Content>\n  );\n}\n\ntype SheetHeaderProps = React.ComponentProps<'div'>;\n\nfunction SheetHeader(props: SheetHeaderProps) {\n  return <div data-slot=\"sheet-header\" {...props} />;\n}\n\ntype SheetFooterProps = React.ComponentProps<'div'>;\n\nfunction SheetFooter(props: SheetFooterProps) {\n  return <div data-slot=\"sheet-footer\" {...props} />;\n}\n\ntype SheetTitleProps = React.ComponentProps<typeof SheetPrimitive.Title>;\n\nfunction SheetTitle(props: SheetTitleProps) {\n  return <SheetPrimitive.Title data-slot=\"sheet-title\" {...props} />;\n}\n\ntype SheetDescriptionProps = React.ComponentProps<\n  typeof SheetPrimitive.Description\n>;\n\nfunction SheetDescription(props: SheetDescriptionProps) {\n  return (\n    <SheetPrimitive.Description data-slot=\"sheet-description\" {...props} />\n  );\n}\n\nexport {\n  useSheet,\n  Sheet,\n  SheetPortal,\n  SheetOverlay,\n  SheetTrigger,\n  SheetClose,\n  SheetContent,\n  SheetHeader,\n  SheetFooter,\n  SheetTitle,\n  SheetDescription,\n  type SheetProps,\n  type SheetPortalProps,\n  type SheetOverlayProps,\n  type SheetTriggerProps,\n  type SheetCloseProps,\n  type SheetContentProps,\n  type SheetHeaderProps,\n  type SheetFooterProps,\n  type SheetTitleProps,\n  type SheetDescriptionProps,\n};",
       },
     ],
     keywords: [],
