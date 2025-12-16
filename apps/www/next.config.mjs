@@ -18,6 +18,9 @@ const config = {
       {
         hostname: 'blog.langchain.com',
       },
+      {
+        hostname: 'images.ctfassets.net',
+      },
     ],
   },
   reactStrictMode: false,
