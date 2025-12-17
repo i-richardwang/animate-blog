@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { BlogList } from '@/components/docs/blog-list';
+import { ExploreNotesCard } from '@/components/docs/explore-notes-card';
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -39,7 +40,10 @@ export default async function Page(props: {
           </DocsDescription>
 
           <DocsBody id="docs-body" className="pb-10 pt-4">
-            <BlogList posts={posts} />
+            <ExploreNotesCard />
+            <div className="mt-6">
+              <BlogList posts={posts} />
+            </div>
           </DocsBody>
         </DocsPage>
         <Footer />
