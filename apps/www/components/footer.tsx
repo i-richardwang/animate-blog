@@ -1,16 +1,12 @@
 import { MotionEffect } from './effects/motion-effect';
 
-export const Footer = () => {
-  return (
-    <MotionEffect
-      slide={{
-        direction: 'down',
-      }}
-      fade
-      zoom
-      delay={1.6}
-    >
-      <div className="w-full">
+type FooterProps = {
+  animated?: boolean;
+};
+
+export const Footer = ({ animated = false }: FooterProps) => {
+  const content = (
+    <div className="w-full">
         {/* Vercel OSS Program badge removed - project has been customized and is no longer part of the official Vercel OSS program */}
         {/* <div className="w-full flex items-center justify-center pt-8 pb-10">
           <a href="https://vercel.com/oss">
@@ -45,6 +41,20 @@ export const Footer = () => {
           </div>
         </div>
       </div>
-    </MotionEffect>
   );
+
+  if (animated) {
+    return (
+      <MotionEffect
+        slide={{ direction: 'down' }}
+        fade
+        zoom
+        delay={2.2}
+      >
+        {content}
+      </MotionEffect>
+    );
+  }
+
+  return content;
 };

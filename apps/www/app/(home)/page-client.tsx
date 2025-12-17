@@ -56,7 +56,7 @@ export function HomePageClient({ latestContent }: HomePageClientProps) {
               <Features />
             </div>
 
-            <Footer />
+            <Footer animated />
           </>
         )}
       </div>
