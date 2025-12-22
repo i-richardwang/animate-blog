@@ -56,14 +56,20 @@ export default async function Page(props: {
       })
       .filter((p): p is NonNullable<typeof p> => p !== null);
 
-    const showcaseProjects = projectsData.filter(
-      (project) => project.category === 'showcase',
+    const developerProjects = projectsData.filter(
+      (project) => project.category === 'developer',
     );
-    const openSourceProjects = projectsData.filter(
-      (project) => project.category === 'opensource',
+    const productivityProjects = projectsData.filter(
+      (project) => project.category === 'productivity',
     );
-    const productProjects = projectsData.filter(
-      (project) => project.category === 'product',
+    const solutionsProjects = projectsData.filter(
+      (project) => project.category === 'solutions',
+    );
+    const learningProjects = projectsData.filter(
+      (project) => project.category === 'learning',
+    );
+    const personalProjects = projectsData.filter(
+      (project) => project.category === 'personal',
     );
 
     return (
@@ -75,30 +81,48 @@ export default async function Page(props: {
           </DocsDescription>
 
           <DocsBody id="docs-body" className="pb-10 pt-4">
-            {showcaseProjects.length > 0 && (
+            {developerProjects.length > 0 && (
               <section className="mb-12">
                 <h2 className="text-xl font-medium mb-6 text-foreground">
-                  个人展示
+                  开发者工具
                 </h2>
-                <ProjectList projects={showcaseProjects} />
+                <ProjectList projects={developerProjects} />
               </section>
             )}
 
-            {openSourceProjects.length > 0 && (
+            {productivityProjects.length > 0 && (
               <section className="mb-12">
                 <h2 className="text-xl font-medium mb-6 text-foreground">
-                  开源项目
+                  效率产品
                 </h2>
-                <ProjectList projects={openSourceProjects} />
+                <ProjectList projects={productivityProjects} />
               </section>
             )}
 
-            {productProjects.length > 0 && (
+            {solutionsProjects.length > 0 && (
+              <section className="mb-12">
+                <h2 className="text-xl font-medium mb-6 text-foreground">
+                  AI 解决方案
+                </h2>
+                <ProjectList projects={solutionsProjects} />
+              </section>
+            )}
+
+            {learningProjects.length > 0 && (
+              <section className="mb-12">
+                <h2 className="text-xl font-medium mb-6 text-foreground">
+                  学习资源
+                </h2>
+                <ProjectList projects={learningProjects} />
+              </section>
+            )}
+
+            {personalProjects.length > 0 && (
               <section>
                 <h2 className="text-xl font-medium mb-6 text-foreground">
-                  独立开发产品
+                  个人空间
                 </h2>
-                <ProjectList projects={productProjects} />
+                <ProjectList projects={personalProjects} />
               </section>
             )}
           </DocsBody>
