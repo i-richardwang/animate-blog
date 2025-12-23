@@ -5,7 +5,7 @@ import { Reading } from './icons/reading';
 import { Projects } from './icons/projects';
 import { Blog } from './icons/blog';
 import { Notes } from './icons/notes';
-import { About } from './icons/about';
+import { Services } from './icons/services';
 import { Podcasts } from './icons/podcasts';
 import { Films } from './icons/films';
 import { Books } from './icons/books';
@@ -108,9 +108,10 @@ const COMPONENTS_ROW1 = [
     icon: <Notes />,
   },
   {
-    name: 'About',
-    description: '关于我',
-    icon: <About />,
+    name: 'Homelab',
+    description: '自托管服务',
+    href: '/status',
+    icon: <Services />,
   },
 ];
 
