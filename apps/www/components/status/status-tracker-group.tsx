@@ -59,7 +59,7 @@ export const StatusTrackerGroup = ({
       <CollapsibleContent
         data-animate={mounted}
         className={cn(
-          'flex flex-col gap-3 border-t border-border/50 px-3 py-2',
+          'grid grid-cols-1 gap-3 border-t border-border/50 px-3 py-2 md:grid-cols-2',
           'overflow-hidden',
           'data-[animate=true]:data-[state=closed]:animate-collapsible-up data-[animate=true]:data-[state=open]:animate-collapsible-down',
         )}
@@ -94,7 +94,7 @@ export const StatusTrackerGroupSkeleton = ({
         </div>
       </div>
       {/* Content */}
-      <div className="flex flex-col gap-3 border-t border-border/50 px-3 py-2">
+      <div className="grid grid-cols-1 gap-3 border-t border-border/50 px-3 py-2 md:grid-cols-2">
         {Array.from({ length: monitorCount }).map((_, i) => (
           <StatusMonitorSkeleton key={i} />
         ))}

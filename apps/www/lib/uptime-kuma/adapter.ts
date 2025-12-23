@@ -41,7 +41,10 @@ function getStatusLabel(status: StatusVariant): string {
   }
 }
 
-export function generateTrackerData(heartbeats: Heartbeat[]): TrackerDayData[] {
+export function generateTrackerData(
+  heartbeats: Heartbeat[],
+  groupSize: number = 2,
+): TrackerDayData[] {
   if (heartbeats.length === 0) {
     return [];
   }
@@ -51,20 +54,43 @@ export function generateTrackerData(heartbeats: Heartbeat[]): TrackerDayData[] {
     (a, b) => parseTime(a.time).getTime() - parseTime(b.time).getTime(),
   );
 
-  // Convert each heartbeat to a tracker data point
-  return sorted.map((hb) => {
-    const status = STATUS_MAP[hb.status] || 'empty';
-    const time = parseTime(hb.time);
+  // Group heartbeats into chunks
+  const groups: Heartbeat[][] = [];
+  for (let i = 0; i < sorted.length; i += groupSize) {
+    groups.push(sorted.slice(i, i + groupSize));
+  }
+
+  // Convert each group to a tracker data point
+  return groups.map((group) => {
+    const segmentHeight = 100 / group.length;
+
+    // Create bar segments (oldest at bottom, newest at top)
+    const bar = group.map((hb) => ({
+      status: STATUS_MAP[hb.status] || ('empty' as StatusVariant),
+      height: segmentHeight,
+    }));
+
+    // Create card items with time info
+    const card = group.map((hb) => {
+      const status = STATUS_MAP[hb.status] || ('empty' as StatusVariant);
+      const time = parseTime(hb.time);
+      const timeStr = time.toLocaleTimeString('default', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      return {
+        status,
+        value: `${timeStr} · ${getStatusLabel(status)} · ${formatPing(hb.ping)}`,
+      };
+    });
+
+    // Use the latest time in the group as the day reference
+    const latestTime = parseTime(group[group.length - 1].time);
 
     return {
-      day: time.toISOString(),
-      bar: [{ status, height: 100 }],
-      card: [
-        {
-          status,
-          value: `${getStatusLabel(status)} · ${formatPing(hb.ping)}`,
-        },
-      ],
+      day: latestTime.toISOString(),
+      bar,
+      card,
     };
   });
 }

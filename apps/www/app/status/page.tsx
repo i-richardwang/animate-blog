@@ -76,7 +76,7 @@ export default function StatusPage() {
 
   return (
     <>
-      <DocsPage toc={[]} article={{ className: '!max-w-3xl' }}>
+      <DocsPage toc={[]} article={{ className: '!max-w-[1124px]' }}>
         <DocsTitle className="font-medium">系统状态</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           所有服务的实时状态和运行时间信息
@@ -95,14 +95,14 @@ export default function StatusPage() {
           )}
 
           {/* Trackers */}
-          <div className="mt-8 flex flex-col gap-5 px-3">
+          <div className="mt-8 grid grid-cols-1 gap-5 px-3 md:grid-cols-2">
             {isLoading ? (
               <>
-                <StatusTrackerGroupSkeleton monitorCount={3} />
-                <StatusTrackerGroupSkeleton monitorCount={2} />
+                <StatusTrackerGroupSkeleton monitorCount={3} className="col-span-full" />
+                <StatusTrackerGroupSkeleton monitorCount={2} className="col-span-full" />
               </>
             ) : trackers && trackers.length > 0 ? (
-              trackers.map((tracker, index) => {
+              trackers.map((tracker) => {
                 if (tracker.type === 'monitor') {
                   return (
                     <StatusMonitor
@@ -117,6 +117,7 @@ export default function StatusPage() {
                     title={tracker.group.name}
                     status={tracker.group.status}
                     defaultOpen
+                    className="col-span-full"
                   >
                     {tracker.group.monitors.map((monitor) => (
                       <StatusMonitor key={monitor.id} monitor={monitor} />
@@ -125,7 +126,7 @@ export default function StatusPage() {
                 );
               })
             ) : (
-              <div className="border bg-card p-8 text-center text-muted-foreground">
+              <div className="col-span-full border bg-card p-8 text-center text-muted-foreground">
                 暂无监控数据
               </div>
             )}
