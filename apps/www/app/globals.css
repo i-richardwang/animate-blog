@@ -50,6 +50,19 @@
 
   --destructive-foreground: #fcf9f0;
 
+  /* Status colors - GitHub (High Contrast) */
+  --success: oklch(60.81% 0.1567 142.5);
+
+  --success-foreground: #ffffff;
+
+  --warning: oklch(81.84% 0.1328 85.87);
+
+  --warning-foreground: #ffffff;
+
+  --info: oklch(45.2% 0.1445 252.03);
+
+  --info-foreground: #ffffff;
+
   --border: #e0dccc;
 
   --input: #e0dccc;
@@ -135,6 +148,19 @@
 
   --destructive-foreground: #1c1c1c;
 
+  /* Status colors - GitHub (High Contrast) */
+  --success: oklch(54.34% 0.1634 145.98);
+
+  --success-foreground: #ffffff;
+
+  --warning: oklch(81.84% 0.1328 85.87);
+
+  --warning-foreground: #1c1c1c;
+
+  --info: oklch(46.96% 0.2957 264.51);
+
+  --info-foreground: #ffffff;
+
   --border: #2f2f2f;
 
   --input: #2f2f2f;
@@ -218,6 +244,18 @@
   --color-destructive: var(--destructive);
 
   --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-success: var(--success);
+
+  --color-success-foreground: var(--success-foreground);
+
+  --color-warning: var(--warning);
+
+  --color-warning-foreground: var(--warning-foreground);
+
+  --color-info: var(--info);
+
+  --color-info-foreground: var(--info-foreground);
 
   --color-border: var(--border);
 

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { MotionEffect } from './effects/motion-effect';
 
 type FooterProps = {
@@ -7,40 +8,42 @@ type FooterProps = {
 export const Footer = ({ animated = false }: FooterProps) => {
   const content = (
     <div className="w-full">
-        {/* Vercel OSS Program badge removed - project has been customized and is no longer part of the official Vercel OSS program */}
-        {/* <div className="w-full flex items-center justify-center pt-8 pb-10">
-          <a href="https://vercel.com/oss">
-            <img
-              alt="Vercel OSS Program"
-              src="https://vercel.com/oss/program-badge.svg"
-            />
-          </a>
-        </div> */}
-
-        <div className="max-w-7xl mx-auto h-16">
-          <div className="size-full px-4 md:px-6 flex items-center justify-center prose prose-sm text-sm text-muted-foreground">
-            <p className="text-center truncate">
-              Built by{' '}
-              <a
-                href="https://x.com/richard2wang"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Richard Wang
-              </a>
-              . The source code is available on{' '}
-              <a
-                href="https://github.com/i-richardwang/animate-blog"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                GitHub
-              </a>
-              .
-            </p>
-          </div>
+      <div className="mx-auto h-16 max-w-7xl">
+        <div className="flex size-full items-center justify-center gap-4 px-4 text-sm text-muted-foreground md:px-6">
+          <p className="truncate text-center">
+            Built by{' '}
+            <a
+              href="https://x.com/richard2wang"
+              rel="noopener noreferrer"
+              target="_blank"
+              className="underline hover:text-foreground"
+            >
+              Richard Wang
+            </a>
+            . Source on{' '}
+            <a
+              href="https://github.com/i-richardwang/animate-blog"
+              rel="noopener noreferrer"
+              target="_blank"
+              className="underline hover:text-foreground"
+            >
+              GitHub
+            </a>
+            .
+          </p>
+          <Link
+            href="/status"
+            className="flex shrink-0 items-center gap-1.5 transition-colors hover:text-foreground"
+          >
+            All operational
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping bg-success opacity-75" />
+              <span className="relative inline-flex size-2 bg-success" />
+            </span>
+          </Link>
         </div>
       </div>
+    </div>
   );
 
   if (animated) {
