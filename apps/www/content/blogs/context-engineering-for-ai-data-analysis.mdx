@@ -1,0 +1,267 @@
+---
+title: 数仓项目的上下文管理
+description: 通过项目结构设计，构建 AI 可理解的数仓规范与业务逻辑
+date: 2025-09-23
+author:
+  name: Richard Wang
+  url: https://github.com/i-richardwang
+---
+
+利用自然语言编写 SQL 是 AI 应用中备受期待的场景。理论上，只要为模型提供数据库连接，它就能扮演数据分析师的角色。
+
+但在实际生产环境中，这个设想面临着诸多挑战。
+
+即便是 GPT-4 或 Claude 这样的先进模型，在处理企业级数仓任务时也常会出现偏差：遗漏分区条件导致全表扫描、引用不存在的字段名称、混淆业务统计口径。生成的 SQL 语法虽然正确，但查询逻辑却往往偏离了业务事实。
+
+我们在对话窗口中花费了大量精力去解释表结构和业务规则。问题的核心往往不在于模型的推理能力，而是缺乏必要的上下文信息。
+
+与其在每次会话中重复输入这些背景信息，不如将其结构化地植入项目文件中，让 AI 在需要时能够自主索引和获取。
+
+---
+
+## 痛点分析
+
+当 AI 缺少项目上下文时，生成的 SQL 容易出现以下几类典型问题：
+
+**1. 忽视分区策略**
+
+AI 无法预知表结构采用了 year/month/day 分区设计，倾向于生成 SELECT \* 语句。在海量数据集上，这会引发全表扫描，消耗大量计算资源。
+
+**2. 字段命名幻觉**
+
+AI 常依据通用命名习惯臆造字段名。例如将离职状态字段误认为 status，而实际字段名为 hr_status；或使用 'Left' 代表离职，而系统定义的枚举值为 'T'（Terminated）。
+
+**3. 业务逻辑缺失**
+
+AI 不了解具体的业务定义，例如计算离职率时需要排除实习生，或者分母应取月末在职人数。
+
+本质上，AI 更像是一位技术精湛但对业务背景一无所知的新入职工程师。它精通 SQL 语法，却不了解企业内部的数据规范和业务定义。
+
+虽然可以在 Prompt 中补充这些信息，但这种方式效率较低且难以复用。更优的方案是将这些信息固化在项目结构中，使其成为代码库的一部分。
+
+---
+
+## 核心思路
+
+将 AI 所需的认知信息写入项目文件，替代重复的对话输入。
+
+Cursor、Claude Code 等现代 AI 编程工具在运行时会自动检索项目文件。我们需要设计合理的文件内容与组织形式，引导 AI 获取并理解所需信息。
+
+上下文管理可分为三个层级：
+
+| 层级     | 载体                           | 作用                                   |
+| -------- | ------------------------------ | -------------------------------------- |
+| 全局规则 | `rules.md`                     | 定义项目的通用规范                     |
+| 表级说明 | SQL 文件头部注释 (Usage Notes) | 提供单表的业务定义、字段含义及使用限制 |
+| 目录结构 | 文件夹分层                     | 通过物理路径区分数据的处理阶段与用途   |
+
+---
+
+## 实践方案
+
+### 1. 全局规则：rules.md
+
+在项目根目录放置 `rules.md` 文件，明确项目的通用规范。AI 工具通常会优先读取根目录下的 Markdown 文件，此处是定义全局约束的最佳位置。
+
+**示例：分区查询规范**
+
+```markdown
+### Partition Table Requirements
+
+- **All partition tables MUST include partition conditions in WHERE clauses**
+- **Default partition strategy**: Previous day data using:
+  WHERE concat(year, month, day) = regexp_replace(date_add(current_date, -1), '-', '')
+- Never query partition tables without partition filters to avoid full table scans
+```
+
+明确此规则后，AI 生成查询时会自动追加分区条件，无需人工干预。
+
+**示例：数据库环境规范**
+
+```markdown
+### Database Schema Requirements
+
+- **Always use fully qualified table names with database prefix**
+- Production environment: `hr_analytics_dw.table_name`
+- Pre-production environment: `hr_analytics_pre.table_name`
+- Mart layer: `hr_mart.table_name`
+- Default to production environment unless explicitly specified otherwise
+```
+
+这确保了 AI 在构建 SQL 时能正确引用库名和表名，避免因环境路径错误导致的执行失败。
+
+### 2. 表级元数据：Usage Notes
+
+在每个 SQL 文件头部添加标准化的使用说明。相比于独立的 Wiki 或 Excel 文档，这种"代码即文档"的方式能让 AI 在检索代码时直接获取上下文。
+
+```sql
+--********************************************************************--
+-- 使用说明 (Usage Notes)
+-- 1. 表定义：员工基本信息全量表，包含基本信息、组织架构、职位信息
+-- 2. 主键：employee_id (员工ID)
+-- 3. 分区表配置：本表为分区表，查询时必须添加分区条件
+--    标准分区条件：WHERE concat(year, month, day) = regexp_replace(date_add(current_date, -1), '-', '')
+-- 4. 数据库环境：hr_analytics_dw
+--********************************************************************--
+
+CREATE TABLE IF NOT EXISTS `employee_roster` (
+  `employee_id` string COMMENT '员工ID',
+  `hr_status` string COMMENT '在职状态',
+  `tenure_years` string COMMENT '司龄',
+  `job_family` string COMMENT '职位族',
+  ...
+)
+```
+
+这段注释起到了多重作用：
+
+- **消除歧义**：明确 `employee_id` 为主键，指导 JOIN 操作
+- **建立语义映射**：通过中文注释将自然语言概念（如"在职"）与物理字段关联
+- **辅助检索**：当询问"员工数据"时，AI 可通过注释内容快速定位到相关文件
+
+### 3. 目录结构：文件夹分层
+
+```text
+project/
+├── rules.md
+├── source_table/        # 源表定义，仅包含 DDL 和字段说明
+│   ├── employee/
+│   ├── organization/
+│   └── survey/
+├── task/                # 数据加工逻辑，包含 ETL、CTE、JOIN 过程
+│   ├── survey_union.sql
+│   └── employee_development.sql
+└── queries/             # 业务分析查询模板
+    └── team_composition_change.sql
+```
+
+清晰的分层有助于 AI 理解文件的用途：
+
+- 寻找表结构和字段定义时，检索 `source_table/`
+- 参考数据加工逻辑时，查看 `task/`
+- 寻找分析类查询模板时，优先参考 `queries/`
+
+例如，当要求 AI "分析团队人员变化"时，它会优先参考 `queries/` 目录下的既有脚本。
+
+---
+
+## 案例演示
+
+以"计算各职位族的平均司龄"这一需求为例。
+
+缺乏项目上下文时，AI 生成的查询往往存在缺陷：遗漏分区条件、未过滤非在职员工、忽略字段类型转换。
+
+引入项目上下文后，AI 生成的查询更加严谨：
+
+```sql
+SELECT
+  job_family,
+  COUNT(DISTINCT employee_id) AS employee_count,
+  ROUND(AVG(CAST(tenure_years AS DOUBLE)), 2) AS avg_tenure
+FROM hr_analytics_dw.employee_roster
+WHERE concat(year, month, day) = regexp_replace(date_add(current_date, -1), '-', '')
+  AND hr_status = 'A'
+GROUP BY job_family
+ORDER BY employee_count DESC;
+```
+
+AI 从项目文件中提取了关键细节：
+
+- **分区过滤**：基于 `rules.md` 和 Usage Notes 的规范
+- **业务过滤**：基于字段注释理解 `hr_status = 'A'` 代表在职
+- **类型转换**：基于 DDL 定义识别 `tenure_years` 为字符串类型
+
+这些信息已内化为项目的一部分，无需在 Prompt 中反复强调。
+
+---
+
+## 进阶策略：维度快照
+
+跨期分析中常见的一个陷阱是组织架构的时间变化。
+
+若使用最新的组织架构去关联去年的调研数据，可能会因部门合并或拆分导致数据偏差。
+
+我们可以在 `rules.md` 中定义维度快照策略：
+
+```markdown
+### Dimensional Snapshot Strategy
+
+For point-in-time analysis, dimension tables may use fixed partition dates:
+WHERE concat_ws('-', year, month, day) = '2024-12-31' -- Lock to year-end snapshot
+```
+
+并在实际 SQL 文件中提供示例：
+
+```sql
+WITH survey_data AS (
+  -- 调研数据取前一日分区
+  SELECT *
+  FROM hr_analytics_dw.survey_response
+  WHERE concat(year, month, day) = regexp_replace(date_add(current_date, -1), '-', '')
+),
+
+org_snapshot AS (
+  -- 组织架构锁定至年末快照
+  SELECT *
+  FROM hr_analytics_dw.organization_structure
+  WHERE concat_ws('-', year, month, day) = '2024-12-31'
+)
+
+SELECT s.*, o.org_name1, o.org_name2
+FROM survey_data s
+LEFT JOIN org_snapshot o ON s.department_id = o.department_id;
+```
+
+当 AI 遇到"跨期对比"或"历史回溯"类需求时，便能参考此模式，采用固定时点的维度快照进行关联。
+
+---
+
+## 实施建议
+
+### 精简核心表
+
+企业数仓表数量庞大，无需全部纳入。建议仅收录经过治理的核心表，既降低 AI 的选择难度，也减少幻觉产生的概率。
+
+### 剔除干扰信息
+
+宽表中常包含废弃或定义模糊的字段。在提供给 AI 的 DDL 文件中，建议仅保留常用且定义清晰的字段。
+
+### 采用双语注释
+
+```sql
+`tenure_years` string COMMENT '司龄',
+`job_family` string COMMENT '职位族',
+```
+
+双语注释能确保 AI 无论在中文还是英文语境下，都能准确匹配字段。
+
+### 预置查询样本
+
+在文件末尾附带典型查询案例：
+
+```sql
+-- 示例: 按职位族统计员工分布
+-- SELECT job_family, COUNT(DISTINCT employee_id) AS employee_count
+-- FROM hr_analytics_dw.employee_roster
+-- WHERE concat(year, month, day) = regexp_replace(date_add(current_date, -1), '-', '')
+--   AND hr_status = 'A'
+-- GROUP BY job_family;
+```
+
+AI 在生成类似查询时会参考这些示例。
+
+---
+
+## 结语
+
+所谓的"AI 智能"，很大程度上取决于我们提供给它的上下文质量。本文介绍的这套方法，本质上是把过去散落在文档、聊天记录甚至口头约定中的知识，变成了代码库里结构化的信息。
+
+回顾一下核心步骤：
+
+1. 利用 rules.md 确立全局技术规范。
+
+2. 通过 Usage Notes 完善表级业务元数据。
+
+3. 构建清晰的目录结构以表达数据流转逻辑。
+
+当把这些基础设施搭建好之后，你会发现，这不仅让 AI 写出的 SQL 更靠谱，也让整个数仓项目变得更加清晰和规范。
