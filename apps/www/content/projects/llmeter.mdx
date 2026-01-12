@@ -1,0 +1,84 @@
+---
+title: LLMeter
+description: LLM API 监控仪表板，实时追踪多个大语言模型提供商的令牌使用、成本消耗和性能指标
+date: 2025-01-10
+category: developer
+logo: https://llmeter.richardwang.me/icon-192.png
+tech:
+  - Next.js
+  - React
+  - TypeScript
+  - Tailwind CSS
+  - Drizzle ORM
+  - PostgreSQL
+  - Recharts
+links:
+  url: https://llmeter.richardwang.me
+  github: https://github.com/i-richardwang/LLMeter
+featured: false
+---
+
+LLM API 使用监控仪表板，连接 Bifrost LLM 网关数据库，提供令牌消耗、成本分析、性能追踪等多维度数据可视化。
+
+## 监控面板
+
+![仪表板概览](/projects/llmeter/dashboard.png)
+
+8 个核心指标卡片：总令牌数、总请求数、总成本、成功率、平均 TPS、平均延迟、每请求平均令牌数、每请求平均成本。支持按时间范围筛选（24 小时、7 天、30 天或自定义），数据每 30 秒自动刷新。
+
+## 趋势分析
+
+![趋势图表与活动热力图](/projects/llmeter/trends.png)
+
+令牌使用趋势（区分 Prompt 和 Completion）、成本趋势、请求数趋势。GitHub 风格的年度活动热力图展示使用密度分布。
+
+## 多维度分布
+
+![按提供商和品牌分布](/projects/llmeter/providers.png)
+
+按提供商、按 AI 品牌分别统计令牌消耗和成本占比。内置主流模型的品牌识别，自动归类聚合。
+
+## 模型排行
+
+![模型排行榜](/projects/llmeter/models.png)
+
+Top 10 模型的令牌使用量和 TPS 性能对比。
+
+## 技术架构
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Frontend Layer                       │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐      │
+│  │ Stats Cards │  │ Trend Charts│  │  Pie Charts │      │
+│  └─────────────┘  └─────────────┘  └─────────────┘      │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐      │
+│  │  Bar Charts │  │   Heatmap   │  │ Date Picker │      │
+│  └─────────────┘  └─────────────┘  └─────────────┘      │
+│                         │                               │
+│              React 19 + Recharts + Motion               │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                     API Layer                           │
+│           Next.js API Routes + Zod Validation           │
+│                          │                              │
+│    ┌─────────────────────┼─────────────────────┐        │
+│    │  7 Parallel Queries │ Model Normalization │        │
+│    └─────────────────────┴─────────────────────┘        │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                   Database Layer                        │
+│              Drizzle ORM + PostgreSQL                   │
+│                  (Bifrost Logs Table)                   │
+└─────────────────────────────────────────────────────────┘
+```
+
+**前端**：Next.js 16 + React 19，Tailwind CSS 4 + shadcn/ui，Recharts 图表，Motion 动画。
+
+**后端**：Next.js API Routes，Zod 参数验证，7 个数据库查询并行执行。
+
+**数据层**：Drizzle ORM 连接 PostgreSQL，读取 Bifrost 网关日志。

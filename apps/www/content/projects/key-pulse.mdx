@@ -1,0 +1,55 @@
+---
+title: KeyPulse
+description: API 密钥验证和管理平台，支持批量操作、加密存储、计划任务和 Bifrost 集成
+date: 2025-01-10
+category: developer
+logo: https://raw.githubusercontent.com/i-richardwang/key-pulse/main/public/icon-192.png
+tech:
+  - Next.js
+  - React
+  - TypeScript
+  - PostgreSQL
+  - Drizzle ORM
+links:
+  github: https://github.com/i-richardwang/KeyPulse
+featured: false
+---
+
+全栈 API 密钥验证和管理平台，专为需要管理大量 API 密钥的开发者和团队设计。支持 OpenAI、Anthropic 等多个提供商，提供实时验证、批量操作、计划任务等功能。所有密钥加密存储。
+
+## 密钥管理
+
+![密钥列表](/projects/key-pulse/keys-table.png)
+
+主界面展示所有 API 密钥的状态概览。支持单个添加或批量导入密钥，一键验证全部或选中的密钥。验证通过 Server-Sent Events 实时推送进度，结果包含响应时间帮助识别慢速密钥。支持按状态、提供商筛选和搜索，可导出为 JSON、CSV、TXT 格式。
+
+## 提供商配置
+
+![提供商设置](/projects/key-pulse/providers.png)
+
+支持 OpenAI、Anthropic 以及任意兼容 OpenAI 接口的自定义提供商。每个提供商可独立配置基础 URL、验证模型、请求超时和代理设置。密钥按提供商分组管理，方便区分不同来源的密钥。
+
+## 代理支持
+
+![代理设置](/projects/key-pulse/proxies.png)
+
+支持 HTTP 和 SOCKS5 代理，可为不同提供商绑定独立代理。适用于需要特定网络环境访问 API 的场景。
+
+## 计划任务
+
+![计划任务](/projects/key-pulse/schedules.png)
+
+基于 Cron 表达式的自动化验证调度，可针对全部密钥或特定提供商定时执行验证。支持查看执行历史和手动触发，确保密钥状态始终最新。
+
+## Bifrost 集成
+
+![Bifrost 同步](/projects/key-pulse/bifrost.png)
+
+与 Bifrost API 网关双向同步。支持从 Bifrost 导入现有配置，或将本地管理的提供商和密钥推送到网关。支持 API 和直接数据库连接两种同步模式。
+
+## 技术栈
+
+- **前端**: Next.js 16、React 19、TailwindCSS、Shadcn/UI
+- **后端**: Next.js API Routes、Drizzle ORM
+- **数据库**: PostgreSQL
+- **状态管理**: TanStack Query
