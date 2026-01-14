@@ -1,0 +1,96 @@
+---
+title: DataStudio
+description: AI 友好的数据分析项目模板，通过结构化上下文让 AI 生成准确的 SQL 查询
+date: 2025-01-14
+category: analytics
+logo: /projects/github.svg
+tech:
+  - SQL
+  - Hive SQL
+  - Spark SQL
+links:
+  github: https://github.com/i-richardwang/DataStudio
+featured: false
+---
+
+AI 友好的数据分析项目模板。通过 `rules.md` 全局规则、SQL 文件 Usage Notes、清晰的目录分层，让 Claude Code 等 AI 工具自动理解分区策略、字段定义和业务口径，生成可直接执行的 SQL。
+
+## 项目结构
+
+```
+DataStudio/
+├── source_table/          # 源表定义（DDL + 字段注释）
+│   ├── employee/          # 员工域
+│   ├── organization/      # 组织域
+│   ├── survey/            # 调研域
+│   └── performance_talent/# 绩效域
+│
+├── task/                  # 数据加工逻辑
+│   ├── employee_development.sql
+│   ├── survey_union.sql
+│   └── job_classification.sql
+│
+├── queries/               # 分析查询模板
+│   └── team_composition_change.sql
+│
+└── rules.md               # AI 上下文规则
+```
+
+## 上下文层级
+
+| 层级 | 载体 | 作用 |
+|------|------|------|
+| 全局规则 | `rules.md` | 分区策略、库名规范、SQL 风格 |
+| 表级说明 | Usage Notes | 主键、分区配置、字段含义 |
+| 目录结构 | 文件夹分层 | 区分源表、加工、查询 |
+
+## 全局规则
+
+`rules.md` 定义 AI 必须遵循的约束：
+
+```markdown
+### Partition Table Requirements
+
+- All partition tables MUST include partition conditions
+- Default: WHERE concat(year, month, day) = regexp_replace(date_add(current_date, -1), '-', '')
+```
+
+AI 生成查询时自动追加分区条件，避免全表扫描。
+
+## 表级元数据
+
+每个 SQL 文件头部的 Usage Notes：
+
+```sql
+--********************************************************************--
+-- Usage Notes
+-- 1. Table Definition: 员工基本信息全量表
+-- 2. Primary Key: employee_id
+-- 3. Partition: year/month/day 三级分区
+-- 4. Database: hr_analytics_dw
+--********************************************************************--
+```
+
+## 维度快照
+
+跨期分析时锁定历史组织架构：
+
+```sql
+-- 组织架构锁定至年末快照
+WHERE concat_ws('-', year, month, day) = '2024-12-31'
+```
+
+避免部门变更导致的数据偏差。
+
+## 技术说明
+
+| 项目 | 说明 |
+|------|------|
+| SQL 方言 | Hive SQL / Spark SQL |
+| 示例领域 | HR（员工、组织、绩效、调研） |
+| 分区策略 | year/month/day 三级分区 |
+| AI 工具 | Claude Code 等支持规则配置的工具 |
+
+---
+
+详细的设计思路和实践案例见博客：[数仓项目的上下文管理](/blog/context-engineering-for-ai-data-analysis)。

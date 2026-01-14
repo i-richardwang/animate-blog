@@ -65,7 +65,7 @@ export const projects = defineDocs({
     image: z.string().optional(),
     logo: z.string().optional(),
     featured: z.boolean().default(false),
-    category: z.enum(['developer', 'productivity', 'solutions', 'learning', 'personal']).optional(),
+    category: z.enum(['developer', 'productivity', 'solutions', 'learning', 'personal', 'analytics']).optional(),
   }),
   },
   meta: {

@@ -65,6 +65,9 @@ export default async function Page(props: {
     const solutionsProjects = projectsData.filter(
       (project) => project.category === 'solutions',
     );
+    const analyticsProjects = projectsData.filter(
+      (project) => project.category === 'analytics',
+    );
     const learningProjects = projectsData.filter(
       (project) => project.category === 'learning',
     );
@@ -105,6 +108,15 @@ export default async function Page(props: {
                   AI 解决方案
                 </h2>
                 <ProjectList projects={solutionsProjects} />
+              </section>
+            )}
+
+            {analyticsProjects.length > 0 && (
+              <section className="mb-12">
+                <h2 className="text-xl font-medium mb-6 text-foreground">
+                  数据分析
+                </h2>
+                <ProjectList projects={analyticsProjects} />
               </section>
             )}
 
