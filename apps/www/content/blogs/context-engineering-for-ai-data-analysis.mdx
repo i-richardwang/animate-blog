@@ -84,7 +84,9 @@ Cursor、Claude Code 等现代 AI 编程工具在运行时会自动检索项目�
 - **Always use fully qualified table names with database prefix**
 - Production environment: `hr_analytics_dw.table_name`
 - Pre-production environment: `hr_analytics_pre.table_name`
+- Core HR system: `hr_core.table_name`
 - Mart layer: `hr_mart.table_name`
+- Development mart: `hr_mart_dev.table_name`
 - Default to production environment unless explicitly specified otherwise
 ```
 
@@ -124,14 +126,16 @@ CREATE TABLE IF NOT EXISTS `employee_roster` (
 ```text
 project/
 ├── rules.md
-├── source_table/        # 源表定义，仅包含 DDL 和字段说明
+├── source_table/           # 源表定义，仅包含 DDL 和字段说明
 │   ├── employee/
 │   ├── organization/
+│   ├── performance_talent/
 │   └── survey/
-├── task/                # 数据加工逻辑，包含 ETL、CTE、JOIN 过程
-│   ├── survey_union.sql
-│   └── employee_development.sql
-└── queries/             # 业务分析查询模板
+├── task/                   # 数据加工逻辑，包含 ETL、CTE、JOIN 过程
+│   ├── employee_development.sql
+│   ├── job_classification.sql
+│   └── survey_union.sql
+└── queries/                # 业务分析查询模板
     └── team_composition_change.sql
 ```
 
