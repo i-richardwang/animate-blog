@@ -1,0 +1,213 @@
+---
+title: Resume Extraction
+description: AI 驱动的简历解析服务，通过 LangGraph 工作流和可配置提取规则，将 PDF 简历转化为结构化数据
+date: 2025-01-20
+category: solutions
+logo: /projects/github.svg
+tech:
+  - LangGraph
+  - FastAPI
+  - Python
+  - MongoDB
+  - SQLAlchemy
+  - PyMuPDF
+links:
+  github: https://github.com/i-richardwang/resume_ext
+featured: false
+---
+
+> 上传 PDF 简历，自动提取个人信息、工作经历、教育背景、项目经验和技能标签，输出标准化的结构化数据。
+
+传统简历解析依赖 PDF 文本层提取加正则匹配——遇到扫描件、图片型 PDF 或复杂多栏排版就容易失败，每增加一个提取字段还需要编写新的解析规则。
+
+Resume Extraction 采用完全不同的路径：将 PDF 页面渲染为图片，由视觉模型直接"看"内容，再通过 LLM 输出结构化数据。这带来两个核心优势——**不依赖文本层，任意格式的 PDF 都能处理**；**提取规则通过 JSON 配置定义，扩展新字段无需改代码**。整个流程由 LangGraph 编排为独立的工作流节点，每个节点可独立失败和重试。
+
+## 系统架构
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        入口层 (Entry)                            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
+│  │  FastAPI     │  │   Worker     │  │     CLI      │           │
+│  │  REST API    │  │  异步消费者   │  │  本地调试     │           │
+│  └──────────────┘  └──────────────┘  └──────────────┘           │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    工作流层 (LangGraph) ★                        │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
+│  │ 文档预处理│→│ 文本提取  │→│ 结果合并  │→│ 结构化解析│        │
+│  │ PDF→图片  │  │ 视觉OCR  │  │ 多页整合  │  │ LLM提取  │        │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘        │
+│                                              ↓                  │
+│                                        ┌──────────┐            │
+│                                        │ 临时清理  │            │
+│                                        └──────────┘            │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      存储层 (Storage)                            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
+│  │ MySQL/PgSQL  │  │   MongoDB    │  │   SQLite     │           │
+│  │ 任务队列/文件 │  │ 提取结果/配置 │  │  LLM 缓存    │           │
+│  └──────────────┘  └──────────────┘  └──────────────┘           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+入口层提供三种使用方式：REST API 适合生产环境集成，Worker 从数据库任务队列拉取待处理任务，CLI 用于本地调试和单文件处理。三者共享同一套 LangGraph 工作流，确保处理逻辑一致。
+
+## 工作流节点
+
+LangGraph 将简历处理拆分为五个顺序节点，每个节点可独立失败和重试：
+
+| 节点 | 功能 | 说明 |
+|------|------|------|
+| **document_preprocessing** | PDF 转图片 | PyMuPDF 将每页 PDF 渲染为高分辨率图片 |
+| **extract_text_pages** | 逐页文本提取 | 视觉模型识别每页图片中的文本内容 |
+| **merge_results** | 多页合并 | 将各页文本按逻辑顺序合并为完整简历文本 |
+| **extract_structured_data** | 结构化解析 | LLM 从合并文本中提取个人信息、经历等结构化字段 |
+| **cleanup_temp_files** | 临时文件清理 | 删除中间产物（图片、临时文件） |
+
+节点间通过 `ResumeWorkflowState` 传递状态，包含图片路径、页面映射、提取内容、错误信息等上下文。条件边控制流程跳转——如果某个节点失败，工作流会跳过后续依赖节点，直接进入清理阶段。
+
+## 配置化提取
+
+通过 JSON 配置定义提取规则，无需编写代码即可扩展提取字段：
+
+```json
+{
+  "type_name": "personal_info",
+  "display_name": "个人信息",
+  "enabled": true,
+  "model_type": "text",
+  "output_format": "single",
+  "prompt": "从简历文本中提取候选人的个人基本信息...",
+  "output_schema": {
+    "name": "string - 姓名",
+    "email": "string - 邮箱",
+    "phone": "string - 电话",
+    "location": "string - 所在地",
+    "age": "integer - 年龄",
+    "gender": "string - 性别"
+  }
+}
+```
+
+系统内置五类提取器：
+
+- **personal_info** — 姓名、邮箱、电话、所在地、年龄等基本信息
+- **work_experiences** — 公司、职位、在职时间、工作职责
+- **education** — 学校、学历、专业、毕业时间
+- **projects** — 项目名称、描述、技术栈、个人角色
+- **skills** — 技术技能和软技能标签
+
+用户还可以通过 MongoDB 存储自定义提取配置，添加任意新的提取维度（如语言能力、证书资质等），系统运行时自动加载并合并。
+
+## 异步任务处理
+
+生产环境下，API 和 Worker 分离部署，通过数据库任务队列协调：
+
+```
+POST /api/v1/tasks/submit { file_ids: ["id1", "id2"] }
+        │
+        ▼
+  TaskQueue 写入 (status: pending)
+        │
+        ▼
+  Worker 轮询 → 原子抢占任务 (pending → processing)
+        │
+        ▼
+  下载文件 → 执行 LangGraph 工作流
+        │
+        ▼
+  结果写入 MongoDB → 更新状态 (processing → completed)
+```
+
+任务抢占采用原子操作，支持多 Worker 并行消费且不会重复处理。单个 Worker 可配置最大并发数，支持优雅关闭（SIGINT/SIGTERM）和异常任务自动重排。
+
+## API 接口
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| `POST` | `/api/v1/tasks/submit` | 提交解析任务（批量，1-100 个文件） |
+| `GET` | `/api/v1/tasks/status` | 查询任务状态（支持 task_id 或 file_id） |
+| `DELETE` | `/api/v1/files` | 删除文件及关联的解析结果 |
+| `GET` | `/health` | 服务健康检查 |
+
+所有接口通过 Bearer Token 认证，Swagger 文档自动生成于 `/docs`。
+
+## 多模型支持
+
+系统将 LLM 调用按用途分为三种角色，可独立配置不同模型：
+
+| 角色 | 用途 |
+|------|------|
+| **Vision Model** | PDF 页面 OCR 识别 |
+| **Text Model** | 常规文本提取 |
+| **Smart Model** | 复杂结构化推理 |
+
+支持 OpenAI、Anthropic、Google Gemini、Groq 等主流 LLM 提供商，通过环境变量切换。可选启用 SQLite 缓存，对相同输入跳过重复 API 调用，降低成本。
+
+## 技术实现
+
+### 核心技术栈
+
+| 技术 | 用途 |
+|------|------|
+| LangGraph | 工作流编排，节点状态管理 |
+| LangChain | LLM 调用，结构化输出 |
+| FastAPI | REST API 服务 |
+| PyMuPDF | PDF 转图片 |
+| SQLAlchemy | 关系数据库 ORM（MySQL/PostgreSQL） |
+| MongoDB | 提取结果和用户配置存储 |
+| Langfuse | 可选的可观测性监控 |
+
+### 项目结构
+
+```
+resume-extraction/
+├── src/
+│   ├── api/                  # REST API (FastAPI)
+│   │   ├── routes/           # 路由定义
+│   │   ├── services/         # 业务逻辑
+│   │   ├── models/           # 请求/响应模型
+│   │   └── middleware/       # API Key 认证
+│   │
+│   ├── worker/               # 异步任务消费者
+│   │   ├── main.py           # Worker 入口，轮询任务队列
+│   │   └── processor.py      # 单任务处理逻辑
+│   │
+│   ├── cli/                  # 命令行工具
+│   │
+│   ├── workflow/             # LangGraph 工作流 ★
+│   │   ├── graph.py          # 图定义
+│   │   ├── nodes.py          # 节点实现
+│   │   ├── state.py          # 状态定义
+│   │   ├── executor.py       # 执行入口
+│   │   └── providers.py      # 依赖注入容器
+│   │
+│   ├── core/                 # 核心模块
+│   │   ├── config/           # 集中配置（AppConfig）
+│   │   ├── extractors/       # 提取器（配置驱动）
+│   │   ├── document_processors/  # PDF/图片处理
+│   │   ├── cache/            # LLM 缓存
+│   │   └── observability/    # Langfuse 集成
+│   │
+│   └── database/             # 数据持久化
+│       ├── models.py         # SQLAlchemy 模型
+│       ├── mongodb_operations.py
+│       └── operations/       # CRUD 操作
+│
+├── config/
+│   └── default_configs.json  # 内置提取配置
+│
+└── docs/                     # 部署和使用文档
+```
+
+## 适用场景
+
+**招聘系统集成** — 作为后端服务对接 ATS/招聘平台，批量解析候选人简历，输出标准化数据供下游匹配和筛选。
+
+**人才库建设** — 将历史积累的 PDF 简历批量转化为结构化数据，构建可检索的人才数据库。

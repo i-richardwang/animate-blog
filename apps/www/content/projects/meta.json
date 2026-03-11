@@ -15,6 +15,7 @@
     "dataflow",
     "querybot",
     "talentmatch",
+    "resume-extraction",
     "agentic-table-playground",
     "llm-textkit",
     "workforce-compass",
