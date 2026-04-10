@@ -57,7 +57,7 @@ export default function TokenUsagePage() {
 
         <DocsBody id="docs-body" className="pb-10 pt-4">
           {/* Range Selector */}
-          <div className="flex justify-end">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <RangeSelector value={range} onChange={setRange} />
           </div>
 

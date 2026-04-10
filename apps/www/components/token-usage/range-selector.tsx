@@ -16,13 +16,13 @@ interface RangeSelectorProps {
 
 export const RangeSelector = ({ value, onChange }: RangeSelectorProps) => {
   return (
-    <div className="flex gap-1 border bg-muted/50 p-1">
+    <div className="flex w-full gap-1 border bg-muted/50 p-1">
       {RANGES.map((range) => (
         <button
           key={range.value}
           onClick={() => onChange(range.value)}
           className={cn(
-            'px-3 py-1.5 text-sm font-medium transition-colors',
+            'flex-1 py-1.5 text-sm font-medium transition-colors',
             value === range.value
               ? 'bg-background text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground',
