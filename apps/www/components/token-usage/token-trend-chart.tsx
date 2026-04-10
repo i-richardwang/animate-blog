@@ -58,7 +58,7 @@ export const TokenTrendChart = ({ data }: TokenTrendChartProps) => {
                 />
               }
             />
-            <Bar dataKey="tokens" fill="var(--color-tokens)" radius={8} />
+            <Bar dataKey="tokens" fill="var(--color-tokens)" radius={0} />
           </BarChart>
         </ChartContainer>
       </CardContent>

@@ -61,7 +61,7 @@ export const BrandUsageChart = ({ data }: BrandUsageChartProps) => {
                 />
               }
             />
-            <Bar dataKey="tokens" fill="var(--color-tokens)" radius={5} />
+            <Bar dataKey="tokens" fill="var(--color-tokens)" radius={0} />
           </BarChart>
         </ChartContainer>
       </CardContent>
