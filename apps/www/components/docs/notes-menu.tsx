@@ -9,6 +9,7 @@ import {
   HoverCardContent,
 } from '@workspace/ui/components/ui/hover-card';
 import { BookText } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export const NOTES_ITEMS = [
   {
@@ -26,6 +27,9 @@ export const NOTES_ITEMS = [
 ];
 
 export const NotesMenu = () => {
+  const pathname = usePathname();
+  const active = pathname.startsWith('/docs');
+
   return (
     <HoverCard openDelay={150} closeDelay={200}>
       <HoverCardTrigger asChild>
@@ -34,12 +38,15 @@ export const NotesMenu = () => {
             color: 'ghost',
             size: 'sm',
             className: cn(
-              '!text-sm !font-normal text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white !h-8 transition-colors duration-200 ease-in-out',
+              '!text-sm !font-normal !h-8 transition-colors duration-200 ease-in-out',
               'lg:!px-3 !px-2',
+              active
+                ? 'text-primary hover:text-primary !font-medium'
+                : 'text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white',
             ),
           })}
         >
-          <BookText className="size-4 lg:hidden text-muted-foreground" />
+          <BookText className={cn('size-4 lg:hidden', active ? 'text-primary' : 'text-muted-foreground')} />
           <span className="lg:inline hidden">笔记</span>
         </button>
       </HoverCardTrigger>

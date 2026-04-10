@@ -15,6 +15,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { useSearchContext, useSidebar } from 'fumadocs-ui/provider';
+import { usePathname } from 'next/navigation';
 import { ThemeSwitcher } from '../animate/theme-switcher';
 import XIcon from '@workspace/ui/components/icons/x-icon';
 import GithubIcon from '@workspace/ui/components/icons/github-icon';
@@ -77,10 +78,12 @@ const NavItem = ({
   title,
   url,
   icon,
+  active,
 }: {
   title: string;
   url: string;
   icon?: React.ReactNode;
+  active?: boolean;
 }) => {
   return (
     <Link
@@ -90,13 +93,18 @@ const NavItem = ({
         color: 'ghost',
         size: 'sm',
         className: cn(
-          '!text-sm !font-normal text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white !h-8 transition-colors duration-200 ease-in-out',
+          '!text-sm !font-normal !h-8 transition-colors duration-200 ease-in-out',
           'lg:!px-3 !px-2',
+          active
+            ? 'text-primary hover:text-primary !font-medium'
+            : 'text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white',
         ),
       })}
     >
       {icon && (
-        <span className="lg:hidden text-muted-foreground">{icon}</span>
+        <span className={cn('lg:hidden', active ? 'text-primary' : 'text-muted-foreground')}>
+          {icon}
+        </span>
       )}
       <span className="lg:inline hidden">{title}</span>
     </Link>
@@ -106,6 +114,7 @@ const NavItem = ({
 export const Nav = () => {
   const { setOpenSearch } = useSearchContext();
   const { open, setOpen } = useSidebar();
+  const pathname = usePathname();
 
   return (
     <Navbar className="md:h-17 h-14 border-b-0 bg-background">
@@ -126,7 +135,13 @@ export const Nav = () => {
           <div className="md:flex hidden items-center gap-1">
             <NotesMenu />
             {NAV_ITEMS.map((item) => (
-              <NavItem key={item.title} title={item.title} url={item.url} icon={item.icon} />
+              <NavItem
+                key={item.title}
+                title={item.title}
+                url={item.url}
+                icon={item.icon}
+                active={pathname.startsWith(item.url)}
+              />
             ))}
           </div>
 
