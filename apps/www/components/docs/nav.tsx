@@ -51,6 +51,10 @@ export const NAV_ITEMS = [
     title: '推荐播客',
     url: '/podcasts',
   },
+  {
+    title: 'Token 用量',
+    url: '/token-usage',
+  },
   // {
   //   title: '关于我',
   //   url: '/about',

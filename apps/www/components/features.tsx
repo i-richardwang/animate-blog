@@ -8,7 +8,7 @@ import { Notes } from './icons/notes';
 import { Services } from './icons/services';
 import { Podcasts } from './icons/podcasts';
 import { Films } from './icons/films';
-import { Books } from './icons/books';
+import { TokenUsage } from './icons/token-usage';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { AnimateIcon } from '@/registry/icons/icon';
@@ -108,10 +108,10 @@ const COMPONENTS_ROW1 = [
     icon: <Notes />,
   },
   {
-    name: 'Homelab',
-    description: '自托管服务',
-    href: '/status',
-    icon: <Services />,
+    name: 'Token',
+    description: 'Token 用量',
+    href: '/token-usage',
+    icon: <TokenUsage />,
   },
 ];
 
@@ -134,9 +134,10 @@ const COMPONENTS_ROW2 = [
     icon: <Films />,
   },
   {
-    name: 'Books',
-    description: '推荐书籍',
-    icon: <Books />,
+    name: 'Homelab',
+    description: '自托管服务',
+    href: '/status',
+    icon: <Services />,
   },
 ];
 

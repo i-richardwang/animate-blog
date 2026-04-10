@@ -32,7 +32,7 @@ import { NOTES_ITEMS } from './notes-menu';
 import { SquareMenu } from 'lucide-react';
 import { useIsMobile } from '@workspace/ui/hooks/use-mobile';
 
-const CONTENT_SECTIONS = ['/blog', '/projects', '/reading', '/podcasts'] as const;
+const CONTENT_SECTIONS = ['/blog', '/projects', '/reading', '/podcasts', '/token-usage'] as const;
 const DOCS_SECTIONS = [
   '/docs/ai',
   '/docs/data-science',

@@ -33,5 +33,15 @@
   "packageManager": "pnpm@10.29.1",
   "engines": {
     "node": ">=20"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "dependencies": {
+    "@types/pg": "^8.20.0",
+    "drizzle-orm": "^0.45.2",
+    "pg": "^8.20.0",
+    "recharts": "^3.8.1"
   }
 }
