@@ -8,6 +8,7 @@ import {
   HoverCardTrigger,
   HoverCardContent,
 } from '@workspace/ui/components/ui/hover-card';
+import { BookText } from 'lucide-react';
 
 export const NOTES_ITEMS = [
   {
@@ -33,11 +34,13 @@ export const NotesMenu = () => {
             color: 'ghost',
             size: 'sm',
             className: cn(
-              '!text-sm !font-normal text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white !h-8 !px-3 transition-colors duration-200 ease-in-out',
+              '!text-sm !font-normal text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white !h-8 transition-colors duration-200 ease-in-out',
+              'lg:!px-3 !px-2',
             ),
           })}
         >
-          笔记
+          <BookText className="size-4 lg:hidden text-muted-foreground" />
+          <span className="lg:inline hidden">笔记</span>
         </button>
       </HoverCardTrigger>
       <HoverCardContent align="start" sideOffset={8} className="w-48 p-2">

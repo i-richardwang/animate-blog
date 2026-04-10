@@ -6,7 +6,14 @@ import React from 'react';
 import { IconLogo } from '../icon-logo';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@workspace/ui/lib/utils';
-import { CommandIcon } from 'lucide-react';
+import {
+  CommandIcon,
+  FolderKanban,
+  PenLine,
+  BookOpen,
+  Podcast,
+  BarChart3,
+} from 'lucide-react';
 import { useSearchContext, useSidebar } from 'fumadocs-ui/provider';
 import { ThemeSwitcher } from '../animate/theme-switcher';
 import XIcon from '@workspace/ui/components/icons/x-icon';
@@ -38,22 +45,27 @@ export const NAV_ITEMS = [
   {
     title: '项目',
     url: '/projects',
+    icon: <FolderKanban className="size-4" />,
   },
   {
     title: '博客',
     url: '/blog',
+    icon: <PenLine className="size-4" />,
   },
   {
     title: '推荐阅读',
     url: '/reading',
+    icon: <BookOpen className="size-4" />,
   },
   {
     title: '推荐播客',
     url: '/podcasts',
+    icon: <Podcast className="size-4" />,
   },
   {
     title: 'Token 用量',
     url: '/token-usage',
+    icon: <BarChart3 className="size-4" />,
   },
   // {
   //   title: '关于我',
@@ -61,19 +73,32 @@ export const NAV_ITEMS = [
   // },
 ];
 
-const NavItem = ({ title, url }: { title: string; url: string }) => {
+const NavItem = ({
+  title,
+  url,
+  icon,
+}: {
+  title: string;
+  url: string;
+  icon?: React.ReactNode;
+}) => {
   return (
     <Link
       href={url}
+      title={title}
       className={buttonVariants({
         color: 'ghost',
         size: 'sm',
         className: cn(
-          '!text-sm !font-normal text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white !h-8 !px-3 transition-colors duration-200 ease-in-out',
+          '!text-sm !font-normal text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white !h-8 transition-colors duration-200 ease-in-out',
+          'lg:!px-3 !px-2',
         ),
       })}
     >
-      {title}
+      {icon && (
+        <span className="lg:hidden text-muted-foreground">{icon}</span>
+      )}
+      <span className="lg:inline hidden">{title}</span>
     </Link>
   );
 };
@@ -101,7 +126,7 @@ export const Nav = () => {
           <div className="md:flex hidden items-center gap-1">
             <NotesMenu />
             {NAV_ITEMS.map((item) => (
-              <NavItem key={item.title} title={item.title} url={item.url} />
+              <NavItem key={item.title} title={item.title} url={item.url} icon={item.icon} />
             ))}
           </div>
 
