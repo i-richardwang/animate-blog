@@ -1,0 +1,75 @@
+---
+title: Dossier
+description: 用 Claude Code 做组织情报研究的知识图谱系统，围绕人物、组织、关系、任职和来源构建可累积的研究状态
+date: 2026-04-08
+category: data
+logo: /projects/github.svg
+links:
+  github: https://github.com/i-richardwang/Dossier
+tech:
+  - Claude Code
+  - Next.js
+  - TypeScript
+  - PostgreSQL
+  - Drizzle ORM
+featured: false
+---
+
+大型科技公司的内部变化很难从单一信息源拼出全貌。一次部门重组的来龙去脉、关键人物的去向、新结构背后的运营理念，相关材料分散在访谈、报道、官方公告和 SEC filing 里，结论需要跨越几十份材料累积，早期的判断还会被后续证据修正。
+
+Dossier 把这个过程交给 Claude Code agent——在一张 PostgreSQL 知识图谱上持续写入、交叉验证和维护。每次 session 从数据库里已有的状态读起，不从零开始。
+
+## 研究循环
+
+![Dossier 研究循环：ingest → research → reconcile → analyze](/ai/applications/dossier-research-cycle.png)
+
+四个 Claude Code skill 组织研究节奏：
+
+- **/ingest**：给一份材料（报道、memo、公告），从中提取人物、组织、关系、任职、观察，写入图谱
+- **/research**：给一个实体（人或组织），自主搜索和阅读相关材料，写入图谱补全它缺失的维度
+- **/reconcile**：维护图谱健康——去重、解决冲突、推进事实状态、标记数据空白
+- **/analyze**：只读查询，基于图谱回答问题，区分数据和推断，暴露不确定性
+
+典型工作流：先 /ingest 处理核心文档，/research 逐个补全关键实体，阶段性 /reconcile 修正质量，最后 /analyze 围绕具体问题取数。
+
+## 知识图谱
+
+![Dossier 知识图谱数据模型：实体层、事实层、来源层的关系](/ai/applications/dossier-knowledge-graph-schema.png)
+
+图谱分三层：实体（人物和组织）、事实（关系、任职、观察）、来源（每条事实绑定到具体材料的具体段落）。不确定性嵌在数据模型里——每条事实带 confidence 分值和状态生命周期（`draft → confirmed → disputed → deprecated`），支持"先记录、后续验证"的研究节奏。
+
+## 关键设计选择
+
+**写入收敛到 CLI**。所有数据写入走 `scripts/db.ts`，一个二十余条命令的 TypeScript CLI。质量约束强制在工具层——漏传 `--confidence` 直接报错，不是靠 prompt 提醒。
+
+```bash
+# 注册实体（自动做向量检索，发现近似名字会提示）
+bun scripts/db.ts add-entity --name "Amy Coleman" --type person --description "Microsoft CPO"
+
+# 写入关系（必须显式声明 confidence 和时间状态）
+bun scripts/db.ts add-rel --subject 42 --predicate reports_to --object 15 \
+  --confidence 0.9 --is-current --source-id 7 --excerpt "Coleman reports directly to Nadella"
+
+# 语义搜索实体（向量相似度排序）
+bun scripts/db.ts search "Microsoft HR leadership"
+
+# 按条件筛选（支持多维度过滤）
+bun scripts/db.ts list-employment --org 15 --current-only
+bun scripts/db.ts list-observations --subject 42 --status disputed
+```
+
+查询支持四种方式：向量语义搜索（自然语言找实体和观察）、文本模糊匹配（名称和来源）、ID 直查（拉取实体的完整档案）、结构化过滤（按类型、状态、时间等多条件组合）。向量搜索依赖外部 embedding API，未配置时自动降级为文本匹配。
+
+**Skill 描述标准，不规定路径**。每个 skill 描述的是完成标准——产出应覆盖哪些维度、达到什么质量；具体的搜索策略、顺序和深度，都由 agent 根据情境判断。
+
+**研究方法和研究对象解耦**。每个研究项目对应一份 context 文件，包含背景、实体清单、优先级和核心问题。新增研究主题时只需添加 context 文件，skill 本身无需改动。
+
+## 技术栈
+
+- **运行时**：Claude Code + TypeScript + Bun
+- **数据库**：PostgreSQL + Drizzle ORM + pgvector
+- **前端**：Next.js（项目管理界面）
+
+---
+
+技术设计的完整记录在 [构建组织情报研究系统](/docs/ai/applications/building-knowledge-graph-for-org-research)。这套系统背后的工程原则——约束为什么要写进工具、状态层为什么要为不确定性预留空间——写在博客 [为做长期研究的 Agent 构建工作环境](/blog/building-work-environment-for-research-agent) 里。

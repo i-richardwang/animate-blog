@@ -1,0 +1,100 @@
+---
+title: Tableau CLI
+description: 为 AI Agent 设计的 Tableau 访问方案，由一个命令行工具和一份 Claude Code skill 配套组成
+date: 2026-04-11
+category: data
+logo: /projects/tableau-cli/tableau-cli.svg
+links:
+  github: https://github.com/i-richardwang/tableau-cli
+tech:
+  - Python
+  - Click
+  - httpx
+  - Tableau REST API
+  - VizQL Data Service
+featured: false
+---
+
+Tableau CLI 是面向 AI agent 的 Tableau 访问工具，由 Python 命令行 `tableau-cli`（能力对齐 [tableau-mcp](https://github.com/tableau/tableau-mcp)）和配套的 Claude Code skill 组成。设计目标是让工具相关内容不常驻 agent context：CLI 调用完即退出，skill 仅在需要时加载对应部分的手册。
+
+一次典型的调用流程是这样的：用户请求 agent 从 Tableau 查找某份数据，agent 加载 skill。入口文件 `SKILL.md` 只有几十行，先运行 `tableau-cli --help` 确认 CLI 可用，再按用户意图路由到对应子命令——"查找数据源"对应 `ds list`。到这一步，agent 才去读取 `references/cli.md` 中 `ds list` 相关的说明，按其中的 flag 构造命令。CLI 返回结构化 JSON，agent 解析后进入下一步。整个流程加入 agent context 的内容只有 skill 入口文件和一段命令手册，下一轮对话也不会保留。
+
+## skills 的组织方式
+
+```
+skills/
+├── SKILL.md                # 入口：意图路由 + 环境检查
+└── references/
+    ├── cli.md              # 完整命令手册（执行前加载）
+    └── installation.md     # 安装与认证（未配置时加载）
+```
+
+`SKILL.md` 承担路由层的职责——按用户意图映射到子命令，预设几条常用的组合工作流（例如"下载数据源后做本地分析"直接对应 `ds list → ds download → convert → 用 Polars/Pandas 加载`），并在入口完成基础的环境检查。详细的 flag 说明、参数表和示例都放在 `references/cli.md`，仅在 agent 准备执行命令时加载；如果环境尚未配置，则只加载 `references/installation.md`。
+
+`SKILL.md` 中另有一条硬性约束：`Do not guess command syntax from memory`，执行命令前必须先加载 `cli.md`。这条规则用于防止 agent 凭印象构造不存在的 flag 或子命令，其余的错误兜底交给 CLI 自身的结构化错误返回。
+
+## CLI 的输出约定
+
+错误信息同样以 JSON 返回，并附带可操作的 `hint` 字段。CLI 将 VizQL Data Service 的 30 多种错误码翻译为 agent 可直接阅读的说明，例如服务未开启时：
+
+```json
+{
+  "isError": true,
+  "errorType": "feature-disabled",
+  "message": "The VizQL Data Service is disabled on this Tableau Server.",
+  "hint": "To enable it, use TSM using the instructions at https://help.tableau.com/..."
+}
+```
+
+Agent 依据 `hint` 即可决定下一步，比如提示用户去开启服务，或改用其他实现路径。
+
+写入文件的命令统一返回 `filePath`。`ds download`、`views image`、`convert` 这类命令都会输出 `{"filePath": "/absolute/path"}` 格式的结果，让一条命令的产物可以直接作为下一条命令的输入：
+
+```bash
+tableau-cli ds download <id> -o ./data/         # → {"filePath": ".../data.tdsx"}
+tableau-cli convert ./data/data.tdsx -o ./data/ # → {"filePath": ".../data.parquet"}
+```
+
+## API 覆盖
+
+| 领域 | API |
+|------|-----|
+| 认证 | REST API v3.24（Personal Access Token） |
+| 数据源 | REST API + VizQL Data Service + Metadata API（GraphQL） |
+| 视图 | REST API（list / data / image） |
+| 工作簿 | REST API（带 view 使用统计） |
+| 搜索 | Content Exploration API |
+| 转换 | 本地文件：TDSX/HYPER → Parquet/CSV |
+
+字段元数据从 VizQL Data Service 和 Metadata API 两个来源合并：VizQL 提供基础字段信息，Metadata API 补充字段描述、计算公式、聚合方式等属性。Metadata API 不可用时会自动降级到 VizQL，不影响主流程。
+
+## 一些例子
+
+```bash
+# 搜索整个站点
+tableau-cli search "Superstore" --type workbook,view --limit 10
+
+# 列出数据源，支持过滤和分页
+tableau-cli ds list --filter "name:has:Sales" --limit 50
+
+# 获取字段元数据
+tableau-cli ds metadata <luid>
+
+# 直接查询数据源数据
+tableau-cli ds query <luid> --query '{"fields": [{"fieldCaption": "Category"}, {"fieldCaption": "Sales"}]}'
+
+# 下载视图图片
+tableau-cli views image <viewId> --width 1200 --height 800 -o dashboard.png
+
+# 下载数据源后本地转换为 Parquet
+tableau-cli ds download <id> -o ./data/
+tableau-cli convert ./data/file.tdsx --to parquet -o ./output/
+```
+
+默认输出 JSON 格式，加 `--format table` 可切换为人读表格。分页由 CLI 内部处理，调用方只需传入 `--limit` 参数。
+
+## 技术栈
+
+- **核心**：Python 3.10+、Click（CLI 框架）、httpx（HTTP 客户端）
+- **可选**：pantab、polars、pyarrow（TDSX/HYPER 转换，按需安装）
+- **配置**：`~/.tableau-cli.json` 或环境变量（PAT 认证，环境变量优先）

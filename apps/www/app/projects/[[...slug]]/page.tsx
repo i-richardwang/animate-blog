@@ -62,11 +62,11 @@ export default async function Page(props: {
     const productivityProjects = projectsData.filter(
       (project) => project.category === 'productivity',
     );
-    const solutionsProjects = projectsData.filter(
-      (project) => project.category === 'solutions',
+    const dataProjects = projectsData.filter(
+      (project) => project.category === 'data',
     );
-    const analyticsProjects = projectsData.filter(
-      (project) => project.category === 'analytics',
+    const talentProjects = projectsData.filter(
+      (project) => project.category === 'talent',
     );
     const learningProjects = projectsData.filter(
       (project) => project.category === 'learning',
@@ -102,21 +102,21 @@ export default async function Page(props: {
               </section>
             )}
 
-            {solutionsProjects.length > 0 && (
+            {dataProjects.length > 0 && (
               <section className="mb-12">
                 <h2 className="text-xl font-medium mb-6 text-foreground">
-                  AI 解决方案
+                  AI 数据应用
                 </h2>
-                <ProjectList projects={solutionsProjects} />
+                <ProjectList projects={dataProjects} />
               </section>
             )}
 
-            {analyticsProjects.length > 0 && (
+            {talentProjects.length > 0 && (
               <section className="mb-12">
                 <h2 className="text-xl font-medium mb-6 text-foreground">
-                  数据分析
+                  AI 人才应用
                 </h2>
-                <ProjectList projects={analyticsProjects} />
+                <ProjectList projects={talentProjects} />
               </section>
             )}
 
