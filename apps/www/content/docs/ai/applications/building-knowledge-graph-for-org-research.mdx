@@ -1,0 +1,177 @@
+---
+title: 构建组织情报研究系统
+description: Dossier 的设计记录：用 PostgreSQL 知识图谱、CLI 写入约束和四个 Claude Code skill 支撑可累积的组织情报研究
+releaseDate: 2026-04-08
+author:
+  name: Richard Wang
+  url: https://richardwang.me
+---
+
+Dossier 是一个用 Claude Code agent 在 PostgreSQL 知识图谱上做组织情报研究的系统——目标是让研究结果跨 session 累积，而不是每次 session 从零重读材料。
+
+这种研究工作用普通的笔记工具很快就会失控：
+
+- **材料一多就开始互相引用、重复、过期**，很快就不记得某条判断是基于哪份材料做出来的
+- **同一个人在不同报道里有三四种叫法**(本名、英文名、缩写、昵称)，不主动消歧就会分裂成几条孤立记录
+- **早期写下的结论被两个月后的新报道推翻**时，没有地方能回溯"这条旧结论当初的证据有多强"，也没法决定是直接替换还是并存打标
+- **有些信息天然没法结构化**——"这个人在内部被视为铁腕管理者"、"这家公司文化以回避风险著称"——这些是判断和信号，但放弃它们就等于丢掉了最有用的情报
+
+让 agent 做这种研究不是写一个 prompt 就够了，它需要一个**能跨 session 累积、能装下不确定性的记忆层**——这篇文章记录的就是 Dossier 这个记忆层是怎么建起来的。
+
+## 它能帮你做什么
+
+给 Dossier 一个研究主题——比如"Microsoft 最近一年 HR 组织结构的变化"——然后让它在几周时间里逐步累积出一张可查询、带证据追溯的知识图谱。累积到一定程度，你可以用自然语言向它提问，拿到带证据支撑的回答。
+
+典型的提问场景：
+
+- **追踪人的轨迹**："Amy Coleman 上任 CPO 之后做了哪些组织调整？完整的时间线是什么样？"
+- **还原结构变化**："这次重组之前和之后，HR 部门的汇报链分别是什么样？中间哪些节点的职责发生了变化？"
+- **筛出疑点**："目前被标成 disputed 的事实里，哪些涉及核心人物？证据冲突的两边分别来自哪些来源？"
+- **发现盲区**："哪些关键实体只在一份材料里出现过，confidence 还停留在 draft？"
+
+每次回答都会带 source 引用，可以一路回溯到具体报道或 memo 里的具体段落。遇到冲突时能看到两边的置信度和原文依据。
+
+## 知识图谱的结构
+
+图谱分三层：实体、事实、来源。
+
+![Dossier 知识图谱数据模型：实体层、事实层、来源层的关系](/ai/applications/dossier-knowledge-graph-schema.png)
+
+**实体层**存人物和组织。每个实体有 canonical_name(去重用的规范化名称)和 display_name(保留原始写法)。entity_aliases 存名称变体——"张三 / Zhang San / 小张"对应同一个实体。注册实体时 CLI 会先做向量检索，发现近似名字就提示而不是静默创建。
+
+**事实层**拆成四张表：
+
+- **directed_relationships**： 不对称关系。predicate 白名单：`reports_to` / `leads` / `succeeded_by` / `part_of` / `merged_into` / `split_into` / `renamed_from`。
+- **undirected_relationships**： 对称关系(同事、校友)。`left_entity_id < right_entity_id` 由数据库 CHECK 强制，同一对关系不会被写两次。
+- **employment_records**： 任职时间线。带职位名、任职类型(full_time / interim / board / advisor / other)、地点、起止时间。独立成表是因为这些字段硬塞进 relationship 会让查询变得很难写。
+- **observations**： 没法结构化的线索。"此人在内部被视为工程文化的推动者"、"该公司近年在 AI 投入上极为激进"——信息能压成 predicate 就放 relationship，压不动就放 observation，让"先存着"合法存在。
+
+**来源层**只有一张 sources 表。source_type 用自由文本而非 enum——证据源类型永远在变，用 enum 会让 ingest 被 schema 变更卡住。同类不同写法的问题交给 /reconcile 归一。
+
+## 不确定性怎么表达
+
+四张事实表共享一组字段来表达不确定性：
+
+**confidence** 是 0-1 的数值，由证据强度决定：官方公告 → 0.9，访谈报道 → 0.7，推断 → 0.5 或更低。CLI 强制要求，漏传直接报错。
+
+**status** 是一条事实的生命周期：`draft → confirmed → disputed → deprecated`。默认 `draft`，由 /reconcile 根据证据强度推进。一条事实可以从"初步判断"演进到"多来源确认"，也可以被新证据降级为 disputed。
+
+**primarySourceId + primaryExcerpt** 把每条事实绑到具体的证据段落——来自哪篇报道里的哪一段原话。后续解决冲突时，agent 可以直接对比原文依据来裁定。
+
+时间维度上，所有事实表的 unique 索引只约束 `is_current = true` 的行(partial unique index)。一个人可以有多条历史任职记录，但不能同时存在两条"当前"的。
+
+## 写入约束：CLI 而非 prompt
+
+所有数据写入收敛到一个 TypeScript CLI——`scripts/db.ts`，二十余条命令。CLI 平时藏在代码里不占 agent 上下文，只在被调用时进入——比 MCP 更省，MCP 在启动时就把所有工具装进上下文。
+
+关键设计：**所有质量约束都强制在 CLI 层。** `add-observation` 漏传 `--confidence` 直接报错，报错信息附带修复路径(什么场景用什么分值)。`add-employment` 和 `add-rel` 还强制 `--is-current` / `--not-current` 二选一，逼 agent 每次显式表态这条记录是关于当前还是历史。
+
+注册实体时，CLI 自动做向量检索；写入 observation 前自动做语义去重。这些逻辑写在工具里，而不是指望 agent 每次都记得"先 search 再 add"。
+
+## 四个 Skill
+
+数据模型和 CLI 是基础设施，研究工作的节奏由四个 Claude Code skill 组织。
+
+所有 skill 的第一个参数都是项目名，用于定位 `docs/research/projects/<project-name>/context.md`——项目背景、实体清单、优先级和核心问题。新增研究主题只需加一份 context 文件，skill 本身无需改动。
+
+![Dossier 研究循环：ingest → research → reconcile → analyze](/ai/applications/dossier-research-cycle.png)
+
+### /ingest：从一份材料里提取事实
+
+```
+/ingest microsoft-hr-reorg https://example.com/amy-coleman-interview
+```
+
+agent 抓取这份材料，逐段提取：
+
+- 出现的人物和组织 → 注册为实体(先检索是否已存在)
+- 明确的结构关系(A 向 B 汇报、C 领导 D) → directed_relationship
+- 任职信息(某人在某公司任某职位) → employment_record
+- 判断和信号("此人风格强硬"、"该团队士气低落") → observation
+- 材料本身 → 注册为 source，每条事实通过 primary_source_id + primary_excerpt 绑定到具体段落
+
+每条写入都带 confidence——直接引述给 0.9，合理推断给 0.5。所有事实默认 `status： draft`，等 /reconcile 来推进。
+
+ingest 只从当前这份材料里提取，不做外部搜索，一份材料一次 ingest。
+
+### /research：补全一个实体的维度
+
+```
+/research microsoft-hr-reorg "Amy Coleman"
+```
+
+/ingest 是"给一份材料，提取所有事实"；/research 是"给一个实体，补全它缺的维度"。agent 先查图谱里这个实体已有什么，判断哪些维度还是空白或只有低 confidence 的单一来源，再决定去哪搜、搜什么。
+
+对**人物**，research 覆盖的维度：
+
+- 身份与履历：当前职位、历史任职、教育背景
+- 汇报关系：向谁汇报、管理谁
+- 工作风格和能力画像：公开可见的管理特征、决策倾向
+- 外部叙事：媒体和行业对此人的评价和定位
+- 关键协作者：长期合作关系、公开互动
+
+对**组织**，维度不同：层级归属(parent / subsidiary)、领导更迭、业务范围和方向、前身组织(合并、拆分、更名的历史)。
+
+遇到来源之间的矛盾：两边都写入，给较弱来源更低的 confidence，交给 /reconcile 裁定。research 过程中发现的新实体也会被注册——先建一条最小记录加一条有来源的关系，避免线索丢失。
+
+### /reconcile：维护图谱的长期健康
+
+```
+/reconcile microsoft-hr-reorg --full
+```
+
+即便每条单独的写入都合规，图谱整体仍然会偏移——重复的实体、过时的事实、静默并存的矛盾。/reconcile 按六条健康标准逐项检查：
+
+| 标准 | 检查什么 | 不达标的代价 |
+|---|---|---|
+| **可搜性** | 每个概念对应一个活跃实体，alias 覆盖常见称呼 | 图谱出现信息孤岛 |
+| **唯一性** | 同一事实没有被语义重复记录 | 分不清交叉验证还是重复录入 |
+| **时间一致性** | `is_current` 和 `time_end` 对齐，`leads` 和 `employment` 配对 | 时间线查询出错 |
+| **结构化优先** | 能压成关系的不应该埋在 observation 里 | 组织架构查询缺失 |
+| **矛盾显式化** | 冲突的当前记录标 `disputed`，不能静默并存为 `draft` | /analyze 把冲突当共识 |
+| **置信度对齐** | 单来源 → draft，多来源权威 → confirmed，已过期 → deprecated | status 字段失去意义 |
+
+修复动作按风险分三层：
+
+- **低风险，直接修**： 补 alias、填缺失的 source ID、draft → confirmed
+- **中风险，修完报告**： 合并重复 observation、标 disputed、把 observation 抽成 relationship
+- **高风险，标记等人判断**： 合并实体、标 deprecated、改关系端点——不可逆操作
+
+/reconcile 还能**派生子 research 进程**。检查中发现某个实体信息严重不足时，它会启动一个独立的 `/research` session 去补，完成后回来验证新写入的质量。每轮最多派一轮 research，避免递归失控。
+
+两种运行模式：指定单个实体(深查，包括一跳邻居)或 `--full`(按重要度分层——核心实体深查，长尾轻扫)。
+
+### /analyze：基于图谱回答问题
+
+```
+/analyze microsoft-hr-reorg "Amy Coleman 上任后的组织结构变化全貌"
+```
+
+analyze 是唯一**只读**的 skill——只查询，不写入。这个限制很重要：分析过程中冒出的"这里应该补一下"的想法，该走 /research 或 /ingest 入库，不能在分析会话里偷偷塞。
+
+analyze 有几条硬性的表达规则：
+
+- **区分图谱数据和推断**： 数据库里有的引实体 ID，自己推断的标"图谱外推断"
+- **暴露不确定性**： 低 confidence、disputed、缺 source 的事实都要标出来
+- **主动展示矛盾**： 同一维度有多条当前记录且时间重叠，展示冲突而不选边
+- **承认空白**： 某个维度没有数据就直接说，并建议用 /research 或 /ingest 补充
+
+## 一个在跑的研究项目
+
+Dossier 目前在跑的研究项目之一是 Microsoft 2026 年 3 月的 HR 重组——CPO Amy Coleman 上任一年后对整个 HR 组织的重构，信号是 HR 从"为稳定扩张"转向"为适应性扩张"。
+
+项目 context 文件里定义了三级实体优先级：
+
+- **Tier 1**： 新旧范式对比的核心人物(Amy Coleman vs 前任 Kathleen Hogan)
+- **Tier 2**： 五个新组织杠杆点的负责人(Engineering HR、Employee Experience、Total Rewards、People & Culture、Workforce Acceleration)
+- **Tier 3**： 即将退休的制度记忆持有者
+
+以及四个待解的研究问题：这次重组是常规调整还是根本性转向？完整的重组前后组织架构对比？人际关系网络？权力消长(谁在扩张、谁在退出)？
+
+典型的工作流：先 /ingest 处理核心报道(Amy Coleman 的访谈、公告原文)，再 /research 逐个补全 Tier 1 和 Tier 2 人物，阶段性 /reconcile 维护数据质量，最后 /analyze 围绕具体问题取数。
+
+---
+
+- [Prompt 之外：长期研究 Agent 的工程实践](/blog/engineering-principles-for-ai-research-agent) - 方法论复盘：约束为什么要前置到工具层、状态层为什么要能装下不确定性
+- [Dossier 项目页](/projects/dossier) - 项目整体介绍、研究循环和技术栈
+- [GitHub 仓库](https://github.com/i-richardwang/Dossier) - 获取完整源代码
