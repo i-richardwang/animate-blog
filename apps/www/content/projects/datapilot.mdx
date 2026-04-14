@@ -1,0 +1,17 @@
+---
+title: DataPilot
+description: 基于 Craft Agents 的数据分析工作流平台，增加了 SQLite 存储、批处理和配套 CLI
+date: 2026-04-13
+category: data
+logo: /projects/github.svg
+links:
+  github: https://github.com/i-richardwang/datapilot
+tech:
+  - TypeScript
+  - SQLite
+  - Drizzle ORM
+  - Craft Agents
+featured: false
+---
+
+DataPilot 是 [Craft Agents](https://github.com/lukilabs/craft-agents-oss) 的一个 fork，针对数据分析场景做了功能扩展。主要的改动包括将存储后端从文件系统迁移到 SQLite、增加批处理系统（支持 CSV/JSON/JSONL 数据源、并发控制、重试和结构化输出校验），以及配套的 CLI 工具用于会话调度、批处理管理和 agent 服务的自包含执行。

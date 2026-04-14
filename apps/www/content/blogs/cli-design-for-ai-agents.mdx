@@ -1,0 +1,103 @@
+---
+title: 面向 Agent 的 CLI 工具设计
+description: 从命令组织、响应裁剪、错误引导到渐进式加载，构建 Agent 友好的 CLI 工具
+date: 2026-04-13
+author:
+  name: Richard Wang
+  url: https://github.com/i-richardwang
+---
+
+给 Agent 提供工具时，越来越多的项目开始选择 CLI 而非 MCP。[OpenClaw](https://github.com/openclaw/openclaw) 的做法比较典型：agent 通过 CLI 命令和 shell 脚本访问工具，它的 [mcporter](https://github.com/ShadM00/openclaw-mcporter) 工具可以把现有的 MCP server 直接转成 CLI。MCP server 启动时会把所有工具描述注入 agent 的上下文，token 开销随工具数量线性增长，有 benchmark 显示差距可以达到十倍以上。不过自动转换只是换了一层壳。要让 CLI 真正好用，命令的组织、响应的设计、错误的引导都值得针对 agent 的工作方式重新考量。
+
+我们在几个项目中为 agent 构建了 CLI 工具，覆盖了外部 API 访问、本地数据库读写、agent 服务调度等不同场景。底层系统不同，但设计思路有不少共通之处。下面的经验主要以 [Tableau CLI](/projects/tableau-cli)（在 Tableau 官方 [tableau-mcp](https://github.com/tableau/tableau-mcp) 基础上改写的 Python CLI）为例，也会穿插其他项目的做法。
+
+## CLI 在上下文效率上的优势
+
+MCP server 启动后，所有工具的描述（名称、参数、说明）会一次性注入 agent 的 system prompt，无论这轮对话是否用到它们。以 Tableau MCP 为例，它注册了搜索、数据源、视图、工作簿等十几个工具，每个工具都有参数表和使用说明。即使用户只是想下载一张仪表板截图，整套工具描述依然在上下文里占位。
+
+CLI 不用时不占上下文。需要用的时候，agent 也要查看 `--help` 或加载命令手册，这部分同样会进入上下文。但相比 MCP，开销更小：一方面模型本身对 CLI 有通用知识，不需要像 MCP 那样为每个工具提供完整的参数 schema；另一方面 agent 只需要加载当前要用的那条命令的说明，不是所有命令一起灌进来。配合 skill 文件做渐进式加载，可以进一步控制每次进入上下文的信息量，后面会展开讲。
+
+这个差异在 agent 同时接入多个外部系统时尤其明显。MCP 的上下文占用是所有已注册 server 的工具描述之和，而 CLI 方案下，agent 的上下文里只有当前正在使用的那份命令手册。
+
+## 面向 Agent 的任务设计接口
+
+把一个已有的 API 包装成 CLI 时，很容易按 API endpoint 一一映射成命令。但 agent 的使用方式和人不同，它不需要完整的 API 面，需要的是能直接完成任务的少量命令。命令的粒度按工作流而非 API 来组织，对 agent 更友好。
+
+### 按任务粒度组织命令
+
+很多产品的 API 分散在多个体系里，同一件事可能需要调两三个不同的接口才能拿到完整信息。如果 CLI 按 API endpoint 一一映射，agent 需要自己判断该调哪个接口、结果怎么合并，这不是它应该承担的认知负荷。更好的做法是把多个 API 调用合并成一条语义清晰的命令，agent 只需要知道"查元数据用这条命令"，底层几个 API 怎么协作是 CLI 内部的事。Tableau CLI 的 `ds metadata` 就是这样做的：一条命令背后合并了两个不同 API 的返回结果，其中一个不可用时自动降级，agent 完全不需要感知。
+
+命令的取舍同样重要。Tableau REST API 有几十个 endpoint，但 CLI 只暴露了 agent 在数据分析场景中实际需要的那些：搜索内容、列出和下载数据源、查询数据、导出视图。管理类操作（创建用户、修改权限、配置站点）不在范围内，因为这些不是 agent 做数据分析时会触及的动作。少暴露一个命令，agent 就少一个需要理解和选择的分支。
+
+### 裁剪响应内容
+
+API 返回的原始数据对 agent 来说往往太多了。以 Tableau 的搜索接口为例，返回结果包含三十多个字段，大部分是 agent 不需要的元数据。CLI 在输出前做了主动裁剪，只保留 agent 做决策需要的子集，并做类型归一化（比如统一不同来源的数据源类型、给视图补上所属工作簿名称）。
+
+裁剪的目的和前面选择暴露哪些命令一样：减少 agent 需要处理的信息量。API 返回 30 个字段，agent 可能只需要 8 个，剩下的 22 个占了上下文空间却不参与任何判断。
+
+### 错误信息引导 Agent 自动恢复
+
+Agent 在执行过程中遇到错误是常态：字段名拼错、服务未开启、返回数据量超限。如果 CLI 只把底层 API 的错误码或异常信息原样抛出来，agent 通常无法判断该怎么修复，最终只能中断任务、把错误转交给用户。一个本来可以自动完成的工作流就断在了这里。
+
+解决的办法是在错误响应里加入可操作的引导信息。Tableau CLI 为每种已知错误附带了一个 `hint` 字段，告诉 agent 下一步该做什么：
+
+```json
+{
+  "isError": true,
+  "errorType": "Unknown field",
+  "message": "Unknown field: The requested field doesn't exist.",
+  "hint": "Use `tableau-cli datasources metadata <luid>` to see available fields and their exact names."
+}
+```
+
+字段名不对，hint 引导 agent 去查可用字段；某个服务没开启，hint 指向配置文档；返回数据量太大，hint 建议收紧过滤条件。Agent 读到 hint 就能尝试自动修复并继续执行，不需要人介入。这里要感谢 tableau-mcp 的基础工作，错误的分类和描述文本来自 MCP 的原始实现，CLI 在此基础上补充了面向 agent 的 hint 层。
+
+除了 hint，统一错误格式也很重要。不管底层是 API 报错、网络超时还是参数校验失败，CLI 都输出同一种 JSON 结构，agent 不需要为不同类型的异常写不同的处理逻辑。
+
+[Dossier](/projects/dossier)（用知识图谱做组织情报研究的系统）的 CLI 在这方面有一个值得借鉴的做法：写入重复实体时不报错，而是检测到唯一约束冲突后返回已有记录的 ID，agent 可以直接拿这个 ID 继续后续操作。把"重复"从错误变成了正常流程的一部分，从源头减少了任务中断的可能。
+
+## Skill 分层与渐进式加载
+
+CLI 解决了"执行"层面的上下文效率，但 agent 还需要知道怎么用这个工具。如果把完整的命令手册写进 CLAUDE.md 或 system prompt，就又回到了 MCP 的老路。
+
+CLI 配套的 skill 文档可以按使用频率拆成多层。Dossier 的 CLI 涉及数据录入、深度研究、质量检查、交互分析等多种工作流，每种工作流有独立的 skill 和规则文件，每个研究项目还有独立的 context 文件定义背景和待解问题。新增一个研究主题只需要加一份 context，skill 本身不用动。
+
+Tableau CLI 的拆法更简单，分三层：
+
+```
+skills/
+├── SKILL.md              # 入口：意图路由 + 环境检查
+└── references/
+    ├── cli.md            # 完整命令手册
+    └── installation.md   # 安装与认证配置
+```
+
+`SKILL.md` 是唯一在加载 skill 时进入上下文的文件，只有五十行左右。它的职责是路由：把"查找包含 Sales 的数据源"映射到 `ds list --filter "name:has:Sales"`，把"下载数据源后做本地分析"映射到 `ds download → convert → load with Polars/Pandas` 的流程。
+
+`references/cli.md` 包含所有命令的完整 flag 列表、参数说明和示例。Agent 准备执行命令时才加载这份文件，执行完毕后这份上下文在下一轮会话中自然释放。SKILL.md 里写了一条硬规则：`Do not guess command syntax from memory`，强制 agent 每次执行前都去读 cli.md 而不是凭印象拼命令。
+
+`references/installation.md` 是安装和认证配置的说明。只有在 `tableau-cli --help` 失败（CLI 未安装）或配置缺失时才会被加载。对于一个已经配置好的环境，这份文件永远不会进入上下文。
+
+这种分层的效果是：agent 大部分时间只占用 SKILL.md 的五十行上下文，需要执行命令时临时加载一份手册，执行完就释放。安装说明在整个生命周期里最多用一次。和 MCP 的"所有工具描述常驻"相比，上下文的利用率高出很多。
+
+## CLI 是应用，不只是接口封装
+
+MCP 的设计边界是 API 调用的封装：接收请求、转发到底层服务、返回结果。即使 MCP server 跑在本地，它能做的事仍然受限于底层 API 提供了什么。CLI 则不同，它是一个完整的本地应用，可以调用任何本地库和系统能力，做 API 本身做不到的事。
+
+Tableau CLI 的 `convert` 命令是一个典型的例子。Tableau 的数据源文件（.tdsx）是一种专有格式，API 只提供下载能力，不提供格式转换。CLI 在本地用第三方库读取这种格式并转换为通用的 Parquet 或 CSV，整个过程不涉及任何 API 调用：
+
+```bash
+tableau-cli ds download <id> -o ./data/         # 从 Tableau 下载数据源文件
+tableau-cli convert ./data/data.tdsx -o ./data/ # 本地转换为 Parquet
+# 接下来 agent 可以用 Polars/Pandas 加载 Parquet 做分析
+```
+
+转换依赖作为可选包安装（`pip install tableau-cli[convert]`），依赖缺失时 CLI 返回结构化错误并在 hint 里告诉 agent 怎么安装。
+
+CLI 的能力边界比 API 封装宽得多，理论上可以集成任何本地计算能力。Tableau CLI 的格式转换是一个例子，[DataPilot](/projects/datapilot)（带 CLI 的 agent 平台）走得更远：它的 `run` 命令会自动在本地启动一个分析 agent 服务，执行完毕后关闭，整个过程对调用方来说就是一条 CLI 命令。这种自包含的执行模式在 MCP 架构下很难实现。
+
+## 结语
+
+回过头看，这些设计判断都指向同一件事：工具的形态选择没有绝对的对错，关键是站在 agent 的工作流角度去设计，而不是站在底层系统的 API 角度去封装。CLI 恰好在当前阶段提供了一个足够灵活的载体来实践这个立场。同样的思路如果用在 MCP 上，很多做法也是成立的——命令的粒度设计、响应的裁剪、错误信息的引导，这些跟协议选择无关，跟"为谁设计"有关。
+
+最后，Tableau CLI 的核心 API 集成、数据转换逻辑和错误分类来自 Tableau 官方的 [tableau-mcp](https://github.com/tableau/tableau-mcp)，没有这个基础，CLI 的适配工作不会这么顺利。
