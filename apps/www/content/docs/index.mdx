@@ -3,7 +3,7 @@ title: 欢迎
 description: 技术手札，记录探索的点滴
 ---
 
-import { Brain, BarChart3, Code2, FolderGit2, PenLine, BookMarked, User } from 'lucide-react';
+import { Brain, BarChart3, Code2, FolderGit2, PenLine, BookMarked, Activity, Coins } from 'lucide-react';
 
 这是一本技术手札，记录探索的点滴，分享见解，公开构建。
 
@@ -14,19 +14,19 @@ import { Brain, BarChart3, Code2, FolderGit2, PenLine, BookMarked, User } from '
     icon={<Brain />}
     href="/docs/ai"
     title="AI 探索"
-    description="机器学习、大语言模型和 AI 应用实践"
+    description="大语言模型的原理理解与应用开发"
   />
   <Card
     icon={<BarChart3 />}
     href="/docs/data-science"
     title="数据科学"
-    description="数据分析、可视化和统计洞察"
+    description="从预测建模到数据可视化的项目实践"
   />
   <Card
     icon={<Code2 />}
     href="/docs/development"
     title="开发实践"
-    description="独立开发、自托管服务和技术笔记"
+    description="Homelab 基础设施搭建与独立开发笔记"
   />
 </Cards>
 
@@ -52,27 +52,19 @@ import { Brain, BarChart3, Code2, FolderGit2, PenLine, BookMarked, User } from '
     description="值得一读的外部文章"
   />
   <Card
-    icon={<User />}
-    href="/about"
-    title="关于我"
-    description="个人介绍和联系方式"
+    icon={<Coins />}
+    href="/token-usage"
+    title="Token 用量"
+    description="各 AI 工具的 Token 消耗与成本趋势"
   />
-</Cards>
-
-## 关于这里
-
-这里是学习笔记、实验记录和思考的集合。内容会持续更新和完善，欢迎探索。如有问题或想法，随时联系。
-
-## 基于 Animate UI 构建
-
-本站基于 [Animate UI](https://animate-ui.com) 构建，感谢 Animate UI 团队。
-
-<Cards>
   <Card
-    href="/blog/building-personal-site-with-animate-ui"
-    title="使用 Animate UI 构建个人网站"
-    description="改造历程与定制指南"
+    icon={<Activity />}
+    href="/status"
+    title="系统状态"
+    description="Homelab 各服务的运行状态"
   />
 </Cards>
 
-查看 [GitHub 仓库](https://github.com/i-richardwang/animate-blog) 了解完整实现。
+---
+
+本站基于 [Animate UI](https://animate-ui.com) 构建 · [GitHub 仓库](https://github.com/i-richardwang/animate-blog)

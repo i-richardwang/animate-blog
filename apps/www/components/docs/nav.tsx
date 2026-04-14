@@ -13,6 +13,7 @@ import {
   BookOpen,
   Podcast,
   BarChart3,
+  Activity,
 } from 'lucide-react';
 import { useSearchContext, useSidebar } from 'fumadocs-ui/provider';
 import { usePathname } from 'next/navigation';
@@ -67,6 +68,11 @@ export const NAV_ITEMS = [
     title: 'Token 用量',
     url: '/token-usage',
     icon: <BarChart3 className="size-4" />,
+  },
+  {
+    title: '系统状态',
+    url: '/status',
+    icon: <Activity className="size-4" />,
   },
   // {
   //   title: '关于我',

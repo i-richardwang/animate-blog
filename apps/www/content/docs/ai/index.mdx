@@ -3,28 +3,35 @@ title: AI 探索
 description: AI 技术与应用实践
 ---
 
-import { Zap, Cpu, Sparkles } from 'lucide-react';
+import { Zap, Cpu, FlaskConical, Settings2 } from 'lucide-react';
 
 <Cards>
   <Card
     icon={<Zap strokeWidth={2} />}
     href="/docs/ai/fundamentals/understanding-vector-embedding"
-    title="AI技术解码"
-    description="深入理解 AI 核心技术概念"
+    title="技术解码"
+    description="向量嵌入、LLM 原理与数据准备"
     accent
   />
   <Card
     icon={<Cpu strokeWidth={2} />}
-    href="/docs/ai/applications/practical-llm-fine-tuning"
-    title="AI深度实践"
-    description="高级 AI 项目实战与深度探索"
+    href="/docs/ai/applications/building-knowledge-graph-for-org-research"
+    title="深度实践"
+    description="知识图谱、SQL 助手、简历推荐等完整项目"
     accent
   />
   <Card
-    icon={<Sparkles fill="currentColor" strokeWidth={0} />}
-    href="/docs/ai/applications/skills-knowledge-graph"
-    title="LLM 应用实践"
-    description="大语言模型实际应用案例"
+    icon={<FlaskConical strokeWidth={2} />}
+    href="/docs/ai/applications/batch-processing-llm-calls"
+    title="原型实验"
+    description="文本分类、情感分析、PDF 问答等快速验证"
+    accent
+  />
+  <Card
+    icon={<Settings2 strokeWidth={2} />}
+    href="/docs/ai/applications/hypothetical-questions-rag-retrieval"
+    title="优化策略"
+    description="RAG 检索优化与非结构化文档处理"
     accent
   />
 </Cards>
