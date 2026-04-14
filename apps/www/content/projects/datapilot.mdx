@@ -1,17 +1,90 @@
 ---
 title: DataPilot
-description: 基于 Craft Agents 的数据分析工作流平台，增加了 SQLite 存储、批处理和配套 CLI
+description: 基于 Craft Agents 的 agent 平台，增加了 SQLite 存储、批处理系统和配套 CLI
 date: 2026-04-13
 category: data
-logo: /projects/github.svg
+logo: /projects/datapilot/datapilot.svg
 links:
   github: https://github.com/i-richardwang/datapilot
 tech:
   - TypeScript
+  - Bun
   - SQLite
   - Drizzle ORM
-  - Craft Agents
+  - Electron
+  - Claude Agent SDK
 featured: false
 ---
 
-DataPilot 是 [Craft Agents](https://github.com/lukilabs/craft-agents-oss) 的一个 fork，针对数据分析场景做了功能扩展。主要的改动包括将存储后端从文件系统迁移到 SQLite、增加批处理系统（支持 CSV/JSON/JSONL 数据源、并发控制、重试和结构化输出校验），以及配套的 CLI 工具用于会话调度、批处理管理和 agent 服务的自包含执行。
+DataPilot 是一个支持批处理的 agent 平台，基于 [Craft Agents](https://github.com/lukilabs/craft-agents-oss) 开发。除了桌面端、Web 界面和终端客户端等基础的 agent 交互能力外，DataPilot 增加了面向数据处理的批量执行系统、用 SQLite 替换了原有的 JSON 文件存储以支撑并发场景，并提供 CLI 工具让 agent 和脚本可以程序化地管理 workspace。
+
+![DataPilot 桌面端界面](/projects/datapilot/desktop-app.png)
+
+## 批量执行
+
+批量执行是 DataPilot 的核心扩展。给定一批数据（CSV/JSON/JSONL），系统对每条记录用 prompt 模板生成独立的 agent session，并发运行：
+
+```json
+{
+  "name": "analyze-reports",
+  "source": {
+    "type": "csv",
+    "path": "reports.csv",
+    "idField": "report_id"
+  },
+  "execution": {
+    "maxConcurrency": 3,
+    "retryOnFailure": true,
+    "maxRetries": 2
+  },
+  "action": {
+    "type": "prompt",
+    "prompt": "分析报告 $BATCH_ITEM_report_id 的内容..."
+  },
+  "output": {
+    "path": "results.jsonl",
+    "schema": { "..." : "JSON Schema for validation" }
+  }
+}
+```
+
+每条记录的处理状态（pending → running → completed/failed）持久化在 SQLite 里，进程中断后从断点继续，已完成的条目根据 `idField` 去重，不会重复执行。输出支持 JSON Schema 校验，不符合 schema 的结果触发重试。
+
+## 存储
+
+session、标签、数据源、视图等运行时状态存储在 SQLite 中（Drizzle ORM），按 workspace 隔离，每个 workspace 一个 `workspace.db`。批量执行时多个 session 同时运行，SQLite 的事务机制比 JSON 文件更适合并发读写。自动化配置、skill 文件等需要 agent 直接编辑的内容仍保留文件存储。
+
+SQLite driver 做了运行时适配：Bun 环境用内置的 `bun:sqlite`，Node 环境用 `better-sqlite3`，自动检测。
+
+## CLI
+
+`datapilot` 是 workspace 管理工具，直接读写本地数据库，不依赖 server。覆盖标签、数据源、自动化、skill、权限、主题、批处理七个域，六十余条子命令，所有命令返回统一的 JSON 格式：
+
+```bash
+datapilot source list
+# → { "ok": true, "data": [...], "warnings": [] }
+
+datapilot batch status <id> --items
+# → { "ok": true, "data": { "status": "running", "totalItems": 150, "completed": 87, ... } }
+```
+
+`datapilot-cli` 是终端客户端，用于创建和管理 agent session。支持自包含执行——自动启动 server、运行 session、完成后关闭，也可以连接已有 server：
+
+```bash
+datapilot-cli run "分析这份数据集并生成摘要"
+
+datapilot-cli --server http://localhost:9100 sessions
+datapilot-cli send <session-id> "继续上次的分析"
+```
+
+## 部署
+
+提供 Docker Compose 配置，server 和 viewer（session 分享服务）一键部署。Viewer server 是独立的 HTTP 后端，支持文件系统和 S3 两种存储方式。
+
+## 技术栈
+
+- **运行时**：Bun + TypeScript
+- **AI**：Claude Agent SDK + Pi SDK（多 LLM provider 接入）
+- **存储**：SQLite + Drizzle ORM
+- **桌面端**：Electron + React + Vite
+- **UI**：shadcn/ui + Radix UI + Tailwind CSS
