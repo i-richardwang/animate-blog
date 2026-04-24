@@ -28,10 +28,13 @@ const MODEL_ALIASES: Record<string, string> = {
   'accounts/fireworks/routers/kimi-k2p5-turbo': 'kimi-k2.5',
   'kimi-k2:1t': 'kimi-k2',
   'kimi-k2-thinking': 'kimi-k2',
+  'moonshotai/kimi-k2.6': 'kimi-k2.6',
 
   // GLM
   'zai-glm-4.6': 'glm-4.6',
   'zai-glm-4.7': 'glm-4.7',
+  'z-ai/glm-5.1': 'glm-5.1',
+  'glm-5.1-precision': 'glm-5.1',
   'glm-4.7-free': 'glm-4.7',
 
   // MiniMax
