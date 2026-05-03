@@ -1,4 +1,6 @@
-// Non-standard model name -> standard name
+// Non-standard model name -> standard name.
+// Keys must be lowercase — lookup lowercases the input, so case variants
+// (DeepSeek-V4-Pro / deepseek-v4-pro) merge without separate entries.
 const MODEL_ALIASES: Record<string, string> = {
   // Claude - date-versioned → base name
   'claude-haiku-4-5-20251001': 'claude-haiku-4-5',
@@ -29,6 +31,7 @@ const MODEL_ALIASES: Record<string, string> = {
   'kimi-k2:1t': 'kimi-k2',
   'kimi-k2-thinking': 'kimi-k2',
   'moonshotai/kimi-k2.6': 'kimi-k2.6',
+  'kimi-k2.6-precision': 'kimi-k2.6',
 
   // GLM
   'zai-glm-4.6': 'glm-4.6',
@@ -36,6 +39,9 @@ const MODEL_ALIASES: Record<string, string> = {
   'z-ai/glm-5.1': 'glm-5.1',
   'glm-5.1-precision': 'glm-5.1',
   'glm-4.7-free': 'glm-4.7',
+
+  // DeepSeek
+  'deepseek-v4-pro-precision': 'deepseek-v4-pro',
 
   // MiniMax
   'minimax-m2.1-free': 'minimax-m2.1',
@@ -51,7 +57,8 @@ const MODEL_ALIASES: Record<string, string> = {
 
 export function normalizeModelName(name: string): string {
   if (!name || !name.trim()) return 'unknown';
-  return MODEL_ALIASES[name] ?? name;
+  const key = name.toLowerCase();
+  return MODEL_ALIASES[key] ?? key;
 }
 
 const BRAND_PATTERNS: [RegExp, string][] = [
@@ -76,7 +83,7 @@ const BRAND_PATTERNS: [RegExp, string][] = [
 ];
 
 export function getModelBrand(modelName: string): string {
-  const normalized = normalizeModelName(modelName).toLowerCase();
+  const normalized = normalizeModelName(modelName);
   const modelPart = normalized.includes('/')
     ? normalized.split('/').pop() ?? normalized
     : normalized;
