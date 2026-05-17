@@ -1,0 +1,121 @@
+---
+title: Better Skills
+description: Agent Skill 开发工作台，将 skill 创作从凭感觉调整变为可度量的 build → measure → iterate 循环
+date: 2025-05-10
+category: developer
+logo: /projects/github.svg
+tech:
+  - Python
+  - Pydantic
+  - Next.js
+  - React
+  - PostgreSQL
+  - Drizzle ORM
+links:
+  github: https://github.com/i-richardwang/better-skills
+featured: false
+---
+
+Better Skills 是一个面向 Claude Agent Skill 的开发工作台，提供 CLI 工具链和 Web Dashboard。给定一个 skill，系统自动运行测试用例、对比基线、量化评分，并归档每次迭代的完整状态，让 skill 的质量变化可追踪、可回溯。
+
+## 核心流程
+
+整个工作流围绕 **build → measure → iterate** 展开：
+
+1. **Scaffold** — 用 `better-skills init` 生成 skill 骨架（SKILL.md + triggers.json + evals.json）
+2. **Evaluate** — 每个测试用例在两套配置下运行：当前 skill（current）和基线（baseline），基线可以是裸 Claude、上一轮迭代、指定历史版本或任意外部 skill
+3. **Grade** — Grader Agent 逐条审查 transcript 和输出，对每个 assertion 给出 pass/fail 判定和证据
+4. **Aggregate** — 汇总为 benchmark.json，计算通过率、token 消耗、执行时间
+5. **Review** — 在浏览器 Viewer 或 Dashboard 中查看结果，人工判断改进方向
+6. **Improve** — 修改 SKILL.md，进入下一轮迭代
+
+```bash
+# 初始化 skill 和测试用例
+better-skills init path/to/my-skill
+better-skills init-evals path/to/my-skill-evals --skill-path path/to/my-skill
+
+# 运行完整迭代（执行 + 评分 + 聚合 + 打开 Viewer）
+better-skills iterate \
+  --skill-path path/to/my-skill \
+  --evals-json path/to/my-skill-evals/evals.json \
+  --workspace my-skill-workspace
+```
+
+## 双配置对比
+
+每个测试用例都在 current 和 baseline 两套配置下执行，确保度量的是 skill 带来的增量而非模型本身的能力。基线解析支持四种模式：
+
+| 模式 | 含义 |
+|------|------|
+| `none` | 裸 Claude，不加载任何 skill |
+| `previous` | 自动定位上一轮迭代的 skill 快照 |
+| `iteration-N` | 指定历史版本 |
+| `path:/abs/path` | 任意外部 skill 目录 |
+
+每轮迭代结束后系统自动保存 skill 快照，后续迭代的 `previous` 会自然指向正确版本。
+
+## 隔离执行
+
+每次运行在 `/tmp/better-skills-iso/` 下创建独立工作目录，输入文件按 basename 暂存，输出写入隔离的 `outputs/` 目录。这样做的目的是避免项目上下文泄漏——执行器不会读到 `.claude/skills/`、`CLAUDE.md` 等本地配置，保证评测结果可复现。
+
+## 迭代工作区
+
+每轮迭代的完整状态持久化在工作区中：
+
+```
+my-skill-workspace/
+└── iteration-1/
+    ├── manifest.json          # 所有 run 的索引
+    ├── benchmark.json         # 聚合指标
+    ├── benchmark.md           # 可读报告
+    ├── skill-state/           # 本轮 skill 快照
+    └── eval-1/
+        ├── current/run-1/
+        │   ├── transcript.jsonl
+        │   ├── grading.json
+        │   └── outputs/
+        └── baseline/run-1/
+            └── ...
+```
+
+manifest-first 设计：不遍历目录，通过 `manifest.json` 索引所有 run，扫描速度快且结构明确。
+
+## 触发描述优化
+
+Skill 的 `description` 字段决定 Claude 何时触发该 skill。`trigger-loop` 命令自动化优化这一环节：
+
+1. 生成 20 条测试 query（一半应触发、一半不应触发）
+2. 用户在交互式 HTML 编辑器中审核调整
+3. 60/40 划分训练集和测试集
+4. 生成 5 个候选描述，分别在两个集合上评估
+5. 按测试集表现选出最优描述，避免过拟合
+
+## Dashboard
+
+CLI 产出的是 JSON 和 Markdown 报告，但跨迭代的趋势分析需要更直观的界面。Dashboard 基于 Next.js + PostgreSQL 构建，CLI 在每轮迭代结束后自动上传数据（可选），提供三个层级的视图。
+
+**Portfolio — 全局概览**
+
+首页展示所有正在度量的 skill，KPI 条显示 skill 总数、累计迭代轮次、总 benchmark run 数和最后上传时间。每张 skill 卡片突出当前通过率和迭代进度，按最近活跃排序。
+
+![Dashboard Portfolio](/projects/better-skills/dashboard-portfolio.png)
+
+**Skill Detail — 单个 skill 的迭代轨迹**
+
+进入单个 skill 后，顶部 KPI 条展示最新通过率、与基线的 delta（pp）、从首轮到当前的累计变化。核心是 Pass-rate trajectory 折线图——绿色实线为 current，棕色虚线为 baseline，中间填充区域直观呈现两者的差距走势。下方按 eval case 拆分为独立的迷你趋势图，可以快速定位哪些用例在哪轮迭代出现了回归。
+
+![Skill Detail](/projects/better-skills/dashboard-skill.png)
+
+**Iteration Detail — 单轮迭代的完整切面**
+
+每轮迭代页展示该轮的 current/baseline 通过率、delta、cost ratio（token 消耗比），以及执行器和评分器的模型信息。Run breakdown 按 eval case 逐条列出 current 和 baseline 的通过率、assertion 通过数、token 消耗、执行时间和工具调用次数，配合右侧的资源消耗汇总面板，可以精确判断这一轮改动的效果和代价。
+
+![Iteration Detail](/projects/better-skills/dashboard-iteration.png)
+
+## 技术栈
+
+- **CLI**：Python 3.10+ / Pydantic 2.0+ / PyYAML
+- **执行器**：`claude -p` subprocess，支持 OpenCode 适配
+- **Dashboard**：Next.js 16 + React 19 + shadcn/ui + Recharts
+- **数据库**：PostgreSQL 14+ / Drizzle ORM
+- **分发**：PyPI（`better-skills`），build hook 将运行时资源打入 wheel
