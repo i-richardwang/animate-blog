@@ -26,6 +26,7 @@ const MODEL_ALIASES: Record<string, string> = {
   // Kimi
   'kimi-k2.5-turbo': 'kimi-k2.5',
   'accounts/fireworks/routers/kimi-k2p5-turbo': 'kimi-k2.5',
+  'accounts/fireworks/routers/kimi-k2p6-turbo': 'kimi-k2.6',
   'kimi-k2:1t': 'kimi-k2',
   'kimi-k2-thinking': 'kimi-k2',
   'kimi-k2.6-precision': 'kimi-k2.6',
