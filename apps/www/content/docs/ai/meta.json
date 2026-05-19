@@ -9,6 +9,7 @@
     "fundamentals/guide-to-building-llms-from-scratch",
     "fundamentals/llm-data-prep-stages-and-formats",
     "---深度实践---",
+    "applications/building-skill-evaluation-framework",
     "applications/building-knowledge-graph-for-org-research",
     "applications/building-natural-language-sql-assistant",
     "applications/building-llm-resume-recommender",
