@@ -12,6 +12,7 @@ import {
   PenLine,
   BookOpen,
   Podcast,
+  Paperclip,
   BarChart3,
   Activity,
 } from 'lucide-react';
@@ -45,24 +46,19 @@ export const NAV_ITEMS = [
 
   // Personal blog navigation
   {
-    title: '项目',
-    url: '/projects',
-    icon: <FolderKanban className="size-4" />,
-  },
-  {
     title: '博客',
     url: '/blog',
     icon: <PenLine className="size-4" />,
   },
   {
-    title: '推荐阅读',
-    url: '/reading',
-    icon: <BookOpen className="size-4" />,
+    title: '项目',
+    url: '/projects',
+    icon: <FolderKanban className="size-4" />,
   },
   {
-    title: '推荐播客',
-    url: '/podcasts',
-    icon: <Podcast className="size-4" />,
+    title: '笔记',
+    url: '/docs',
+    icon: <Paperclip className="size-4" />,
   },
   {
     title: 'Token 用量',
@@ -74,6 +70,17 @@ export const NAV_ITEMS = [
     url: '/status',
     icon: <Activity className="size-4" />,
   },
+  // Hidden until content is ready
+  // {
+  //   title: '推荐阅读',
+  //   url: '/reading',
+  //   icon: <BookOpen className="size-4" />,
+  // },
+  // {
+  //   title: '推荐播客',
+  //   url: '/podcasts',
+  //   icon: <Podcast className="size-4" />,
+  // },
   // {
   //   title: '关于我',
   //   url: '/about',

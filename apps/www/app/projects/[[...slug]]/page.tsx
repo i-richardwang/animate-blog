@@ -56,20 +56,17 @@ export default async function Page(props: {
       })
       .filter((p): p is NonNullable<typeof p> => p !== null);
 
-    const developerProjects = projectsData.filter(
-      (project) => project.category === 'developer',
+    const portfolioProjects = projectsData.filter(
+      (project) => project.category === 'portfolio',
     );
-    const productivityProjects = projectsData.filter(
-      (project) => project.category === 'productivity',
+    const businessProjects = projectsData.filter(
+      (project) => project.category === 'business',
     );
-    const dataProjects = projectsData.filter(
-      (project) => project.category === 'data',
+    const tinysaasProjects = projectsData.filter(
+      (project) => project.category === 'tinysaas',
     );
-    const talentProjects = projectsData.filter(
-      (project) => project.category === 'talent',
-    );
-    const learningProjects = projectsData.filter(
-      (project) => project.category === 'learning',
+    const explorationProjects = projectsData.filter(
+      (project) => project.category === 'exploration',
     );
     const personalProjects = projectsData.filter(
       (project) => project.category === 'personal',
@@ -84,57 +81,54 @@ export default async function Page(props: {
           </DocsDescription>
 
           <DocsBody id="docs-body" className="pb-10 pt-4">
-            {developerProjects.length > 0 && (
+            {portfolioProjects.length > 0 && (
               <section className="mb-12">
-                <h2 className="text-xl font-medium mb-6 text-foreground">
-                  开发者工具
+                <h2 className="text-2xl font-medium mb-6 text-foreground">
+                  作品集
                 </h2>
-                <ProjectList projects={developerProjects} />
+                <ProjectList projects={portfolioProjects} />
               </section>
             )}
 
-            {productivityProjects.length > 0 && (
+            <div className="mt-4 mb-8 border-t border-border" />
+
+            <h2 className="text-2xl font-medium mb-8 text-foreground">
+              实验室
+            </h2>
+
+            {businessProjects.length > 0 && (
               <section className="mb-12">
-                <h2 className="text-xl font-medium mb-6 text-foreground">
-                  效率产品
-                </h2>
-                <ProjectList projects={productivityProjects} />
+                <h3 className="text-lg font-medium mb-6 text-muted-foreground">
+                  业务实践
+                </h3>
+                <ProjectList projects={businessProjects} />
               </section>
             )}
 
-            {dataProjects.length > 0 && (
+            {explorationProjects.length > 0 && (
               <section className="mb-12">
-                <h2 className="text-xl font-medium mb-6 text-foreground">
-                  AI 数据应用
-                </h2>
-                <ProjectList projects={dataProjects} />
-              </section>
-            )}
-
-            {talentProjects.length > 0 && (
-              <section className="mb-12">
-                <h2 className="text-xl font-medium mb-6 text-foreground">
-                  AI 人才应用
-                </h2>
-                <ProjectList projects={talentProjects} />
-              </section>
-            )}
-
-            {learningProjects.length > 0 && (
-              <section className="mb-12">
-                <h2 className="text-xl font-medium mb-6 text-foreground">
-                  学习资源
-                </h2>
-                <ProjectList projects={learningProjects} />
+                <h3 className="text-lg font-medium mb-6 text-muted-foreground">
+                  学习探索
+                </h3>
+                <ProjectList projects={explorationProjects} />
               </section>
             )}
 
             {personalProjects.length > 0 && (
-              <section>
-                <h2 className="text-xl font-medium mb-6 text-foreground">
+              <section className="mb-12">
+                <h3 className="text-lg font-medium mb-6 text-muted-foreground">
                   个人空间
-                </h2>
+                </h3>
                 <ProjectList projects={personalProjects} />
+              </section>
+            )}
+
+            {tinysaasProjects.length > 0 && (
+              <section>
+                <h3 className="text-lg font-medium mb-6 text-muted-foreground">
+                  Tiny SaaS
+                </h3>
+                <ProjectList projects={tinysaasProjects} />
               </section>
             )}
           </DocsBody>

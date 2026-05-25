@@ -171,44 +171,39 @@ const FeatureCard = ({
     >
       {/* @ts-ignore */}
       <Component {...(component.href ? { href: component.href } : {})}>
-        <AnimateIcon animateOnHover asChild>
-          <motion.div
-            whileHover={{
-              scale: component.href ? 1.025 : 1,
-            }}
-            whileTap={{
-              scale: component.href ? 0.925 : 1,
-            }}
-            transition={{
-              type: 'spring',
-              stiffness: 200,
-              damping: 20,
-            }}
-            className={cn(
-              'relative w-full bg-card rounded-md overflow-hidden',
-              !component?.href && 'opacity-50 cursor-not-allowed',
-            )}
-          >
-            <div className="w-full h-[140px] flex flex-row items-center">
-              <div className="flex-1 flex flex-col items-center justify-center gap-0.5">
-                <p
-                  className={cn(
-                    dancing.className,
-                    'text-[22px] font-black text-muted-foreground leading-none',
-                  )}
-                >
-                  {component.name}
-                </p>
-                <p className="text-sm font-medium text-muted-foreground/70 leading-tight font-serif">
-                  {component.description}
-                </p>
-              </div>
-              <div className="flex-1 flex items-center justify-center">
-                {component.icon}
-              </div>
-            </div>
-          </motion.div>
-        </AnimateIcon>
+        <motion.div
+          whileHover={{
+            scale: component.href ? 1.025 : 1,
+          }}
+          whileTap={{
+            scale: component.href ? 0.925 : 1,
+          }}
+          transition={{
+            type: 'spring',
+            stiffness: 200,
+            damping: 20,
+          }}
+          className={cn(
+            'relative w-full bg-card rounded-md overflow-hidden',
+            !component?.href && 'opacity-50 cursor-not-allowed',
+          )}
+        >
+          <div className="pt-3 pb-1 px-4 flex flex-col items-center gap-1.5">
+            <p
+              className={cn(
+                dancing.className,
+                'text-[24px] font-black text-muted-foreground leading-none',
+              )}
+            >
+              {component.name}
+            </p>
+            <p className="text-sm font-medium text-muted-foreground/70 leading-tight font-serif">
+              {component.description}
+            </p>
+          </div>
+
+          {component.icon}
+        </motion.div>
       </Component>
     </MotionEffect>
   );
@@ -217,31 +212,28 @@ const FeatureCard = ({
 export const Features = () => {
   return (
     <div className="relative pt-16 pb-10 px-5 flex flex-col items-center justify-center mt-auto">
-      <div className="flex flex-col sm:gap-6 gap-4 w-full max-w-7xl sm:max-lg:max-w-2xl mx-auto">
-        {/* Row 1: 4 cards */}
-        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 sm:gap-6 gap-4">
-          {COMPONENTS_ROW1.map((component, index) => (
-            <FeatureCard
-              key={component.name}
-              component={component}
-              index={index}
-              baseDelay={1}
-            />
-          ))}
-        </div>
-
-        {/* Row 2: 4 cards */}
-        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 sm:gap-6 gap-4">
-          {COMPONENTS_ROW2.map((component, index) => (
-            <FeatureCard
-              key={component.name}
-              component={component}
-              index={index}
-              baseDelay={1.6}
-            />
-          ))}
-        </div>
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 sm:gap-6 gap-4 w-full max-w-7xl sm:max-lg:max-w-2xl mx-auto">
+        {COMPONENTS_ROW1.map((component, index) => (
+          <FeatureCard
+            key={component.name}
+            component={component}
+            index={index}
+            baseDelay={1}
+          />
+        ))}
       </div>
+
+      {/* Row 2: hidden until content is ready
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 sm:gap-6 gap-4 w-full max-w-7xl sm:max-lg:max-w-2xl mx-auto mt-4 sm:mt-6">
+        {COMPONENTS_ROW2.map((component, index) => (
+          <FeatureCard
+            key={component.name}
+            component={component}
+            index={index}
+            baseDelay={1.6}
+          />
+        ))}
+      </div> */}
     </div>
   );
 };

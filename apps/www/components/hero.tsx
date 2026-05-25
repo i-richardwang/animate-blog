@@ -100,8 +100,8 @@ export const Hero = ({ latestContent }: HeroProps) => {
                   variant="default"
                   asChild
                 >
-                  <Link href="/docs">
-                    探索笔记 <ArrowRightIcon className="!size-5" />
+                  <Link href="/blog">
+                    探索博客 <ArrowRightIcon className="!size-5" />
                   </Link>
                 </Button>
               </motion.div>
@@ -116,16 +116,23 @@ export const Hero = ({ latestContent }: HeroProps) => {
             zoom
             delay={0.6}
           >
-            <motion.div>
-              <Button
-                size="lg"
-                className="w-full opacity-50 cursor-not-allowed"
-                variant="accent"
-                disabled
+            <AnimateIcon animateOnHover="out" completeOnStop asChild>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                About Me
-              </Button>
-            </motion.div>
+                <Button
+                  size="lg"
+                  className="w-full"
+                  variant="accent"
+                  asChild
+                >
+                  <Link href="/projects">
+                    项目展示 <ArrowRightIcon className="!size-5" />
+                  </Link>
+                </Button>
+              </motion.div>
+            </AnimateIcon>
           </MotionEffect>
         </div>
 
