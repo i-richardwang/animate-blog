@@ -1,6 +1,6 @@
 ---
 title: Better Skills
-description: Agent Skill 开发工作台，将 skill 创作从凭感觉调整变为可度量的 build → measure → iterate 循环
+description: AI 任务的可靠性评估工具，系统性地度量和保障 Agent Skill 在生产场景中的稳定性
 date: 2025-05-10
 category: portfolio
 logo: /projects/github.svg
@@ -16,7 +16,11 @@ links:
 featured: false
 ---
 
-Better Skills 是一个面向 Claude Agent Skill 的开发工作台，提供 CLI 工具链和 Web Dashboard。给定一个 skill，系统自动运行测试用例、对比基线、量化评分，并归档每次迭代的完整状态，让 skill 的质量变化可追踪、可回溯。
+## 为什么做
+
+AI 任务（Skill）在正常输入下跑通不代表可靠。实际业务中存在大量边界情况和异常输入，凭感觉调整无法暴露这些问题，也无法判断每次迭代是改善还是回退。缺少度量手段，Skill 就无法从"能跑"进入"可信"。
+
+Better Skills 提供 CLI 工具链和 Web Dashboard，将 skill 开发从凭感觉调整变为可度量的 build → measure → iterate 循环。给定一个 skill，系统自动运行测试用例（覆盖常规路径、边界情况和失败路径）、对比基线、量化评分，并归档每次迭代的完整状态，让质量变化可追踪、可回溯。
 
 ## 核心流程
 

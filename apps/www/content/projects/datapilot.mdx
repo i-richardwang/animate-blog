@@ -1,6 +1,6 @@
 ---
 title: DataPilot
-description: 基于 Craft Agents 的 agent 平台，增加了 SQLite 存储、批处理系统和配套 CLI
+description: AI 批量处理平台，让 AI 按统一标准、可靠地处理大规模业务数据
 date: 2026-04-13
 category: portfolio
 logo: /projects/datapilot/datapilot.svg
@@ -16,7 +16,11 @@ tech:
 featured: false
 ---
 
-DataPilot 是一个支持批处理的 agent 平台，基于 [Craft Agents](https://github.com/lukilabs/craft-agents-oss) 开发。除了桌面端、Web 界面和终端客户端等基础的 agent 交互能力外，DataPilot 增加了面向数据处理的批量执行系统、用 SQLite 替换了原有的 JSON 文件存储以支撑并发场景，并提供 CLI 工具让 agent 和脚本可以程序化地管理 workspace。
+## 目标
+
+业务场景中存在大量需要 AI 逐条处理的数据任务（实体标准化、文本分类、标签生产、数据富化），但缺乏一个能批量、可靠、可追踪地完成这些任务的平台。通用 Agent 平台面向单次对话设计，不支持批量数据处理；手写脚本能跑通但缺乏重试、进度追踪、结果分享等生产级能力。
+
+DataPilot 基于 [Craft Agents](https://github.com/lukilabs/craft-agents-oss) 深度改造，补齐批量处理、稳定性保障和协作分享能力，使其适用于数据密集的业务场景。除了桌面端、Web 界面和终端客户端等基础的 agent 交互能力外，DataPilot 增加了面向数据处理的批量执行系统、用 SQLite 替换了原有的 JSON 文件存储以支撑并发场景，并提供 CLI 工具让 agent 和脚本可以程序化地管理 workspace。
 
 ![DataPilot 桌面端界面](/projects/datapilot/desktop-app.png)
 
