@@ -26,8 +26,55 @@ function getDateRange(range: string): Date | null {
   }
 }
 
+// Nominal length of the selected range in days. Used as the denominator for
+// the daily average so it matches what the reader picked (e.g. "最近 30 天" → ÷30),
+// instead of dividing by only the days that happened to have usage. Returns null
+// for 'all', where there is no fixed period and we fall back to the actual span.
+function getRangeDays(range: string): number | null {
+  switch (range) {
+    case '7d':
+      return 7;
+    case '30d':
+      return 30;
+    case '90d':
+      return 90;
+    case 'all':
+      return null;
+    default:
+      return 30;
+  }
+}
+
 function formatDate(d: Date): string {
   return d.toISOString().split('T')[0];
+}
+
+// Fill every calendar date in [start, end] so days with no usage show up as 0
+// rather than being skipped. Keeps the trend chart's x-axis evenly spaced and
+// honest about idle days, matching the selected period.
+function fillDailyGaps(
+  trends: DailyTrend[],
+  start: Date,
+  end: Date,
+): DailyTrend[] {
+  const byDate = new Map(trends.map((t) => [t.date, t]));
+  const result: DailyTrend[] = [];
+  const cursor = new Date(
+    Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()),
+  );
+  const last = Date.UTC(
+    end.getUTCFullYear(),
+    end.getUTCMonth(),
+    end.getUTCDate(),
+  );
+
+  while (cursor.getTime() <= last) {
+    const key = formatDate(cursor);
+    result.push(byDate.get(key) || { date: key, cost: 0, tokens: 0 });
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  return result;
 }
 
 // ============================================================
@@ -50,23 +97,6 @@ async function getCCusageSummary(since: Date | null) {
     .where(conditions.length ? and(...conditions) : undefined);
 
   return result[0];
-}
-
-async function getCCusageActiveDates(since: Date | null) {
-  const db = getCCusageDb();
-  const conditions = since
-    ? [gte(usageRecords.date, formatDate(since))]
-    : [];
-
-  const result = await db
-    .select({
-      date: usageRecords.date,
-    })
-    .from(usageRecords)
-    .where(conditions.length ? and(...conditions) : undefined)
-    .groupBy(usageRecords.date);
-
-  return result.map((r) => String(r.date));
 }
 
 async function getCCusageDaily(since: Date | null) {
@@ -141,21 +171,6 @@ async function getLLMeterCacheTokens(since: Date | null) {
   `);
 
   return Number((result.rows[0] as { total: string }).total);
-}
-
-async function getLLMeterActiveDates(since: Date | null) {
-  const db = getLLMeterDb();
-  const conditions = since ? [gte(logs.timestamp, since)] : [];
-
-  const result = await db
-    .select({
-      date: sql<string>`date(${logs.timestamp})`,
-    })
-    .from(logs)
-    .where(conditions.length ? and(...conditions) : undefined)
-    .groupBy(sql`date(${logs.timestamp})`);
-
-  return result.map((r) => String(r.date));
 }
 
 async function getLLMeterDaily(since: Date | null) {
@@ -249,27 +264,16 @@ function mergeBrands(...sources: ModelUsage[][]): BrandUsage[] {
     .sort((a, b) => b.tokens - a.tokens);
 }
 
-function mergeActiveDays(...sources: string[][]): number {
-  const set = new Set<string>();
-  for (const dates of sources) {
-    for (const d of dates) {
-      set.add(d);
-    }
-  }
-  return set.size;
-}
-
 export async function fetchTokenUsage(
   range: string,
 ): Promise<TokenUsageResponse> {
+  const now = new Date();
   const since = getDateRange(range);
 
   const [
     ccSummary,
     llSummary,
     llCacheTokens,
-    ccActiveDates,
-    llActiveDates,
     ccDaily,
     llDaily,
     ccModels,
@@ -278,8 +282,6 @@ export async function fetchTokenUsage(
     getCCusageSummary(since),
     getLLMeterSummary(since),
     getLLMeterCacheTokens(since),
-    getCCusageActiveDates(since),
-    getLLMeterActiveDates(since),
     getCCusageDaily(since),
     getLLMeterDaily(since),
     getCCusageModels(since),
@@ -288,19 +290,36 @@ export async function fetchTokenUsage(
 
   const totalCost = Number(ccSummary.totalCost) + Number(llSummary.totalCost);
   const totalTokens = Number(ccSummary.totalTokens) + Number(llSummary.totalTokens);
-  const activeDays = mergeActiveDays(ccActiveDates, llActiveDates) || 1;
+
+  const mergedTrend = mergeDailyTrends(ccDaily, llDaily);
+
+  // Window over which to fill gaps: fixed ranges start at `since`; 'all' starts
+  // at the first day that actually has data. Both end at today.
+  const windowStart =
+    since ??
+    (mergedTrend.length
+      ? new Date(`${mergedTrend[0].date}T00:00:00.000Z`)
+      : null);
+
+  const dailyTrend = windowStart
+    ? fillDailyGaps(mergedTrend, windowStart, now)
+    : mergedTrend;
+
+  // Denominator for the daily average: the selected period's nominal day count
+  // (so "最近 30 天" divides by 30), or the actual span for 'all'.
+  const periodDays = getRangeDays(range) ?? (dailyTrend.length || 1);
 
   const summary: TokenUsageSummary = {
     totalCost,
     totalTokens,
     totalCacheReadTokens:
       Number(ccSummary.totalCacheReadTokens) + llCacheTokens,
-    avgDailyTokens: totalTokens / activeDays,
+    avgDailyTokens: totalTokens / periodDays,
   };
 
   return {
     summary,
-    dailyTrend: mergeDailyTrends(ccDaily, llDaily),
+    dailyTrend,
     byModel: mergeModels(ccModels, llModels),
     byBrand: mergeBrands(ccModels, llModels),
     range,
