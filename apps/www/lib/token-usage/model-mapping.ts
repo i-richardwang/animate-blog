@@ -34,6 +34,7 @@ const MODEL_ALIASES: Record<string, string> = {
   // GLM
   'zai-glm-4.6': 'glm-4.6',
   'zai-glm-4.7': 'glm-4.7',
+  'umans-glm-5.1': 'glm-5.1',
   'glm-5.1-precision': 'glm-5.1',
   'glm-4.7-free': 'glm-4.7',
 
