@@ -1,12 +1,17 @@
 import { sql, gte, and } from 'drizzle-orm';
 import { getCCusageDb, getLLMeterDb } from './db';
 import { usageRecords, logs } from './schema';
-import { normalizeModelName, getModelBrand } from './model-mapping';
+import {
+  normalizeModelName,
+  getModelBrand,
+  normalizeProviderName,
+} from './model-mapping';
 import type {
   TokenUsageSummary,
   DailyTrend,
   ModelUsage,
   BrandUsage,
+  ProviderUsage,
   TokenUsageResponse,
 } from './types';
 
@@ -189,6 +194,21 @@ async function getLLMeterDaily(since: Date | null) {
     .orderBy(sql`date(${logs.timestamp})`);
 }
 
+async function getLLMeterProviders(since: Date | null) {
+  const db = getLLMeterDb();
+  const conditions = since ? [gte(logs.timestamp, since)] : [];
+
+  return db
+    .select({
+      provider: logs.provider,
+      tokens: sql<number>`coalesce(sum(${logs.totalTokens}), 0)`,
+      cost: sql<number>`coalesce(sum(${logs.cost}::numeric), 0)`,
+    })
+    .from(logs)
+    .where(conditions.length ? and(...conditions) : undefined)
+    .groupBy(logs.provider);
+}
+
 async function getLLMeterModels(since: Date | null) {
   const db = getLLMeterDb();
   const conditions = since ? [gte(logs.timestamp, since)] : [];
@@ -264,11 +284,56 @@ function mergeBrands(...sources: ModelUsage[][]): BrandUsage[] {
     .sort((a, b) => b.tokens - a.tokens);
 }
 
+// Merge LLMeter's per-provider rows (normalized, case-folded) with CCusage's
+// total bucketed as a single "Claude Code" provider, then keep the top providers
+// by tokens and fold the long tail into "其他" so the pies stay readable.
+const PROVIDER_TOP_N = 7;
+
+function mergeProviders(
+  llProviders: { provider: string; tokens: number; cost: number }[],
+  ccTokens: number,
+  ccCost: number,
+): ProviderUsage[] {
+  const map = new Map<string, { tokens: number; cost: number }>();
+
+  for (const p of llProviders) {
+    const name = normalizeProviderName(p.provider);
+    const e = map.get(name) ?? { tokens: 0, cost: 0 };
+    e.tokens += Number(p.tokens);
+    e.cost += Number(p.cost);
+    map.set(name, e);
+  }
+
+  if (ccTokens > 0 || ccCost > 0) {
+    const e = map.get('Claude Code') ?? { tokens: 0, cost: 0 };
+    e.tokens += ccTokens;
+    e.cost += ccCost;
+    map.set('Claude Code', e);
+  }
+
+  const all = Array.from(map.entries())
+    .map(([provider, v]) => ({ provider, ...v }))
+    .filter((p) => p.tokens > 0)
+    .sort((a, b) => b.tokens - a.tokens);
+
+  if (all.length <= PROVIDER_TOP_N) return all;
+
+  const top = all.slice(0, PROVIDER_TOP_N);
+  const rest = all.slice(PROVIDER_TOP_N).reduce(
+    (acc, p) => ({ tokens: acc.tokens + p.tokens, cost: acc.cost + p.cost }),
+    { tokens: 0, cost: 0 },
+  );
+  return [...top, { provider: '其他', ...rest }];
+}
+
 export async function fetchTokenUsage(
   range: string,
 ): Promise<TokenUsageResponse> {
   const now = new Date();
   const since = getDateRange(range);
+  // The activity heatmap always shows a fixed trailing year, independent of the
+  // range selector that drives the other charts.
+  const since365 = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
 
   const [
     ccSummary,
@@ -278,6 +343,9 @@ export async function fetchTokenUsage(
     llDaily,
     ccModels,
     llModels,
+    llProviders,
+    ccDaily365,
+    llDaily365,
   ] = await Promise.all([
     getCCusageSummary(since),
     getLLMeterSummary(since),
@@ -286,6 +354,9 @@ export async function fetchTokenUsage(
     getLLMeterDaily(since),
     getCCusageModels(since),
     getLLMeterModels(since),
+    getLLMeterProviders(since),
+    getCCusageDaily(since365),
+    getLLMeterDaily(since365),
   ]);
 
   const totalCost = Number(ccSummary.totalCost) + Number(llSummary.totalCost);
@@ -317,11 +388,24 @@ export async function fetchTokenUsage(
     avgDailyTokens: totalTokens / periodDays,
   };
 
+  const heatmap = mergeDailyTrends(ccDaily365, llDaily365).map((d) => ({
+    date: d.date,
+    value: d.tokens,
+  }));
+
+  const byProvider = mergeProviders(
+    llProviders,
+    Number(ccSummary.totalTokens),
+    Number(ccSummary.totalCost),
+  );
+
   return {
     summary,
     dailyTrend,
     byModel: mergeModels(ccModels, llModels),
     byBrand: mergeBrands(ccModels, llModels),
+    heatmap,
+    byProvider,
     range,
   };
 }

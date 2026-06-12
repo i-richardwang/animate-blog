@@ -14,6 +14,8 @@ import { CostTrendChart } from '@/components/token-usage/cost-trend-chart';
 import { TokenTrendChart } from '@/components/token-usage/token-trend-chart';
 import { ModelUsageChart } from '@/components/token-usage/model-usage-chart';
 import { BrandUsageChart } from '@/components/token-usage/brand-usage-chart';
+import { ProviderUsageChart } from '@/components/token-usage/provider-usage-chart';
+import { ActivityHeatmap } from '@/components/token-usage/activity-heatmap';
 import { RangeSelector } from '@/components/token-usage/range-selector';
 import type { TokenUsageResponse } from '@/lib/token-usage/types';
 import { formatCost, formatTokens } from '@/lib/token-usage/format';
@@ -111,7 +113,11 @@ export default function TokenUsagePage() {
           {/* Charts */}
           {!isLoading && data && (
             <>
-              <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className="mt-6">
+                <ActivityHeatmap data={data.heatmap} />
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <CostTrendChart data={data.dailyTrend} />
                 <TokenTrendChart data={data.dailyTrend} />
               </div>
@@ -120,19 +126,41 @@ export default function TokenUsagePage() {
                 <ModelUsageChart data={data.byModel} />
                 <BrandUsageChart data={data.byBrand} />
               </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <ProviderUsageChart
+                  data={data.byProvider}
+                  metric="tokens"
+                  title="服务商 Token 占比"
+                  description="按服务商统计的 Token 使用量"
+                  colorOrder={data.byProvider.map((p) => p.provider)}
+                />
+                <ProviderUsageChart
+                  data={data.byProvider}
+                  metric="cost"
+                  title="服务商成本占比"
+                  description="按服务商统计的成本"
+                  colorOrder={data.byProvider.map((p) => p.provider)}
+                />
+              </div>
             </>
           )}
 
           {/* Loading Charts */}
           {isLoading && (
             <>
-              <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className="mt-6 h-[280px] animate-pulse border bg-card" />
+              <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <div className="h-[370px] animate-pulse border bg-card" />
                 <div className="h-[370px] animate-pulse border bg-card" />
               </div>
               <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <div className="h-[370px] animate-pulse border bg-card" />
                 <div className="h-[370px] animate-pulse border bg-card" />
+              </div>
+              <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div className="h-[440px] animate-pulse border bg-card" />
+                <div className="h-[440px] animate-pulse border bg-card" />
               </div>
             </>
           )}

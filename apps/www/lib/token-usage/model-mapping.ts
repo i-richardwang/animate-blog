@@ -90,6 +90,23 @@ export function normalizeModelName(name: string): string {
   return MODEL_ALIASES[key] ?? key;
 }
 
+// Gateway provider name -> canonical provider. Lookup lowercases the input, so
+// case variants (Fireworks / fireworks) merge into one slice.
+const PROVIDER_NAME_ALIASES: Record<string, string> = {
+  cloud: 'openrouter',
+  google: 'openrouter',
+  'opencode-claude': 'opencode',
+  'opencode-a': 'opencode',
+  'opencode-o': 'opencode',
+  openai: 'codex',
+};
+
+export function normalizeProviderName(name: string): string {
+  if (!name || !name.trim()) return 'unknown';
+  const key = name.toLowerCase();
+  return PROVIDER_NAME_ALIASES[key] ?? key;
+}
+
 const BRAND_PATTERNS: [RegExp, string][] = [
   [/^(qwen|qwq)/i, 'Qwen'],
   [/^(gpt|o1|o3|chatgpt)/i, 'OpenAI'],
