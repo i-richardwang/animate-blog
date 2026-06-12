@@ -263,7 +263,7 @@ function mergeModels(...sources: ModelUsage[][]): ModelUsage[] {
   }
 
   return Array.from(map.entries())
-    .filter(([, tokens]) => tokens > 0)
+    .filter(([model, tokens]) => tokens > 0 && model !== 'unknown')
     .map(([model, tokens]) => ({ model, tokens }))
     .sort((a, b) => b.tokens - a.tokens);
 }
@@ -273,6 +273,10 @@ function mergeBrands(...sources: ModelUsage[][]): BrandUsage[] {
 
   for (const models of sources) {
     for (const m of models) {
+      // Drop the synthetic "unknown" model (CCusage writes it when a session
+      // has no resolvable model name) so it doesn't surface as an "Other" bar.
+      // Headline totals are computed separately and still include it.
+      if (normalizeModelName(m.model) === 'unknown') continue;
       const brand = getModelBrand(m.model);
       map.set(brand, (map.get(brand) || 0) + m.tokens);
     }
