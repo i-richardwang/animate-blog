@@ -30,6 +30,7 @@ const MODEL_ALIASES: Record<string, string> = {
   'kimi-k2:1t': 'kimi-k2',
   'kimi-k2-thinking': 'kimi-k2',
   'kimi-k2.6-precision': 'kimi-k2.6',
+  'umans-kimi-k2.6': 'kimi-k2.6',
 
   // GLM
   'zai-glm-4.6': 'glm-4.6',
@@ -73,14 +74,18 @@ const PROVIDER_PREFIXES = new Set([
   'x-ai',
   'xiaomi',
   'z-ai',
+  'zenmux',
 ]);
 
 export function normalizeModelName(name: string): string {
   if (!name || !name.trim()) return 'unknown';
   let key = name.toLowerCase();
-  const slash = key.indexOf('/');
-  if (slash > 0 && PROVIDER_PREFIXES.has(key.slice(0, slash))) {
+  // Strip nested provider prefixes left-to-right, so router-chained names like
+  // zenmux/z-ai/glm-5.1 collapse to glm-5.1 (not just one segment).
+  let slash = key.indexOf('/');
+  while (slash > 0 && PROVIDER_PREFIXES.has(key.slice(0, slash))) {
     key = key.slice(slash + 1);
+    slash = key.indexOf('/');
   }
   return MODEL_ALIASES[key] ?? key;
 }
