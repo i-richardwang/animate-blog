@@ -164,18 +164,20 @@ async function getLLMeterSummary(since: Date | null) {
 
 async function getLLMeterCacheTokens(since: Date | null) {
   const db = getLLMeterDb();
+  const conditions = since ? [gte(logs.timestamp, since)] : [];
 
-  const result = await db.execute(sql`
-    SELECT coalesce(sum((token_usage::jsonb -> 'prompt_tokens_details' ->> 'cached_read_tokens')::bigint), 0) as total
-    FROM logs
-    WHERE token_usage IS NOT NULL
-      AND token_usage <> ''
-      AND length(token_usage) > 2
-      AND token_usage::jsonb -> 'prompt_tokens_details' ->> 'cached_read_tokens' IS NOT NULL
-      ${since ? sql`AND timestamp >= ${since}` : sql``}
-  `);
+  // Sum the native cached_read_tokens column directly. It is fully populated on
+  // logs_archive and verified identical to the old token_usage JSON extraction
+  // (prompt_tokens_details.cached_read_tokens), but avoids a per-row text→jsonb
+  // parse of the large token_usage field.
+  const result = await db
+    .select({
+      total: sql<number>`coalesce(sum(${logs.cachedReadTokens}), 0)`,
+    })
+    .from(logs)
+    .where(conditions.length ? and(...conditions) : undefined);
 
-  return Number((result.rows[0] as { total: string }).total);
+  return Number(result[0].total);
 }
 
 async function getLLMeterDaily(since: Date | null) {

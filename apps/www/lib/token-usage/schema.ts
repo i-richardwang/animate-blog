@@ -4,11 +4,11 @@ import {
   varchar,
   integer,
   numeric,
+  doublePrecision,
   date,
   timestamp,
   jsonb,
   boolean,
-  bigint,
   uniqueIndex,
   index,
 } from 'drizzle-orm/pg-core';
@@ -69,24 +69,30 @@ export const usageRecords = pgTable(
 // LLMeter schema (LLM API usage via Bifrost gateway)
 // ============================================================
 
-export const logs = pgTable('logs', {
+// Reads from `logs_archive`: the metadata-only replica of the Bifrost gateway's
+// `logs` table, synced by bifrost-log-archive (content columns are dropped, all
+// analytics/cost columns kept). See bifrost-log-archive/01_schema.sql.
+export const logs = pgTable('logs_archive', {
   id: varchar('id').primaryKey(),
   parentRequestId: varchar('parent_request_id'),
   timestamp: timestamp('timestamp', { withTimezone: true }).notNull(),
   objectType: varchar('object_type').notNull(),
   provider: varchar('provider').notNull(),
   model: varchar('model').notNull(),
-  numberOfRetries: bigint('number_of_retries', { mode: 'number' }).default(0),
-  fallbackIndex: bigint('fallback_index', { mode: 'number' }).default(0),
+  numberOfRetries: integer('number_of_retries'),
+  fallbackIndex: integer('fallback_index'),
   selectedKeyId: varchar('selected_key_id'),
   selectedKeyName: varchar('selected_key_name'),
   virtualKeyId: varchar('virtual_key_id'),
   virtualKeyName: varchar('virtual_key_name'),
-  promptTokens: bigint('prompt_tokens', { mode: 'number' }).default(0),
-  completionTokens: bigint('completion_tokens', { mode: 'number' }).default(0),
-  totalTokens: bigint('total_tokens', { mode: 'number' }).default(0),
-  cost: numeric('cost'),
-  latency: numeric('latency'),
+  promptTokens: integer('prompt_tokens'),
+  completionTokens: integer('completion_tokens'),
+  totalTokens: integer('total_tokens'),
+  // Native column on the source table, fully populated and identical to the
+  // value previously parsed out of token_usage JSON. Used directly for speed.
+  cachedReadTokens: integer('cached_read_tokens'),
+  cost: doublePrecision('cost'),
+  latency: doublePrecision('latency'),
   status: varchar('status').notNull(),
   stream: boolean('stream').default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
