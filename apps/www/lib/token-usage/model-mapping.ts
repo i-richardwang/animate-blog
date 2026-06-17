@@ -31,6 +31,10 @@ const MODEL_ALIASES: Record<string, string> = {
   'kimi-k2-thinking': 'kimi-k2',
   'kimi-k2.6-precision': 'kimi-k2.6',
   'umans-kimi-k2.6': 'kimi-k2.6',
+  'umans-kimi-k2.7': 'kimi-k2.7',
+
+  // Qwen
+  'umans-qwen3.6-35b-a3b': 'qwen3.6-35b-a3b',
 
   // GLM
   'zai-glm-4.6': 'glm-4.6',
