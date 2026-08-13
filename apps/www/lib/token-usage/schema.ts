@@ -91,7 +91,20 @@ export const logs = pgTable('logs_archive', {
   // Native column on the source table, fully populated and identical to the
   // value previously parsed out of token_usage JSON. Used directly for speed.
   cachedReadTokens: integer('cached_read_tokens'),
+  // What the gateway itself billed. Kept as the archive's audit baseline but
+  // NOT what these queries sum: gateways record NULL or 0 for whole providers
+  // (subscription routes, free channels, models missing from their price
+  // table), so summing it silently undercounts.
   cost: doublePrecision('cost'),
+  // Filled by the archive's pricing pass: the gateway's own figure where it
+  // billed something, otherwise the usage valued at the model vendor's list
+  // price. costBasis says which ('gateway' | 'listprice' | 'unpriced').
+  costEffective: doublePrecision('cost_effective'),
+  costBasis: varchar('cost_basis'),
+  // Canonical model behind `model`, resolved by the archive's alias table.
+  // Unused here -- model grouping still runs through normalizeModelName(),
+  // whose prefix stripping also handles models the archive has no alias for.
+  modelKey: varchar('model_key'),
   latency: doublePrecision('latency'),
   status: varchar('status').notNull(),
   stream: boolean('stream').default(false),

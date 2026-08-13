@@ -153,7 +153,7 @@ async function getLLMeterSummary(since: Date | null) {
 
   const result = await db
     .select({
-      totalCost: sql<number>`coalesce(sum(${logs.cost}::numeric), 0)`,
+      totalCost: sql<number>`coalesce(sum(${logs.costEffective}::numeric), 0)`,
       totalTokens: sql<number>`coalesce(sum(${logs.totalTokens}), 0)`,
     })
     .from(logs)
@@ -187,7 +187,7 @@ async function getLLMeterDaily(since: Date | null) {
   return db
     .select({
       date: sql<string>`date(${logs.timestamp})`,
-      cost: sql<number>`coalesce(sum(${logs.cost}::numeric), 0)`,
+      cost: sql<number>`coalesce(sum(${logs.costEffective}::numeric), 0)`,
       tokens: sql<number>`coalesce(sum(${logs.totalTokens}), 0)`,
     })
     .from(logs)
@@ -204,7 +204,7 @@ async function getLLMeterProviders(since: Date | null) {
     .select({
       provider: logs.provider,
       tokens: sql<number>`coalesce(sum(${logs.totalTokens}), 0)`,
-      cost: sql<number>`coalesce(sum(${logs.cost}::numeric), 0)`,
+      cost: sql<number>`coalesce(sum(${logs.costEffective}::numeric), 0)`,
     })
     .from(logs)
     .where(conditions.length ? and(...conditions) : undefined)
