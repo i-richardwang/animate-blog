@@ -39,20 +39,20 @@ const MODEL_ALIASES: Record<string, string> = {
   'umans-qwen3.6-35b-a3b': 'qwen3.6-35b-a3b',
   'qwen3.8-max-preview': 'qwen3.8-max',
 
+  // Qwen - umans routing labels
+  'umans-flash': 'qwen3.6-35b-a3b',
+
   // GLM
   'zai-glm-4.6': 'glm-4.6',
   'zai-glm-4.7': 'glm-4.7',
   'umans-glm-5.1': 'glm-5.1',
   'umans-glm-5.2': 'glm-5.2',
   'glm-5.1-precision': 'glm-5.1',
-  'glm-4.7-free': 'glm-4.7',
 
   // DeepSeek
   'deepseek-v4-pro-precision': 'deepseek-v4-pro',
   'umans-deepseek-v4-pro-dspark': 'deepseek-v4-pro',
-
-  // MiniMax
-  'minimax-m2.1-free': 'minimax-m2.1',
+  'deepseek-v4-flash-0731': 'deepseek-v4-flash',
 
   // GPT
   'gpt-oss-120b': 'gpt-oss:120b',
@@ -70,6 +70,8 @@ const PROVIDER_PREFIXES = new Set([
   'anthropic',
   'baidu',
   'bytedance-seed',
+  'cloud',
+  'commandcode',
   'deepseek',
   'google',
   'kwaipilot',
@@ -78,17 +80,33 @@ const PROVIDER_PREFIXES = new Set([
   'moonshotai',
   'nvidia',
   'openai',
+  'opencode-go',
+  'opencode-zen',
   'qwen',
   'tencent',
   'x-ai',
   'xiaomi',
   'z-ai',
+  'zai',
   'zenmux',
 ]);
 
+// Some gateways log the raw request path, so the model arrives percent-encoded
+// (google%2Fgemini-3.1-flash-lite%3AgenerateContent).
+function decodeIfEncoded(name: string): string {
+  if (!name.includes('%')) return name;
+  try {
+    return decodeURIComponent(name);
+  } catch {
+    return name;
+  }
+}
+
 export function normalizeModelName(name: string): string {
   if (!name || !name.trim()) return 'unknown';
-  let key = name.toLowerCase();
+  let key = decodeIfEncoded(name).toLowerCase();
+  // Drop the API action the path form carries (...:generateContent).
+  key = key.replace(/:(stream)?generatecontent$/, '');
   // Strip nested provider prefixes left-to-right, so router-chained names like
   // zenmux/z-ai/glm-5.1 collapse to glm-5.1 (not just one segment).
   let slash = key.indexOf('/');
@@ -96,6 +114,15 @@ export function normalizeModelName(name: string): string {
     key = key.slice(slash + 1);
     slash = key.indexOf('/');
   }
+  // OpenRouter pins routing with a :<provider> suffix. Only strip when the
+  // suffix names a provider — ollama-style size tags (qwen3-coder:480b) are
+  // part of the model identity and must survive.
+  const colon = key.lastIndexOf(':');
+  if (colon > 0 && PROVIDER_PREFIXES.has(key.slice(colon + 1))) {
+    key = key.slice(0, colon);
+  }
+  // A free channel is the same model on a different billing tier.
+  key = key.replace(/-free$/, '');
   return MODEL_ALIASES[key] ?? key;
 }
 
@@ -110,6 +137,8 @@ const PROVIDER_NAME_ALIASES: Record<string, string> = {
   'opencode-claude': 'opencode',
   'opencode-a': 'opencode',
   'opencode-o': 'opencode',
+  'opencode-go': 'opencode',
+  'opencode-zen': 'opencode',
   openai: 'codex',
 };
 
