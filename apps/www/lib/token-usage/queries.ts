@@ -154,7 +154,6 @@ async function getCCusageModels(since: Date | null) {
     ${since ? sql`WHERE date >= ${formatDate(since)}` : sql``}
     GROUP BY model
     ORDER BY tokens DESC
-    LIMIT 20
   `);
 
   return (result.rows as { model: string; tokens: string }[]).map((r) => ({
@@ -242,9 +241,11 @@ async function getLLMeterModels(since: Date | null) {
     })
     .from(logs)
     .where(conditions.length ? and(...conditions) : undefined)
+    // No LIMIT: one canonical model can be spread over a dozen raw names, so
+    // truncating here would drop tail aliases before normalizeModelName() gets
+    // to fold them back together. The consumers do their own top-N.
     .groupBy(logs.model)
-    .orderBy(sql`sum(${logs.totalTokens}) desc`)
-    .limit(20);
+    .orderBy(sql`sum(${logs.totalTokens}) desc`);
 
   return result.map((r) => ({
     model: r.model,
