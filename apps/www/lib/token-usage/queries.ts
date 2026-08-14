@@ -122,6 +122,26 @@ async function getCCusageDaily(since: Date | null) {
     .orderBy(usageRecords.date);
 }
 
+// CCusage stores one row per (device, date, agent_type), so the CLI that
+// produced the usage survives into the provider breakdown instead of every
+// row being attributed to Claude Code.
+async function getCCusageProviders(since: Date | null) {
+  const db = getCCusageDb();
+  const conditions = since
+    ? [gte(usageRecords.date, formatDate(since))]
+    : [];
+
+  return db
+    .select({
+      provider: usageRecords.agentType,
+      cost: sql<number>`coalesce(sum(${usageRecords.totalCost}::numeric), 0)`,
+      tokens: sql<number>`coalesce(sum(${usageRecords.totalTokens}), 0)`,
+    })
+    .from(usageRecords)
+    .where(conditions.length ? and(...conditions) : undefined)
+    .groupBy(usageRecords.agentType);
+}
+
 async function getCCusageModels(since: Date | null) {
   const db = getCCusageDb();
 
@@ -290,31 +310,25 @@ function mergeBrands(...sources: ModelUsage[][]): BrandUsage[] {
     .sort((a, b) => b.tokens - a.tokens);
 }
 
-// Merge LLMeter's per-provider rows (normalized, case-folded) with CCusage's
-// total bucketed as a single "Claude Code" provider, then keep the top providers
-// by tokens and fold the long tail into "其他" so the pies stay readable.
+// Merge LLMeter's per-provider rows with CCusage's per-agent rows, both run
+// through the same normalization so shared names (codex, opencode) collapse
+// into one slice, then keep the top providers by tokens and fold the long tail
+// into "其他" so the pies stay readable. The two sources cover disjoint
+// traffic — CCusage's CLIs do not go through the gateway — so summing them
+// double-counts nothing.
 const PROVIDER_TOP_N = 7;
 
 function mergeProviders(
-  llProviders: { provider: string; tokens: number; cost: number }[],
-  ccTokens: number,
-  ccCost: number,
+  ...sources: { provider: string; tokens: number; cost: number }[][]
 ): ProviderUsage[] {
   const map = new Map<string, { tokens: number; cost: number }>();
 
-  for (const p of llProviders) {
+  for (const p of sources.flat()) {
     const name = normalizeProviderName(p.provider);
     const e = map.get(name) ?? { tokens: 0, cost: 0 };
     e.tokens += Number(p.tokens);
     e.cost += Number(p.cost);
     map.set(name, e);
-  }
-
-  if (ccTokens > 0 || ccCost > 0) {
-    const e = map.get('Claude Code') ?? { tokens: 0, cost: 0 };
-    e.tokens += ccTokens;
-    e.cost += ccCost;
-    map.set('Claude Code', e);
   }
 
   const all = Array.from(map.entries())
@@ -350,6 +364,7 @@ export async function fetchTokenUsage(
     ccModels,
     llModels,
     llProviders,
+    ccProviders,
     ccDaily365,
     llDaily365,
   ] = await Promise.all([
@@ -361,6 +376,7 @@ export async function fetchTokenUsage(
     getCCusageModels(since),
     getLLMeterModels(since),
     getLLMeterProviders(since),
+    getCCusageProviders(since),
     getCCusageDaily(since365),
     getLLMeterDaily(since365),
   ]);
@@ -399,11 +415,7 @@ export async function fetchTokenUsage(
     value: d.tokens,
   }));
 
-  const byProvider = mergeProviders(
-    llProviders,
-    Number(ccSummary.totalTokens),
-    Number(ccSummary.totalCost),
-  );
+  const byProvider = mergeProviders(llProviders, ccProviders);
 
   return {
     summary,

@@ -101,7 +101,10 @@ export function normalizeModelName(name: string): string {
 
 // Gateway provider name -> canonical provider. Lookup lowercases the input, so
 // case variants (Fireworks / fireworks) merge into one slice.
+// CCusage agent_type values go through the same lookup, so a CLI that also
+// shows up as a gateway provider (codex, opencode) lands in one slice.
 const PROVIDER_NAME_ALIASES: Record<string, string> = {
+  'claude-code': 'Claude Code',
   cloud: 'openrouter',
   google: 'openrouter',
   'opencode-claude': 'opencode',
