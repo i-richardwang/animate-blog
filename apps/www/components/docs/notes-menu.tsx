@@ -11,6 +11,14 @@ import {
 import { BookText } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
+// The notes section's own entry. Exported so the navbar trigger and the mobile
+// sidebar both take it from here instead of each declaring their own — the
+// navbar used to carry a second, independent 笔记 item next to this menu.
+export const NOTES_NAV = {
+  title: '笔记',
+  url: '/docs',
+};
+
 export const NOTES_ITEMS = [
   {
     title: 'AI 探索',
@@ -33,7 +41,9 @@ export const NotesMenu = () => {
   return (
     <HoverCard openDelay={150} closeDelay={200}>
       <HoverCardTrigger asChild>
-        <button
+        <Link
+          href={NOTES_NAV.url}
+          title={NOTES_NAV.title}
           className={buttonVariants({
             color: 'ghost',
             size: 'sm',
@@ -47,8 +57,8 @@ export const NotesMenu = () => {
           })}
         >
           <BookText className={cn('size-4 lg:hidden', active ? 'text-primary' : 'text-muted-foreground')} />
-          <span className="lg:inline hidden">笔记</span>
-        </button>
+          <span className="lg:inline hidden">{NOTES_NAV.title}</span>
+        </Link>
       </HoverCardTrigger>
       <HoverCardContent align="start" sideOffset={8} className="w-48 p-2">
         <div className="flex flex-col gap-0.5">

@@ -12,7 +12,6 @@ import {
   PenLine,
   BookOpen,
   Podcast,
-  Paperclip,
   BarChart3,
   Activity,
 } from 'lucide-react';
@@ -55,11 +54,8 @@ export const NAV_ITEMS = [
     url: '/projects',
     icon: <FolderKanban className="size-4" />,
   },
-  {
-    title: '笔记',
-    url: '/docs',
-    icon: <Paperclip className="size-4" />,
-  },
+  // 笔记 is not listed here: <NotesMenu /> renders it ahead of this list,
+  // with the section's three topics on hover.
   {
     title: 'Token 用量',
     url: '/token-usage',
