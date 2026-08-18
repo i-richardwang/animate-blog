@@ -14,8 +14,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import type { DailyTrend } from '@/lib/token-usage/types';
-import { formatCost } from '@/lib/token-usage/format';
+import type { DailyTrend, TrendGranularity } from '@/lib/token-usage/types';
+import {
+  formatCost,
+  formatTrendTick,
+  formatTrendLabel,
+  granularityLabel,
+} from '@/lib/token-usage/format';
 
 const chartConfig = {
   cost: {
@@ -26,14 +31,20 @@ const chartConfig = {
 
 interface CostTrendChartProps {
   data: DailyTrend[];
+  granularity: TrendGranularity;
 }
 
-export const CostTrendChart = ({ data }: CostTrendChartProps) => {
+export const CostTrendChart = ({
+  data,
+  granularity,
+}: CostTrendChartProps) => {
   return (
     <Card>
       <CardHeader>
         <CardTitle>成本趋势</CardTitle>
-        <CardDescription>按天统计的 AI 使用成本 (USD)</CardDescription>
+        <CardDescription>
+          按{granularityLabel(granularity)}统计的 AI 使用成本 (USD)
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -48,16 +59,16 @@ export const CostTrendChart = ({ data }: CostTrendChartProps) => {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => {
-                const d = new Date(value);
-                return `${d.getMonth() + 1}/${d.getDate()}`;
-              }}
+              tickFormatter={(value) => formatTrendTick(value, granularity)}
             />
             <ChartTooltip
               cursor={false}
               content={
                 <ChartTooltipContent
                   indicator="line"
+                  labelFormatter={(value) =>
+                    formatTrendLabel(String(value), granularity)
+                  }
                   valueFormatter={(value) => formatCost(value)}
                 />
               }

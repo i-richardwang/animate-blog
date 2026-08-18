@@ -5,11 +5,17 @@ export interface TokenUsageSummary {
   avgDailyTokens: number;
 }
 
+// One bucket of the cost/token trend. `date` is the bucket's first day
+// (the day itself, the Monday of the week, or the 1st of the month).
 export interface DailyTrend {
   date: string;
   cost: number;
   tokens: number;
 }
+
+// How the trend charts bucket time. Picked from the span of the selected range
+// so a long window (notably "全部") doesn't render hundreds of one-day bars.
+export type TrendGranularity = 'day' | 'week' | 'month';
 
 export interface ModelUsage {
   model: string;
@@ -44,4 +50,5 @@ export interface TokenUsageResponse {
   heatmap: HeatmapDay[];
   byProvider: ProviderUsage[];
   range: string;
+  trendGranularity: TrendGranularity;
 }

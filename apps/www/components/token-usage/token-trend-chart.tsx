@@ -14,8 +14,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import type { DailyTrend } from '@/lib/token-usage/types';
-import { formatTokens } from '@/lib/token-usage/format';
+import type { DailyTrend, TrendGranularity } from '@/lib/token-usage/types';
+import {
+  formatTokens,
+  formatTrendTick,
+  formatTrendLabel,
+  granularityLabel,
+} from '@/lib/token-usage/format';
 
 const chartConfig = {
   tokens: {
@@ -26,14 +31,20 @@ const chartConfig = {
 
 interface TokenTrendChartProps {
   data: DailyTrend[];
+  granularity: TrendGranularity;
 }
 
-export const TokenTrendChart = ({ data }: TokenTrendChartProps) => {
+export const TokenTrendChart = ({
+  data,
+  granularity,
+}: TokenTrendChartProps) => {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Token 用量趋势</CardTitle>
-        <CardDescription>按天统计的 Token 消耗量</CardDescription>
+        <CardDescription>
+          按{granularityLabel(granularity)}统计的 Token 消耗量
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -44,16 +55,16 @@ export const TokenTrendChart = ({ data }: TokenTrendChartProps) => {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => {
-                const d = new Date(value);
-                return `${d.getMonth() + 1}/${d.getDate()}`;
-              }}
+              tickFormatter={(value) => formatTrendTick(value, granularity)}
             />
             <ChartTooltip
               cursor={false}
               content={
                 <ChartTooltipContent
                   indicator="line"
+                  labelFormatter={(value) =>
+                    formatTrendLabel(String(value), granularity)
+                  }
                   valueFormatter={(value) => formatTokens(value)}
                 />
               }

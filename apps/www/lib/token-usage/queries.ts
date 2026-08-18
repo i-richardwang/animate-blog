@@ -13,6 +13,7 @@ import type {
   BrandUsage,
   ProviderUsage,
   TokenUsageResponse,
+  TrendGranularity,
 } from './types';
 
 function getDateRange(range: string): Date | null {
@@ -80,6 +81,58 @@ function fillDailyGaps(
   }
 
   return result;
+}
+
+// Pick the trend bucket from how many days the window actually spans. Daily
+// bars stay readable up to a quarter; beyond that (in practice the "全部"
+// range, which spans the whole history) they turn into a solid block, so the
+// chart steps up to weeks and then months.
+const WEEK_THRESHOLD_DAYS = 100;
+const MONTH_THRESHOLD_DAYS = 400;
+
+function pickGranularity(spanDays: number): TrendGranularity {
+  if (spanDays <= WEEK_THRESHOLD_DAYS) return 'day';
+  if (spanDays <= MONTH_THRESHOLD_DAYS) return 'week';
+  return 'month';
+}
+
+// First day of the bucket a date belongs to: the day itself, the ISO week's
+// Monday, or the 1st of the month.
+function bucketStart(dateStr: string, granularity: TrendGranularity): string {
+  if (granularity === 'day') return dateStr;
+
+  const d = new Date(`${dateStr}T00:00:00.000Z`);
+  if (granularity === 'month') {
+    return formatDate(
+      new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)),
+    );
+  }
+
+  // getUTCDay(): 0 = Sunday, so shift it to a Monday-first offset.
+  const offset = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - offset);
+  return formatDate(d);
+}
+
+// Roll gap-filled daily rows up into weeks or months. Input is already dense,
+// so empty buckets inside the window can't appear; a bucket at either edge may
+// be partial (the current week/month, or the first one with data).
+function bucketTrend(
+  daily: DailyTrend[],
+  granularity: TrendGranularity,
+): DailyTrend[] {
+  if (granularity === 'day') return daily;
+
+  const map = new Map<string, DailyTrend>();
+  for (const row of daily) {
+    const key = bucketStart(row.date, granularity);
+    const existing = map.get(key) || { date: key, cost: 0, tokens: 0 };
+    existing.cost += row.cost;
+    existing.tokens += row.tokens;
+    map.set(key, existing);
+  }
+
+  return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date));
 }
 
 // ============================================================
@@ -395,13 +448,16 @@ export async function fetchTokenUsage(
       ? new Date(`${mergedTrend[0].date}T00:00:00.000Z`)
       : null);
 
-  const dailyTrend = windowStart
+  const filledTrend = windowStart
     ? fillDailyGaps(mergedTrend, windowStart, now)
     : mergedTrend;
 
+  const trendGranularity = pickGranularity(filledTrend.length);
+  const dailyTrend = bucketTrend(filledTrend, trendGranularity);
+
   // Denominator for the daily average: the selected period's nominal day count
   // (so "最近 30 天" divides by 30), or the actual span for 'all'.
-  const periodDays = getRangeDays(range) ?? (dailyTrend.length || 1);
+  const periodDays = getRangeDays(range) ?? (filledTrend.length || 1);
 
   const summary: TokenUsageSummary = {
     totalCost,
@@ -426,5 +482,6 @@ export async function fetchTokenUsage(
     heatmap,
     byProvider,
     range,
+    trendGranularity,
   };
 }
