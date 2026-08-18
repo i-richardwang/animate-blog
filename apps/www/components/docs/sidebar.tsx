@@ -27,17 +27,22 @@ import { usePathname } from 'next/navigation';
 import { isActive } from 'fumadocs-ui/utils/is-active';
 import { AnimatePresence, motion } from 'motion/react';
 import { Separator } from '@/lib/attach-separator';
-import { NAV_ITEMS } from './nav';
-import { NOTES_ITEMS, NOTES_NAV } from './notes-menu';
+import { docsSectionUrls, flatSections } from '@/lib/navigation';
 import { SquareMenu } from 'lucide-react';
 import { useIsMobile } from '@workspace/ui/hooks/use-mobile';
 
-const CONTENT_SECTIONS = ['/blog', '/projects', '/reading', '/podcasts', '/token-usage'] as const;
-const DOCS_SECTIONS = [
-  '/docs/ai',
-  '/docs/data-science',
-  '/docs/development',
+// Routes whose layout uses this sidebar but has no page tree to show. This is
+// a layout concern, not a navigation one, so it stays a list of its own rather
+// than being derived from the nav manifest.
+const CONTENT_SECTIONS = [
+  '/blog',
+  '/projects',
+  '/reading',
+  '/podcasts',
+  '/token-usage',
 ] as const;
+// The notes tree's roots, taken from the nav manifest.
+const DOCS_SECTIONS = docsSectionUrls;
 
 const isContentSection = (pathname: string) =>
   CONTENT_SECTIONS.some((section) => pathname.startsWith(section));
@@ -45,22 +50,17 @@ const isContentSection = (pathname: string) =>
 const isDocsSection = (pathname: string) =>
   DOCS_SECTIONS.some((section) => pathname.startsWith(section));
 
+// The navbar's hover menus have no mobile equivalent, so sections and their
+// sub-sections are listed flat here, in navbar order.
 const MENU_ITEMS = [
   {
     name: 'Menu',
     type: 'separator',
     icon: <SquareMenu />,
   },
-  // The navbar's hover menu has no mobile equivalent, so the notes entry and
-  // its topics are listed inline here.
-  { text: NOTES_NAV.title, url: NOTES_NAV.url },
-  ...NOTES_ITEMS.map((item) => ({
-    text: item.title,
-    url: item.url,
-  })),
-  ...NAV_ITEMS.filter((item) => item.title !== 'Docs').map((item) => ({
-    text: item.title,
-    url: item.url,
+  ...flatSections.map((section) => ({
+    text: section.title,
+    url: section.url,
   })),
 ];
 

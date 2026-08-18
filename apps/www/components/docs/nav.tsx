@@ -6,124 +6,20 @@ import React from 'react';
 import { IconLogo } from '../icon-logo';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@workspace/ui/lib/utils';
-import {
-  CommandIcon,
-  FolderKanban,
-  PenLine,
-  BookOpen,
-  Podcast,
-  BarChart3,
-  Activity,
-} from 'lucide-react';
+import { CommandIcon } from 'lucide-react';
 import { useSearchContext, useSidebar } from 'fumadocs-ui/provider';
-import { usePathname } from 'next/navigation';
 import { ThemeSwitcher } from '../animate/theme-switcher';
 import XIcon from '@workspace/ui/components/icons/x-icon';
 import GithubIcon from '@workspace/ui/components/icons/github-icon';
 import MailIcon from '@workspace/ui/components/icons/mail-icon';
 import { Menu } from '@/registry/icons/menu';
-import { NotesMenu } from './notes-menu';
-
-export const NAV_ITEMS = [
-  // Original navigation items (commented out for upstream sync)
-  // {
-  //   title: 'Docs',
-  //   url: '/docs',
-  // },
-  // {
-  //   title: 'Components',
-  //   url: '/docs/components',
-  // },
-  // {
-  //   title: 'Primitives',
-  //   url: '/docs/primitives',
-  // },
-  // {
-  //   title: 'Icons',
-  //   url: '/docs/icons',
-  // },
-
-  // Personal blog navigation
-  {
-    title: '博客',
-    url: '/blog',
-    icon: <PenLine className="size-4" />,
-  },
-  {
-    title: '项目',
-    url: '/projects',
-    icon: <FolderKanban className="size-4" />,
-  },
-  // 笔记 is not listed here: <NotesMenu /> renders it ahead of this list,
-  // with the section's three topics on hover.
-  {
-    title: 'Token 用量',
-    url: '/token-usage',
-    icon: <BarChart3 className="size-4" />,
-  },
-  {
-    title: '系统状态',
-    url: '/status',
-    icon: <Activity className="size-4" />,
-  },
-  // Hidden until content is ready
-  // {
-  //   title: '推荐阅读',
-  //   url: '/reading',
-  //   icon: <BookOpen className="size-4" />,
-  // },
-  // {
-  //   title: '推荐播客',
-  //   url: '/podcasts',
-  //   icon: <Podcast className="size-4" />,
-  // },
-  // {
-  //   title: '关于我',
-  //   url: '/about',
-  // },
-];
-
-const NavItem = ({
-  title,
-  url,
-  icon,
-  active,
-}: {
-  title: string;
-  url: string;
-  icon?: React.ReactNode;
-  active?: boolean;
-}) => {
-  return (
-    <Link
-      href={url}
-      title={title}
-      className={buttonVariants({
-        color: 'ghost',
-        size: 'sm',
-        className: cn(
-          '!text-sm !font-normal !h-8 transition-colors duration-200 ease-in-out',
-          'lg:!px-3 !px-2',
-          active
-            ? 'text-primary hover:text-primary !font-medium'
-            : 'text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white',
-        ),
-      })}
-    >
-      {icon && (
-        <span className={cn('lg:hidden', active ? 'text-primary' : 'text-muted-foreground')}>
-          {icon}
-        </span>
-      )}
-      <span className="lg:inline hidden">{title}</span>
-    </Link>
-  );
-};
+import { visibleSections } from '@/lib/navigation';
+import { NavItem } from './nav-item';
+import { NavSectionMenu } from './nav-section-menu';
 
 export const Nav = () => {
   const { setOpenSearch } = useSearchContext();
   const { open, setOpen } = useSidebar();
-  const pathname = usePathname();
 
   return (
     <Navbar className="md:h-17 h-14 border-b-0 bg-background">
@@ -142,16 +38,13 @@ export const Nav = () => {
 
         <div className="flex items-center md:justify-between justify-end gap-2 flex-1">
           <div className="md:flex hidden items-center gap-1">
-            <NotesMenu />
-            {NAV_ITEMS.map((item) => (
-              <NavItem
-                key={item.title}
-                title={item.title}
-                url={item.url}
-                icon={item.icon}
-                active={pathname.startsWith(item.url)}
-              />
-            ))}
+            {visibleSections.map((section) =>
+              section.children ? (
+                <NavSectionMenu key={section.url} section={section} />
+              ) : (
+                <NavItem key={section.url} section={section} />
+              ),
+            )}
           </div>
 
           <div className="flex items-center md:gap-3 gap-2">
