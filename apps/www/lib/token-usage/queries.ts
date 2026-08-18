@@ -6,14 +6,14 @@ import {
   getModelBrand,
   normalizeProviderName,
 } from './model-mapping';
+import { pickGranularity, bucketTrend, formatIsoDate } from './trend-bucketing';
 import type {
   TokenUsageSummary,
-  DailyTrend,
+  DailyPoint,
   ModelUsage,
   BrandUsage,
   ProviderUsage,
   TokenUsageResponse,
-  TrendGranularity,
 } from './types';
 
 function getDateRange(range: string): Date | null {
@@ -51,20 +51,16 @@ function getRangeDays(range: string): number | null {
   }
 }
 
-function formatDate(d: Date): string {
-  return d.toISOString().split('T')[0];
-}
-
 // Fill every calendar date in [start, end] so days with no usage show up as 0
 // rather than being skipped. Keeps the trend chart's x-axis evenly spaced and
 // honest about idle days, matching the selected period.
 function fillDailyGaps(
-  trends: DailyTrend[],
+  trends: DailyPoint[],
   start: Date,
   end: Date,
-): DailyTrend[] {
+): DailyPoint[] {
   const byDate = new Map(trends.map((t) => [t.date, t]));
-  const result: DailyTrend[] = [];
+  const result: DailyPoint[] = [];
   const cursor = new Date(
     Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()),
   );
@@ -75,64 +71,12 @@ function fillDailyGaps(
   );
 
   while (cursor.getTime() <= last) {
-    const key = formatDate(cursor);
+    const key = formatIsoDate(cursor);
     result.push(byDate.get(key) || { date: key, cost: 0, tokens: 0 });
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
 
   return result;
-}
-
-// Pick the trend bucket from how many days the window actually spans. Daily
-// bars stay readable up to a quarter; beyond that (in practice the "全部"
-// range, which spans the whole history) they turn into a solid block, so the
-// chart steps up to weeks and then months.
-const WEEK_THRESHOLD_DAYS = 100;
-const MONTH_THRESHOLD_DAYS = 400;
-
-function pickGranularity(spanDays: number): TrendGranularity {
-  if (spanDays <= WEEK_THRESHOLD_DAYS) return 'day';
-  if (spanDays <= MONTH_THRESHOLD_DAYS) return 'week';
-  return 'month';
-}
-
-// First day of the bucket a date belongs to: the day itself, the ISO week's
-// Monday, or the 1st of the month.
-function bucketStart(dateStr: string, granularity: TrendGranularity): string {
-  if (granularity === 'day') return dateStr;
-
-  const d = new Date(`${dateStr}T00:00:00.000Z`);
-  if (granularity === 'month') {
-    return formatDate(
-      new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)),
-    );
-  }
-
-  // getUTCDay(): 0 = Sunday, so shift it to a Monday-first offset.
-  const offset = (d.getUTCDay() + 6) % 7;
-  d.setUTCDate(d.getUTCDate() - offset);
-  return formatDate(d);
-}
-
-// Roll gap-filled daily rows up into weeks or months. Input is already dense,
-// so empty buckets inside the window can't appear; a bucket at either edge may
-// be partial (the current week/month, or the first one with data).
-function bucketTrend(
-  daily: DailyTrend[],
-  granularity: TrendGranularity,
-): DailyTrend[] {
-  if (granularity === 'day') return daily;
-
-  const map = new Map<string, DailyTrend>();
-  for (const row of daily) {
-    const key = bucketStart(row.date, granularity);
-    const existing = map.get(key) || { date: key, cost: 0, tokens: 0 };
-    existing.cost += row.cost;
-    existing.tokens += row.tokens;
-    map.set(key, existing);
-  }
-
-  return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date));
 }
 
 // ============================================================
@@ -142,7 +86,7 @@ function bucketTrend(
 async function getCCusageSummary(since: Date | null) {
   const db = getCCusageDb();
   const conditions = since
-    ? [gte(usageRecords.date, formatDate(since))]
+    ? [gte(usageRecords.date, formatIsoDate(since))]
     : [];
 
   const result = await db
@@ -160,7 +104,7 @@ async function getCCusageSummary(since: Date | null) {
 async function getCCusageDaily(since: Date | null) {
   const db = getCCusageDb();
   const conditions = since
-    ? [gte(usageRecords.date, formatDate(since))]
+    ? [gte(usageRecords.date, formatIsoDate(since))]
     : [];
 
   return db
@@ -181,7 +125,7 @@ async function getCCusageDaily(since: Date | null) {
 async function getCCusageProviders(since: Date | null) {
   const db = getCCusageDb();
   const conditions = since
-    ? [gte(usageRecords.date, formatDate(since))]
+    ? [gte(usageRecords.date, formatIsoDate(since))]
     : [];
 
   return db
@@ -204,7 +148,7 @@ async function getCCusageModels(since: Date | null) {
       sum(total_tokens) as tokens
     FROM usage_records,
       jsonb_array_elements_text(models_used) as model
-    ${since ? sql`WHERE date >= ${formatDate(since)}` : sql``}
+    ${since ? sql`WHERE date >= ${formatIsoDate(since)}` : sql``}
     GROUP BY model
     ORDER BY tokens DESC
   `);
@@ -310,10 +254,10 @@ async function getLLMeterModels(since: Date | null) {
 // Aggregation
 // ============================================================
 
-function mergeDailyTrends(
+function mergeDailyPoints(
   ...sources: { date: string; cost: number; tokens: number }[][]
-): DailyTrend[] {
-  const map = new Map<string, DailyTrend>();
+): DailyPoint[] {
+  const map = new Map<string, DailyPoint>();
 
   for (const rows of sources) {
     for (const row of rows) {
@@ -438,26 +382,27 @@ export async function fetchTokenUsage(
   const totalCost = Number(ccSummary.totalCost) + Number(llSummary.totalCost);
   const totalTokens = Number(ccSummary.totalTokens) + Number(llSummary.totalTokens);
 
-  const mergedTrend = mergeDailyTrends(ccDaily, llDaily);
+  const mergedDaily = mergeDailyPoints(ccDaily, llDaily);
 
   // Window over which to fill gaps: fixed ranges start at `since`; 'all' starts
   // at the first day that actually has data. Both end at today.
   const windowStart =
     since ??
-    (mergedTrend.length
-      ? new Date(`${mergedTrend[0].date}T00:00:00.000Z`)
+    (mergedDaily.length
+      ? new Date(`${mergedDaily[0].date}T00:00:00.000Z`)
       : null);
 
-  const filledTrend = windowStart
-    ? fillDailyGaps(mergedTrend, windowStart, now)
-    : mergedTrend;
+  const daily = windowStart
+    ? fillDailyGaps(mergedDaily, windowStart, now)
+    : mergedDaily;
 
-  const trendGranularity = pickGranularity(filledTrend.length);
-  const dailyTrend = bucketTrend(filledTrend, trendGranularity);
+  // The daily series stays the source of truth; the charts only fold it.
+  const trendGranularity = pickGranularity(daily.length);
+  const trend = bucketTrend(daily, trendGranularity);
 
   // Denominator for the daily average: the selected period's nominal day count
   // (so "最近 30 天" divides by 30), or the actual span for 'all'.
-  const periodDays = getRangeDays(range) ?? (filledTrend.length || 1);
+  const periodDays = getRangeDays(range) ?? (daily.length || 1);
 
   const summary: TokenUsageSummary = {
     totalCost,
@@ -467,7 +412,7 @@ export async function fetchTokenUsage(
     avgDailyTokens: totalTokens / periodDays,
   };
 
-  const heatmap = mergeDailyTrends(ccDaily365, llDaily365).map((d) => ({
+  const heatmap = mergeDailyPoints(ccDaily365, llDaily365).map((d) => ({
     date: d.date,
     value: d.tokens,
   }));
@@ -476,7 +421,7 @@ export async function fetchTokenUsage(
 
   return {
     summary,
-    dailyTrend,
+    trend,
     byModel: mergeModels(ccModels, llModels),
     byBrand: mergeBrands(ccModels, llModels),
     heatmap,

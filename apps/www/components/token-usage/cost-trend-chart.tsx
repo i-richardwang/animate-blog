@@ -14,13 +14,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import type { DailyTrend, TrendGranularity } from '@/lib/token-usage/types';
+import type { TrendBucket, TrendGranularity } from '@/lib/token-usage/types';
 import {
-  formatCost,
-  formatTrendTick,
-  formatTrendLabel,
+  formatBucketTick,
+  formatBucketLabel,
   granularityLabel,
-} from '@/lib/token-usage/format';
+} from '@/lib/token-usage/trend-bucketing';
+import { formatCost } from '@/lib/token-usage/format';
 
 const chartConfig = {
   cost: {
@@ -30,9 +30,35 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 interface CostTrendChartProps {
-  data: DailyTrend[];
+  data: TrendBucket[];
   granularity: TrendGranularity;
 }
+
+// A partial bucket covers fewer days than its neighbours, so the curve dips at
+// that edge for a reason other than spending less. Mark those points; the rest
+// of the series stays dot-free.
+const PartialDot = ({
+  cx,
+  cy,
+  payload,
+}: {
+  cx?: number;
+  cy?: number;
+  payload?: TrendBucket;
+}) => {
+  if (!payload?.partial || cx == null || cy == null) return <g />;
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={3}
+      fill="var(--background)"
+      stroke="var(--color-cost)"
+      strokeWidth={1.5}
+      strokeDasharray="2 2"
+    />
+  );
+};
 
 export const CostTrendChart = ({
   data,
@@ -55,19 +81,22 @@ export const CostTrendChart = ({
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="date"
+              dataKey="start"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => formatTrendTick(value, granularity)}
+              tickFormatter={(value) => formatBucketTick(value, granularity)}
             />
             <ChartTooltip
               cursor={false}
               content={
                 <ChartTooltipContent
                   indicator="line"
-                  labelFormatter={(value) =>
-                    formatTrendLabel(String(value), granularity)
+                  labelFormatter={(_, payload) =>
+                    formatBucketLabel(
+                      payload?.[0]?.payload as TrendBucket,
+                      granularity,
+                    )
                   }
                   valueFormatter={(value) => formatCost(value)}
                 />
@@ -79,6 +108,8 @@ export const CostTrendChart = ({
               fill="var(--color-cost)"
               fillOpacity={0.4}
               stroke="var(--color-cost)"
+              dot={<PartialDot />}
+              activeDot={{ r: 4 }}
             />
           </AreaChart>
         </ChartContainer>

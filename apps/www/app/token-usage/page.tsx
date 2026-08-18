@@ -119,11 +119,11 @@ export default function TokenUsagePage() {
 
               <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <CostTrendChart
-                  data={data.dailyTrend}
+                  data={data.trend}
                   granularity={data.trendGranularity}
                 />
                 <TokenTrendChart
-                  data={data.dailyTrend}
+                  data={data.trend}
                   granularity={data.trendGranularity}
                 />
               </div>

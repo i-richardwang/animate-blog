@@ -1,6 +1,6 @@
 'use client';
 
-import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Cell, XAxis } from 'recharts';
 import {
   Card,
   CardContent,
@@ -14,13 +14,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import type { DailyTrend, TrendGranularity } from '@/lib/token-usage/types';
+import type { TrendBucket, TrendGranularity } from '@/lib/token-usage/types';
 import {
-  formatTokens,
-  formatTrendTick,
-  formatTrendLabel,
+  formatBucketTick,
+  formatBucketLabel,
   granularityLabel,
-} from '@/lib/token-usage/format';
+} from '@/lib/token-usage/trend-bucketing';
+import { formatTokens } from '@/lib/token-usage/format';
 
 const chartConfig = {
   tokens: {
@@ -30,7 +30,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 interface TokenTrendChartProps {
-  data: DailyTrend[];
+  data: TrendBucket[];
   granularity: TrendGranularity;
 }
 
@@ -51,25 +51,38 @@ export const TokenTrendChart = ({
           <BarChart accessibilityLayer data={data}>
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="date"
+              dataKey="start"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => formatTrendTick(value, granularity)}
+              tickFormatter={(value) => formatBucketTick(value, granularity)}
             />
             <ChartTooltip
               cursor={false}
               content={
                 <ChartTooltipContent
                   indicator="line"
-                  labelFormatter={(value) =>
-                    formatTrendLabel(String(value), granularity)
+                  labelFormatter={(_, payload) =>
+                    formatBucketLabel(
+                      payload?.[0]?.payload as TrendBucket,
+                      granularity,
+                    )
                   }
                   valueFormatter={(value) => formatTokens(value)}
                 />
               }
             />
-            <Bar dataKey="tokens" fill="var(--color-tokens)" radius={0} />
+            <Bar dataKey="tokens" fill="var(--color-tokens)" radius={0}>
+              {/* A partial bucket covers fewer days than its neighbours, so its
+                  bar is short by construction. Dim it rather than let it read
+                  as a drop in usage. */}
+              {data.map((bucket) => (
+                <Cell
+                  key={bucket.start}
+                  fillOpacity={bucket.partial ? 0.4 : 1}
+                />
+              ))}
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>

@@ -5,17 +5,28 @@ export interface TokenUsageSummary {
   avgDailyTokens: number;
 }
 
-// One bucket of the cost/token trend. `date` is the bucket's first day
-// (the day itself, the Monday of the week, or the 1st of the month).
-export interface DailyTrend {
+// One day of usage. The daily series is the single source the trend buckets,
+// the heatmap and the daily average are all derived from.
+export interface DailyPoint {
   date: string;
   cost: number;
   tokens: number;
 }
 
-// How the trend charts bucket time. Picked from the span of the selected range
+// How the trend charts fold time. Picked from the span of the selected range
 // so a long window (notably "全部") doesn't render hundreds of one-day bars.
 export type TrendGranularity = 'day' | 'week' | 'month';
+
+// One bar of the trend charts. `start` is the bucket's first day; `partial`
+// marks a bucket the window only partly covers — the in-progress week/month,
+// or the first one on "全部" — whose bar is short for a reason other than a
+// drop in usage.
+export interface TrendBucket {
+  start: string;
+  cost: number;
+  tokens: number;
+  partial: boolean;
+}
 
 export interface ModelUsage {
   model: string;
@@ -44,7 +55,7 @@ export interface ProviderUsage {
 
 export interface TokenUsageResponse {
   summary: TokenUsageSummary;
-  dailyTrend: DailyTrend[];
+  trend: TrendBucket[];
   byModel: ModelUsage[];
   byBrand: BrandUsage[];
   heatmap: HeatmapDay[];
