@@ -19,6 +19,8 @@ Tableau CLI 是面向 AI agent 的 Tableau 访问工具，由 Python 命令行 `
 
 一次典型的调用流程是这样的：用户请求 agent 从 Tableau 查找某份数据，agent 加载 skill。入口文件 `SKILL.md` 只有几十行，先运行 `tableau-cli --help` 确认 CLI 可用，再按用户意图路由到对应子命令——"查找数据源"对应 `ds list`。到这一步，agent 才去读取 `references/cli.md` 中 `ds list` 相关的说明，按其中的 flag 构造命令。CLI 返回结构化 JSON，agent 解析后进入下一步。整个流程加入 agent context 的内容只有 skill 入口文件和一段命令手册，下一轮对话也不会保留。
 
+![tableau-cli 的命令行帮助信息](/projects/tableau-cli/tableau-cli-help.png)
+
 ## skills 的组织方式
 
 ```
