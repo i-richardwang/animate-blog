@@ -7,7 +7,12 @@ type FooterProps = {
 
 export const Footer = ({ animated = false }: FooterProps) => {
   const content = (
-    <div className="w-full">
+    // Pages render this next to <DocsPage /> inside the docs layout grid,
+    // whose template is three rows (header / toc-popover / main) and whose
+    // outer columns size to their content. Pinning the footer to a fourth
+    // row of the main column keeps it below the page without letting its
+    // width pull the outer columns out of balance.
+    <div className="w-full [grid-area:4/3/5/4]">
       <div className="mx-auto h-16 max-w-7xl">
         <div className="flex size-full items-center justify-center gap-4 px-4 text-sm text-muted-foreground md:px-6">
           <p className="truncate text-center">
@@ -48,12 +53,7 @@ export const Footer = ({ animated = false }: FooterProps) => {
 
   if (animated) {
     return (
-      <MotionEffect
-        slide={{ direction: 'down' }}
-        fade
-        zoom
-        delay={2.2}
-      >
+      <MotionEffect slide={{ direction: 'down' }} fade zoom delay={2.2}>
         {content}
       </MotionEffect>
     );

@@ -76,7 +76,11 @@ export default function StatusPage() {
 
   return (
     <>
-      <DocsPage toc={[]} className="!max-w-[1124px]">
+      <DocsPage
+        toc={[]}
+        tableOfContent={{ enabled: false }}
+        className="!max-w-[1124px]"
+      >
         <DocsTitle className="font-medium">系统状态</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           所有服务的实时状态和运行时间信息
@@ -98,8 +102,14 @@ export default function StatusPage() {
           <div className="mt-8 grid grid-cols-1 gap-5 px-3 md:grid-cols-2">
             {isLoading ? (
               <>
-                <StatusTrackerGroupSkeleton monitorCount={3} className="col-span-full" />
-                <StatusTrackerGroupSkeleton monitorCount={2} className="col-span-full" />
+                <StatusTrackerGroupSkeleton
+                  monitorCount={3}
+                  className="col-span-full"
+                />
+                <StatusTrackerGroupSkeleton
+                  monitorCount={2}
+                  className="col-span-full"
+                />
               </>
             ) : trackers && trackers.length > 0 ? (
               trackers.map((tracker) => {

@@ -39,7 +39,11 @@ export default async function Page(props: {
 
     return (
       <>
-        <DocsPage toc={[]} className="!max-w-[1124px]">
+        <DocsPage
+          toc={[]}
+          tableOfContent={{ enabled: false }}
+          className="!max-w-[1124px]"
+        >
           <DocsTitle className="font-medium">推荐阅读</DocsTitle>
           <DocsDescription className="mb-1 font-normal">
             每周一篇深度好文，扩展技术与认知边界。
@@ -85,13 +89,16 @@ export default async function Page(props: {
     <>
       <DocsPage
         toc={[]}
+        tableOfContent={{ enabled: false }}
         className="!max-w-[860px]"
         footer={{
           items: {
             previous: prevNav
               ? { name: prevNav.name, url: prevNav.url }
               : undefined,
-            next: nextNav ? { name: nextNav.name, url: nextNav.url } : undefined,
+            next: nextNav
+              ? { name: nextNav.name, url: nextNav.url }
+              : undefined,
           },
         }}
       >
@@ -107,7 +114,9 @@ export default async function Page(props: {
                   className={
                     !prevNav ? 'pointer-events-none opacity-50' : undefined
                   }
-                  aria-label={prevNav ? `前往 ${prevNav.name}` : '没有更新的文章'}
+                  aria-label={
+                    prevNav ? `前往 ${prevNav.name}` : '没有更新的文章'
+                  }
                 >
                   <ArrowLeft />
                 </Link>
@@ -119,7 +128,9 @@ export default async function Page(props: {
                   className={
                     !nextNav ? 'pointer-events-none opacity-50' : undefined
                   }
-                  aria-label={nextNav ? `前往 ${nextNav.name}` : '没有更早的文章'}
+                  aria-label={
+                    nextNav ? `前往 ${nextNav.name}` : '没有更早的文章'
+                  }
                 >
                   <ArrowRight />
                 </Link>
@@ -219,7 +230,8 @@ export async function generateMetadata(props: {
   const page = reading.getPage(slug);
   if (!page) notFound();
 
-  const image = page.data.image || ['/reading-og', ...slug, 'image.png'].join('/');
+  const image =
+    page.data.image || ['/reading-og', ...slug, 'image.png'].join('/');
 
   return {
     title: page.data.title,

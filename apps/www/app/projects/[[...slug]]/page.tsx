@@ -24,7 +24,7 @@ export default async function Page(props: {
     // Get pages in the order defined by pageTree (which follows meta.json)
     const tree = projects.pageTree;
     const orderedUrls: string[] = [];
-    
+
     // Extract URLs from pageTree in order, skipping separators
     for (const node of tree.children) {
       if (node.type === 'page') {
@@ -34,7 +34,7 @@ export default async function Page(props: {
 
     // Create a map for quick lookup
     const pagesMap = new Map(
-      projects.getPages().map((page) => [page.url, page])
+      projects.getPages().map((page) => [page.url, page]),
     );
 
     // Build projectsData in the correct order
@@ -74,7 +74,11 @@ export default async function Page(props: {
 
     return (
       <>
-        <DocsPage toc={[]} className="!max-w-[1124px]">
+        <DocsPage
+          toc={[]}
+          tableOfContent={{ enabled: false }}
+          className="!max-w-[1124px]"
+        >
           <DocsTitle className="font-medium">项目</DocsTitle>
           <DocsDescription className="mb-1 font-normal">
             探索技术，构建产品
@@ -154,9 +158,7 @@ export default async function Page(props: {
 
   // Find current position and neighbors
   const currentIndex = orderedUrls.indexOf(page.url);
-  const pagesMap = new Map(
-    projects.getPages().map((p) => [p.url, p]),
-  );
+  const pagesMap = new Map(projects.getPages().map((p) => [p.url, p]));
 
   const prevNav =
     currentIndex > 0
@@ -178,6 +180,7 @@ export default async function Page(props: {
     <>
       <DocsPage
         toc={[]}
+        tableOfContent={{ enabled: false }}
         className="!max-w-[860px]"
         breadcrumb={{ enabled: true, includeSeparator: true }}
         footer={{
@@ -185,7 +188,9 @@ export default async function Page(props: {
             previous: prevNav
               ? { name: prevNav.name, url: prevNav.url }
               : undefined,
-            next: nextNav ? { name: nextNav.name, url: nextNav.url } : undefined,
+            next: nextNav
+              ? { name: nextNav.name, url: nextNav.url }
+              : undefined,
           },
         }}
       >
@@ -200,7 +205,9 @@ export default async function Page(props: {
                   className={
                     !prevNav ? 'pointer-events-none opacity-50' : undefined
                   }
-                  aria-label={prevNav ? `前往 ${prevNav.name}` : '没有上一个项目'}
+                  aria-label={
+                    prevNav ? `前往 ${prevNav.name}` : '没有上一个项目'
+                  }
                 >
                   <ArrowLeft />
                 </Link>
@@ -212,7 +219,9 @@ export default async function Page(props: {
                   className={
                     !nextNav ? 'pointer-events-none opacity-50' : undefined
                   }
-                  aria-label={nextNav ? `前往 ${nextNav.name}` : '没有下一个项目'}
+                  aria-label={
+                    nextNav ? `前往 ${nextNav.name}` : '没有下一个项目'
+                  }
                 >
                   <ArrowRight />
                 </Link>

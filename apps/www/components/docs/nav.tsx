@@ -22,10 +22,9 @@ export const Nav = () => {
   const { open, setOpen } = useSidebar();
 
   return (
-    // Fumadocs 16 dropped the `Navbar` wrapper; this is its v15 markup inline.
     <header
       id="nd-subnav"
-      className="fixed top-(--fd-banner-height) inset-x-0 z-30 flex items-center px-4 border-b transition-colors backdrop-blur-sm md:h-17 h-14 border-b-0 bg-background"
+      className="fixed top-0 inset-x-0 z-30 flex items-center px-4 h-(--fd-banner-height) bg-background"
     >
       <div className="flex items-center gap-3 max-w-[1670px] w-full mx-auto md:px-5 px-3">
         <Link

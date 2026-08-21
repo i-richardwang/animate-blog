@@ -51,7 +51,11 @@ export default function TokenUsagePage() {
 
   return (
     <>
-      <DocsPage toc={[]} className="!max-w-[1124px]">
+      <DocsPage
+        toc={[]}
+        tableOfContent={{ enabled: false }}
+        className="!max-w-[1124px]"
+      >
         <DocsTitle className="font-medium">Token 用量</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           AI Token 使用量和成本的实时统计与趋势分析

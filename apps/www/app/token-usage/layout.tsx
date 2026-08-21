@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
-import { Nav } from '@/components/docs/nav';
-import { baseOptions } from '@/app/layout.config';
-import { ThemeSwitcher } from '@/components/animate/theme-switcher';
+import { siteLayoutProps } from '@/lib/site-layout';
 import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 
 export const metadata: Metadata = {
@@ -17,17 +14,10 @@ export const metadata: Metadata = {
   },
 };
 
-const TOKEN_USAGE_LAYOUT_PROPS: DocsLayoutProps = {
-  tree: {
-    name: 'Token Usage',
-    children: [],
-  },
-  githubUrl: 'https://github.com/i-richardwang/animate-blog',
-  themeSwitch: {
-    component: <ThemeSwitcher />,
-  },
-  ...baseOptions,
-};
+const TOKEN_USAGE_LAYOUT_PROPS = siteLayoutProps({
+  name: 'Token Usage',
+  children: [],
+});
 
 export default function TokenUsageLayout({
   children,
@@ -37,17 +27,7 @@ export default function TokenUsageLayout({
   return (
     <>
       <ScrollProgressBar />
-      <DocsLayout
-        {...TOKEN_USAGE_LAYOUT_PROPS}
-        nav={{
-          component: <Nav />,
-        }}
-        sidebar={{
-          enabled: false,
-        }}
-      >
-        {children}
-      </DocsLayout>
+      <DocsLayout {...TOKEN_USAGE_LAYOUT_PROPS}>{children}</DocsLayout>
     </>
   );
 }

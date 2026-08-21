@@ -320,6 +320,18 @@
     display: none; /* Chrome, Safari, Opera */
   }
 
+  /* The site navbar (components/docs/nav.tsx) is a fixed bar above the
+     Fumadocs layout. Publishing its height here keeps the sidebar and TOC
+     sticky below it; lib/site-layout.tsx pads the layout by the same amount. */
+  :root {
+    --fd-banner-height: 3.5rem;
+  }
+  @media (min-width: 768px) {
+    :root {
+      --fd-banner-height: 4.25rem;
+    }
+  }
+
   /* Force sidebar background to match page background */
   aside,
   #nd-sidebar {

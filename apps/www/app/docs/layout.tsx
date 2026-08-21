@@ -1,39 +1,17 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { siteLayoutProps } from '@/lib/site-layout';
 import type { ReactNode } from 'react';
-import { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
-import { baseOptions } from '@/app/layout.config';
 import { source } from '@/lib/source';
-import { ThemeSwitcher } from '@/components/animate/theme-switcher';
-import { SIDEBAR_TABS } from '@/lib/sidebar';
-import { Nav } from '@/components/docs/nav';
 import { Footer } from '@/components/footer';
 import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 
-const DOCS_LAYOUT_PROPS: DocsLayoutProps = {
-  tree: source.pageTree,
-  sidebar: {
-    tabs: SIDEBAR_TABS,
-  },
-
-  githubUrl: 'https://github.com/i-richardwang/animate-blog',
-  themeSwitch: {
-    component: <ThemeSwitcher />,
-  },
-  ...baseOptions,
-};
+const DOCS_LAYOUT_PROPS = siteLayoutProps(source.pageTree);
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <>
       <ScrollProgressBar />
-      <DocsLayout
-        {...DOCS_LAYOUT_PROPS}
-        nav={{
-          component: <Nav />,
-        }}
-      >
-        {children}
-      </DocsLayout>
+      <DocsLayout {...DOCS_LAYOUT_PROPS}>{children}</DocsLayout>
       <Footer />
     </>
   );
