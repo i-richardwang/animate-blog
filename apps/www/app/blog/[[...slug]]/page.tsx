@@ -33,7 +33,7 @@ export default async function Page(props: {
 
     return (
       <>
-        <DocsPage toc={[]} article={{ className: '!max-w-[1124px]' }}>
+        <DocsPage toc={[]} className="!max-w-[1124px]">
           <DocsTitle className="font-medium">博客</DocsTitle>
           <DocsDescription className="mb-1 font-normal">
             记录思考与探索的足迹
@@ -82,7 +82,7 @@ export default async function Page(props: {
     <>
       <DocsPage
         toc={page.data.toc}
-        article={{ className: '!max-w-[860px]' }}
+        className="!max-w-[860px]"
         footer={{
           items: {
             previous: prevNav

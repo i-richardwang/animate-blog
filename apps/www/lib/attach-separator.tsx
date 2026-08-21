@@ -4,7 +4,7 @@ import CommunityIcon from '@workspace/ui/components/icons/community-icon';
 import ImageIcon from '@workspace/ui/components/icons/image-icon';
 import HeadlessUIIcon from '@workspace/ui/components/icons/headlessui-icon';
 import RadixIcon from '@workspace/ui/components/icons/radix-icon';
-import type { BuildPageTreeOptions } from 'fumadocs-core/source';
+import type { LoaderPlugin } from 'fumadocs-core/source';
 import {
   Code,
   RectangleHorizontalIcon,
@@ -81,18 +81,17 @@ const separatorIcons: Record<string, React.ReactNode> = {
   '优化策略': <SeparatorIcon><Lightbulb strokeWidth={2} /></SeparatorIcon>,
 };
 
-export const attachSeparator: BuildPageTreeOptions['attachSeparator'] = (
-  node,
-) => {
-  const name = node.name as string;
-  const icon = separatorIcons[name];
-  
-  if (icon) {
-    // Set icon separately, keep name as plain text
-    // This way sidebar shows icon + name, but breadcrumb only shows name
-    node.icon = icon as React.ReactElement;
-    // node.name stays as the original string
-  }
-
-  return node;
+// Gives section separators an icon. Fumadocs 16 replaced the loader's
+// `pageTree.attachSeparator` option with loader plugins, hence the shape.
+export const attachSeparator: LoaderPlugin = {
+  name: 'attach-separator',
+  transformPageTree: {
+    separator(node) {
+      const icon = separatorIcons[node.name as string];
+      // Set icon separately and keep the name as plain text, so the sidebar
+      // shows icon + name while the breadcrumb only shows the name.
+      if (icon) node.icon = icon as React.ReactElement;
+      return node;
+    },
+  },
 };

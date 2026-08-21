@@ -5,7 +5,6 @@ import { Nav } from '@/components/docs/nav';
 import { baseOptions } from '@/app/layout.config';
 import { ThemeSwitcher } from '@/components/animate/theme-switcher';
 import { podcasts } from '@/lib/source';
-import { DocsSidebar } from '@/components/docs/sidebar';
 import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 
 const PODCASTS_LAYOUT_PROPS: DocsLayoutProps = {
@@ -32,8 +31,6 @@ export default function PodcastsLayout({ children }: { children: ReactNode }) {
       >
         {children}
       </DocsLayout>
-      {/* Mobile-only sidebar overlay for Podcasts routes */}
-      <DocsSidebar {...PODCASTS_LAYOUT_PROPS} />
     </>
   );
 }

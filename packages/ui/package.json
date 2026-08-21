@@ -26,10 +26,12 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@turbo/gen": "^2.4.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "eslint-config-next": "^16.3.2"
+    "eslint-config-next": "^16.3.2",
+    "tailwindcss": "^4.3.3"
   },
   "exports": {
     "./globals.css": "./src/styles/globals.css",

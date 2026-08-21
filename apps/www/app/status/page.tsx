@@ -76,7 +76,7 @@ export default function StatusPage() {
 
   return (
     <>
-      <DocsPage toc={[]} article={{ className: '!max-w-[1124px]' }}>
+      <DocsPage toc={[]} className="!max-w-[1124px]">
         <DocsTitle className="font-medium">系统状态</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           所有服务的实时状态和运行时间信息

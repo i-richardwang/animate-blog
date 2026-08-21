@@ -74,7 +74,7 @@ export default async function Page(props: {
 
     return (
       <>
-        <DocsPage toc={[]} article={{ className: '!max-w-[1124px]' }}>
+        <DocsPage toc={[]} className="!max-w-[1124px]">
           <DocsTitle className="font-medium">项目</DocsTitle>
           <DocsDescription className="mb-1 font-normal">
             探索技术，构建产品
@@ -178,7 +178,7 @@ export default async function Page(props: {
     <>
       <DocsPage
         toc={[]}
-        article={{ className: '!max-w-[860px]' }}
+        className="!max-w-[860px]"
         breadcrumb={{ enabled: true, includeSeparator: true }}
         footer={{
           items: {

@@ -19,7 +19,7 @@ import { ViewOptions, LLMCopyButton } from '@/components/docs/page-actions';
 import { Button } from '@/registry/components/buttons/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { findNeighbour } from 'fumadocs-core/server';
+import { findNeighbour } from 'fumadocs-core/page-tree';
 import { baseOptions } from '@/app/layout.config';
 
 export default async function Page(props: {
@@ -117,7 +117,7 @@ export default async function Page(props: {
     <DocsPage
       toc={page.data.toc}
       full={page.data.full}
-      article={{ className: '!max-w-[860px]' }}
+      className="!max-w-[860px]"
       breadcrumb={{ enabled: true, includeSeparator: true }}
       // Original footer with lastUpdate info (replaced with built-in navigation)
       // footer={{

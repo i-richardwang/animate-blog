@@ -3,6 +3,7 @@ import { Card } from 'fumadocs-ui/components/card';
 import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
+import type { ComponentProps } from 'react';
 import { ComponentPreview } from '@/components/docs/component-preview';
 import { ComponentInstallation } from '@/components/docs/component-installation';
 import { ExternalLink } from '@/components/docs/external-link';
@@ -40,8 +41,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Steps,
     Step,
     Callout,
-    pre: (props: CodeBlockProps) => (
-      <CodeBlock {...props}>
+    // `<pre>`'s clipboard `onCopy` has a different shape from CodeBlock's.
+    pre: ({ onCopy: _onCopy, ...props }: ComponentProps<'pre'>) => (
+      <CodeBlock {...(props as CodeBlockProps)}>
         <Pre>{props.children}</Pre>
       </CodeBlock>
     ),

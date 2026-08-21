@@ -5,8 +5,7 @@ import { Nav } from '@/components/docs/nav';
 import { baseOptions } from '@/app/layout.config';
 import { ThemeSwitcher } from '@/components/animate/theme-switcher';
 import { getSortedBlogPosts } from '@/lib/source';
-import type { PageTree } from 'fumadocs-core/server';
-import { DocsSidebar } from '@/components/docs/sidebar';
+import type * as PageTree from 'fumadocs-core/page-tree';
 import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 
 // Build page tree sorted by date (newest first)
@@ -43,8 +42,6 @@ export default function BlogLayout({ children }: { children: ReactNode }) {
       >
         {children}
       </DocsLayout>
-      {/* Mobile-only sidebar overlay for Blog routes */}
-      <DocsSidebar {...BLOG_LAYOUT_PROPS} />
     </>
   );
 }

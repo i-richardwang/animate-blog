@@ -1,6 +1,5 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
-import { DocsSidebar } from '@/components/docs/sidebar';
 import { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import { baseOptions } from '@/app/layout.config';
 import { source } from '@/lib/source';
@@ -29,9 +28,6 @@ export default function Layout({ children }: { children: ReactNode }) {
       <ScrollProgressBar />
       <DocsLayout
         {...DOCS_LAYOUT_PROPS}
-        sidebar={{
-          component: <DocsSidebar {...DOCS_LAYOUT_PROPS} />,
-        }}
         nav={{
           component: <Nav />,
         }}

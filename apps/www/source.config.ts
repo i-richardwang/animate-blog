@@ -5,6 +5,7 @@ import {
   frontmatterSchema,
   metaSchema,
 } from 'fumadocs-mdx/config';
+import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import { z } from 'zod';
 
 // You can customise Zod schemas for frontmatter and `meta.json` here
@@ -112,8 +113,9 @@ export const podcasts = defineCollections({
 });
 
 export default defineConfig({
-  lastModifiedTime: 'git',
-    mdxOptions: {
+  // Fumadocs MDX 14 replaced `lastModifiedTime: 'git'` with this plugin.
+  plugins: [lastModified()],
+  mdxOptions: {
     rehypePlugins: [],
   },
 });

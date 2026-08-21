@@ -5,7 +5,6 @@ import { Nav } from '@/components/docs/nav';
 import { baseOptions } from '@/app/layout.config';
 import { ThemeSwitcher } from '@/components/animate/theme-switcher';
 import { projects } from '@/lib/source';
-import { DocsSidebar } from '@/components/docs/sidebar';
 import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 
 const PROJECTS_LAYOUT_PROPS: DocsLayoutProps = {
@@ -32,8 +31,6 @@ export default function ProjectsLayout({ children }: { children: ReactNode }) {
       >
         {children}
       </DocsLayout>
-      {/* Mobile-only sidebar overlay for Projects routes */}
-      <DocsSidebar {...PROJECTS_LAYOUT_PROPS} />
     </>
   );
 }

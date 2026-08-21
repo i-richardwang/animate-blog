@@ -1,13 +1,13 @@
 'use client';
 
-import { Navbar } from 'fumadocs-ui/layouts/docs-client';
 import Link from 'next/link';
 import React from 'react';
 import { IconLogo } from '../icon-logo';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@workspace/ui/lib/utils';
 import { CommandIcon } from 'lucide-react';
-import { useSearchContext, useSidebar } from 'fumadocs-ui/provider';
+import { useSearchContext } from 'fumadocs-ui/contexts/search';
+import { useSidebar } from 'fumadocs-ui/layouts/docs/slots/sidebar';
 import { ThemeSwitcher } from '../animate/theme-switcher';
 import XIcon from '@workspace/ui/components/icons/x-icon';
 import GithubIcon from '@workspace/ui/components/icons/github-icon';
@@ -22,7 +22,11 @@ export const Nav = () => {
   const { open, setOpen } = useSidebar();
 
   return (
-    <Navbar className="md:h-17 h-14 border-b-0 bg-background">
+    // Fumadocs 16 dropped the `Navbar` wrapper; this is its v15 markup inline.
+    <header
+      id="nd-subnav"
+      className="fixed top-(--fd-banner-height) inset-x-0 z-30 flex items-center px-4 border-b transition-colors backdrop-blur-sm md:h-17 h-14 border-b-0 bg-background"
+    >
       <div className="flex items-center gap-3 max-w-[1670px] w-full mx-auto md:px-5 px-3">
         <Link
           href="/"
@@ -112,6 +116,6 @@ export const Nav = () => {
           </div>
         </div>
       </div>
-    </Navbar>
+    </header>
   );
 };

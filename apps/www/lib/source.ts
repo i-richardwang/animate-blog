@@ -1,4 +1,4 @@
-import { docs, blog, projects as projectsSource, reading as readingSource, podcasts as podcastsSource } from '@/.source';
+import { docs, blog, projects as projectsSource, reading as readingSource, podcasts as podcastsSource } from 'collections/server';
 import { LucideIcons } from '@/components/icons/lucide-icons';
 import { attachFile } from '@/lib/attach-file';
 import { attachSeparator } from '@/lib/attach-separator';
@@ -8,9 +8,9 @@ import {
   type InferMetaType,
   type InferPageType,
 } from 'fumadocs-core/source';
-import type { PageTree } from 'fumadocs-core/server';
-import { createMDXSource } from 'fumadocs-mdx';
+import type * as PageTree from 'fumadocs-core/page-tree';
 import { icons } from 'lucide-react';
+import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { createElement } from 'react';
 
 // Directories to exclude (Animate UI original documentation)
@@ -30,10 +30,7 @@ const EXCLUDED_ROOT_PAGES = new Set([
 const rawSource = loader({
   baseUrl: '/docs',
   source: docs.toFumadocsSource(),
-  pageTree: {
-    attachFile,
-    attachSeparator,
-  },
+  plugins: [attachFile, attachSeparator],
   icon(icon) {
     if (!icon) return;
     if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
@@ -139,16 +136,13 @@ export const source = {
 
 export const blogs = loader({
   baseUrl: '/blog',
-  source: createMDXSource(blog),
+  source: toFumadocsSource(blog, []),
 });
 
 export const projects = loader({
   baseUrl: '/projects',
   source: projectsSource.toFumadocsSource(),
-  pageTree: {
-    attachFile,
-    attachSeparator,
-  },
+  plugins: [attachFile, attachSeparator],
   icon(icon) {
     if (!icon) return;
     if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
@@ -207,7 +201,7 @@ export const getLatestContent = (limit: number = 3) => {
 
 export const reading = loader({
   baseUrl: '/reading',
-  source: createMDXSource(readingSource),
+  source: toFumadocsSource(readingSource, []),
 });
 
 // Helper to get reading posts sorted by date (newest first)
@@ -222,7 +216,7 @@ export const getSortedReadingPosts = () => {
 
 export const podcasts = loader({
   baseUrl: '/podcasts',
-  source: createMDXSource(podcastsSource),
+  source: toFumadocsSource(podcastsSource, []),
 });
 
 // Helper to get podcast posts sorted by date (newest first)

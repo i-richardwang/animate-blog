@@ -1,4 +1,4 @@
-import type { BuildPageTreeOptions } from 'fumadocs-core/source';
+import type { LoaderPlugin } from 'fumadocs-core/source';
 import { cn } from '@workspace/ui/lib/utils';
 import { Dancing_Script } from 'next/font/google';
 
@@ -28,9 +28,25 @@ const Badge = ({
   );
 };
 
-export const attachFile: BuildPageTreeOptions['attachFile'] = (node, file) => {
-  if (!file) return node;
-  const data = file.data;
+// Decorates page-tree items with "new / alpha / beta / ..." badges taken
+// from the page's frontmatter. Fumadocs 16 replaced the loader's
+// `pageTree.attachFile` option with loader plugins, hence the shape.
+export const attachFile: LoaderPlugin = {
+  name: 'attach-file',
+  transformPageTree: {
+    file(node, filePath) {
+      if (!filePath) return node;
+      const file = this.storage.read(filePath);
+      if (!file || file.format !== 'page') return node;
+      return decorate(node, file.data as Record<string, unknown>);
+    },
+  },
+};
+
+function decorate<N extends { name: React.ReactNode }>(
+  node: N,
+  data: Record<string, unknown>,
+): N {
 
   if ('releaseDate' in data) {
     const now = new Date();
@@ -86,4 +102,4 @@ export const attachFile: BuildPageTreeOptions['attachFile'] = (node, file) => {
   }
 
   return node;
-};
+}
