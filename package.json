@@ -18,11 +18,12 @@
     "@eslint/js": "^9.34.0",
     "@tailwindcss/postcss": "^4.1.13",
     "@types/node": "24.0.7",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.34.1",
+    "eslint-config-next": "^16.3.2",
     "husky": "^9.1.7",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
@@ -41,7 +42,10 @@
   "dependencies": {
     "@types/pg": "^8.20.0",
     "drizzle-orm": "^0.45.2",
+    "next": "^16.3.2",
     "pg": "^8.20.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "recharts": "^3.8.1"
   }
 }
