@@ -54,6 +54,10 @@ const MODEL_ALIASES: Record<string, string> = {
   'umans-deepseek-v4-pro-dspark': 'deepseek-v4-pro',
   'deepseek-v4-flash-0731': 'deepseek-v4-flash',
 
+  // Meta -- the contributor tier is the same model bought by granting
+  // training rights, so it charts as one series with the standard one.
+  'muse-spark-1.2-contributor': 'muse-spark-1.2',
+
   // GPT
   'gpt-oss-120b': 'gpt-oss:120b',
 
@@ -75,6 +79,7 @@ const PROVIDER_PREFIXES = new Set([
   'deepseek',
   'google',
   'kwaipilot',
+  'meta',
   'minimax',
   'mistralai',
   'moonshotai',
@@ -157,6 +162,7 @@ const BRAND_PATTERNS: [RegExp, string][] = [
   [/^deepseek/i, 'DeepSeek'],
   [/^gemini/i, 'Gemini'],
   [/^(llama|meta-llama)/i, 'Llama'],
+  [/^muse-/i, 'Meta'],
   [/^grok/i, 'Grok'],
   [/^(mistral|mixtral|codestral|ministral|devstral)/i, 'Mistral'],
   [/^(yi-|yi\d)/i, 'Yi'],
