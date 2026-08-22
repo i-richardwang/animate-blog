@@ -8,7 +8,6 @@ import {
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import { Metadata } from 'next';
-import { Footer } from '@/components/footer';
 import { Button } from '@/registry/components/buttons/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -75,7 +74,6 @@ export default async function Page(props: {
     return (
       <>
         <DocsPage
-          toc={[]}
           tableOfContent={{ enabled: false }}
           className="!max-w-[1124px]"
         >
@@ -137,7 +135,6 @@ export default async function Page(props: {
             )}
           </DocsBody>
         </DocsPage>
-        <Footer />
       </>
     );
   }
@@ -179,7 +176,6 @@ export default async function Page(props: {
   return (
     <>
       <DocsPage
-        toc={[]}
         tableOfContent={{ enabled: false }}
         className="!max-w-[860px]"
         breadcrumb={{ enabled: true, includeSeparator: true }}
@@ -257,7 +253,6 @@ export default async function Page(props: {
           <MDXContent components={getMDXComponents()} />
         </DocsBody>
       </DocsPage>
-      <Footer />
     </>
   );
 }

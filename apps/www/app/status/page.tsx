@@ -7,7 +7,6 @@ import {
   DocsDescription,
   DocsTitle,
 } from 'fumadocs-ui/page';
-import { Footer } from '@/components/footer';
 import { StatusBanner } from '@/components/status/status-banner';
 import { StatusMonitor } from '@/components/status/status-monitor';
 import {
@@ -77,7 +76,6 @@ export default function StatusPage() {
   return (
     <>
       <DocsPage
-        toc={[]}
         tableOfContent={{ enabled: false }}
         className="!max-w-[1124px]"
       >
@@ -143,7 +141,6 @@ export default function StatusPage() {
           </div>
         </DocsBody>
       </DocsPage>
-      <Footer />
     </>
   );
 }

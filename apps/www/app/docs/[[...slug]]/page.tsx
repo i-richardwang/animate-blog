@@ -116,21 +116,10 @@ export default async function Page(props: {
   return (
     <DocsPage
       toc={page.data.toc}
+      tableOfContentPopover={{ enabled: false }}
       full={page.data.full}
       className="!max-w-[860px]"
       breadcrumb={{ enabled: true, includeSeparator: true }}
-      // Original footer with lastUpdate info (replaced with built-in navigation)
-      // footer={{
-      //   component: (
-      //     <Footer
-      //       lastUpdate={
-      //         page.data.lastModified
-      //           ? new Date(page.data.lastModified)
-      //           : undefined
-      //       }
-      //     />
-      //   ),
-      // }}
       footer={{
         items: {
           previous: prevNav

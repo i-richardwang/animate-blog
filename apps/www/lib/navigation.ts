@@ -78,6 +78,3 @@ export const flatSections = visibleSections.flatMap((section) => [
   ...(section.children ?? []),
 ]);
 
-// Roots of the notes tree, i.e. the paths that render a docs page tree.
-export const docsSectionUrls =
-  NAV_SECTIONS.find((s) => s.url === '/docs')?.children?.map((c) => c.url) ?? [];

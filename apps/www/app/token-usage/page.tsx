@@ -8,7 +8,6 @@ import {
   DocsTitle,
 } from 'fumadocs-ui/page';
 import { Coins, Cpu, TrendingUp, Database } from 'lucide-react';
-import { Footer } from '@/components/footer';
 import { StatCard, StatCardSkeleton } from '@/components/token-usage/stat-card';
 import { CostTrendChart } from '@/components/token-usage/cost-trend-chart';
 import { TokenTrendChart } from '@/components/token-usage/token-trend-chart';
@@ -52,7 +51,6 @@ export default function TokenUsagePage() {
   return (
     <>
       <DocsPage
-        toc={[]}
         tableOfContent={{ enabled: false }}
         className="!max-w-[1124px]"
       >
@@ -176,7 +174,6 @@ export default function TokenUsagePage() {
           )}
         </DocsBody>
       </DocsPage>
-      <Footer />
     </>
   );
 }

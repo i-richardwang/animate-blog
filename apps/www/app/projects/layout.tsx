@@ -1,16 +1,6 @@
 import type { ReactNode } from 'react';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { siteLayoutProps } from '@/lib/site-layout';
-import { projects } from '@/lib/source';
-import { ScrollProgressBar } from '@/components/scroll-progress-bar';
+import { SiteLayout } from '@/components/site-layout';
 
-const PROJECTS_LAYOUT_PROPS = siteLayoutProps(projects.pageTree);
-
-export default function ProjectsLayout({ children }: { children: ReactNode }) {
-  return (
-    <>
-      <ScrollProgressBar />
-      <DocsLayout {...PROJECTS_LAYOUT_PROPS}>{children}</DocsLayout>
-    </>
-  );
+export default function UprojectsLayout({ children }: { children: ReactNode }) {
+  return <SiteLayout>{children}</SiteLayout>;
 }

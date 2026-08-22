@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { siteLayoutProps } from '@/lib/site-layout';
-import { ScrollProgressBar } from '@/components/scroll-progress-bar';
+import { SiteLayout } from '@/components/site-layout';
 
 export const metadata: Metadata = {
   title: '系统状态',
@@ -14,16 +12,6 @@ export const metadata: Metadata = {
   },
 };
 
-const STATUS_LAYOUT_PROPS = siteLayoutProps({
-  name: 'Status',
-  children: [],
-});
-
 export default function StatusLayout({ children }: { children: ReactNode }) {
-  return (
-    <>
-      <ScrollProgressBar />
-      <DocsLayout {...STATUS_LAYOUT_PROPS}>{children}</DocsLayout>
-    </>
-  );
+  return <SiteLayout>{children}</SiteLayout>;
 }

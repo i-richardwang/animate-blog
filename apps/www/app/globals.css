@@ -332,34 +332,6 @@
     }
   }
 
-  /* Force sidebar background to match page background */
-  aside,
-  #nd-sidebar {
-    background-color: var(--background) !important;
-  }
-
-  /* Force remove sidebar border at md breakpoint and above to prevent vertical line */
-  @media (min-width: 768px) {
-    #nd-sidebar {
-      border: none !important;
-      border-right: none !important;
-    }
-  }
-
-  /* At 3xl breakpoint, align sidebar with centered container */
-  @media (min-width: 1670px) {
-    #nd-sidebar {
-      left: calc((100vw - 1670px) / 2) !important;
-    }
-  }
-
-  #nd-sidebar div div div a[href^='/docs/components'] > svg[data-icon='true'],
-  #nd-sidebar div div div a[href^='/docs/primitives'] > svg[data-icon='true'],
-  #nd-sidebar div div div a[href^='/docs/icons'] > svg[data-icon='true'],
-  #nd-sidebar div div div a + div[data-state='open'] {
-    @apply !hidden;
-  }
-
   #nd-docs-layout {
     @apply relative;
   }
@@ -382,10 +354,6 @@
 
   #nd-toc div[role='none'] {
     @apply !w-[3px] !rounded-full -ml-px;
-  }
-
-  #nd-tocnav {
-    @apply !hidden;
   }
 
   #docs-body h1,
