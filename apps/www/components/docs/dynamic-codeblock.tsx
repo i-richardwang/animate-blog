@@ -9,12 +9,12 @@ import type { ComponentProps } from 'react';
 const getComponents = ({
   title,
   icon,
-  onCopy,
+  onCopied,
   className,
 }: {
   title?: string;
   icon?: React.ReactNode;
-  onCopy?: () => void;
+  onCopied?: () => void;
   className?: string;
 }) =>
   ({
@@ -24,7 +24,7 @@ const getComponents = ({
           {...props}
           title={title}
           icon={icon}
-          onCopy={onCopy}
+          onCopied={onCopied}
           className={cn('my-0', props.className, className)}
         >
           <Pre>{props.children}</Pre>
@@ -38,7 +38,7 @@ export type DynamicCodeBlockProps = {
   code: string;
   title?: string;
   icon?: React.ReactNode;
-  onCopy?: () => void;
+  onCopied?: () => void;
   options?: Omit<HighlightOptions, 'lang'>;
   className?: string;
 };
@@ -49,10 +49,10 @@ export function DynamicCodeBlock({
   options,
   title,
   icon,
-  onCopy,
+  onCopied,
   className,
 }: DynamicCodeBlockProps) {
-  const components = getComponents({ title, icon, onCopy, className });
+  const components = getComponents({ title, icon, onCopied, className });
 
   return useShiki(code, {
     lang,

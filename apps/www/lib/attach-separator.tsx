@@ -81,8 +81,7 @@ const separatorIcons: Record<string, React.ReactNode> = {
   '优化策略': <SeparatorIcon><Lightbulb strokeWidth={2} /></SeparatorIcon>,
 };
 
-// Gives section separators an icon. Fumadocs 16 replaced the loader's
-// `pageTree.attachSeparator` option with loader plugins, hence the shape.
+// Gives section separators an icon.
 export const attachSeparator: LoaderPlugin = {
   name: 'attach-separator',
   transformPageTree: {

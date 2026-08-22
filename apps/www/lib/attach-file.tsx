@@ -29,8 +29,7 @@ const Badge = ({
 };
 
 // Decorates page-tree items with "new / alpha / beta / ..." badges taken
-// from the page's frontmatter. Fumadocs 16 replaced the loader's
-// `pageTree.attachFile` option with loader plugins, hence the shape.
+// from the page's frontmatter.
 export const attachFile: LoaderPlugin = {
   name: 'attach-file',
   transformPageTree: {

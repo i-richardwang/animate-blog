@@ -21,7 +21,8 @@ export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   icon?: ReactNode;
   allowCopy?: boolean;
   viewportProps?: ScrollAreaPrimitive.ScrollAreaViewportProps;
-  onCopy?: () => void;
+  /** Called after the block's content has been written to the clipboard. */
+  onCopied?: () => void;
 };
 
 export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
@@ -47,7 +48,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
       allowCopy = true,
       icon,
       viewportProps,
-      onCopy: onCopyEvent,
+      onCopied,
       ...props
     },
     ref,
@@ -67,10 +68,10 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
 
       void navigator.clipboard.writeText(clone.textContent ?? '').then(() => {
         setIsCopied(true);
-        onCopyEvent?.();
+        onCopied?.();
         setTimeout(() => setIsCopied(false), 3000);
       });
-    }, [onCopyEvent]);
+    }, [onCopied]);
 
     return (
       <figure
