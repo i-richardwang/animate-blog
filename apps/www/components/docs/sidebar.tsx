@@ -1,10 +1,10 @@
 'use client';
 
-// The docs sidebar, built on the sidebar primitives Fumadocs 16 exports from
-// `fumadocs-ui/components/sidebar/*`. It replaces the stock sidebar slot
-// (`slots.sidebar.root`) and keeps this site's look: a borderless list with an
-// animated active/hover indicator, plus a mobile drawer that doubles as the
-// site menu on routes that have no page tree of their own.
+// The site sidebar, plugged into DocsLayout through `slots.sidebar.root` and
+// built on the primitives from `fumadocs-ui/components/sidebar/*`. On desktop
+// it is the notes' page tree with the site's borderless, animated look; on
+// mobile it is a drawer that lists the site menu first and the page tree,
+// when the section has one, below it.
 
 import { cn } from '@workspace/ui/lib/utils';
 import {
@@ -246,8 +246,7 @@ export function DocsSidebar({
 }: SidebarProps) {
   const { menuItems } = useDocsLayout();
   const { full: tree } = useTreeContext();
-  // Sections without a page tree have no desktop sidebar; their mobile drawer
-  // is the site menu.
+  // Only sections that pass a page tree get a desktop sidebar.
   const hasPageTree = tree.children.length > 0;
   const links = menuItems.filter((item) => item.type !== 'icon');
 
