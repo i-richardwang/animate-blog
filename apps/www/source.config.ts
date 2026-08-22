@@ -8,26 +8,9 @@ import {
 import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import { z } from 'zod';
 
-// The notes collection lives in the `content/docs` tree inherited from
-// Animate UI, whose own component documentation is still checked in. Only the
-// personal notes are part of the site.
-const ANIMATE_UI_DOCS = [
-  'components/**',
-  'icons/**',
-  'primitives/**',
-  'accessibility.mdx',
-  'changelog.mdx',
-  'installation.mdx',
-  'mcp.mdx',
-  'other-animated-distributions.mdx',
-  'roadmap.mdx',
-  'troubleshooting.mdx',
-];
-
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    files: ['**/*.mdx', ...ANIMATE_UI_DOCS.map((pattern) => `!${pattern}`)],
     schema: frontmatterSchema.extend({
       releaseDate: z.coerce.date().optional(),
       beta: z.boolean().optional(),
@@ -43,7 +26,6 @@ export const docs = defineDocs({
     }),
   },
   meta: {
-    files: ['**/*.json', ...ANIMATE_UI_DOCS.map((pattern) => `!${pattern}`)],
     schema: metaSchema,
   },
 });
