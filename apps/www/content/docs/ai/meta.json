@@ -3,6 +3,7 @@
   "description": "AI 技术与应用实践",
   "icon": "Brain",
   "root": true,
+  "pagesIndex": "index",
   "pages": [
     "---技术解码---",
     "fundamentals/understanding-vector-embedding",

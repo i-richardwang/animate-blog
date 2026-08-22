@@ -30,8 +30,8 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
-import { SquareMenu } from 'lucide-react';
-import { type ComponentProps, type ReactNode, useState } from 'react';
+import { BookOpen, SquareMenu } from 'lucide-react';
+import { type ComponentProps, useState } from 'react';
 import { ThemeSwitcher } from '../animate/theme-switcher';
 import { Separator } from '@/lib/attach-separator';
 import { flatSections } from '@/lib/navigation';
@@ -154,30 +154,20 @@ function PageTreeItem({ item }: { item: PageTree.Item }) {
   );
 }
 
-// Folders are shown flat: a link to the folder's index page (when it has
-// one) followed by its children. The notes tree is organised by separators
-// rather than nested folders, so this keeps the list one level deep.
-function PageTreeFolder({
-  item,
-  children,
-}: {
-  item: PageTree.Folder;
-  children: ReactNode;
-}) {
+// Every folder in the notes tree is a root folder — its own section, with its
+// own sidebar once you are inside it. So the folder is listed as a single link
+// to its landing page; its pages are not spilled into the parent list.
+function PageTreeFolder({ item }: { item: PageTree.Folder }) {
   const pathname = usePathname();
+  if (!item.index) return null;
   return (
-    <>
-      {item.index && (
-        <AnimatedItem
-          href={item.index.url}
-          external={item.index.external}
-          active={pathname === item.index.url}
-        >
-          {item.name}
-        </AnimatedItem>
-      )}
-      {children}
-    </>
+    <AnimatedItem
+      href={item.index.url}
+      external={item.index.external}
+      active={pathname === item.index.url}
+    >
+      {item.name}
+    </AnimatedItem>
   );
 }
 
@@ -252,6 +242,14 @@ export function DocsSidebar({
 
   const pageTree = hasPageTree && (
     <>
+      {links.length > 0 && (
+        <SectionSeparator>
+          <Separator
+            icon={<BookOpen fill="currentColor" strokeWidth={2.5} />}
+            name="指南"
+          />
+        </SectionSeparator>
+      )}
       {links.map((item, i, list) => (
         <SidebarLinkItem
           key={i}

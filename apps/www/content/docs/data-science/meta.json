@@ -3,6 +3,7 @@
   "description": "数据分析与可视化",
   "icon": "BarChart3",
   "root": true,
+  "pagesIndex": "index",
   "pages": [
     "---数据集构造---",
     "analysis/mock-employee-promotion-data",

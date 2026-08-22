@@ -3,6 +3,7 @@
   "description": "独立开发与自托管",
   "icon": "Code",
   "root": true,
+  "pagesIndex": "index",
   "pages": [
     "---Self Hosted---",
     "self-hosted/pve-installation-pcie-passthrough",
