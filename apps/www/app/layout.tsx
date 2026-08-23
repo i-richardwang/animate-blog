@@ -6,7 +6,6 @@ import type { Metadata } from 'next';
 
 import './globals.css';
 import { jsonLd } from '@/lib/json-ld';
-import { cn } from '@workspace/ui/lib/utils';
 import { Analytics } from '@/lib/analytics';
 
 export const metadata: Metadata = {
@@ -105,11 +104,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       </head>
 
       <body
-        className={cn(
-          'flex flex-col min-h-screen',
-          // Allows to make more attractive video recordings
-          // 'screenshot-mode',
-        )}
+        className="flex flex-col min-h-screen"
       >
         <RootProvider theme={{ defaultTheme: 'system' }}>
           <NuqsAdapter>{children}</NuqsAdapter>

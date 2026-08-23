@@ -4,8 +4,6 @@ import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import type { ComponentProps } from 'react';
-import { ComponentPreview } from '@/components/docs/component-preview';
-import { ComponentInstallation } from '@/components/docs/component-installation';
 import { ExternalLink } from '@/components/docs/external-link';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
@@ -30,8 +28,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
         {children}
       </Card>
     ),
-    ComponentPreview,
-    ComponentInstallation,
     TypeTable,
     ExternalLink,
     Steps,

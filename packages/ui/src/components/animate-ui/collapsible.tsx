@@ -28,17 +28,15 @@ const useCollapsible = (): CollapsibleContextType => {
 type CollapsibleProps = React.ComponentProps<typeof CollapsiblePrimitive.Root>;
 
 function Collapsible({ children, ...props }: CollapsibleProps) {
-  const [isOpen, setIsOpen] = React.useState(
-    props?.open ?? props?.defaultOpen ?? false,
-  );
-
-  React.useEffect(() => {
-    if (props?.open !== undefined) setIsOpen(props.open);
-  }, [props?.open]);
+  // The open state is mirrored into context so the content can animate. When
+  // the component is controlled, the prop is the state; otherwise the local
+  // one is.
+  const [openState, setOpenState] = React.useState(props?.defaultOpen ?? false);
+  const isOpen = props?.open ?? openState;
 
   const handleOpenChange = React.useCallback(
     (open: boolean) => {
-      setIsOpen(open);
+      setOpenState(open);
       props.onOpenChange?.(open);
     },
     [props],
