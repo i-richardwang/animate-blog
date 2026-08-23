@@ -20,6 +20,7 @@ import { Button } from '@/registry/components/buttons/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { findNeighbour } from 'fumadocs-core/page-tree';
+import { SectionLabel } from '@/components/docs/section-label';
 import { baseOptions } from '@/app/layout.config';
 
 export default async function Page(props: {
@@ -119,7 +120,8 @@ export default async function Page(props: {
       tableOfContentPopover={{ enabled: false }}
       full={page.data.full}
       className="!max-w-[860px]"
-      breadcrumb={{ enabled: true, includeSeparator: true }}
+      breadcrumb={{ enabled: true }}
+      slots={{ breadcrumb: SectionLabel }}
       footer={{
         items: {
           previous: prevNav
