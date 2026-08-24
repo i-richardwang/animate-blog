@@ -106,11 +106,12 @@ export async function GET(_req: Request, { params }: any) {
   );
 }
 
+// OG images are only ever fetched by crawlers, so there is nothing to gain from
+// prerendering them. Deferring them to runtime keeps the font download — the only
+// network call in this route — out of the build, where a single timeout would fail
+// the whole deployment. `revalidate = false` caches each image once it is generated.
 export function generateStaticParams(): {
   slug: string[];
 }[] {
-  return blogs.generateParams().map((page) => ({
-    ...page,
-    slug: [...page.slug, 'image.png'],
-  }));
+  return [];
 }
