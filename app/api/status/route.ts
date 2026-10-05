@@ -2,13 +2,8 @@ import { NextResponse } from 'next/server';
 import type { UptimeKumaGroup } from '@/lib/uptime-kuma/types';
 
 const UPTIME_KUMA_URL =
-  process.env.UPTIME_KUMA_URL ||
-  process.env.NEXT_PUBLIC_UPTIME_KUMA_URL ||
-  'https://status.homelab.wang';
-const UPTIME_KUMA_SLUG =
-  process.env.UPTIME_KUMA_SLUG ||
-  process.env.NEXT_PUBLIC_UPTIME_KUMA_SLUG ||
-  'homelab';
+  process.env.UPTIME_KUMA_URL || 'https://status.homelab.wang';
+const UPTIME_KUMA_SLUG = process.env.UPTIME_KUMA_SLUG || 'homelab';
 
 export async function GET() {
   try {
