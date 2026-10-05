@@ -9,7 +9,6 @@ export default [
       '.source/**',
       'out/**',
       'public/**',
-      '__registry__/**',
       'next-env.d.ts',
     ],
   },

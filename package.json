@@ -9,7 +9,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "format:write": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache",
     "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache",
-    "registry:build": "pnpm --filter animate-ui registry:build",
     "prepare": "husky"
   },
   "devDependencies": {
