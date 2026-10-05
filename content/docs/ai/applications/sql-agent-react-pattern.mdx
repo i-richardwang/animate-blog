@@ -4,8 +4,6 @@ description: 从基础 SQL 问答到智能 Agent，通过 ReAct 模式实现动�
 releaseDate: 2024-06-15
 ---
 
-import { Step, Steps } from 'fumadocs-ui/components/steps';
-
 之前搭建的 [SQL 问答系统](/docs/ai/applications/sql-database-qa-llm)，能把自然语言转成 SQL 并执行查询。单表、简单查询的场景下效果不错，但遇到复杂情况就暴露出明显的局限：
 
 **问题一：表名需要预先指定**。如果数据库有多张表，用户问"销售部门有多少人"，系统不知道该查 `employees` 还是 `staff_info`。

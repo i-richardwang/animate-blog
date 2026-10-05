@@ -1,94 +1,63 @@
 import { Feed } from 'feed';
 import { blogs, source } from '@/lib/source';
-import { SITE_AUTHOR } from '@/lib/site';
+import { SITE, SITE_AUTHOR } from '@/lib/site';
 
-const baseUrl = 'https://richardwang.me';
-
-type FeedItem = {
-  url: string;
-  title: string;
-  description: string;
-  date: Date;
-  category: string;
+// Feed category for notes, by their section (the first URL segment).
+const NOTE_CATEGORIES: Record<string, string> = {
+  ai: 'AI Exploration',
+  'data-science': 'Data Science',
+  development: 'Development',
 };
 
 export function getRSS() {
+  const author = { name: SITE_AUTHOR.name, link: SITE_AUTHOR.url };
   const feed = new Feed({
-    title: "Richard's Page",
-    id: baseUrl,
-    link: baseUrl,
+    title: SITE.name,
+    id: SITE.url,
+    link: SITE.url,
     language: 'en',
     description:
       'A personal blog and knowledge base for learning, exploration, and sharing insights.',
-    image: `${baseUrl}/og-image.png`,
-    favicon: `${baseUrl}/favicon-32x32.png`,
+    image: `${SITE.url}/og-image.png`,
+    favicon: `${SITE.url}/favicon-32x32.png`,
     copyright: `All rights reserved ${new Date().getFullYear()}, Richard Wang`,
     feedLinks: {
-      rss2: `${baseUrl}/rss.xml`,
+      rss2: `${SITE.url}/rss.xml`,
     },
-    author: {
-      name: SITE_AUTHOR.name,
-      link: SITE_AUTHOR.url,
-    },
+    author,
   });
 
-  const items: FeedItem[] = [];
-
-  // Add blog posts
-  const blogPosts = blogs.getPages();
-  for (const post of blogPosts) {
-    items.push({
-      url: post.url,
-      title: post.data.title,
-      description: post.data.description ?? '',
-      date: new Date(post.data.date),
+  const entries = [
+    ...blogs.getPages().map((post) => ({
+      page: post,
+      date: post.data.date,
       category: 'Blog',
-    });
-  }
+    })),
+    // Only notes with a releaseDate are published; section index pages
+    // have none.
+    ...source.getPages().flatMap((page) =>
+      page.data.releaseDate
+        ? [
+            {
+              page,
+              date: page.data.releaseDate,
+              category: NOTE_CATEGORIES[page.slugs[0]] ?? 'Docs',
+            },
+          ]
+        : [],
+    ),
+  ].sort((a, b) => b.date.getTime() - a.date.getTime());
 
-  // Add documentation pages
-  const docPages = source.getPages();
-  for (const page of docPages) {
-    // Only notes with a releaseDate are published to the feed; section
-    // index pages have none.
-    if (!page.data.releaseDate) continue;
-
-    const itemDate = new Date(page.data.releaseDate);
-
-    // Determine category
-    let category = 'Docs';
-    if (page.url.startsWith('/docs/ai')) {
-      category = 'AI Exploration';
-    } else if (page.url.startsWith('/docs/data-science')) {
-      category = 'Data Science';
-    } else if (page.url.startsWith('/docs/development')) {
-      category = 'Development';
-    }
-
-    items.push({
-      url: page.url,
+  for (const { page, date, category } of entries) {
+    const url = `${SITE.url}${page.url}`;
+    feed.addItem({
+      id: url,
       title: page.data.title,
       description: page.data.description ?? '',
-      date: itemDate,
-      category,
-    });
-  }
-
-  // Sort by date (newest first)
-  items.sort((a, b) => b.date.getTime() - a.date.getTime());
-
-  // Add all items to feed
-  for (const item of items) {
-    const itemUrl = `${baseUrl}${item.url}`;
-
-    feed.addItem({
-      id: itemUrl,
-      title: item.title,
-      description: item.description,
-      link: itemUrl,
-      date: item.date,
-      author: [{ name: SITE_AUTHOR.name, link: SITE_AUTHOR.url }],
-      category: [{ name: item.category }],
+      link: url,
+      date,
+      author: [author],
+      category: [{ name: category }],
     });
   }
 

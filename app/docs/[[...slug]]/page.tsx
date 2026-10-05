@@ -3,19 +3,17 @@ import {
   DocsPage,
   DocsBody,
   DocsDescription,
-  DocsTitle,
   EditOnGitHub,
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { getMDXComponents } from '@/mdx-components';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { DocsAuthor } from '@/components/docs/docs-author';
-import { SITE_AUTHOR } from '@/lib/site';
+import { SITE, SITE_AUTHOR } from '@/lib/site';
+import { pageMetadata } from '@/lib/metadata';
+import { PageTitle } from '@/components/docs/page-title';
 import { ViewOptions, LLMCopyButton } from '@/components/docs/page-actions';
-import { Button } from '@/components/animate-ui/components/buttons/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
 import { findNeighbour } from 'fumadocs-core/page-tree';
 import { SectionLabel } from '@/components/docs/section-label';
 import { baseOptions } from '@/app/layout.config';
@@ -90,7 +88,7 @@ export default async function Page(props: {
             url: guideItems[guideIndex + 1].url,
             name: guideItems[guideIndex + 1].text,
           }
-      : { url: '/docs/ai', name: 'AI 探索' }
+        : { url: '/docs/ai', name: 'AI 探索' }
       : nextPage
         ? { url: nextPage.url, name: String(nextPage.name ?? 'Suivant') }
         : undefined;
@@ -99,54 +97,17 @@ export default async function Page(props: {
     <DocsPage
       toc={page.data.toc}
       tableOfContentPopover={{ enabled: false }}
-      full={page.data.full}
       className="!max-w-[860px]"
-      breadcrumb={{ enabled: true }}
       slots={{ breadcrumb: SectionLabel }}
-      footer={{
-        items: {
-          previous: prevNav
-            ? { name: prevNav.name, url: prevNav.url }
-            : undefined,
-          next: nextNav ? { name: nextNav.name, url: nextNav.url } : undefined,
-        },
-      }}
+      footer={{ items: { previous: prevNav, next: nextNav } }}
     >
-      <div className="flex flex-row gap-2 items-start w-full justify-between">
-        <DocsTitle className="font-medium">{page.data.title}</DocsTitle>
-        {(prevNav || nextNav) && (
-          <div className="flex flex-row gap-1.5 items-center pt-0.5">
-            <Button variant="accent" size="icon-sm" asChild>
-              <Link
-                href={prevNav?.url ?? page.url}
-                aria-disabled={!prevNav}
-                className={
-                  !prevNav ? 'pointer-events-none opacity-50' : undefined
-                }
-                aria-label={
-                  prevNav ? `Aller à ${prevNav.name}` : 'Pas de page précédente'
-                }
-              >
-                <ArrowLeft />
-              </Link>
-            </Button>
-            <Button variant="accent" size="icon-sm" asChild>
-              <Link
-                href={nextNav?.url ?? page.url}
-                aria-disabled={!nextNav}
-                className={
-                  !nextNav ? 'pointer-events-none opacity-50' : undefined
-                }
-                aria-label={
-                  nextNav ? `Aller à ${nextNav.name}` : 'Pas de page suivante'
-                }
-              >
-                <ArrowRight />
-              </Link>
-            </Button>
-          </div>
-        )}
-      </div>
+      <PageTitle
+        title={page.data.title}
+        url={page.url}
+        previous={prevNav}
+        next={nextNav}
+        emptyLabels={{ previous: '没有上一篇笔记', next: '没有下一篇笔记' }}
+      />
       <DocsDescription className="mb-1 font-normal">
         {page.data.description}
       </DocsDescription>
@@ -155,12 +116,12 @@ export default async function Page(props: {
       <div className="flex flex-row gap-2 items-center">
         <EditOnGitHub
           className="border-0 [&_svg]:text-fd-muted-foreground"
-          href={`https://github.com/i-richardwang/animate-blog/blob/main/content/docs/${params.slug ? `${params.slug.join('/')}.mdx` : 'index.mdx'}`}
+          href={`${SITE.repo}/blob/main/content/docs/${params.slug ? `${params.slug.join('/')}.mdx` : 'index.mdx'}`}
         />
         <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptions
           markdownUrl={`${page.url}.mdx`}
-          githubUrl={`https://github.com/i-richardwang/animate-blog/blob/main/content/docs/${page.path}`}
+          githubUrl={`${SITE.repo}/blob/main/content/docs/${page.path}`}
         />
       </div>
 
@@ -186,27 +147,10 @@ export async function generateMetadata(props: {
   const page = source.getPage(slug);
   if (!page) notFound();
 
-  const image = ['/docs-og', ...slug, 'image.png'].join('/');
-
-  return {
+  return pageMetadata({
     title: page.data.title,
     description: page.data.description,
-    authors: [SITE_AUTHOR],
-    openGraph: {
-      title: page.data.title,
-      description: page.data.description,
-      url: 'https://richardwang.me',
-      siteName: "Richard's Page",
-      images: image,
-      locale: 'zh_CN',
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      site: '@richard2wang',
-      title: page.data.title,
-      description: page.data.description,
-      images: image,
-    },
-  };
+    url: SITE.url,
+    image: ['/docs-og', ...slug, 'image.png'].join('/'),
+  });
 }

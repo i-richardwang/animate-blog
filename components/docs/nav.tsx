@@ -2,16 +2,14 @@
 
 import Link from 'next/link';
 import React from 'react';
-import { IconLogo } from '../icon-logo';
+import { IconLogo } from '@/components/icon-logo';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CommandIcon } from 'lucide-react';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
 import { useSidebar } from 'fumadocs-ui/layouts/docs/slots/sidebar';
 import { ThemeSwitcher } from '@/components/theme-switcher';
-import XIcon from '@/components/icons/x-icon';
-import GithubIcon from '@/components/icons/github-icon';
-import MailIcon from '@/components/icons/mail-icon';
+import { SocialLinks } from '@/components/social-links';
 import { Menu } from '@/components/animate-ui/icons/menu';
 import { visibleSections } from '@/lib/navigation';
 import { NavItem } from './nav-item';
@@ -68,33 +66,7 @@ export const Nav = () => {
             </button>
 
             <div className="flex items-center gap-1 max-md:hidden">
-              <a
-                href="https://github.com/i-richardwang/animate-blog"
-                rel="noreferrer noopener"
-                target="_blank"
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground size-8 [&_svg]:size-5 text-fd-muted-foreground"
-                data-active="false"
-              >
-                <GithubIcon />
-              </a>
-
-              <a
-                href="https://x.com/richard2wang"
-                rel="noreferrer noopener"
-                target="_blank"
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground size-8 [&_svg]:size-5 text-fd-muted-foreground"
-                data-active="false"
-              >
-                <XIcon />
-              </a>
-
-              <a
-                href="mailto:contact@richardwang.me"
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground size-8 [&_svg]:size-5 text-fd-muted-foreground"
-                data-active="false"
-              >
-                <MailIcon />
-              </a>
+              <SocialLinks linkClassName="size-8" />
             </div>
 
             <ThemeSwitcher className="max-md:hidden" />

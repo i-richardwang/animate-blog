@@ -5,15 +5,17 @@ import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 
 import './globals.css';
-import { SITE_AUTHOR } from '@/lib/site';
+import { SITE, SITE_AUTHOR } from '@/lib/site';
 import { jsonLd } from '@/lib/json-ld';
-import { Analytics } from '@/lib/analytics';
+import { Analytics } from '@/components/analytics';
+
+const OG_IMAGE = { url: SITE.image, width: 1200, height: 630, alt: SITE.name };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://richardwang.me'),
+  metadataBase: new URL(SITE.url),
   title: {
-    template: "%s - Richard's Page",
-    default: "Richard's Page - Learning, Building, Sharing",
+    template: `%s - ${SITE.name}`,
+    default: `${SITE.name} - Learning, Building, Sharing`,
   },
   description:
     'A personal blog and knowledge base for learning, exploration, and sharing insights.',
@@ -44,46 +46,32 @@ export const metadata: Metadata = {
     },
   ],
   authors: [SITE_AUTHOR],
-  publisher: "Richard's Page",
+  publisher: SITE.name,
   alternates: {
     types: {
       'application/rss+xml': [
         {
-          title: "Richard's Page - All Updates",
-          url: 'https://richardwang.me/rss.xml',
+          title: `${SITE.name} - All Updates`,
+          url: `${SITE.url}/rss.xml`,
         },
       ],
     },
   },
   openGraph: {
-    title: "Richard's Page",
+    title: SITE.name,
     description: '数字花园，记录技术探索的点滴',
-    url: 'https://richardwang.me',
-    siteName: "Richard's Page",
-    images: [
-      {
-        url: 'https://richardwang.me/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: "Richard's Page",
-      },
-    ],
-    locale: 'zh_CN',
+    url: SITE.url,
+    siteName: SITE.name,
+    images: [OG_IMAGE],
+    locale: SITE.locale,
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@richard2wang',
-    title: "Richard's Page",
+    site: SITE.twitter,
+    title: SITE.name,
     description: '数字花园，记录技术探索的点滴',
-    images: [
-      {
-        url: 'https://richardwang.me/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: "Richard's Page",
-      },
-    ],
+    images: [OG_IMAGE],
   },
 };
 
@@ -99,9 +87,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         />
       </head>
 
-      <body
-        className="flex flex-col min-h-screen"
-      >
+      <body className="flex flex-col min-h-screen">
         <RootProvider theme={{ defaultTheme: 'system' }}>
           <NuqsAdapter>{children}</NuqsAdapter>
         </RootProvider>

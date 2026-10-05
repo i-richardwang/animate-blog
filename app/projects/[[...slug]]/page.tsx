@@ -1,4 +1,4 @@
-import { projects } from '@/lib/source';
+import { projects, getNeighbours, getOrderedProjects } from '@/lib/source';
 import {
   DocsPage,
   DocsBody,
@@ -7,12 +7,22 @@ import {
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
-import { Metadata } from 'next';
-import { Button } from '@/components/animate-ui/components/buttons/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import type { Metadata } from 'next';
 import { ProjectList } from '@/components/docs/project-list';
 import { ProjectActions } from '@/components/docs/page-actions';
+import { PageTitle } from '@/components/docs/page-title';
+import { pageMetadata, sectionMetadata } from '@/lib/metadata';
+import { SITE } from '@/lib/site';
+
+const SECTION = { title: '项目', description: '探索技术，构建产品' };
+
+// The portfolio leads the page; the other categories are grouped under
+// "实验室".
+const LAB_GROUPS = [
+  { category: 'business', title: '业务实践' },
+  { category: 'exploration', title: '学习探索' },
+  { category: 'personal', title: '个人空间' },
+] as const;
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -20,107 +30,54 @@ export default async function Page(props: {
   const { slug = [] } = await props.params;
 
   if (slug.length === 0) {
-    // Get pages in the order defined by pageTree (which follows meta.json)
-    const tree = projects.pageTree;
-    const orderedUrls: string[] = [];
-
-    // Extract URLs from pageTree in order, skipping separators
-    for (const node of tree.children) {
-      if (node.type === 'page') {
-        orderedUrls.push(node.url);
-      }
-    }
-
-    // Create a map for quick lookup
-    const pagesMap = new Map(
-      projects.getPages().map((page) => [page.url, page]),
-    );
-
-    // Build projectsData in the correct order
-    const projectsData = orderedUrls
-      .map((url) => {
-        const project = pagesMap.get(url);
-        if (!project) return null;
-        return {
+    const ordered = getOrderedProjects();
+    const inCategory = (category: string) =>
+      ordered
+        .filter((project) => project.data.category === category)
+        .map((project) => ({
           url: project.url,
           title: project.data.title,
           description: project.data.description,
           tech: project.data.tech,
           logo: project.data.logo,
-          category: project.data.category,
-        };
-      })
-      .filter((p): p is NonNullable<typeof p> => p !== null);
-
-    const portfolioProjects = projectsData.filter(
-      (project) => project.category === 'portfolio',
-    );
-    const businessProjects = projectsData.filter(
-      (project) => project.category === 'business',
-    );
-    const explorationProjects = projectsData.filter(
-      (project) => project.category === 'exploration',
-    );
-    const personalProjects = projectsData.filter(
-      (project) => project.category === 'personal',
-    );
+        }));
+    const portfolio = inCategory('portfolio');
+    const labGroups = LAB_GROUPS.map((group) => ({
+      ...group,
+      projects: inCategory(group.category),
+    })).filter((group) => group.projects.length > 0);
 
     return (
-      <>
-        <DocsPage
-          tableOfContent={{ enabled: false }}
-          className="!max-w-[1124px]"
-        >
-          <DocsTitle className="font-medium">项目</DocsTitle>
-          <DocsDescription className="mb-1 font-normal">
-            探索技术，构建产品
-          </DocsDescription>
+      <DocsPage tableOfContent={{ enabled: false }} className="!max-w-[1124px]">
+        <DocsTitle className="font-medium">{SECTION.title}</DocsTitle>
+        <DocsDescription className="mb-1 font-normal">
+          {SECTION.description}
+        </DocsDescription>
 
-          <DocsBody id="docs-body" className="pb-10 pt-4">
-            {portfolioProjects.length > 0 && (
-              <section className="mb-12">
-                <h2 className="text-2xl font-medium mb-6 text-foreground">
-                  作品集
-                </h2>
-                <ProjectList projects={portfolioProjects} />
-              </section>
-            )}
+        <DocsBody id="docs-body" className="pb-10 pt-4">
+          {portfolio.length > 0 && (
+            <section className="mb-12">
+              <h2 className="text-2xl font-medium mb-6 text-foreground">
+                作品集
+              </h2>
+              <ProjectList projects={portfolio} />
+            </section>
+          )}
 
-            <div className="mt-4 mb-8 border-t border-border" />
+          <div className="mt-4 mb-8 border-t border-border" />
 
-            <h2 className="text-2xl font-medium mb-8 text-foreground">
-              实验室
-            </h2>
+          <h2 className="text-2xl font-medium mb-8 text-foreground">实验室</h2>
 
-            {businessProjects.length > 0 && (
-              <section className="mb-12">
-                <h3 className="text-lg font-medium mb-6 text-muted-foreground">
-                  业务实践
-                </h3>
-                <ProjectList projects={businessProjects} />
-              </section>
-            )}
-
-            {explorationProjects.length > 0 && (
-              <section className="mb-12">
-                <h3 className="text-lg font-medium mb-6 text-muted-foreground">
-                  学习探索
-                </h3>
-                <ProjectList projects={explorationProjects} />
-              </section>
-            )}
-
-            {personalProjects.length > 0 && (
-              <section>
-                <h3 className="text-lg font-medium mb-6 text-muted-foreground">
-                  个人空间
-                </h3>
-                <ProjectList projects={personalProjects} />
-              </section>
-            )}
-          </DocsBody>
-        </DocsPage>
-      </>
+          {labGroups.map((group) => (
+            <section key={group.category} className="mb-12 last:mb-0">
+              <h3 className="text-lg font-medium mb-6 text-muted-foreground">
+                {group.title}
+              </h3>
+              <ProjectList projects={group.projects} />
+            </section>
+          ))}
+        </DocsBody>
+      </DocsPage>
     );
   }
 
@@ -128,117 +85,49 @@ export default async function Page(props: {
   if (!page) notFound();
 
   const MDXContent = page.data.body;
-
-  // Get ordered URLs from pageTree (follows meta.json order)
-  const tree = projects.pageTree;
-  const orderedUrls: string[] = [];
-  for (const node of tree.children) {
-    if (node.type === 'page') {
-      orderedUrls.push(node.url);
-    }
-  }
-
-  // Find current position and neighbors
-  const currentIndex = orderedUrls.indexOf(page.url);
-  const pagesMap = new Map(projects.getPages().map((p) => [p.url, p]));
-
-  const prevNav =
-    currentIndex > 0
-      ? {
-          url: orderedUrls[currentIndex - 1],
-          name: pagesMap.get(orderedUrls[currentIndex - 1])?.data.title ?? '',
-        }
-      : undefined;
-
-  const nextNav =
-    currentIndex < orderedUrls.length - 1
-      ? {
-          url: orderedUrls[currentIndex + 1],
-          name: pagesMap.get(orderedUrls[currentIndex + 1])?.data.title ?? '',
-        }
-      : undefined;
+  const { previous, next } = getNeighbours(getOrderedProjects(), page.url);
 
   return (
-    <>
-      <DocsPage
-        tableOfContent={{ enabled: false }}
-        className="!max-w-[860px]"
-        breadcrumb={{ enabled: true, includeSeparator: true }}
-        footer={{
-          items: {
-            previous: prevNav
-              ? { name: prevNav.name, url: prevNav.url }
-              : undefined,
-            next: nextNav
-              ? { name: nextNav.name, url: nextNav.url }
-              : undefined,
-          },
-        }}
-      >
-        <div className="flex flex-row gap-2 items-start w-full justify-between">
-          <DocsTitle className="font-medium">{page.data.title}</DocsTitle>
-          {(prevNav || nextNav) && (
-            <div className="flex flex-row gap-1.5 items-center pt-0.5">
-              <Button variant="accent" size="icon-sm" asChild>
-                <Link
-                  href={prevNav?.url ?? page.url}
-                  aria-disabled={!prevNav}
-                  className={
-                    !prevNav ? 'pointer-events-none opacity-50' : undefined
-                  }
-                  aria-label={
-                    prevNav ? `前往 ${prevNav.name}` : '没有上一个项目'
-                  }
-                >
-                  <ArrowLeft />
-                </Link>
-              </Button>
-              <Button variant="accent" size="icon-sm" asChild>
-                <Link
-                  href={nextNav?.url ?? page.url}
-                  aria-disabled={!nextNav}
-                  className={
-                    !nextNav ? 'pointer-events-none opacity-50' : undefined
-                  }
-                  aria-label={
-                    nextNav ? `前往 ${nextNav.name}` : '没有下一个项目'
-                  }
-                >
-                  <ArrowRight />
-                </Link>
-              </Button>
-            </div>
-          )}
+    <DocsPage
+      tableOfContent={{ enabled: false }}
+      className="!max-w-[860px]"
+      footer={{ items: { previous, next } }}
+    >
+      <PageTitle
+        title={page.data.title}
+        url={page.url}
+        previous={previous}
+        next={next}
+        emptyLabels={{ previous: '没有上一个项目', next: '没有下一个项目' }}
+      />
+      <DocsDescription className="mb-1 font-normal">
+        {page.data.description}
+      </DocsDescription>
+
+      {page.data.tech.length > 0 && (
+        <div className="flex flex-row gap-2 items-center flex-wrap">
+          {page.data.tech.map((tech) => (
+            <span
+              key={tech}
+              className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
+            >
+              {tech}
+            </span>
+          ))}
         </div>
-        <DocsDescription className="mb-1 font-normal">
-          {page.data.description}
-        </DocsDescription>
+      )}
 
-        {page.data.tech.length > 0 && (
-          <div className="flex flex-row gap-2 items-center flex-wrap">
-            {page.data.tech.map((tech) => (
-              <span
-                key={tech}
-                className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        )}
+      <div className="flex flex-row gap-2 items-center">
+        <ProjectActions
+          projectUrl={page.data.links.url}
+          githubUrl={page.data.links.github}
+        />
+      </div>
 
-        <div className="flex flex-row gap-2 items-center">
-          <ProjectActions
-            projectUrl={page.data.links.url}
-            githubUrl={page.data.links.github}
-          />
-        </div>
-
-        <DocsBody id="docs-body" className="prose-lg-content pb-10 pt-4">
-          <MDXContent components={getMDXComponents()} />
-        </DocsBody>
-      </DocsPage>
-    </>
+      <DocsBody id="docs-body" className="prose-lg-content pb-10 pt-4">
+        <MDXContent components={getMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
   );
 }
 
@@ -250,61 +139,18 @@ export async function generateMetadata(props: {
   params: Promise<{ slug?: string[] }>;
 }): Promise<Metadata> {
   const { slug = [] } = await props.params;
-
   if (slug.length === 0) {
-    return {
-      title: '项目',
-      description: '探索技术，构建产品',
-      openGraph: {
-        title: '项目',
-        description: '探索技术，构建产品',
-        url: 'https://richardwang.me/projects',
-        siteName: "Richard's Page",
-        type: 'website',
-        locale: 'zh_CN',
-        images: [
-          {
-            url: 'https://richardwang.me/og-image.png',
-            width: 1200,
-            height: 630,
-            alt: "Richard's Page",
-          },
-        ],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        site: '@richard2wang',
-        title: '项目',
-        description: '探索技术，构建产品',
-        images: ['https://richardwang.me/og-image.png'],
-      },
-    };
+    return sectionMetadata({ ...SECTION, path: '/projects' });
   }
 
   const page = projects.getPage(slug);
   if (!page) notFound();
 
-  const image = ['/projects-og', ...slug, 'image.png'].join('/');
-
-  return {
+  return pageMetadata({
     title: page.data.title,
     description: page.data.description,
-    openGraph: {
-      title: page.data.title,
-      description: page.data.description,
-      url: `https://richardwang.me${page.url}`,
-      siteName: "Richard's Page",
-      type: 'article',
-      publishedTime: new Date(page.data.date).toISOString(),
-      locale: 'zh_CN',
-      images: image,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      site: '@richard2wang',
-      title: page.data.title,
-      description: page.data.description,
-      images: image,
-    },
-  };
+    url: `${SITE.url}${page.url}`,
+    image: ['/projects-og', ...slug, 'image.png'].join('/'),
+    publishedTime: page.data.date,
+  });
 }

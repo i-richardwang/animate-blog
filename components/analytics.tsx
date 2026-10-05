@@ -2,14 +2,10 @@
 
 import Script from 'next/script';
 
-/**
- * Umami Analytics
- *
- * https://umami.is
- */
-export function UmamiAnalytics() {
-  const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID as string;
-  const script = process.env.NEXT_PUBLIC_UMAMI_SCRIPT as string;
+// Umami (https://umami.is) page analytics, loaded only when configured.
+export function Analytics() {
+  const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+  const script = process.env.NEXT_PUBLIC_UMAMI_SCRIPT;
 
   if (!websiteId || !script) {
     return null;

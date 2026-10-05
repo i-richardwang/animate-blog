@@ -1,11 +1,15 @@
 import type { StatusVariant } from './types';
 
-export const chartConfig: Record<StatusVariant, { color: string }> = {
-  success: { color: 'var(--success)' },
-  degraded: { color: 'var(--warning)' },
-  error: { color: 'var(--destructive)' },
-  info: { color: 'var(--info)' },
-  empty: { color: 'var(--muted)' },
+// How each status is labelled and coloured in the trackers.
+export const STATUS_META: Record<
+  StatusVariant,
+  { label: string; color: string }
+> = {
+  success: { label: 'Successful', color: 'var(--success)' },
+  degraded: { label: 'Degraded', color: 'var(--warning)' },
+  error: { label: 'Failed', color: 'var(--destructive)' },
+  info: { label: 'Maintenance', color: 'var(--info)' },
+  empty: { label: 'No data', color: 'var(--muted)' },
 };
 
 const STATUS_PRIORITY: Record<StatusVariant, number> = {

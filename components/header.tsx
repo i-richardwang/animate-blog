@@ -3,9 +3,7 @@
 import { motion } from 'motion/react';
 
 import { Logo } from '@/components/logo';
-import XIcon from '@/components/icons/x-icon';
-import GithubIcon from '@/components/icons/github-icon';
-import MailIcon from '@/components/icons/mail-icon';
+import { SocialLinks } from '@/components/social-links';
 import { useIsMobile } from '@/hooks/use-media-query';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 
@@ -80,31 +78,7 @@ export const Header = ({ transition }: { transition: boolean }) => {
           className="absolute z-110 flex items-center gap-x-4"
         >
           <div className="hidden xs:flex items-center gap-x-1">
-            <a
-              href="https://github.com/i-richardwang/animate-blog"
-              rel="noreferrer noopener"
-              target="_blank"
-              className="inline-flex sm:mt-1 items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&_svg]:size-5 text-fd-muted-foreground sm:[&_svg]:size-5.5"
-              data-active="false"
-            >
-              <GithubIcon />
-            </a>
-            <a
-              href="https://x.com/richard2wang"
-              rel="noreferrer noopener"
-              target="_blank"
-              className="inline-flex sm:mt-1 items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&_svg]:size-5 text-fd-muted-foreground sm:[&_svg]:size-5.5"
-              data-active="false"
-            >
-              <XIcon />
-            </a>
-            <a
-              href="mailto:contact@richardwang.me"
-              className="inline-flex sm:mt-1 items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&_svg]:size-5 text-fd-muted-foreground sm:[&_svg]:size-5.5"
-              data-active="false"
-            >
-              <MailIcon />
-            </a>
+            <SocialLinks linkClassName="sm:mt-1 p-1.5 sm:[&_svg]:size-5.5" />
           </div>
 
           <ThemeSwitcher className="mt-1 xs:mt-0 sm:mt-1" />

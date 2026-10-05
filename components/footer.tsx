@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { MotionEffect } from '@/components/motion-effect';
+import { SITE, SOCIAL } from '@/lib/site';
 
 type FooterProps = {
   animated?: boolean;
@@ -13,7 +14,7 @@ export const Footer = ({ animated = false }: FooterProps) => {
           <p className="truncate text-center">
             Built by{' '}
             <a
-              href="https://x.com/richard2wang"
+              href={SOCIAL.x}
               rel="noopener noreferrer"
               target="_blank"
               className="underline hover:text-foreground"
@@ -22,7 +23,7 @@ export const Footer = ({ animated = false }: FooterProps) => {
             </a>
             . Source on{' '}
             <a
-              href="https://github.com/i-richardwang/animate-blog"
+              href={SITE.repo}
               rel="noopener noreferrer"
               target="_blank"
               className="underline hover:text-foreground"

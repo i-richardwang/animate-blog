@@ -11,6 +11,7 @@ import { Nav } from '@/components/docs/nav';
 import { DocsSidebar } from '@/components/docs/sidebar';
 import { Footer } from '@/components/footer';
 import { ScrollProgressBar } from '@/components/scroll-progress-bar';
+import { SITE } from '@/lib/site';
 
 // Every section of the site renders inside Fumadocs' DocsLayout so they share
 // one navbar, one mobile drawer and one page grid.
@@ -38,7 +39,7 @@ export function SiteLayout({
       <DocsLayout
         {...baseOptions}
         tree={tree}
-        githubUrl="https://github.com/i-richardwang/animate-blog"
+        githubUrl={SITE.repo}
         slots={{
           header: Nav,
           sidebar: {

@@ -10,8 +10,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { TrackerDayData, StatusVariant } from './types';
-import { chartConfig } from './utils';
-import { requests } from './messages';
+import { STATUS_META } from './utils';
 
 interface StatusTrackerProps {
   data: TrackerDayData[];
@@ -242,7 +241,7 @@ export const StatusTracker = ({ data }: StatusTrackerProps) => {
                     className="w-full transition-all"
                     style={{
                       height: `${segment.height}%`,
-                      backgroundColor: chartConfig[segment.status].color,
+                      backgroundColor: STATUS_META[segment.status].color,
                     }}
                   />
                 ))}
@@ -291,7 +290,7 @@ export const StatusTracker = ({ data }: StatusTrackerProps) => {
       })}
     </div>
   );
-}
+};
 
 export const StatusTrackerSkeleton = ({
   className,
@@ -303,7 +302,7 @@ export const StatusTrackerSkeleton = ({
       {...props}
     />
   );
-}
+};
 
 const StatusTrackerContent = ({
   status,
@@ -318,14 +317,14 @@ const StatusTrackerContent = ({
         <div
           className="h-2.5 w-2.5 rounded-sm"
           style={{
-            backgroundColor: chartConfig[status].color,
+            backgroundColor: STATUS_META[status].color,
           }}
         />
-        <div className="text-sm">{requests[status]}</div>
+        <div className="text-sm">{STATUS_META[status].label}</div>
       </div>
       <div className="ml-auto font-mono text-muted-foreground text-xs tracking-tight">
         {value}
       </div>
     </div>
   );
-}
+};

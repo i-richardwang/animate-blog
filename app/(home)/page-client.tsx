@@ -7,7 +7,7 @@ import { Hero } from '@/components/hero';
 import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import type { LatestContent } from '@/types/content';
+import type { LatestEntry } from '@/lib/source';
 
 const CONTENT_VARIANTS = {
   hidden: {
@@ -20,7 +20,7 @@ const CONTENT_VARIANTS = {
 } as const;
 
 type HomePageClientProps = {
-  latestContent: LatestContent[];
+  latestContent: LatestEntry[];
 };
 
 export function HomePageClient({ latestContent }: HomePageClientProps) {

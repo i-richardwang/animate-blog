@@ -1,4 +1,4 @@
-import { blogs, getSortedBlogPosts } from '@/lib/source';
+import { blogs, getNeighbours, getSortedBlogPosts } from '@/lib/source';
 import {
   DocsPage,
   DocsBody,
@@ -7,16 +7,16 @@ import {
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { DocsAuthor } from '@/components/docs/docs-author';
-import { SITE_AUTHOR } from '@/lib/site';
-import { Button } from '@/components/animate-ui/components/buttons/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
-import { format } from 'date-fns';
-import { enUS } from 'date-fns/locale';
+import { PageTitle } from '@/components/docs/page-title';
 import { BlogList } from '@/components/docs/blog-list';
 import { ExploreNotesCard } from '@/components/docs/explore-notes-card';
+import { pageMetadata, sectionMetadata } from '@/lib/metadata';
+import { SITE, SITE_AUTHOR } from '@/lib/site';
+import { formatDate } from '@/lib/utils';
+
+const SECTION = { title: '博客', description: '记录思考与探索的足迹' };
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -28,28 +28,23 @@ export default async function Page(props: {
       url: post.url,
       title: post.data.title,
       description: post.data.description,
-      date: new Date(post.data.date),
+      date: post.data.date,
     }));
 
     return (
-      <>
-        <DocsPage
-          tableOfContent={{ enabled: false }}
-          className="!max-w-[1124px]"
-        >
-          <DocsTitle className="font-medium">博客</DocsTitle>
-          <DocsDescription className="mb-1 font-normal">
-            记录思考与探索的足迹
-          </DocsDescription>
+      <DocsPage tableOfContent={{ enabled: false }} className="!max-w-[1124px]">
+        <DocsTitle className="font-medium">{SECTION.title}</DocsTitle>
+        <DocsDescription className="mb-1 font-normal">
+          {SECTION.description}
+        </DocsDescription>
 
-          <DocsBody id="docs-body" className="pb-10 pt-4">
-            <ExploreNotesCard />
-            <div className="mt-6">
-              <BlogList posts={posts} />
-            </div>
-          </DocsBody>
-        </DocsPage>
-      </>
+        <DocsBody id="docs-body" className="pb-10 pt-4">
+          <ExploreNotesCard />
+          <div className="mt-6">
+            <BlogList posts={posts} />
+          </div>
+        </DocsBody>
+      </DocsPage>
     );
   }
 
@@ -57,98 +52,40 @@ export default async function Page(props: {
   if (!page) notFound();
 
   const MDXContent = page.data.body;
-  const date = new Date(page.data.date);
-
-  // Get sorted posts for navigation (newest first)
-  const sortedPosts = getSortedBlogPosts();
-  const currentIndex = sortedPosts.findIndex((p) => p.url === page.url);
-
-  // Previous is newer (lower index), Next is older (higher index)
-  const prevNav =
-    currentIndex > 0
-      ? {
-          url: sortedPosts[currentIndex - 1].url,
-          name: sortedPosts[currentIndex - 1].data.title,
-        }
-      : undefined;
-
-  const nextNav =
-    currentIndex < sortedPosts.length - 1
-      ? {
-          url: sortedPosts[currentIndex + 1].url,
-          name: sortedPosts[currentIndex + 1].data.title,
-        }
-      : undefined;
+  const { date } = page.data;
+  // Newest first: the previous post is newer, the next one older.
+  const { previous, next } = getNeighbours(getSortedBlogPosts(), page.url);
 
   return (
-    <>
-      <DocsPage
-        toc={page.data.toc}
-        tableOfContentPopover={{ enabled: false }}
-        className="!max-w-[860px]"
-        footer={{
-          items: {
-            previous: prevNav
-              ? { name: prevNav.name, url: prevNav.url }
-              : undefined,
-            next: nextNav
-              ? { name: nextNav.name, url: nextNav.url }
-              : undefined,
-          },
-        }}
+    <DocsPage
+      toc={page.data.toc}
+      tableOfContentPopover={{ enabled: false }}
+      className="!max-w-[860px]"
+      footer={{ items: { previous, next } }}
+    >
+      <PageTitle
+        title={page.data.title}
+        url={page.url}
+        previous={previous}
+        next={next}
+        emptyLabels={{ previous: '没有更新的文章', next: '没有更早的文章' }}
+      />
+      <DocsDescription className="mb-1 font-normal">
+        {page.data.description}
+      </DocsDescription>
+      <DocsAuthor {...SITE_AUTHOR} />
+
+      <time
+        dateTime={date.toISOString()}
+        className="text-sm text-muted-foreground"
       >
-        <div className="flex flex-row gap-2 items-start w-full justify-between">
-          <DocsTitle className="font-medium">{page.data.title}</DocsTitle>
-          {(prevNav || nextNav) && (
-            <div className="flex flex-row gap-1.5 items-center pt-0.5">
-              <Button variant="accent" size="icon-sm" asChild>
-                <Link
-                  href={prevNav?.url ?? page.url}
-                  aria-disabled={!prevNav}
-                  className={
-                    !prevNav ? 'pointer-events-none opacity-50' : undefined
-                  }
-                  aria-label={
-                    prevNav ? `前往 ${prevNav.name}` : '没有更新的文章'
-                  }
-                >
-                  <ArrowLeft />
-                </Link>
-              </Button>
-              <Button variant="accent" size="icon-sm" asChild>
-                <Link
-                  href={nextNav?.url ?? page.url}
-                  aria-disabled={!nextNav}
-                  className={
-                    !nextNav ? 'pointer-events-none opacity-50' : undefined
-                  }
-                  aria-label={
-                    nextNav ? `前往 ${nextNav.name}` : '没有更早的文章'
-                  }
-                >
-                  <ArrowRight />
-                </Link>
-              </Button>
-            </div>
-          )}
-        </div>
-        <DocsDescription className="mb-1 font-normal">
-          {page.data.description}
-        </DocsDescription>
-        <DocsAuthor {...SITE_AUTHOR} />
+        {formatDate(date)}
+      </time>
 
-        <time
-          dateTime={date.toISOString()}
-          className="text-sm text-muted-foreground"
-        >
-          {format(date, 'MMM d, yyyy', { locale: enUS })}
-        </time>
-
-        <DocsBody id="docs-body" className="prose-lg-content pb-10 pt-4">
-          <MDXContent components={getMDXComponents()} />
-        </DocsBody>
-      </DocsPage>
-    </>
+      <DocsBody id="docs-body" className="prose-lg-content pb-10 pt-4">
+        <MDXContent components={getMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
   );
 }
 
@@ -160,62 +97,16 @@ export async function generateMetadata(props: {
   params: Promise<{ slug?: string[] }>;
 }): Promise<Metadata> {
   const { slug = [] } = await props.params;
-
-  if (slug.length === 0) {
-    return {
-      title: '博客',
-      description: '记录思考与探索的足迹',
-      openGraph: {
-        title: '博客',
-        description: '记录思考与探索的足迹',
-        url: 'https://richardwang.me/blog',
-        siteName: "Richard's Page",
-        type: 'website',
-        locale: 'zh_CN',
-        images: [
-          {
-            url: 'https://richardwang.me/og-image.png',
-            width: 1200,
-            height: 630,
-            alt: "Richard's Page",
-          },
-        ],
-      },
-      twitter: {
-        card: 'summary_large_image',
-        site: '@richard2wang',
-        title: '博客',
-        description: '记录思考与探索的足迹',
-        images: ['https://richardwang.me/og-image.png'],
-      },
-    };
-  }
+  if (slug.length === 0) return sectionMetadata({ ...SECTION, path: '/blog' });
 
   const page = blogs.getPage(slug);
   if (!page) notFound();
 
-  const image = ['/blog-og', ...slug, 'image.png'].join('/');
-
-  return {
+  return pageMetadata({
     title: page.data.title,
     description: page.data.description,
-    authors: [SITE_AUTHOR],
-    openGraph: {
-      title: page.data.title,
-      description: page.data.description,
-      url: `https://richardwang.me${page.url}`,
-      siteName: "Richard's Page",
-      type: 'article',
-      publishedTime: new Date(page.data.date).toISOString(),
-      locale: 'zh_CN',
-      images: image,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      site: '@richard2wang',
-      title: page.data.title,
-      description: page.data.description,
-      images: image,
-    },
-  };
+    url: `${SITE.url}${page.url}`,
+    image: ['/blog-og', ...slug, 'image.png'].join('/'),
+    publishedTime: page.data.date,
+  });
 }

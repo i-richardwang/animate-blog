@@ -10,11 +10,7 @@ import Link from 'next/link';
 import { SendHorizontalIcon } from '@/components/animate-ui/icons/send-horizontal';
 import { PartyPopper } from '@/components/animate-ui/icons/party-popper';
 import { useEffect, useState } from 'react';
-import type { LatestContent } from '@/types/content';
-
-type LatestBlogsProps = {
-  content: LatestContent[];
-};
+import type { LatestEntry } from '@/lib/source';
 
 const SyncedSendIcon = () => {
   const { currentText } = useRotatingText();
@@ -34,15 +30,10 @@ const SyncedSendIcon = () => {
   );
 };
 
-const BlogLink = ({ content }: { content: LatestContent[] }) => {
+// Links the title currently shown, which is always one of `entries`.
+const CurrentEntryLink = ({ entries }: { entries: LatestEntry[] }) => {
   const { currentText } = useRotatingText();
-  const currentItem = content.find((item) => item.title === currentText);
-
-  if (!currentItem) {
-    return (
-      <RotatingText className="font-medium text-foreground/80 text-sm sm:text-base line-clamp-1" />
-    );
-  }
+  const currentItem = entries.find((entry) => entry.title === currentText)!;
 
   return (
     <Link href={currentItem.url} className="block group">
@@ -51,11 +42,9 @@ const BlogLink = ({ content }: { content: LatestContent[] }) => {
   );
 };
 
-export const LatestBlogs = ({ content }: LatestBlogsProps) => {
-  // Fallback to empty array if no content provided
-  if (!content || content.length === 0) {
-    return null;
-  }
+// The newest posts and notes, rotating in a strip below the hero.
+export const LatestContent = ({ entries }: { entries: LatestEntry[] }) => {
+  if (entries.length === 0) return null;
 
   return (
     <MotionEffect
@@ -74,14 +63,14 @@ export const LatestBlogs = ({ content }: LatestBlogsProps) => {
           </span>
 
           <RotatingTextContainer
-            text={content.map((item) => item.title)}
+            text={entries.map((entry) => entry.title)}
             duration={4000}
             inView
             inViewOnce={false}
             className="flex-1 text-left flex items-center gap-3"
           >
             <SyncedSendIcon />
-            <BlogLink content={content} />
+            <CurrentEntryLink entries={entries} />
           </RotatingTextContainer>
         </div>
       </div>

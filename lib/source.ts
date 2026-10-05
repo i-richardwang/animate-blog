@@ -1,4 +1,10 @@
-import { docs, blog, projects as projectsSource, reading as readingSource, podcasts as podcastsSource } from 'collections/server';
+import {
+  docs,
+  blog,
+  projects as projectsSource,
+  reading as readingSource,
+  podcasts as podcastsSource,
+} from 'collections/server';
 import { attachFile } from '@/lib/attach-file';
 import { loader, type InferPageType } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
@@ -30,73 +36,60 @@ export const projects = loader({
   source: projectsSource.toFumadocsSource(),
 });
 
-// Helper to get blog posts sorted by date (newest first)
-export const getSortedBlogPosts = () => {
-  return blogs
-    .getPages()
-    .sort(
-      (a, b) =>
-        new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
-    );
-};
-
-// Helper to get latest content (blogs + docs with releaseDate) sorted by date
-export const getLatestContent = (limit: number = 3) => {
-  // Get all blog posts
-  const blogPosts = blogs.getPages().map((post) => ({
-    title: post.data.title,
-    url: post.url,
-    date: new Date(post.data.date),
-    type: 'blog' as const,
-  }));
-
-  const docsWithDate = source
-    .getPages()
-    .filter((page) => page.data.releaseDate)
-    .map((page) => ({
-      title: page.data.title,
-      url: page.url,
-      date: new Date(page.data.releaseDate!),
-      type: 'docs' as const,
-    }));
-
-  // Combine and sort by date (newest first)
-  const allContent = [...blogPosts, ...docsWithDate].sort(
-    (a, b) => b.date.getTime() - a.date.getTime(),
-  );
-
-  // Return top N items
-  return allContent.slice(0, limit);
-};
-
 export const reading = loader({
   baseUrl: '/reading',
   source: toFumadocsSource(readingSource, []),
 });
-
-// Helper to get reading posts sorted by date (newest first)
-export const getSortedReadingPosts = () => {
-  return reading
-    .getPages()
-    .sort(
-      (a, b) =>
-        new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
-    );
-};
 
 export const podcasts = loader({
   baseUrl: '/podcasts',
   source: toFumadocsSource(podcastsSource, []),
 });
 
-// Helper to get podcast posts sorted by date (newest first)
-export const getSortedPodcastPosts = () => {
-  return podcasts
-    .getPages()
-    .sort(
-      (a, b) =>
-        new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
-    );
-};
-
 export type Page = InferPageType<typeof source>;
+
+const byDateDesc = <T extends { data: { date: Date } }>(pages: T[]) =>
+  pages.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+export const getSortedBlogPosts = () => byDateDesc(blogs.getPages());
+export const getSortedReadingPosts = () => byDateDesc(reading.getPages());
+export const getSortedPodcastPosts = () => byDateDesc(podcasts.getPages());
+
+// Projects in the order content/projects/meta.json lists them.
+export const getOrderedProjects = () =>
+  projects.pageTree.children.flatMap((node) => {
+    const page = node.type === 'page' && projects.getNodePage(node);
+    return page ? [page] : [];
+  });
+
+export type PageLink = { name: string; url: string };
+
+// The pages before and after `url` in an ordered list, for prev/next links.
+export function getNeighbours(
+  pages: { url: string; data: { title: string } }[],
+  url: string,
+): { previous?: PageLink; next?: PageLink } {
+  const index = pages.findIndex((page) => page.url === url);
+  const link = (page?: (typeof pages)[number]) =>
+    page && { name: page.data.title, url: page.url };
+  return { previous: link(pages[index - 1]), next: link(pages[index + 1]) };
+}
+
+export type LatestEntry = { title: string; url: string };
+
+// The newest blog posts and dated notes, for the home page.
+export const getLatestContent = (limit: number): LatestEntry[] => {
+  const dated = [
+    ...blogs.getPages().map((post) => ({ page: post, date: post.data.date })),
+    ...source
+      .getPages()
+      .flatMap((page) =>
+        page.data.releaseDate ? [{ page, date: page.data.releaseDate }] : [],
+      ),
+  ];
+
+  return dated
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(0, limit)
+    .map(({ page }) => ({ title: page.data.title, url: page.url }));
+};

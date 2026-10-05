@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { MotionEffect } from '@/components/motion-effect';
 import { ArrowRightIcon } from '@/components/animate-ui/icons/arrow-right';
 import { AnimateIcon } from '@/components/animate-ui/icons/icon';
-import { LatestBlogs } from './latest-blogs';
-import type { LatestContent } from '@/types/content';
+import { LatestContent } from '@/components/latest-content';
+import type { LatestEntry } from '@/lib/source';
 
 const TITLE = "👋 Hi, I'm Richard Wang.";
 
 type HeroProps = {
-  latestContent: LatestContent[];
+  latestContent: LatestEntry[];
 };
 
 export const Hero = ({ latestContent }: HeroProps) => {
@@ -105,12 +105,7 @@ export const Hero = ({ latestContent }: HeroProps) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Button
-                  size="lg"
-                  className="w-full"
-                  variant="accent"
-                  asChild
-                >
+                <Button size="lg" className="w-full" variant="accent" asChild>
                   <Link href="/projects">
                     项目展示 <ArrowRightIcon className="!size-5" />
                   </Link>
@@ -120,7 +115,7 @@ export const Hero = ({ latestContent }: HeroProps) => {
           </MotionEffect>
         </div>
 
-        <LatestBlogs content={latestContent} />
+        <LatestContent entries={latestContent} />
       </div>
     </div>
   );

@@ -4,8 +4,6 @@ description: 通过生成段落摘要进行多向量检索，用精炼的摘要�
 releaseDate: 2024-05-19
 ---
 
-import { Step, Steps } from 'fumadocs-ui/components/steps';
-
 [假设问题检索](/docs/ai/applications/hypothetical-questions-rag-retrieval)的方法是让 LLM 为文档生成可能的用户问题，通过问题来匹配检索。除了这个方向，还有另一个思路：让 LLM 为每个文档片段生成摘要，用摘要来做检索。
 
 长文档片段往往包含大量细节信息，其中可能只有一小部分和用户问题真正相关。如果直接对原文进行向量化，这些细节信息会"稀释"核心语义特征。而摘要能够提炼出文档的关键信息，去除冗余描述，让向量表示更加聚焦。
