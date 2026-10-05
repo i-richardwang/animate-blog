@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { MotionEffect } from '@/components/motion-effect';
+import { Effect } from '@/components/animate-ui/primitives/effects/effect';
 import { Sparkles, Camera, Server, Headphones, Film } from 'lucide-react';
 import {
   Carousel,
@@ -113,15 +113,7 @@ const InterestCard = ({ interest }: { interest: Interest }) => {
   const Icon = interest.icon;
 
   return (
-    <MotionEffect
-      slide={{
-        direction: 'up',
-      }}
-      fade
-      zoom
-      delay={0.2}
-      inView
-    >
+    <Effect slide={{ direction: 'down' }} fade zoom delay={200} inView>
       <div className="relative">
         {/* Icon and Title - Centered */}
         <div className="flex items-center justify-center gap-4 mb-12">
@@ -169,7 +161,7 @@ const InterestCard = ({ interest }: { interest: Interest }) => {
           </Carousel>
         </div>
       </div>
-    </MotionEffect>
+    </Effect>
   );
 };
 

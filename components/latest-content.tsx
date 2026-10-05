@@ -5,7 +5,7 @@ import {
   RotatingTextContainer,
   useRotatingText,
 } from '@/components/animate-ui/primitives/texts/rotating';
-import { MotionEffect } from '@/components/motion-effect';
+import { Effect } from '@/components/animate-ui/primitives/effects/effect';
 import Link from 'next/link';
 import { SendHorizontalIcon } from '@/components/animate-ui/icons/send-horizontal';
 import { PartyPopper } from '@/components/animate-ui/icons/party-popper';
@@ -42,14 +42,7 @@ export const LatestContent = ({ entries }: { entries: LatestEntry[] }) => {
   if (entries.length === 0) return null;
 
   return (
-    <MotionEffect
-      slide={{
-        direction: 'down',
-      }}
-      fade
-      zoom
-      delay={0.75}
-    >
+    <Effect slide fade zoom delay={750}>
       <div className="bg-card rounded-md h-11 px-4 md:w-[576px] w-full max-w-full mx-auto">
         <div className="flex items-center gap-3 h-full">
           <span className="h-6 px-2 bg-primary text-xs text-primary-foreground rounded flex gap-1 items-center justify-center whitespace-nowrap">
@@ -69,6 +62,6 @@ export const LatestContent = ({ entries }: { entries: LatestEntry[] }) => {
           </RotatingTextContainer>
         </div>
       </div>
-    </MotionEffect>
+    </Effect>
   );
 };

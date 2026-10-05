@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { MotionEffect } from '@/components/motion-effect';
+import { Effect } from '@/components/animate-ui/primitives/effects/effect';
 import { motion } from 'motion/react';
 import { ArrowRightIcon } from '@/components/animate-ui/icons/arrow-right';
 import { LightbulbIcon } from '@/components/animate-ui/icons/lightbulb';
@@ -9,12 +9,7 @@ import { AnimateIcon } from '@/components/animate-ui/icons/icon';
 
 export function ExploreNotesCard() {
   return (
-    <MotionEffect
-      slide={{ direction: 'down', offset: 30 }}
-      fade
-      inView
-      delay={0.1}
-    >
+    <Effect slide={{ offset: 30 }} fade inView delay={100}>
       <AnimateIcon animateOnHover asChild>
         <Link href="/docs">
           <motion.div
@@ -31,6 +26,6 @@ export function ExploreNotesCard() {
           </motion.div>
         </Link>
       </AnimateIcon>
-    </MotionEffect>
+    </Effect>
   );
 }

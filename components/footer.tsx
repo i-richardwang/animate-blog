@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { MotionEffect } from '@/components/motion-effect';
+import { Effect } from '@/components/animate-ui/primitives/effects/effect';
 import { SITE, SOCIAL } from '@/lib/site';
 
 type FooterProps = {
@@ -49,9 +49,9 @@ export const Footer = ({ animated = false }: FooterProps) => {
 
   if (animated) {
     return (
-      <MotionEffect slide={{ direction: 'down' }} fade zoom delay={2.2}>
+      <Effect slide fade zoom delay={2200}>
         {content}
-      </MotionEffect>
+      </Effect>
     );
   }
 

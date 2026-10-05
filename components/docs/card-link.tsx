@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { MotionEffect } from '@/components/motion-effect';
+import { Effect } from '@/components/animate-ui/primitives/effects/effect';
 import { cn } from '@/lib/utils';
 
-// A list entry that slides in when scrolled into view and moves on hover:
-// cards lift, rows nudge right.
+// A list entry that slides in `delay` ms after it scrolls into view and moves
+// on hover: cards lift, rows nudge right.
 export function CardLink({
   href,
   delay,
@@ -21,12 +21,7 @@ export function CardLink({
   children: React.ReactNode;
 }) {
   return (
-    <MotionEffect
-      slide={{ direction: 'down', offset: 30 }}
-      fade
-      inView
-      delay={delay}
-    >
+    <Effect slide={{ offset: 30 }} fade inView delay={delay}>
       <Link href={href}>
         <motion.div
           whileHover={hover === 'lift' ? { y: -4 } : { x: 4 }}
@@ -36,7 +31,7 @@ export function CardLink({
           {children}
         </motion.div>
       </Link>
-    </MotionEffect>
+    </Effect>
   );
 }
 

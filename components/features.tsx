@@ -1,5 +1,5 @@
 import { Dancing_Script } from 'next/font/google';
-import { MotionEffect } from '@/components/motion-effect';
+import { Effect } from '@/components/animate-ui/primitives/effects/effect';
 import { cn } from '@/lib/utils';
 import { Projects } from './icons/projects';
 import { Blog } from './icons/blog';
@@ -46,14 +46,7 @@ const SECTIONS: FeatureItem[] = [
 
 const FeatureCard = ({ item, index }: { item: FeatureItem; index: number }) => {
   return (
-    <MotionEffect
-      slide={{
-        direction: 'down',
-      }}
-      fade
-      zoom
-      delay={1 + 0.15 * index}
-    >
+    <Effect slide fade zoom delay={1000 + 150 * index}>
       <Link href={item.href}>
         <motion.div
           whileHover={{ scale: 1.025 }}
@@ -82,7 +75,7 @@ const FeatureCard = ({ item, index }: { item: FeatureItem; index: number }) => {
           {item.icon}
         </motion.div>
       </Link>
-    </MotionEffect>
+    </Effect>
   );
 };
 

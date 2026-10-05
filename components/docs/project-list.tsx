@@ -22,7 +22,7 @@ export function ProjectList({ projects }: ProjectListProps) {
         <CardLink
           key={project.url}
           href={project.url}
-          delay={0.2 + index * 0.08}
+          delay={200 + index * 80}
           className="h-full group bg-card rounded-md overflow-hidden cursor-pointer"
         >
           <div className="p-6">

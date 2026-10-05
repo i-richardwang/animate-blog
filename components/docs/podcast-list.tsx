@@ -24,7 +24,7 @@ function FeaturedCard({ podcast }: { podcast: Podcast }) {
   return (
     <CardLink
       href={podcast.url}
-      delay={0.2}
+      delay={200}
       className="group bg-card rounded-md overflow-hidden cursor-pointer"
     >
       <div className="flex flex-col md:flex-row">
@@ -88,7 +88,7 @@ function PodcastCard({ podcast, index }: { podcast: Podcast; index: number }) {
   return (
     <CardLink
       href={podcast.url}
-      delay={0.3 + index * 0.08}
+      delay={300 + index * 80}
       className="h-full group bg-card rounded-md overflow-hidden cursor-pointer"
     >
       <div className="flex flex-row">

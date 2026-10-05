@@ -24,7 +24,7 @@ export function BlogList({ posts }: BlogListProps) {
         <CardLink
           key={post.url}
           href={post.url}
-          delay={0.2 + index * 0.08}
+          delay={200 + index * 80}
           hover="nudge"
           className="group flex items-center justify-between gap-4 py-4 px-4 -mx-4 rounded-lg hover:bg-accent/50 transition-colors"
         >

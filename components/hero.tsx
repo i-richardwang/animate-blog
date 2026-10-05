@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { SplittingText } from '@/components/animate-ui/primitives/texts/splitting';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { MotionEffect } from '@/components/motion-effect';
+import { Effect } from '@/components/animate-ui/primitives/effects/effect';
 import { ArrowRightIcon } from '@/components/animate-ui/icons/arrow-right';
 import { AnimateIcon } from '@/components/animate-ui/icons/icon';
 import { LatestContent } from '@/components/latest-content';
@@ -18,15 +18,7 @@ export const Hero = ({ latestContent }: HeroProps) => {
   return (
     <div className="relative overflow-hidden flex flex-col items-center px-5">
       <div className="relative z-10 flex flex-col items-center justify-center pt-40">
-        <MotionEffect
-          slide={{
-            direction: 'down',
-          }}
-          fade
-          zoom
-          inView
-          delay={0.15}
-        >
+        <Effect slide fade zoom inView delay={150}>
           <div className="relative z-10">
             <h1 className="md:max-w-[900px] max-w-[340px]">
               <SplittingText
@@ -48,31 +40,16 @@ export const Hero = ({ latestContent }: HeroProps) => {
               />
             </div>
           </div>
-        </MotionEffect>
+        </Effect>
 
-        <MotionEffect
-          slide={{
-            direction: 'down',
-          }}
-          fade
-          zoom
-          inView
-          delay={0.3}
-        >
+        <Effect slide fade zoom inView delay={300}>
           <p className="block font-normal md:text-lg sm:text-base text-sm text-center mt-6 text-muted-foreground md:max-w-[660px] sm:max-w-[450px] text-balance">
             求知，践行，分享。关于人工智能、数据科学、软件开发与自托管服务的实践笔记。
           </p>
-        </MotionEffect>
+        </Effect>
 
         <div className="flex sm:flex-row flex-col sm:gap-4 gap-3 mt-8 mb-10 max-sm:w-full">
-          <MotionEffect
-            slide={{
-              direction: 'down',
-            }}
-            fade
-            zoom
-            delay={0.45}
-          >
+          <Effect slide fade zoom delay={450}>
             <AnimateIcon animateOnHover="out" completeOnStop asChild>
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -90,16 +67,9 @@ export const Hero = ({ latestContent }: HeroProps) => {
                 </Button>
               </motion.div>
             </AnimateIcon>
-          </MotionEffect>
+          </Effect>
 
-          <MotionEffect
-            slide={{
-              direction: 'down',
-            }}
-            fade
-            zoom
-            delay={0.6}
-          >
+          <Effect slide fade zoom delay={600}>
             <AnimateIcon animateOnHover="out" completeOnStop asChild>
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -112,7 +82,7 @@ export const Hero = ({ latestContent }: HeroProps) => {
                 </Button>
               </motion.div>
             </AnimateIcon>
-          </MotionEffect>
+          </Effect>
         </div>
 
         <LatestContent entries={latestContent} />

@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 import { SplittingText } from '@/components/animate-ui/primitives/texts/splitting';
-import { MotionEffect } from '@/components/motion-effect';
+import { Effect } from '@/components/animate-ui/primitives/effects/effect';
 import Image from 'next/image';
 
 const TITLE = 'About Me';
@@ -12,15 +12,7 @@ export const AboutHero = () => {
   return (
     <div className="relative overflow-x-hidden flex flex-col items-center px-5 pt-40 pb-16">
       <div className="relative z-10 flex flex-col items-center justify-center max-w-4xl mx-auto">
-        <MotionEffect
-          slide={{
-            direction: 'down',
-          }}
-          fade
-          zoom
-          inView
-          delay={0.15}
-        >
+        <Effect slide fade zoom inView delay={150}>
           <div className="relative z-10">
             <h1 className="md:max-w-[900px] max-w-[340px]">
               <SplittingText
@@ -42,31 +34,16 @@ export const AboutHero = () => {
               />
             </div>
           </div>
-        </MotionEffect>
+        </Effect>
 
-        <MotionEffect
-          slide={{
-            direction: 'down',
-          }}
-          fade
-          zoom
-          inView
-          delay={0.3}
-        >
+        <Effect slide fade zoom inView delay={300}>
           <p className="block font-normal md:text-lg sm:text-base text-sm text-center mt-6 text-muted-foreground md:max-w-[660px] sm:max-w-[450px] text-balance">
             {SUBTITLE}
           </p>
-        </MotionEffect>
+        </Effect>
 
         {/* Avatar */}
-        <MotionEffect
-          slide={{
-            direction: 'down',
-          }}
-          fade
-          zoom
-          delay={0.45}
-        >
+        <Effect slide fade zoom delay={450}>
           <div className="mt-12 relative">
             <motion.div
               className="size-32 rounded-full overflow-hidden"
@@ -82,7 +59,7 @@ export const AboutHero = () => {
               />
             </motion.div>
           </div>
-        </MotionEffect>
+        </Effect>
       </div>
     </div>
   );

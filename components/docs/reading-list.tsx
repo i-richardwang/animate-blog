@@ -24,7 +24,7 @@ function FeaturedCard({ reading }: { reading: Reading }) {
   return (
     <CardLink
       href={reading.url}
-      delay={0.2}
+      delay={200}
       className="group bg-card rounded-md overflow-hidden cursor-pointer"
     >
       <div className="flex flex-col md:flex-row">
@@ -69,7 +69,7 @@ function ReadingCard({ reading, index }: { reading: Reading; index: number }) {
   return (
     <CardLink
       href={reading.url}
-      delay={0.3 + index * 0.08}
+      delay={300 + index * 80}
       className="h-full group bg-card rounded-md overflow-hidden cursor-pointer"
     >
       <CoverImage
