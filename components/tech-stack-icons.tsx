@@ -14,7 +14,10 @@ import MilvusIcon from '@/components/icons/milvus-icon';
 import PandasIcon from '@/components/icons/pandas-icon';
 import NodejsIcon from '@/components/icons/nodejs-icon';
 
-const TECH_ICON_MAP: Record<string, React.ComponentType<any>> = {
+const TECH_ICON_MAP: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
   React: ReactIcon,
   TypeScript: TSIcon,
   'Tailwind CSS': TailwindIcon,
