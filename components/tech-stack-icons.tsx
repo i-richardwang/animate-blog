@@ -14,11 +14,6 @@ import MilvusIcon from '@/components/icons/milvus-icon';
 import PandasIcon from '@/components/icons/pandas-icon';
 import NodejsIcon from '@/components/icons/nodejs-icon';
 
-interface TechStackIconsProps {
-  tech: string[];
-  maxDisplay?: number;
-}
-
 const TECH_ICON_MAP: Record<string, React.ComponentType<any>> = {
   React: ReactIcon,
   TypeScript: TSIcon,
@@ -37,19 +32,18 @@ const TECH_ICON_MAP: Record<string, React.ComponentType<any>> = {
   'Node.js': NodejsIcon,
 };
 
-export function TechStackIcons({
-  tech,
-  maxDisplay = 5,
-}: TechStackIconsProps) {
-  const displayedTech = tech.slice(0, maxDisplay);
-  const remaining = tech.length - maxDisplay;
+const MAX_ICONS = 7;
+
+// Icons for the project's technologies that have one, then a count of the
+// rest of them.
+export function TechStackIcons({ tech }: { tech: string[] }) {
+  const withIcons = tech.filter((name) => name in TECH_ICON_MAP);
+  const remaining = withIcons.length - MAX_ICONS;
 
   return (
     <div className="flex items-center gap-2">
-      {displayedTech.map((techName) => {
+      {withIcons.slice(0, MAX_ICONS).map((techName) => {
         const Icon = TECH_ICON_MAP[techName];
-        if (!Icon) return null;
-
         return (
           <div
             key={techName}

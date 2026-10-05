@@ -45,9 +45,7 @@ export function ProjectList({ projects }: ProjectListProps) {
               </p>
             )}
 
-            {project.tech.length > 0 && (
-              <TechStackIcons tech={project.tech} maxDisplay={7} />
-            )}
+            {project.tech.length > 0 && <TechStackIcons tech={project.tech} />}
           </div>
         </CardLink>
       ))}
