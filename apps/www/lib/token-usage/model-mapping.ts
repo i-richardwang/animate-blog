@@ -54,10 +54,6 @@ const MODEL_ALIASES: Record<string, string> = {
   'umans-deepseek-v4-pro-dspark': 'deepseek-v4-pro',
   'deepseek-v4-flash-0731': 'deepseek-v4-flash',
 
-  // Meta -- the contributor tier is the same model bought by granting
-  // training rights, so it charts as one series with the standard one.
-  'muse-spark-1.2-contributor': 'muse-spark-1.2',
-
   // GPT
   'gpt-oss-120b': 'gpt-oss:120b',
 
@@ -78,16 +74,22 @@ const PROVIDER_PREFIXES = new Set([
   'commandcode',
   'deepseek',
   'google',
+  'inclusionai',
   'kwaipilot',
+  'meituan',
   'meta',
   'minimax',
+  'minimaxai',
   'mistralai',
   'moonshotai',
   'nvidia',
   'openai',
   'opencode-go',
   'opencode-zen',
+  'openrouter',
   'qwen',
+  'stealth',
+  'stepfun',
   'tencent',
   'x-ai',
   'xiaomi',
@@ -126,8 +128,12 @@ export function normalizeModelName(name: string): string {
   if (colon > 0 && PROVIDER_PREFIXES.has(key.slice(colon + 1))) {
     key = key.slice(0, colon);
   }
-  // A free channel is the same model on a different billing tier.
-  key = key.replace(/-free$/, '');
+  // A free channel is the same model on a different billing tier, whether the
+  // gateway spells it as a -free name or an OpenRouter :free pin.
+  key = key.replace(/(-|:)free$/, '');
+  // Meta's contributor tier is the same model bought by granting training
+  // rights, so it charts as one series with the standard one.
+  key = key.replace(/-contributor$/, '');
   return MODEL_ALIASES[key] ?? key;
 }
 
