@@ -7,6 +7,8 @@ import {
 } from 'collections/server';
 import { attachFile } from '@/lib/attach-file';
 import { loader, type InferPageType } from 'fumadocs-core/source';
+import { findNeighbour } from 'fumadocs-core/page-tree';
+import type * as PageTree from 'fumadocs-core/page-tree';
 import { icons } from 'lucide-react';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { createElement } from 'react';
@@ -76,6 +78,46 @@ export function getNeighbours(
 }
 
 export type LatestEntry = { title: string; url: string };
+
+// Prev/next links for a note. Within a section they follow the page tree;
+// a section's first note links back to the section's landing page, the
+// first section's landing page to the notes home, and the home on to the
+// first section.
+export function getNoteNeighbours(url: string): {
+  previous?: PageLink;
+  next?: PageLink;
+} {
+  const tree = source.pageTree;
+  const sections = tree.children.filter(
+    (node): node is PageTree.Folder & { index: PageTree.Item } =>
+      node.type === 'folder' && node.root === true && node.index !== undefined,
+  );
+  const sectionLink = (section: (typeof sections)[number]) => ({
+    name: String(section.name),
+    url: section.index.url,
+  });
+  const home = source.getPage([])!;
+  if (url === home.url) {
+    return { next: sections[0] && sectionLink(sections[0]) };
+  }
+
+  // A node's name may carry a badge; links use the page title.
+  const link = (node?: PageTree.Item) =>
+    node && {
+      name: source.getNodePage(node)?.data.title ?? String(node.name),
+      url: node.url,
+    };
+  const { previous, next } = findNeighbour(tree, url);
+  const section = sections.find((s) => url.startsWith(`${s.index.url}/`));
+  return {
+    previous:
+      link(previous) ??
+      (section
+        ? sectionLink(section)
+        : { name: home.data.title, url: home.url }),
+    next: link(next),
+  };
+}
 
 // The newest blog posts and dated notes, for the home page.
 export const getLatestContent = (limit: number): LatestEntry[] => {
