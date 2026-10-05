@@ -61,9 +61,6 @@ export default async function Page(props: {
     const businessProjects = projectsData.filter(
       (project) => project.category === 'business',
     );
-    const tinysaasProjects = projectsData.filter(
-      (project) => project.category === 'tinysaas',
-    );
     const explorationProjects = projectsData.filter(
       (project) => project.category === 'exploration',
     );
@@ -117,20 +114,11 @@ export default async function Page(props: {
             )}
 
             {personalProjects.length > 0 && (
-              <section className="mb-12">
+              <section>
                 <h3 className="text-lg font-medium mb-6 text-muted-foreground">
                   个人空间
                 </h3>
                 <ProjectList projects={personalProjects} />
-              </section>
-            )}
-
-            {tinysaasProjects.length > 0 && (
-              <section>
-                <h3 className="text-lg font-medium mb-6 text-muted-foreground">
-                  Tiny SaaS
-                </h3>
-                <ProjectList projects={tinysaasProjects} />
               </section>
             )}
           </DocsBody>
