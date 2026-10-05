@@ -56,6 +56,9 @@ export const StatusMonitorStatus = ({
     <span className="hidden group-data-[variant=info]/monitor:block">
       Maintenance
     </span>
+    <span className="hidden group-data-[variant=empty]/monitor:block">
+      No data
+    </span>
   </div>
 );
 
@@ -97,6 +100,9 @@ export const StatusBannerMessage = ({
     </span>
     <span className="hidden group-data-[status=info]/status-banner:block">
       Maintenance
+    </span>
+    <span className="hidden group-data-[status=empty]/status-banner:block">
+      No data
     </span>
   </div>
 );
