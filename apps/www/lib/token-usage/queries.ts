@@ -139,16 +139,45 @@ async function getCCusageProviders(since: Date | null) {
     .groupBy(usageRecords.agentType);
 }
 
+// A row is one (device, date, agent) day that often spans several models, so
+// its total_tokens can't be credited to each entry of models_used — that
+// counts the day once per model. Split it by the per-model breakdown the
+// agent's raw report carries instead: Claude Code / Amp write
+// modelBreakdowns[], Codex writes a models{} map. Rows with neither (older
+// OpenCode days) split evenly — approximate, but the per-model figures still
+// sum to the row's real total.
 async function getCCusageModels(since: Date | null) {
   const db = getCCusageDb();
+  const sinceFilter = since ? sql`AND date >= ${formatIsoDate(since)}` : sql``;
 
   const result = await db.execute(sql`
-    SELECT
-      model::text as model,
-      sum(total_tokens) as tokens
-    FROM usage_records,
-      jsonb_array_elements_text(models_used) as model
-    ${since ? sql`WHERE date >= ${formatIsoDate(since)}` : sql``}
+    WITH per_model AS (
+      SELECT
+        b->>'modelName' AS model,
+        coalesce((b->>'inputTokens')::numeric, 0)
+          + coalesce((b->>'outputTokens')::numeric, 0)
+          + coalesce((b->>'cacheReadTokens')::numeric, 0)
+          + coalesce((b->>'cacheCreationTokens')::numeric, 0) AS tokens
+      FROM usage_records,
+        jsonb_array_elements(raw_data->'modelBreakdowns') AS b
+      WHERE jsonb_typeof(raw_data->'modelBreakdowns') = 'array' ${sinceFilter}
+      UNION ALL
+      SELECT m.key, (m.value->>'totalTokens')::numeric
+      FROM usage_records,
+        jsonb_each(raw_data->'models') AS m
+      WHERE jsonb_typeof(raw_data->'models') = 'object'
+        AND jsonb_typeof(raw_data->'modelBreakdowns') IS DISTINCT FROM 'array'
+        ${sinceFilter}
+      UNION ALL
+      SELECT m, total_tokens::numeric / jsonb_array_length(models_used)
+      FROM usage_records,
+        jsonb_array_elements_text(models_used) AS m
+      WHERE jsonb_typeof(raw_data->'modelBreakdowns') IS DISTINCT FROM 'array'
+        AND jsonb_typeof(raw_data->'models') IS DISTINCT FROM 'object'
+        ${sinceFilter}
+    )
+    SELECT model, sum(tokens) AS tokens
+    FROM per_model
     GROUP BY model
     ORDER BY tokens DESC
   `);
