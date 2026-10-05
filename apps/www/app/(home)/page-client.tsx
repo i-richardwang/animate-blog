@@ -47,10 +47,10 @@ export function HomePageClient({ latestContent }: HomePageClientProps) {
               <motion.div
                 variants={CONTENT_VARIANTS}
                 initial="hidden"
-                animate={transition ? 'visible' : 'hidden'}
+                animate="visible"
                 className="w-full"
               >
-                <Hero key={String(transition)} latestContent={latestContent} />
+                <Hero latestContent={latestContent} />
               </motion.div>
 
               <Features />

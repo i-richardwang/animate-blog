@@ -79,24 +79,6 @@
 
   --chart-5: #8fb339;
 
-  --radius: 3px;
-
-  --sidebar: #fcf9f0;
-
-  --sidebar-foreground: #2b3328;
-
-  --sidebar-primary: #526b2d;
-
-  --sidebar-primary-foreground: #fcf9f0;
-
-  --sidebar-accent: #eae7d8;
-
-  --sidebar-accent-foreground: #2b3328;
-
-  --sidebar-border: #e0dccc;
-
-  --sidebar-ring: rgba(82, 107, 45, 0.4);
-
   /* Fumadocs UI color mappings */
   --color-fd-background: #fcf9f0;
   --color-fd-foreground: #2b3328;
@@ -176,22 +158,6 @@
   --chart-4: #78dce8;
 
   --chart-5: #ab9df2;
-
-  --sidebar: #1c1c1c;
-
-  --sidebar-foreground: #f8f8f2;
-
-  --sidebar-primary: #ff6188;
-
-  --sidebar-primary-foreground: #1c1c1c;
-
-  --sidebar-accent: #2a2a2a;
-
-  --sidebar-accent-foreground: #f8f8f2;
-
-  --sidebar-border: #2f2f2f;
-
-  --sidebar-ring: #ff6188;
 
   /* Fumadocs UI color mappings - Dark */
   --color-fd-background: #1c1c1c;
@@ -281,23 +247,6 @@
 
   --radius-xl: 4px;
 
-  --color-sidebar: var(--sidebar);
-
-  --color-sidebar-foreground: var(--sidebar-foreground);
-
-  --color-sidebar-primary: var(--sidebar-primary);
-
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-
-  --color-sidebar-accent: var(--sidebar-accent);
-
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-
-  --color-sidebar-border: var(--sidebar-border);
-
-  --color-sidebar-ring: var(--sidebar-ring);
-
-  --breakpoint-3xl: 1670px;
 }
 
 @layer base {
@@ -322,7 +271,7 @@
 
   /* The site navbar (components/docs/nav.tsx) is a fixed bar above the
      Fumadocs layout. Publishing its height here keeps the sidebar and TOC
-     sticky below it; lib/site-layout.tsx pads the layout by the same amount. */
+     sticky below it; components/site-layout.tsx pads the layout by the same amount. */
   :root {
     --fd-banner-height: 3.5rem;
   }
@@ -368,12 +317,6 @@
   /* Larger prose text for blog/project/reading pages (desktop only) */
   #docs-body.prose-lg-content {
     @apply md:!text-lg;
-  }
-
-  @keyframes blink {
-    50% {
-      opacity: 0.6;
-    }
   }
 }
 

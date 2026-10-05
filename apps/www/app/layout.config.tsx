@@ -1,12 +1,6 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-/**
- * Shared layout configurations
- *
- * you can customise layouts individually from:
- * Home Layout: app/(home)/layout.tsx
- * Docs Layout: app/docs/layout.tsx
- */
+// Options shared by every section's layout (see components/site-layout.tsx).
 export const baseOptions: BaseLayoutProps = {
   // The notes sidebar lists these above the page tree, under a "指南"
   // heading (see components/docs/sidebar.tsx).
@@ -14,7 +8,6 @@ export const baseOptions: BaseLayoutProps = {
     {
       text: '欢迎',
       url: '/docs',
-      secondary: false,
     },
   ],
 };

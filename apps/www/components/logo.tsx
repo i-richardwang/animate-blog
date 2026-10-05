@@ -1,7 +1,6 @@
 'use client';
 
-import { cn } from '@workspace/ui/lib/utils';
-import { motion, type SVGMotionProps } from 'motion/react';
+import { motion } from 'motion/react';
 
 const pathVariants = {
   hidden: {
@@ -19,33 +18,24 @@ const pathVariants = {
 } as const;
 
 const sizes = {
-  xs: 'h-5.5',
   sm: 'h-7',
-  md: 'h-8',
   lg: 'h-12',
-  xl: 'h-14',
-  '2xl': 'h-20',
   '3xl': 'h-24',
 };
 
 export const Logo = ({
   draw = false,
   size = 'sm',
-  className,
-  containerClassName,
-  ...props
 }: {
-  containerClassName?: string;
   draw?: boolean;
   size?: keyof typeof sizes;
-} & SVGMotionProps<SVGSVGElement>) => {
+}) => {
   return (
-    <div className={cn('relative', containerClassName)}>
+    <div className="relative">
       <motion.svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 6440 883"
-        className={cn(sizes[size], className)}
-        {...props}
+        className={sizes[size]}
       >
         <motion.path
           variants={draw ? pathVariants : {}}

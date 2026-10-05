@@ -109,12 +109,7 @@ const INTERESTS: Interest[] = [
   },
 ];
 
-const InterestCard = ({
-  interest,
-}: {
-  interest: Interest;
-  index: number;
-}) => {
+const InterestCard = ({ interest }: { interest: Interest }) => {
   const Icon = interest.icon;
 
   return (
@@ -183,8 +178,8 @@ export const AboutInterests = () => {
     <div className="relative px-5 pb-20">
       <div className="max-w-4xl mx-auto">
         <div className="space-y-20">
-          {INTERESTS.map((interest, index) => (
-            <InterestCard key={index} interest={interest} index={index} />
+          {INTERESTS.map((interest) => (
+            <InterestCard key={interest.title} interest={interest} />
           ))}
         </div>
       </div>

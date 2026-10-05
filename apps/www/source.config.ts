@@ -5,7 +5,6 @@ import {
   frontmatterSchema,
   metaSchema,
 } from 'fumadocs-mdx/config';
-import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import { z } from 'zod';
 
 export const docs = defineDocs({
@@ -13,10 +12,6 @@ export const docs = defineDocs({
   docs: {
     schema: frontmatterSchema.extend({
       releaseDate: z.coerce.date().optional(),
-      beta: z.boolean().optional(),
-      alpha: z.boolean().optional(),
-      updated: z.boolean().optional(),
-      deprecated: z.boolean().optional(),
       author: z
         .object({
           name: z.string(),
@@ -107,9 +102,4 @@ export const podcasts = defineCollections({
   }),
 });
 
-export default defineConfig({
-  plugins: [lastModified()],
-  mdxOptions: {
-    rehypePlugins: [],
-  },
-});
+export default defineConfig();

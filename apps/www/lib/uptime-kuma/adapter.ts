@@ -41,7 +41,7 @@ function getStatusLabel(status: StatusVariant): string {
   }
 }
 
-export function generateTrackerData(
+function generateTrackerData(
   heartbeats: Heartbeat[],
   groupSize: number = 2,
 ): TrackerDayData[] {
@@ -95,7 +95,7 @@ export function generateTrackerData(
   });
 }
 
-export function calculateUptime(heartbeats: Heartbeat[]): string {
+function calculateUptime(heartbeats: Heartbeat[]): string {
   if (heartbeats.length === 0) return '100%';
 
   const upCount = heartbeats.filter((hb) => hb.status === 1).length;
@@ -104,7 +104,7 @@ export function calculateUptime(heartbeats: Heartbeat[]): string {
   return `${percentage}%`;
 }
 
-export function getCurrentStatus(heartbeats: Heartbeat[]): StatusVariant {
+function getCurrentStatus(heartbeats: Heartbeat[]): StatusVariant {
   if (heartbeats.length === 0) return 'empty';
 
   // Sort by time descending and get the most recent
@@ -153,7 +153,6 @@ export function transformToTrackers(
     const monitorGroup: MonitorGroup = {
       id: group.id,
       name: group.name,
-      weight: group.weight,
       status: groupStatus,
       monitors,
     };

@@ -5,12 +5,12 @@ export type StatusVariant =
   | 'info'
   | 'empty';
 
-export interface TrackerBarSegment {
+interface TrackerBarSegment {
   status: StatusVariant;
   height: number; // 0-100 percentage
 }
 
-export interface TrackerCardItem {
+interface TrackerCardItem {
   status: StatusVariant;
   value: string;
 }
@@ -33,7 +33,6 @@ export interface MonitorData {
 export interface MonitorGroup {
   id: number;
   name: string;
-  weight: number;
   status: StatusVariant;
   monitors: MonitorData[];
 }

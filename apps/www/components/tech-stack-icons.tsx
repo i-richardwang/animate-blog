@@ -2,7 +2,6 @@ import ReactIcon from '@workspace/ui/components/icons/react-icon';
 import TSIcon from '@workspace/ui/components/icons/ts-icon';
 import TailwindIcon from '@workspace/ui/components/icons/tailwind-icon';
 import MotionIcon from '@workspace/ui/components/icons/motion-icon';
-import ShadcnIcon from '@workspace/ui/components/icons/shadcn-icon';
 import PythonIcon from '@workspace/ui/components/icons/python-icon';
 import NextjsIcon from '@workspace/ui/components/icons/nextjs-icon';
 import FastapiIcon from '@workspace/ui/components/icons/fastapi-icon';
@@ -12,18 +11,11 @@ import McpIcon from '@workspace/ui/components/icons/mcp-icon';
 import SklearnIcon from '@workspace/ui/components/icons/sklearn-icon';
 import PlotlyIcon from '@workspace/ui/components/icons/plotly-icon';
 import MilvusIcon from '@workspace/ui/components/icons/milvus-icon';
-import SanityIcon from '@workspace/ui/components/icons/sanity-icon';
-import PuppeteerIcon from '@workspace/ui/components/icons/puppeteer-icon';
 import PandasIcon from '@workspace/ui/components/icons/pandas-icon';
 import NodejsIcon from '@workspace/ui/components/icons/nodejs-icon';
-import ViteIcon from '@workspace/ui/components/icons/vite-icon';
-import UptimekumaIcon from '@workspace/ui/components/icons/uptimekuma-icon';
-import DockerIcon from '@workspace/ui/components/icons/docker-icon';
-import { cn } from '@workspace/ui/lib/utils';
 
 interface TechStackIconsProps {
   tech: string[];
-  className?: string;
   maxDisplay?: number;
 }
 
@@ -32,7 +24,6 @@ const TECH_ICON_MAP: Record<string, React.ComponentType<any>> = {
   TypeScript: TSIcon,
   'Tailwind CSS': TailwindIcon,
   Motion: MotionIcon,
-  Fumadocs: ShadcnIcon,
   'Next.js': NextjsIcon,
   Python: PythonIcon,
   FastAPI: FastapiIcon,
@@ -42,25 +33,19 @@ const TECH_ICON_MAP: Record<string, React.ComponentType<any>> = {
   'scikit-learn': SklearnIcon,
   Plotly: PlotlyIcon,
   Milvus: MilvusIcon,
-  Sanity: SanityIcon,
-  Puppeteer: PuppeteerIcon,
   pandas: PandasIcon,
   'Node.js': NodejsIcon,
-  Vite: ViteIcon,
-  'Uptime Kuma': UptimekumaIcon,
-  Docker: DockerIcon,
 };
 
 export function TechStackIcons({
   tech,
-  className,
   maxDisplay = 5,
 }: TechStackIconsProps) {
   const displayedTech = tech.slice(0, maxDisplay);
   const remaining = tech.length - maxDisplay;
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div className="flex items-center gap-2">
       {displayedTech.map((techName) => {
         const Icon = TECH_ICON_MAP[techName];
         if (!Icon) return null;

@@ -8,7 +8,7 @@ export const chartConfig: Record<StatusVariant, { color: string }> = {
   empty: { color: 'var(--muted)' },
 };
 
-export const STATUS_PRIORITY: Record<StatusVariant, number> = {
+const STATUS_PRIORITY: Record<StatusVariant, number> = {
   error: 3,
   degraded: 2,
   info: 1,

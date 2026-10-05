@@ -34,8 +34,7 @@ export async function GET() {
 
     const heartbeatData = await heartbeatResponse.json();
 
-    // Fetch status page config for monitor names and groups
-    const monitorNames: Record<string, string> = {};
+    // Fetch the status page config for its monitor groups
     let publicGroupList: UptimeKumaGroup[] = [];
     try {
       const configResponse = await fetch(
@@ -54,13 +53,6 @@ export async function GET() {
         const configData = await configResponse.json();
         if (configData.publicGroupList) {
           publicGroupList = configData.publicGroupList;
-          for (const group of configData.publicGroupList) {
-            if (group.monitorList) {
-              for (const monitor of group.monitorList) {
-                monitorNames[String(monitor.id)] = monitor.name;
-              }
-            }
-          }
         }
       }
     } catch {
@@ -69,7 +61,6 @@ export async function GET() {
 
     return NextResponse.json({
       ...heartbeatData,
-      monitorNames,
       publicGroupList,
     });
   } catch (error) {

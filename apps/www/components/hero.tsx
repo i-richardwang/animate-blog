@@ -18,22 +18,6 @@ export const Hero = ({ latestContent }: HeroProps) => {
   return (
     <div className="relative overflow-hidden flex flex-col items-center px-5">
       <div className="relative z-10 flex flex-col items-center justify-center pt-40">
-        {/* Original banner (commented out for cleaner design) */}
-        {/* <MotionEffect
-          slide={{
-            direction: 'down',
-          }}
-          fade
-          zoom
-          inView
-        >
-          <div className="mb-8 rounded-full bg-accent py-1.5 px-4 text-sm flex items-center gap-2">
-            <span className="text-neutral-600 dark:text-neutral-400">
-              Learning, Building, Sharing
-            </span>
-          </div>
-        </MotionEffect> */}
-
         <MotionEffect
           slide={{
             direction: 'down',
@@ -135,23 +119,6 @@ export const Hero = ({ latestContent }: HeroProps) => {
             </AnimateIcon>
           </MotionEffect>
         </div>
-
-        {/* Original tech stack icons (commented out for upstream sync) */}
-        {/* <div className="flex items-center gap-4 justify-center sm:justify-start">
-          {ICONS.map((Icon, index) => (
-            <MotionEffect
-              key={index}
-              slide={{
-                direction: 'down',
-              }}
-              fade
-              zoom
-              delay={0.75 + index * 0.1}
-            >
-              <Icon className="size-8" />
-            </MotionEffect>
-          ))}
-        </div> */}
 
         <LatestBlogs content={latestContent} />
       </div>

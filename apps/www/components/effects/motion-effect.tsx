@@ -119,4 +119,4 @@ function MotionEffect({
   );
 }
 
-export { MotionEffect, type MotionEffectProps };
+export { MotionEffect };

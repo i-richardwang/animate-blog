@@ -36,7 +36,7 @@ export const Nav = () => {
               '[&_svg]:!size-5 md:[&_svg]:!size-4.5 !p-0 !size-8 transition-colors duration-200 ease-in-out',
           })}
         >
-          <IconLogo size="sm" />
+          <IconLogo />
         </Link>
 
         <div className="flex items-center md:justify-between justify-end gap-2 flex-1">

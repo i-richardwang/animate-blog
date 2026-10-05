@@ -21,7 +21,6 @@ import {
 } from 'fumadocs-ui/components/sidebar/base';
 import { createLinkItemRenderer } from 'fumadocs-ui/components/sidebar/link-item';
 import { createPageTreeRenderer } from 'fumadocs-ui/components/sidebar/page-tree';
-import type { SidebarProps } from 'fumadocs-ui/layouts/docs/slots/sidebar';
 import { useDocsLayout } from 'fumadocs-ui/layouts/docs';
 import { useTreeContext } from 'fumadocs-ui/contexts/tree';
 import type { LinkItemType } from 'fumadocs-ui/layouts/shared';
@@ -227,13 +226,9 @@ function IconLinks({ items }: { items: LinkItemType[] }) {
   );
 }
 
-export function DocsSidebar({
-  footer,
-  banner,
-  components,
-  className,
-  ...rest
-}: SidebarProps) {
+// Rendered through DocsLayout's sidebar slot. The site sets no sidebar
+// options, so the slot passes no props.
+export function DocsSidebar() {
   const { menuItems } = useDocsLayout();
   const { full: tree } = useTreeContext();
   // Only sections that pass a page tree get a desktop sidebar.
@@ -261,7 +256,6 @@ export function DocsSidebar({
         Item={PageTreeItem}
         Folder={PageTreeFolder}
         Separator={PageTreeSeparator}
-        {...components}
       />
     </>
   );
@@ -282,17 +276,11 @@ export function DocsSidebar({
               <aside
                 id="nd-sidebar"
                 ref={ref}
-                className={cn(
-                  'absolute flex flex-col w-full inset-s-0 inset-y-0 items-end bg-fd-background text-sm *:w-(--fd-sidebar-width)',
-                  className,
-                )}
-                {...rest}
+                className="absolute flex flex-col w-full inset-s-0 inset-y-0 items-end bg-fd-background text-sm *:w-(--fd-sidebar-width)"
               >
-                {banner}
                 <SidebarViewport viewport={viewportProps}>
                   {pageTree}
                 </SidebarViewport>
-                {footer}
               </aside>
             </div>
           )}
@@ -302,14 +290,12 @@ export function DocsSidebar({
       {/* Mobile: a drawer toggled from the navbar. */}
       <SidebarDrawerOverlay className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out" />
       <SidebarDrawerContent className="fixed flex flex-col shadow-lg border-s inset-e-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out">
-        {banner}
         <SidebarViewport viewport={viewportProps}>
           <SiteMenu />
           {pageTree}
         </SidebarViewport>
         <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
           <IconLinks items={menuItems} />
-          {footer}
         </div>
       </SidebarDrawerContent>
     </>

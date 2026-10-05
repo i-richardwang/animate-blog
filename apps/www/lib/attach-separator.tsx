@@ -1,16 +1,5 @@
-import AnimateUIIcon from '@workspace/ui/components/icons/animateui-icon';
-import BaseUIIcon from '@workspace/ui/components/icons/baseui-icon';
-import CommunityIcon from '@workspace/ui/components/icons/community-icon';
-import ImageIcon from '@workspace/ui/components/icons/image-icon';
-import HeadlessUIIcon from '@workspace/ui/components/icons/headlessui-icon';
-import RadixIcon from '@workspace/ui/components/icons/radix-icon';
 import type { LoaderPlugin } from 'fumadocs-core/source';
 import {
-  Code,
-  RectangleHorizontalIcon,
-  SparklesIcon,
-  SquareMenu,
-  TypeIcon,
   Rocket,
   Database,
   Cpu,
@@ -22,7 +11,6 @@ import {
   Zap,
   FlaskConical,
 } from 'lucide-react';
-import { LucideIcons } from '@/components/icons/lucide-icons';
 
 const IconWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -48,37 +36,18 @@ export const Separator = ({
   );
 };
 
-const SeparatorIcon = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <IconWrapper>{children}</IconWrapper>
-  );
-};
-
 // Map separator names to their icons
 const separatorIcons: Record<string, React.ReactNode> = {
-  'Animate UI': <SeparatorIcon><AnimateUIIcon className="!size-3" /></SeparatorIcon>,
-  'Radix UI': <SeparatorIcon><RadixIcon className="!size-2.5" /></SeparatorIcon>,
-  'Base UI': <SeparatorIcon><BaseUIIcon /></SeparatorIcon>,
-  'Headless UI': <SeparatorIcon><HeadlessUIIcon /></SeparatorIcon>,
-  'Effects': <SeparatorIcon><SparklesIcon fill="currentColor" /></SeparatorIcon>,
-  'Community': <SeparatorIcon><CommunityIcon /></SeparatorIcon>,
-  'Backgrounds': <SeparatorIcon><ImageIcon strokeWidth={5} /></SeparatorIcon>,
-  'Buttons': <SeparatorIcon><RectangleHorizontalIcon fill="currentColor" /></SeparatorIcon>,
-  'Texts': <SeparatorIcon><TypeIcon strokeWidth={3} /></SeparatorIcon>,
-  'Icons': <SeparatorIcon><LucideIcons strokeWidth={2} /></SeparatorIcon>,
-  'Usage': <SeparatorIcon><Code strokeWidth={3} /></SeparatorIcon>,
-  'Guide': <SeparatorIcon><Code strokeWidth={2.5} /></SeparatorIcon>,
-  'Menu': <SeparatorIcon><SquareMenu strokeWidth={2} /></SeparatorIcon>,
-  '技术解码': <SeparatorIcon><Zap strokeWidth={2} /></SeparatorIcon>,
-  '深度实践': <SeparatorIcon><Cpu strokeWidth={2} /></SeparatorIcon>,
-  '原型实验': <SeparatorIcon><FlaskConical strokeWidth={2} /></SeparatorIcon>,
-  '数据集构造': <SeparatorIcon><Database strokeWidth={2} /></SeparatorIcon>,
-  '员工流失预测项目实战': <SeparatorIcon><Rocket strokeWidth={2} /></SeparatorIcon>,
-  'Self Hosted': <SeparatorIcon><HardDrive strokeWidth={2} /></SeparatorIcon>,
-  '进阶图表绘制': <SeparatorIcon><LineChart strokeWidth={2} /></SeparatorIcon>,
-  'Tableau 仪表板': <SeparatorIcon><PieChart strokeWidth={2} /></SeparatorIcon>,
-  '独立开发': <SeparatorIcon><Hammer strokeWidth={2} /></SeparatorIcon>,
-  '优化策略': <SeparatorIcon><Lightbulb strokeWidth={2} /></SeparatorIcon>,
+  '技术解码': <IconWrapper><Zap strokeWidth={2} /></IconWrapper>,
+  '深度实践': <IconWrapper><Cpu strokeWidth={2} /></IconWrapper>,
+  '原型实验': <IconWrapper><FlaskConical strokeWidth={2} /></IconWrapper>,
+  '数据集构造': <IconWrapper><Database strokeWidth={2} /></IconWrapper>,
+  '员工流失预测项目实战': <IconWrapper><Rocket strokeWidth={2} /></IconWrapper>,
+  'Self Hosted': <IconWrapper><HardDrive strokeWidth={2} /></IconWrapper>,
+  '进阶图表绘制': <IconWrapper><LineChart strokeWidth={2} /></IconWrapper>,
+  'Tableau 仪表板': <IconWrapper><PieChart strokeWidth={2} /></IconWrapper>,
+  '独立开发': <IconWrapper><Hammer strokeWidth={2} /></IconWrapper>,
+  '优化策略': <IconWrapper><Lightbulb strokeWidth={2} /></IconWrapper>,
 };
 
 // Gives section separators an icon.

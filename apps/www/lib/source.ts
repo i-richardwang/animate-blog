@@ -1,24 +1,16 @@
 import { docs, blog, projects as projectsSource, reading as readingSource, podcasts as podcastsSource } from 'collections/server';
-import { LucideIcons } from '@/components/icons/lucide-icons';
 import { attachFile } from '@/lib/attach-file';
 import { attachSeparator } from '@/lib/attach-separator';
-import AnimateUIIcon from '@workspace/ui/components/icons/animateui-icon';
-import {
-  loader,
-  type InferMetaType,
-  type InferPageType,
-} from 'fumadocs-core/source';
+import { loader, type InferPageType } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { createElement } from 'react';
 
-// Resolves the `icon` field of frontmatter / meta.json: a Lucide icon name,
-// or one of the site's own icons.
+// Resolves the `icon` field of meta.json to a Lucide icon.
 function resolveIcon(icon: string | undefined) {
-  if (!icon) return;
-  if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
-  if (icon === 'AnimateUIIcon') return createElement(AnimateUIIcon);
-  if (icon === 'LucideIcons') return createElement(LucideIcons);
+  if (icon && icon in icons) {
+    return createElement(icons[icon as keyof typeof icons]);
+  }
 }
 
 export const source = loader({
@@ -36,8 +28,6 @@ export const blogs = loader({
 export const projects = loader({
   baseUrl: '/projects',
   source: projectsSource.toFumadocsSource(),
-  plugins: [attachFile, attachSeparator],
-  icon: resolveIcon,
 });
 
 // Helper to get blog posts sorted by date (newest first)
@@ -110,8 +100,3 @@ export const getSortedPodcastPosts = () => {
 };
 
 export type Page = InferPageType<typeof source>;
-export type Meta = InferMetaType<typeof source>;
-export type BlogPage = InferPageType<typeof blogs>;
-export type ProjectPage = InferPageType<typeof projects>;
-export type ReadingPage = InferPageType<typeof reading>;
-export type PodcastPage = InferPageType<typeof podcasts>;

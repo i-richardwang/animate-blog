@@ -6,30 +6,22 @@ const dancing = Dancing_Script({ subsets: ['latin'] });
 
 const Badge = ({
   name,
-  className,
   children,
 }: {
   name: React.ReactNode;
-  className?: string;
   children: React.ReactNode;
 }) => {
   return (
     <span className="flex items-center gap-3 w-full justify-between">
       <span className="!font-normal">{name}</span>{' '}
-      <span
-        className={cn(
-          'text-[17px] text-nowrap text-foreground leading-1 font-black',
-          className,
-        )}
-      >
+      <span className="text-[17px] text-nowrap text-foreground leading-1 font-black">
         <span className={cn(dancing.className, 'leading-1')}>{children}</span>
       </span>
     </span>
   );
 };
 
-// Decorates page-tree items with "new / alpha / beta / ..." badges taken
-// from the page's frontmatter.
+// Marks notes released in the last 30 days with a "new" badge.
 export const attachFile: LoaderPlugin = {
   name: 'attach-file',
   transformPageTree: {
@@ -42,63 +34,18 @@ export const attachFile: LoaderPlugin = {
   },
 };
 
+const NEW_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+
 function decorate<N extends { name: React.ReactNode }>(
   node: N,
   data: Record<string, unknown>,
 ): N {
-
-  if ('releaseDate' in data) {
-    const now = new Date();
-    const release = new Date(data.releaseDate as string);
-    const diffMs = now.getTime() - release.getTime();
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
-
-    if (diffDays <= 30) {
-      node.name = <Badge name={node.name}>new</Badge>;
-    }
-  }
-
-  if ('alpha' in data && typeof data.alpha === 'boolean' && data.alpha) {
-    node.name = (
-      <Badge
-        name={node.name}
-        className="bg-gradient-to-br text-pink-600 dark:text-pink-400"
-      >
-        alpha
-      </Badge>
-    );
-  }
-
-  if ('beta' in data && typeof data.beta === 'boolean' && data.beta) {
-    node.name = (
-      <Badge name={node.name} className="text-blue-600 dark:text-blue-400">
-        beta
-      </Badge>
-    );
-  }
-
+  const { releaseDate } = data;
   if (
-    'deprecated' in data &&
-    typeof data.deprecated === 'boolean' &&
-    data.deprecated
+    releaseDate instanceof Date &&
+    Date.now() - releaseDate.getTime() <= NEW_WINDOW_MS
   ) {
-    node.name = (
-      <Badge name={node.name} className="text-red-600 dark:text-red-400">
-        deprecated
-      </Badge>
-    );
+    node.name = <Badge name={node.name}>new</Badge>;
   }
-
-  if ('updated' in data && typeof data.updated === 'boolean' && data.updated) {
-    node.name = (
-      <Badge
-        name={node.name}
-        className="text-emerald-600 dark:text-emerald-400"
-      >
-        updated
-      </Badge>
-    );
-  }
-
   return node;
 }

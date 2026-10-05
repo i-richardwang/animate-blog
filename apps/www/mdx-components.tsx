@@ -4,13 +4,10 @@ import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import type { ComponentProps } from 'react';
-import { ExternalLink } from '@/components/docs/external-link';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { CodeBlock, Pre } from './components/docs/codeblock';
 import { Callout } from './components/docs/callout';
 
-// use this function to get MDX components, you will need it for rendering MDX
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
@@ -28,8 +25,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
         {children}
       </Card>
     ),
-    TypeTable,
-    ExternalLink,
     Steps,
     Step,
     Callout,

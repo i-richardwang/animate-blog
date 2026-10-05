@@ -24,7 +24,7 @@ export interface NavSection {
   hidden?: boolean;
 }
 
-export const NAV_SECTIONS: NavSection[] = [
+const NAV_SECTIONS: NavSection[] = [
   {
     title: '博客',
     url: '/blog',

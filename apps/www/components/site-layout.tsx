@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import {
   SidebarProvider,
   SidebarTrigger,
@@ -9,7 +9,6 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import { baseOptions } from '@/app/layout.config';
 import { Nav } from '@/components/docs/nav';
 import { DocsSidebar } from '@/components/docs/sidebar';
-import { ThemeSwitcher } from '@/components/animate/theme-switcher';
 import { Footer } from '@/components/footer';
 import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 
@@ -29,8 +28,10 @@ const EMPTY_TREE: PageTree.Root = { name: 'Site', children: [] };
 export function SiteLayout({
   tree = EMPTY_TREE,
   children,
-  ...options
-}: Partial<DocsLayoutProps> & { children: ReactNode }) {
+}: {
+  tree?: PageTree.Root;
+  children: ReactNode;
+}) {
   return (
     <>
       <ScrollProgressBar />
@@ -38,7 +39,6 @@ export function SiteLayout({
         {...baseOptions}
         tree={tree}
         githubUrl="https://github.com/i-richardwang/animate-blog"
-        themeSwitch={{ component: <ThemeSwitcher /> }}
         slots={{
           header: Nav,
           sidebar: {
@@ -49,7 +49,6 @@ export function SiteLayout({
           },
         }}
         containerProps={{ className: 'pt-(--fd-banner-height)' }}
-        {...options}
       >
         {children}
       </DocsLayout>

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { cn } from '@workspace/ui/lib/utils';
 import { Skeleton } from '@workspace/ui/components/ui/skeleton';
 import {
   Tooltip,
@@ -15,23 +14,12 @@ import type { MonitorData } from './types';
 import { StatusTracker, StatusTrackerSkeleton } from './status-tracker';
 import { StatusMonitorIcon } from './status-icons';
 
-interface StatusMonitorProps extends React.ComponentProps<'div'> {
-  monitor: MonitorData;
-  isLoading?: boolean;
-}
-
-export const StatusMonitor = ({
-  className,
-  monitor,
-  isLoading = false,
-  ...props
-}: StatusMonitorProps) => {
+export const StatusMonitor = ({ monitor }: { monitor: MonitorData }) => {
   return (
     <div
       data-slot="status-monitor"
       data-variant={monitor.status}
-      className={cn('group/monitor flex flex-col gap-1', className)}
-      {...props}
+      className="group/monitor flex flex-col gap-1"
     >
       {/* Header */}
       <div className="flex flex-row items-center justify-between gap-4">
@@ -44,33 +32,32 @@ export const StatusMonitor = ({
           </StatusMonitorDescription>
         </div>
         <div className="flex flex-row items-center gap-2">
-          {isLoading ? (
-            <StatusMonitorUptimeSkeleton />
-          ) : (
-            <StatusMonitorUptime>{monitor.uptime}</StatusMonitorUptime>
-          )}
+          <div className="font-mono text-foreground/80 text-sm leading-none">
+            {monitor.uptime}
+          </div>
           <StatusMonitorIcon />
         </div>
       </div>
 
-      {/* Tracker */}
-      {isLoading ? (
-        <StatusTrackerSkeleton />
-      ) : (
-        <StatusTracker data={monitor.data} />
-      )}
+      <StatusTracker data={monitor.data} />
 
       {/* Footer */}
-      <StatusMonitorFooter data={monitor.data} isLoading={isLoading} />
+      <div className="flex flex-row items-center justify-between font-mono text-muted-foreground text-xs leading-none">
+        <div>
+          {monitor.data.length > 0
+            ? formatDistanceToNowStrict(new Date(monitor.data[0].day), {
+                unit: 'day',
+                addSuffix: true,
+              })
+            : '-'}
+        </div>
+        <div>today</div>
+      </div>
     </div>
   );
 };
 
-const StatusMonitorDescription = ({
-  onClick,
-  children,
-  ...props
-}: React.ComponentProps<typeof TooltipTrigger>) => {
+const StatusMonitorDescription = ({ children }: { children?: string }) => {
   const isTouch = useMediaQuery('(hover: none)');
   const [open, setOpen] = useState(false);
 
@@ -79,12 +66,10 @@ const StatusMonitorDescription = ({
   return (
     <Tooltip open={open} onOpenChange={setOpen}>
       <TooltipTrigger
-        onClick={(e) => {
+        onClick={() => {
           if (isTouch) setOpen((prev) => !prev);
-          onClick?.(e);
         }}
         className="rounded-full"
-        {...props}
       >
         <InfoIcon className="size-4 text-muted-foreground" />
       </TooltipTrigger>
@@ -92,54 +77,6 @@ const StatusMonitorDescription = ({
         <p>{children}</p>
       </TooltipContent>
     </Tooltip>
-  );
-};
-
-const StatusMonitorUptime = ({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<'div'>) => {
-  return (
-    <div
-      {...props}
-      className={cn('font-mono text-foreground/80 text-sm leading-none', className)}
-    >
-      {children}
-    </div>
-  );
-};
-
-const StatusMonitorUptimeSkeleton = ({
-  className,
-  ...props
-}: React.ComponentProps<typeof Skeleton>) => {
-  return <Skeleton className={cn('h-4 w-16', className)} {...props} />;
-};
-
-const StatusMonitorFooter = ({
-  data,
-  isLoading,
-}: {
-  data: MonitorData['data'];
-  isLoading?: boolean;
-}) => {
-  return (
-    <div className="flex flex-row items-center justify-between font-mono text-muted-foreground text-xs leading-none">
-      <div>
-        {isLoading ? (
-          <Skeleton className="h-3 w-18" />
-        ) : data.length > 0 ? (
-          formatDistanceToNowStrict(new Date(data[0].day), {
-            unit: 'day',
-            addSuffix: true,
-          })
-        ) : (
-          '-'
-        )}
-      </div>
-      <div>today</div>
-    </div>
   );
 };
 

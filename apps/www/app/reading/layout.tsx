@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { SiteLayout } from '@/components/site-layout';
 
-export default function UreadingLayout({ children }: { children: ReactNode }) {
+export default function ReadingLayout({ children }: { children: ReactNode }) {
   return <SiteLayout>{children}</SiteLayout>;
 }

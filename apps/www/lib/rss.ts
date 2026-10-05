@@ -63,19 +63,8 @@ export function getRSS() {
   // Add documentation pages
   const docPages = source.getPages();
   for (const page of docPages) {
-    // Exclude index pages and pages not suitable for RSS
-    if (
-      page.url === '/docs' ||
-      page.url === '/docs/components' ||
-      page.url === '/docs/primitives' ||
-      page.url === '/docs/icons' ||
-      page.url.includes('/index')
-    ) {
-      continue;
-    }
-
-    // Only include pages with explicit releaseDate in frontmatter
-    // Skip pages without a manually configured release date
+    // Only notes with a releaseDate are published to the feed; section
+    // index pages have none.
     if (!page.data.releaseDate) continue;
 
     const itemDate = new Date(page.data.releaseDate);

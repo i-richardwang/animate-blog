@@ -24,7 +24,6 @@ import {
 } from '@/lib/uptime-kuma/adapter';
 
 interface ApiResponse extends UptimeKumaResponse {
-  monitorNames?: Record<string, string>;
   publicGroupList?: UptimeKumaGroup[];
   error?: string;
 }

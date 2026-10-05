@@ -16,12 +16,7 @@ export interface Heartbeat {
 // 0 = DOWN, 1 = UP, 2 = PENDING, 3 = MAINTENANCE
 export type HeartbeatStatus = 0 | 1 | 2 | 3;
 
-export interface UptimeKumaConfig {
-  baseUrl: string;
-  slug: string;
-}
-
-export interface UptimeKumaMonitor {
+interface UptimeKumaMonitor {
   id: number;
   name: string;
   sendUrl: number;
@@ -33,8 +28,4 @@ export interface UptimeKumaGroup {
   name: string;
   weight: number;
   monitorList: UptimeKumaMonitor[];
-}
-
-export interface UptimeKumaConfigResponse {
-  publicGroupList: UptimeKumaGroup[];
 }
