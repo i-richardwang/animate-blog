@@ -77,4 +77,3 @@ export const flatSections = visibleSections.flatMap((section) => [
   { title: section.title, url: section.url },
   ...(section.children ?? []),
 ]);
-

@@ -13,4 +13,3 @@ export default function PandasIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-

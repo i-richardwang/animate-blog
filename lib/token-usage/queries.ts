@@ -291,7 +291,11 @@ function mergeDailyPoints(
   for (const rows of sources) {
     for (const row of rows) {
       const dateStr = String(row.date);
-      const existing = map.get(dateStr) || { date: dateStr, cost: 0, tokens: 0 };
+      const existing = map.get(dateStr) || {
+        date: dateStr,
+        cost: 0,
+        tokens: 0,
+      };
       existing.cost += Number(row.cost);
       existing.tokens += Number(row.tokens);
       map.set(dateStr, existing);
@@ -366,10 +370,12 @@ function mergeProviders(
   if (all.length <= PROVIDER_TOP_N) return all;
 
   const top = all.slice(0, PROVIDER_TOP_N);
-  const rest = all.slice(PROVIDER_TOP_N).reduce(
-    (acc, p) => ({ tokens: acc.tokens + p.tokens, cost: acc.cost + p.cost }),
-    { tokens: 0, cost: 0 },
-  );
+  const rest = all
+    .slice(PROVIDER_TOP_N)
+    .reduce(
+      (acc, p) => ({ tokens: acc.tokens + p.tokens, cost: acc.cost + p.cost }),
+      { tokens: 0, cost: 0 },
+    );
   return [...top, { provider: '其他', ...rest }];
 }
 
@@ -409,7 +415,8 @@ export async function fetchTokenUsage(
   ]);
 
   const totalCost = Number(ccSummary.totalCost) + Number(llSummary.totalCost);
-  const totalTokens = Number(ccSummary.totalTokens) + Number(llSummary.totalTokens);
+  const totalTokens =
+    Number(ccSummary.totalTokens) + Number(llSummary.totalTokens);
 
   const mergedDaily = mergeDailyPoints(ccDaily, llDaily);
 

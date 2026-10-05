@@ -9,10 +9,7 @@ import {
   type Transition,
 } from 'motion/react';
 
-import {
-  useIsInView,
-  type UseIsInViewOptions,
-} from '@/hooks/use-is-in-view';
+import { useIsInView, type UseIsInViewOptions } from '@/hooks/use-is-in-view';
 
 type DefaultSplittingTextProps = Omit<
   HTMLMotionProps<'div'>,

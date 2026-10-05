@@ -73,11 +73,7 @@ export function CodeBlock({
           <figcaption className="flex-1 truncate text-muted-foreground">
             {title}
           </figcaption>
-          <CopyButton
-            className="-me-2"
-            onClick={onCopy}
-            isCopied={isCopied}
-          />
+          <CopyButton className="-me-2" onClick={onCopy} isCopied={isCopied} />
         </div>
       ) : (
         <div className="absolute right-0 top-0 z-[2] bg-accent p-1.5 rounded-bl-xl">

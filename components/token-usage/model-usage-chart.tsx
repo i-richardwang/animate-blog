@@ -38,7 +38,10 @@ export const ModelUsageChart = ({ data }: ModelUsageChartProps) => {
         <CardDescription>Top 10 模型的 Token 使用量</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="aspect-auto h-[400px] w-full">
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[400px] w-full"
+        >
           <BarChart
             accessibilityLayer
             data={top10}

@@ -36,7 +36,10 @@ export const BrandUsageChart = ({ data }: BrandUsageChartProps) => {
         <CardDescription>按模型品牌统计的 Token 使用量</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="aspect-auto h-[400px] w-full">
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[400px] w-full"
+        >
           <BarChart
             accessibilityLayer
             data={data}

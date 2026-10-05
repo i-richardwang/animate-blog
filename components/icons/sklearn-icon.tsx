@@ -13,4 +13,3 @@ export default function SklearnIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-

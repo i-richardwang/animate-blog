@@ -12,4 +12,3 @@ export default function PythonIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-

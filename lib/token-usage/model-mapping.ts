@@ -186,7 +186,7 @@ const BRAND_PATTERNS: [RegExp, string][] = [
 export function getModelBrand(modelName: string): string {
   const normalized = normalizeModelName(modelName);
   const modelPart = normalized.includes('/')
-    ? normalized.split('/').pop() ?? normalized
+    ? (normalized.split('/').pop() ?? normalized)
     : normalized;
 
   for (const [pattern, brand] of BRAND_PATTERNS) {

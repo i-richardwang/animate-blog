@@ -22,7 +22,9 @@ export const usageRecords = pgTable(
   {
     id: serial('id').primaryKey(),
     deviceId: varchar('device_id', { length: 255 }).notNull(),
-    agentType: varchar('agent_type', { length: 50 }).notNull().default('claude-code'),
+    agentType: varchar('agent_type', { length: 50 })
+      .notNull()
+      .default('claude-code'),
     date: date('date').notNull(),
     inputTokens: integer('input_tokens').notNull().default(0),
     outputTokens: integer('output_tokens').notNull().default(0),

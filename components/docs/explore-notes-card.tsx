@@ -24,7 +24,9 @@ export function ExploreNotesCard() {
             className="inline-flex items-center gap-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md h-11 px-4 transition-colors"
           >
             <LightbulbIcon className="size-[18px]" />
-            <span className="text-[15px]">博客偏思考总结，更多实践内容在笔记中</span>
+            <span className="text-[15px]">
+              博客偏思考总结，更多实践内容在笔记中
+            </span>
             <ArrowRightIcon animation="out" className="size-4" />
           </motion.div>
         </Link>

@@ -1,9 +1,4 @@
-export type StatusVariant =
-  | 'success'
-  | 'degraded'
-  | 'error'
-  | 'info'
-  | 'empty';
+export type StatusVariant = 'success' | 'degraded' | 'error' | 'info' | 'empty';
 
 interface TrackerBarSegment {
   status: StatusVariant;

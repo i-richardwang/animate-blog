@@ -13,4 +13,3 @@ export default function PlotlyIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-

@@ -13,4 +13,3 @@ export default function MilvusIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-

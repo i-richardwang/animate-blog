@@ -60,10 +60,7 @@ const PartialDot = ({
   );
 };
 
-export const CostTrendChart = ({
-  data,
-  granularity,
-}: CostTrendChartProps) => {
+export const CostTrendChart = ({ data, granularity }: CostTrendChartProps) => {
   return (
     <Card>
       <CardHeader>

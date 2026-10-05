@@ -13,4 +13,3 @@ export default function NodejsIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-

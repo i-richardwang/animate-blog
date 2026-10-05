@@ -10,7 +10,10 @@ import {
   type SpringOptions,
 } from 'motion/react';
 
-import { Slot, type WithAsChild } from '@/components/animate-ui/primitives/animate/slot';
+import {
+  Slot,
+  type WithAsChild,
+} from '@/components/animate-ui/primitives/animate/slot';
 import { getStrictContext } from '@/lib/get-strict-context';
 import { useMotionValueState } from '@/hooks/use-motion-value-state';
 

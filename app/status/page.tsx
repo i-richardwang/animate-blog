@@ -73,10 +73,7 @@ export default function StatusPage() {
 
   return (
     <>
-      <DocsPage
-        tableOfContent={{ enabled: false }}
-        className="!max-w-[1124px]"
-      >
+      <DocsPage tableOfContent={{ enabled: false }} className="!max-w-[1124px]">
         <DocsTitle className="font-medium">系统状态</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           所有服务的实时状态和运行时间信息
