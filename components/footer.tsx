@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { MotionEffect } from './effects/motion-effect';
+import { MotionEffect } from '@/components/motion-effect';
 
 type FooterProps = {
   animated?: boolean;

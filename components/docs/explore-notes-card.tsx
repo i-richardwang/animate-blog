@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { MotionEffect } from '@/components/effects/motion-effect';
+import { MotionEffect } from '@/components/motion-effect';
 import { motion } from 'motion/react';
-import { ArrowRightIcon } from '@/registry/icons/arrow-right';
-import { LightbulbIcon } from '@/registry/icons/lightbulb';
-import { AnimateIcon } from '@/registry/icons/icon';
+import { ArrowRightIcon } from '@/components/animate-ui/icons/arrow-right';
+import { LightbulbIcon } from '@/components/animate-ui/icons/lightbulb';
+import { AnimateIcon } from '@/components/animate-ui/icons/icon';
 
 export function ExploreNotesCard() {
   return (

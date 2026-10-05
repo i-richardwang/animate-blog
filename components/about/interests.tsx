@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { MotionEffect } from '@/components/effects/motion-effect';
+import { MotionEffect } from '@/components/motion-effect';
 import { Sparkles, Camera, Server, Headphones, Film } from 'lucide-react';
 import {
   Carousel,

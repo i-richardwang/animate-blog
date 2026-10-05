@@ -3,7 +3,7 @@
 import {
   ScrollProgressProvider,
   ScrollProgress,
-} from '@/registry/primitives/animate/scroll-progress';
+} from '@/components/animate-ui/primitives/animate/scroll-progress';
 
 export const ScrollProgressBar = () => {
   return (

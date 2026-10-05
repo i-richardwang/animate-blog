@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { MotionEffect } from '@/components/effects/motion-effect';
+import { MotionEffect } from '@/components/motion-effect';
 import { motion } from 'motion/react';
 import { TechStackIcons } from '@/components/tech-stack-icons';
 

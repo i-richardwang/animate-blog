@@ -7,7 +7,7 @@ import XIcon from '@/components/icons/x-icon';
 import GithubIcon from '@/components/icons/github-icon';
 import MailIcon from '@/components/icons/mail-icon';
 import { useIsMobile } from '@/hooks/use-media-query';
-import { ThemeSwitcher } from './animate/theme-switcher';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 
 const LOGO_WRAPPER_VARIANTS = {
   center: {

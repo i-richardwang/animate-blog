@@ -31,7 +31,7 @@ import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
 import { BookOpen, SquareMenu } from 'lucide-react';
 import { type ComponentProps, useState } from 'react';
-import { ThemeSwitcher } from '../animate/theme-switcher';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 import { Separator } from '@/lib/attach-separator';
 import { flatSections } from '@/lib/navigation';
 

@@ -4,11 +4,11 @@ import {
   RotatingText,
   RotatingTextContainer,
   useRotatingText,
-} from '@/registry/primitives/texts/rotating';
-import { MotionEffect } from './effects/motion-effect';
+} from '@/components/animate-ui/primitives/texts/rotating';
+import { MotionEffect } from '@/components/motion-effect';
 import Link from 'next/link';
-import { SendHorizontalIcon } from '@/registry/icons/send-horizontal';
-import { PartyPopper } from '@/registry/icons/party-popper';
+import { SendHorizontalIcon } from '@/components/animate-ui/icons/send-horizontal';
+import { PartyPopper } from '@/components/animate-ui/icons/party-popper';
 import { useEffect, useState } from 'react';
 import type { LatestContent } from '@/types/content';
 

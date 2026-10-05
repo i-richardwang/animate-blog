@@ -1,5 +1,5 @@
 import { Dancing_Script } from 'next/font/google';
-import { MotionEffect } from './effects/motion-effect';
+import { MotionEffect } from '@/components/motion-effect';
 import { cn } from '@/lib/utils';
 import { Projects } from './icons/projects';
 import { Blog } from './icons/blog';

@@ -1,5 +1,5 @@
-import { LayoutDashboardIcon } from '@/registry/icons/layout-dashboard';
-import { AnimateIcon } from '@/registry/icons/icon';
+import { LayoutDashboardIcon } from '@/components/animate-ui/icons/layout-dashboard';
+import { AnimateIcon } from '@/components/animate-ui/icons/icon';
 
 export const Projects = () => {
   return (

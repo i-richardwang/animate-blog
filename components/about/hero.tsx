@@ -1,8 +1,8 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { SplittingText } from '@/registry/primitives/texts/splitting';
-import { MotionEffect } from '@/components/effects/motion-effect';
+import { SplittingText } from '@/components/animate-ui/primitives/texts/splitting';
+import { MotionEffect } from '@/components/motion-effect';
 import Image from 'next/image';
 
 const TITLE = 'About Me';

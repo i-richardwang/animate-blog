@@ -1,10 +1,10 @@
 import { motion } from 'motion/react';
-import { SplittingText } from '@/registry/primitives/texts/splitting';
+import { SplittingText } from '@/components/animate-ui/primitives/texts/splitting';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { MotionEffect } from './effects/motion-effect';
-import { ArrowRightIcon } from '@/registry/icons/arrow-right';
-import { AnimateIcon } from '@/registry/icons/icon';
+import { MotionEffect } from '@/components/motion-effect';
+import { ArrowRightIcon } from '@/components/animate-ui/icons/arrow-right';
+import { AnimateIcon } from '@/components/animate-ui/icons/icon';
 import { LatestBlogs } from './latest-blogs';
 import type { LatestContent } from '@/types/content';
 

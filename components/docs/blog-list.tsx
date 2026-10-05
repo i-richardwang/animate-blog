@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import { MotionEffect } from '@/components/effects/motion-effect';
+import { MotionEffect } from '@/components/motion-effect';
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 

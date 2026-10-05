@@ -8,7 +8,7 @@ import {
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import { Metadata } from 'next';
-import { Button } from '@/registry/components/buttons/button';
+import { Button } from '@/components/animate-ui/components/buttons/button';
 import { ArrowLeft, ArrowRight, ExternalLink, Mic } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -16,7 +16,7 @@ import { enUS } from 'date-fns/locale';
 import { PodcastList } from '@/components/docs/podcast-list';
 import { ApplePodcastEmbed } from '@/components/docs/apple-podcast-embed';
 import { CategoryBreadcrumb } from '@/components/docs/category-breadcrumb';
-import { Shine } from '@/registry/primitives/effects/shine';
+import { Shine } from '@/components/animate-ui/primitives/effects/shine';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 

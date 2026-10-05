@@ -1,5 +1,5 @@
-import { ChartColumnIncreasingIcon } from '@/registry/icons/chart-column-increasing';
-import { AnimateIcon } from '@/registry/icons/icon';
+import { ChartColumnIncreasingIcon } from '@/components/animate-ui/icons/chart-column-increasing';
+import { AnimateIcon } from '@/components/animate-ui/icons/icon';
 
 export const TokenUsage = () => {
   return (

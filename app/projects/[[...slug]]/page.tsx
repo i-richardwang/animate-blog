@@ -8,7 +8,7 @@ import {
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import { Metadata } from 'next';
-import { Button } from '@/registry/components/buttons/button';
+import { Button } from '@/components/animate-ui/components/buttons/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { ProjectList } from '@/components/docs/project-list';
