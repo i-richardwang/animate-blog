@@ -1,18 +1,17 @@
 {
   "title": "开发实践",
   "description": "独立开发与自托管",
-  "icon": "Code",
   "root": true,
   "pagesIndex": "index",
   "pages": [
-    "---Self Hosted---",
+    "---[HardDrive]Self Hosted---",
     "self-hosted/pve-installation-pcie-passthrough",
     "self-hosted/pve-vm-gpu-passthrough-cuda-setup",
     "self-hosted/datalore-deployment-overview",
     "self-hosted/dolphinscheduler",
     "self-hosted/hadoop-deployment",
     "self-hosted/hive-on-spark",
-    "---独立开发---",
+    "---[Hammer]独立开发---",
     "indie-hacking/simplelogin-custom-domain-email"
   ]
 }

@@ -32,7 +32,6 @@ export default async function Page(props: {
       description: post.data.description,
       date: new Date(post.data.date),
       podcastName: post.data.podcastName,
-      episodeTitle: post.data.episodeTitle,
       hosts: post.data.hosts,
       guests: post.data.guests,
       duration: post.data.duration,
@@ -147,13 +146,13 @@ export default async function Page(props: {
         </DocsDescription>
 
         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-2">
-          {page.data.hosts?.length > 0 && (
+          {page.data.hosts.length > 0 && (
             <div className="flex items-center gap-1">
               <Mic className="size-3" />
               <span>主播: {page.data.hosts.join(', ')}</span>
             </div>
           )}
-          {page.data.guests?.length > 0 && (
+          {page.data.guests.length > 0 && (
             <>
               <span className="text-muted-foreground/50">|</span>
               <span>嘉宾: {page.data.guests.join(', ')}</span>
@@ -168,14 +167,10 @@ export default async function Page(props: {
           >
             {format(date, 'MMM d, yyyy', { locale: enUS })}
           </time>
-          {page.data.duration && (
-            <>
-              <span className="text-muted-foreground/50">·</span>
-              <span className="text-sm text-muted-foreground">
-                {page.data.duration}
-              </span>
-            </>
-          )}
+          <span className="text-muted-foreground/50">·</span>
+          <span className="text-sm text-muted-foreground">
+            {page.data.duration}
+          </span>
         </div>
 
         <div className="flex flex-row gap-2 items-center mt-4">
@@ -255,8 +250,7 @@ export async function generateMetadata(props: {
   const page = podcasts.getPage(slug);
   if (!page) notFound();
 
-  const image =
-    page.data.image || ['/podcasts-og', ...slug, 'image.png'].join('/');
+  const { image } = page.data;
 
   return {
     title: page.data.title,

@@ -32,7 +32,6 @@ import { AnimatePresence, motion } from 'motion/react';
 import { BookOpen, SquareMenu } from 'lucide-react';
 import { type ComponentProps, useState } from 'react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
-import { Separator } from '@/lib/attach-separator';
 import { flatSections } from '@/lib/navigation';
 
 const indicatorTransition = {
@@ -170,10 +169,32 @@ function PageTreeFolder({ item }: { item: PageTree.Folder }) {
   );
 }
 
+// The small boxed icon in front of a section heading.
+function SeparatorIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="relative size-5 [&_svg]:size-[12px] flex items-center justify-center bg-border text-muted-foreground rounded-[5px]">
+      {children}
+      <span className="absolute left-1/2 translate-x-[calc(-50%-0.5px)] bg-border w-px h-[8px] top-full" />
+    </span>
+  );
+}
+
+// A heading the sidebar adds itself, outside the page tree.
+function Separator({ icon, name }: { icon: React.ReactNode; name: string }) {
+  return (
+    <span className="flex items-center gap-2">
+      <SeparatorIcon>{icon}</SeparatorIcon>
+      <span className="text-[13px] text-neutral-500">{name}</span>
+    </span>
+  );
+}
+
+// Separators come from meta.json (`---[Icon]Name---`); the loader resolves
+// the icon name to a Lucide icon.
 function PageTreeSeparator({ item }: { item: PageTree.Separator }) {
   return (
     <SectionSeparator>
-      {item.icon}
+      {item.icon && <SeparatorIcon>{item.icon}</SeparatorIcon>}
       {item.name}
     </SectionSeparator>
   );

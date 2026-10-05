@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import { Metadata } from 'next';
 import { DocsAuthor } from '@/components/docs/docs-author';
+import { SITE_AUTHOR } from '@/lib/site';
 import { Button } from '@/components/animate-ui/components/buttons/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -134,12 +135,7 @@ export default async function Page(props: {
         <DocsDescription className="mb-1 font-normal">
           {page.data.description}
         </DocsDescription>
-        {page.data.author && (
-          <DocsAuthor
-            name={page.data.author.name}
-            url={page.data.author?.url}
-          />
-        )}
+        <DocsAuthor {...SITE_AUTHOR} />
 
         <time
           dateTime={date.toISOString()}
@@ -203,17 +199,7 @@ export async function generateMetadata(props: {
   return {
     title: page.data.title,
     description: page.data.description,
-    authors: page.data?.author
-      ? [
-          {
-            name: page.data.author.name,
-            ...(page.data.author?.url && { url: page.data.author.url }),
-          },
-        ]
-      : {
-          name: 'Richard Wang',
-          url: 'https://github.com/i-richardwang',
-        },
+    authors: [SITE_AUTHOR],
     openGraph: {
       title: page.data.title,
       description: page.data.description,
@@ -222,14 +208,14 @@ export async function generateMetadata(props: {
       type: 'article',
       publishedTime: new Date(page.data.date).toISOString(),
       locale: 'zh_CN',
-      images: page.data.image || image,
+      images: image,
     },
     twitter: {
       card: 'summary_large_image',
       site: '@richard2wang',
       title: page.data.title,
       description: page.data.description,
-      images: page.data.image || image,
+      images: image,
     },
   };
 }

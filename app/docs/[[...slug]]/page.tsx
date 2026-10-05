@@ -11,6 +11,7 @@ import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { getMDXComponents } from '@/mdx-components';
 import { Metadata } from 'next';
 import { DocsAuthor } from '@/components/docs/docs-author';
+import { SITE_AUTHOR } from '@/lib/site';
 import { ViewOptions, LLMCopyButton } from '@/components/docs/page-actions';
 import { Button } from '@/components/animate-ui/components/buttons/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
@@ -27,6 +28,8 @@ export default async function Page(props: {
   if (!page) notFound();
 
   const MDXContent = page.data.body;
+  // Section landing pages (index.mdx) are not authored notes.
+  const isSectionIndex = /(^|\/)index\.mdx$/.test(page.path);
 
   const tree = source.getPageTree();
   const { previous, next: nextPage } = findNeighbour(tree, page.url);
@@ -147,9 +150,7 @@ export default async function Page(props: {
       <DocsDescription className="mb-1 font-normal">
         {page.data.description}
       </DocsDescription>
-      {page.data.author && (
-        <DocsAuthor name={page.data.author.name} url={page.data.author?.url} />
-      )}
+      {!isSectionIndex && <DocsAuthor {...SITE_AUTHOR} />}
 
       <div className="flex flex-row gap-2 items-center">
         <EditOnGitHub
@@ -190,17 +191,7 @@ export async function generateMetadata(props: {
   return {
     title: page.data.title,
     description: page.data.description,
-    authors: page.data?.author
-      ? [
-          {
-            name: page.data.author.name,
-            ...(page.data.author?.url && { url: page.data.author.url }),
-          },
-        ]
-      : {
-          name: 'Richard Wang',
-          url: 'https://github.com/i-richardwang',
-        },
+    authors: [SITE_AUTHOR],
     openGraph: {
       title: page.data.title,
       description: page.data.description,

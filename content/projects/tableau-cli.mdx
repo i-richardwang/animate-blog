@@ -12,7 +12,6 @@ tech:
   - httpx
   - Tableau REST API
   - VizQL Data Service
-featured: false
 ---
 
 Tableau CLI 是面向 AI agent 的 Tableau 访问工具，由 Python 命令行 `tableau-cli`（能力对齐 [tableau-mcp](https://github.com/tableau/tableau-mcp)）和配套的 Claude Code skill 组成。设计目标是让工具相关内容不常驻 agent context：CLI 调用完即退出，skill 仅在需要时加载对应部分的手册。

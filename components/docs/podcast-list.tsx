@@ -13,11 +13,10 @@ interface Podcast {
   description?: string;
   date: Date;
   podcastName: string;
-  episodeTitle: string;
   hosts: string[];
   guests: string[];
-  duration?: string;
-  image?: string;
+  duration: string;
+  image: string;
 }
 
 interface PodcastListProps {
@@ -39,15 +38,13 @@ function FeaturedCard({ podcast }: { podcast: Podcast }) {
           className="group bg-card rounded-md overflow-hidden cursor-pointer"
         >
           <div className="flex flex-col md:flex-row">
-            {podcast.image && (
-              <div className="relative w-full md:w-[280px] md:h-[280px] aspect-square md:aspect-auto flex-shrink-0 overflow-hidden bg-muted">
-                <img
-                  src={podcast.image}
-                  alt={podcast.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-            )}
+            <div className="relative w-full md:w-[280px] md:h-[280px] aspect-square md:aspect-auto flex-shrink-0 overflow-hidden bg-muted">
+              <img
+                src={podcast.image}
+                alt={podcast.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
 
             <div className="flex-1 p-6 md:p-8 flex flex-col justify-center">
               <div className="flex items-center gap-2 mb-4">
@@ -55,12 +52,10 @@ function FeaturedCard({ podcast }: { podcast: Podcast }) {
                   <Headphones className="size-3" />
                   本周推荐
                 </span>
-                {podcast.duration && (
-                  <span className="h-6 px-2 bg-muted text-muted-foreground text-xs rounded flex gap-1 items-center justify-center">
-                    <Clock className="size-3" />
-                    {podcast.duration}
-                  </span>
-                )}
+                <span className="h-6 px-2 bg-muted text-muted-foreground text-xs rounded flex gap-1 items-center justify-center">
+                  <Clock className="size-3" />
+                  {podcast.duration}
+                </span>
               </div>
 
               <div className="text-sm text-muted-foreground mb-2">
@@ -118,28 +113,24 @@ function PodcastCard({ podcast, index }: { podcast: Podcast; index: number }) {
           className="h-full group bg-card rounded-md overflow-hidden cursor-pointer"
         >
           <div className="flex flex-row">
-            {podcast.image && (
-              <div className="relative w-[160px] h-[160px] flex-shrink-0 overflow-hidden bg-muted">
-                <img
-                  src={podcast.image}
-                  alt={podcast.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-            )}
+            <div className="relative w-[160px] h-[160px] flex-shrink-0 overflow-hidden bg-muted">
+              <img
+                src={podcast.image}
+                alt={podcast.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
 
             <div className="flex-1 p-4 flex flex-col justify-center min-w-0">
               <div className="flex items-center gap-2 mb-1.5 text-xs text-muted-foreground">
                 <span className="truncate">{podcast.podcastName}</span>
-                {podcast.duration && (
-                  <>
-                    <span className="text-muted-foreground/50">·</span>
-                    <span className="flex items-center gap-1 flex-shrink-0">
-                      <Clock className="size-3" />
-                      {podcast.duration}
-                    </span>
-                  </>
-                )}
+                <>
+                  <span className="text-muted-foreground/50">·</span>
+                  <span className="flex items-center gap-1 flex-shrink-0">
+                    <Clock className="size-3" />
+                    {podcast.duration}
+                  </span>
+                </>
               </div>
 
               <h2 className="text-lg font-medium group-hover:text-primary transition-colors line-clamp-2 mb-1.5">

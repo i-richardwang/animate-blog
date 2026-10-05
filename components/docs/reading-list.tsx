@@ -12,11 +12,11 @@ interface Reading {
   title: string;
   description?: string;
   date: Date;
-  author?: {
+  author: {
     name: string;
     url?: string;
   };
-  image?: string;
+  image: string;
 }
 
 interface ReadingListProps {
@@ -38,15 +38,13 @@ function FeaturedCard({ reading }: { reading: Reading }) {
           className="group bg-card rounded-md overflow-hidden cursor-pointer"
         >
           <div className="flex flex-col md:flex-row">
-            {reading.image && (
-              <div className="relative w-full md:w-1/2 aspect-[16/9] overflow-hidden bg-muted">
-                <img
-                  src={reading.image}
-                  alt={reading.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-            )}
+            <div className="relative w-full md:w-1/2 aspect-[16/9] overflow-hidden bg-muted">
+              <img
+                src={reading.image}
+                alt={reading.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
 
             <div className="flex-1 p-6 md:p-8 flex flex-col justify-center">
               <div className="flex items-center gap-2 mb-4">
@@ -67,12 +65,10 @@ function FeaturedCard({ reading }: { reading: Reading }) {
               )}
 
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                {reading.author && (
-                  <>
-                    <span>{reading.author.name}</span>
-                    <span className="text-muted-foreground/50">·</span>
-                  </>
-                )}
+                <>
+                  <span>{reading.author.name}</span>
+                  <span className="text-muted-foreground/50">·</span>
+                </>
                 <time dateTime={reading.date.toISOString()}>
                   {format(reading.date, 'MMM d, yyyy', { locale: enUS })}
                 </time>
@@ -99,15 +95,13 @@ function ReadingCard({ reading, index }: { reading: Reading; index: number }) {
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="h-full group bg-card rounded-md overflow-hidden cursor-pointer"
         >
-          {reading.image && (
-            <div className="relative w-full aspect-[16/9] overflow-hidden bg-muted">
-              <img
-                src={reading.image}
-                alt={reading.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-          )}
+          <div className="relative w-full aspect-[16/9] overflow-hidden bg-muted">
+            <img
+              src={reading.image}
+              alt={reading.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
 
           <div className="p-6">
             <h2 className="text-lg md:text-xl font-medium group-hover:text-primary transition-colors line-clamp-2 mb-3">
@@ -121,7 +115,7 @@ function ReadingCard({ reading, index }: { reading: Reading; index: number }) {
             )}
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              {reading.author && <span>{reading.author.name}</span>}
+              <span>{reading.author.name}</span>
               <time dateTime={reading.date.toISOString()}>
                 {format(reading.date, 'MMM d, yyyy', { locale: enUS })}
               </time>

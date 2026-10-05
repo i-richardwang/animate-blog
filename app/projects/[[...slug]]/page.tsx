@@ -46,10 +46,7 @@ export default async function Page(props: {
           title: project.data.title,
           description: project.data.description,
           tech: project.data.tech,
-          links: project.data.links,
-          image: project.data.image,
           logo: project.data.logo,
-          featured: project.data.featured,
           category: project.data.category,
         };
       })
@@ -217,7 +214,7 @@ export default async function Page(props: {
           {page.data.description}
         </DocsDescription>
 
-        {page.data.tech && page.data.tech.length > 0 && (
+        {page.data.tech.length > 0 && (
           <div className="flex flex-row gap-2 items-center flex-wrap">
             {page.data.tech.map((tech) => (
               <span
@@ -232,8 +229,8 @@ export default async function Page(props: {
 
         <div className="flex flex-row gap-2 items-center">
           <ProjectActions
-            projectUrl={page.data.links?.url}
-            githubUrl={page.data.links?.github}
+            projectUrl={page.data.links.url}
+            githubUrl={page.data.links.github}
           />
         </div>
 
@@ -287,8 +284,7 @@ export async function generateMetadata(props: {
   const page = projects.getPage(slug);
   if (!page) notFound();
 
-  const image =
-    page.data.image || ['/projects-og', ...slug, 'image.png'].join('/');
+  const image = ['/projects-og', ...slug, 'image.png'].join('/');
 
   return {
     title: page.data.title,

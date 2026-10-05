@@ -1,23 +1,17 @@
-const CATEGORY_LABELS: Record<string, string> = {
-  // Reading categories
+const CATEGORY_LABELS = {
   tech: '技术博文',
   humanity: '科技与人文',
-  // Podcast categories
-  business: '商业洞察',
-  other: '其他',
 };
 
 export const CategoryBreadcrumb = ({
   category,
 }: {
-  category?: string;
+  category: keyof typeof CATEGORY_LABELS;
 }) => {
-  if (!category) return null;
-
   return (
     <div className="flex items-center gap-1.5 text-sm text-fd-muted-foreground">
       <span className="truncate text-fd-primary font-medium">
-        {CATEGORY_LABELS[category] ?? category}
+        {CATEGORY_LABELS[category]}
       </span>
     </div>
   );

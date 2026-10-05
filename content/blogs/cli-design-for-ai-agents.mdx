@@ -2,9 +2,6 @@
 title: 面向 Agent 的 CLI 工具设计
 description: 从命令组织、响应裁剪、错误引导到渐进式加载，构建 Agent 友好的 CLI 工具
 date: 2026-04-13
-author:
-  name: Richard Wang
-  url: https://github.com/i-richardwang
 ---
 
 一个 Agent 同时接入多个工具后，光是让模型知道这些工具怎么用，就要占用不少上下文。MCP server 注册的所有工具都会把名称、参数和说明一起交给模型。一次任务通常只会用到其中一小部分，其他工具的说明也会一起进入上下文。

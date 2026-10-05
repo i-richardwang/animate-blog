@@ -1,12 +1,12 @@
 import { docs, blog, projects as projectsSource, reading as readingSource, podcasts as podcastsSource } from 'collections/server';
 import { attachFile } from '@/lib/attach-file';
-import { attachSeparator } from '@/lib/attach-separator';
 import { loader, type InferPageType } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { createElement } from 'react';
 
-// Resolves the `icon` field of meta.json to a Lucide icon.
+// Resolves the icon names of meta.json separators (`---[Icon]Name---`)
+// to Lucide icons.
 function resolveIcon(icon: string | undefined) {
   if (icon && icon in icons) {
     return createElement(icons[icon as keyof typeof icons]);
@@ -16,7 +16,7 @@ function resolveIcon(icon: string | undefined) {
 export const source = loader({
   baseUrl: '/docs',
   source: docs.toFumadocsSource(),
-  plugins: [attachFile, attachSeparator],
+  plugins: [attachFile],
   icon: resolveIcon,
 });
 

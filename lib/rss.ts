@@ -1,5 +1,6 @@
 import { Feed } from 'feed';
 import { blogs, source } from '@/lib/source';
+import { SITE_AUTHOR } from '@/lib/site';
 
 const baseUrl = 'https://richardwang.me';
 
@@ -8,12 +9,7 @@ type FeedItem = {
   title: string;
   description: string;
   date: Date;
-  author: {
-    name: string;
-    url?: string;
-  };
-  image?: string;
-  category?: string;
+  category: string;
 };
 
 export function getRSS() {
@@ -31,8 +27,8 @@ export function getRSS() {
       rss2: `${baseUrl}/rss.xml`,
     },
     author: {
-      name: 'Richard Wang',
-      link: 'https://github.com/i-richardwang',
+      name: SITE_AUTHOR.name,
+      link: SITE_AUTHOR.url,
     },
   });
 
@@ -46,16 +42,6 @@ export function getRSS() {
       title: post.data.title,
       description: post.data.description ?? '',
       date: new Date(post.data.date),
-      author: post.data.author
-        ? {
-            name: post.data.author.name,
-            url: post.data.author.url,
-          }
-        : {
-            name: 'Richard Wang',
-            url: 'https://github.com/i-richardwang',
-          },
-      image: post.data.image,
       category: 'Blog',
     });
   }
@@ -84,15 +70,6 @@ export function getRSS() {
       title: page.data.title,
       description: page.data.description ?? '',
       date: itemDate,
-      author: page.data.author
-        ? {
-            name: page.data.author.name,
-            url: page.data.author.url,
-          }
-        : {
-            name: 'Richard Wang',
-            url: 'https://github.com/i-richardwang',
-          },
       category,
     });
   }
@@ -110,14 +87,8 @@ export function getRSS() {
       description: item.description,
       link: itemUrl,
       date: item.date,
-      author: [
-        {
-          name: item.author.name,
-          link: item.author.url,
-        },
-      ],
-      category: item.category ? [{ name: item.category }] : undefined,
-      image: item.image ? `${baseUrl}${item.image}` : undefined,
+      author: [{ name: SITE_AUTHOR.name, link: SITE_AUTHOR.url }],
+      category: [{ name: item.category }],
     });
   }
 

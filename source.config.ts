@@ -12,12 +12,6 @@ export const docs = defineDocs({
   docs: {
     schema: frontmatterSchema.extend({
       releaseDate: z.coerce.date().optional(),
-      author: z
-        .object({
-          name: z.string(),
-          url: z.string().optional(),
-        })
-        .optional(),
     }),
   },
   meta: {
@@ -30,57 +24,45 @@ export const blog = defineCollections({
   dir: 'content/blogs',
   schema: frontmatterSchema.extend({
     date: z.coerce.date(),
-    author: z
-      .object({
-        name: z.string(),
-        url: z.string().optional(),
-        avatar: z.string().optional(),
-      })
-      .optional(),
-    image: z.string().optional(),
-    tags: z.array(z.string()).default([]),
   }),
 });
 
 export const projects = defineDocs({
+  dir: 'content/projects',
   docs: {
-  schema: frontmatterSchema.extend({
-    date: z.coerce.date(),
-    tech: z.array(z.string()).default([]),
-    links: z
-      .object({
+    schema: frontmatterSchema.extend({
+      date: z.coerce.date(),
+      category: z.enum(['portfolio', 'business', 'exploration', 'personal']),
+      tech: z.array(z.string()),
+      logo: z.string(),
+      links: z.object({
         github: z.string().optional(),
         url: z.string().optional(),
-      })
-      .optional(),
-    image: z.string().optional(),
-    logo: z.string().optional(),
-    featured: z.boolean().default(false),
-    category: z.enum(['portfolio', 'business', 'exploration', 'personal']).optional(),
-  }),
+      }),
+    }),
   },
   meta: {
     schema: metaSchema,
   },
-  dir: 'content/projects',
 });
+
+const category = z.enum(['tech', 'humanity']);
 
 export const reading = defineCollections({
   type: 'doc',
   dir: 'content/reading',
   schema: frontmatterSchema.extend({
     date: z.coerce.date(),
-    author: z
-      .object({
-        name: z.string(),
-        url: z.string().optional(),
-      })
-      .optional(),
-    originalUrl: z.string(),
-    originalTitle: z.string(),
-    image: z.string().optional(),
-    category: z.enum(['tech', 'humanity']).optional(),
+    category,
+    image: z.string(),
     subtitle: z.string().optional(),
+    originalTitle: z.string(),
+    originalUrl: z.string(),
+    // The original article's author.
+    author: z.object({
+      name: z.string(),
+      url: z.string().optional(),
+    }),
   }),
 });
 
@@ -89,16 +71,15 @@ export const podcasts = defineCollections({
   dir: 'content/podcasts',
   schema: frontmatterSchema.extend({
     date: z.coerce.date(),
+    category,
+    image: z.string(),
     podcastName: z.string(),
-    episodeTitle: z.string(),
-    hosts: z.array(z.string()).default([]),
-    guests: z.array(z.string()).default([]),
-    duration: z.string().optional(),
+    hosts: z.array(z.string()),
+    guests: z.array(z.string()),
+    duration: z.string(),
     applePodcastUrl: z.string(),
     applePodcastId: z.string(),
     episodeId: z.string(),
-    image: z.string().optional(),
-    category: z.enum(['tech', 'business', 'humanity', 'other']).optional(),
   }),
 });
 

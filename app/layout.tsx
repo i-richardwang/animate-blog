@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 
 import './globals.css';
+import { SITE_AUTHOR } from '@/lib/site';
 import { jsonLd } from '@/lib/json-ld';
 import { Analytics } from '@/lib/analytics';
 
@@ -42,12 +43,7 @@ export const metadata: Metadata = {
       url: '/apple-touch-icon.png',
     },
   ],
-  authors: [
-    {
-      name: 'Richard Wang',
-      url: 'https://github.com/i-richardwang',
-    },
-  ],
+  authors: [SITE_AUTHOR],
   publisher: "Richard's Page",
   alternates: {
     types: {

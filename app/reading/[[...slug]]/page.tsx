@@ -138,12 +138,7 @@ export default async function Page(props: {
         <DocsDescription className="mb-1 font-normal">
           {page.data.description}
         </DocsDescription>
-        {page.data.author && (
-          <DocsAuthor
-            name={page.data.author.name}
-            url={page.data.author?.url}
-          />
-        )}
+        <DocsAuthor {...page.data.author} />
 
         <div className="flex flex-row gap-2 items-center">
           <time
@@ -170,7 +165,7 @@ export default async function Page(props: {
               )}
             >
               <ExternalLink />
-              阅读原文:《{page.data.originalTitle}》by {page.data.author?.name}
+              阅读原文:《{page.data.originalTitle}》by {page.data.author.name}
             </a>
           </Shine>
         </div>
@@ -225,23 +220,12 @@ export async function generateMetadata(props: {
   const page = reading.getPage(slug);
   if (!page) notFound();
 
-  const image =
-    page.data.image || ['/reading-og', ...slug, 'image.png'].join('/');
+  const { image } = page.data;
 
   return {
     title: page.data.title,
     description: page.data.description,
-    authors: page.data?.author
-      ? [
-          {
-            name: page.data.author.name,
-            ...(page.data.author?.url && { url: page.data.author.url }),
-          },
-        ]
-      : {
-          name: 'Richard Wang',
-          url: 'https://github.com/i-richardwang',
-        },
+    authors: [page.data.author],
     openGraph: {
       title: page.data.title,
       description: page.data.description,
