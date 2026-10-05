@@ -11,14 +11,16 @@ import { cn } from '@/lib/utils';
 export const ThemeSwitcher = ({ className }: { className?: string }) => {
   const { resolvedTheme: theme, setTheme } = useTheme();
 
-  const [isClient, setIsClient] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
+  // The theme is only known on the client, so render nothing on the server
+  // and during hydration.
+  const isHydrated = React.useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false,
+  );
 
   return (
-    isClient && (
+    isHydrated && (
       <Switch
         className={className}
         leftIcon={<Sun />}
@@ -29,6 +31,8 @@ export const ThemeSwitcher = ({ className }: { className?: string }) => {
     )
   );
 };
+
+const subscribeToNothing = () => () => {};
 
 function Switch({
   className,

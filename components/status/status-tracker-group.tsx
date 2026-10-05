@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -27,12 +26,6 @@ export const StatusTrackerGroup = ({
   children,
   className,
 }: StatusTrackerGroupProps) => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   return (
     <Collapsible
       defaultOpen={defaultOpen}
@@ -56,14 +49,7 @@ export const StatusTrackerGroup = ({
           <StatusMonitorIcon />
         </div>
       </CollapsibleTrigger>
-      <CollapsibleContent
-        data-animate={mounted}
-        className={cn(
-          'grid grid-cols-1 gap-3 border-t border-border/50 px-3 py-2 md:grid-cols-2',
-          'overflow-hidden',
-          'data-[animate=true]:data-[state=closed]:animate-collapsible-up data-[animate=true]:data-[state=open]:animate-collapsible-down',
-        )}
-      >
+      <CollapsibleContent className="grid grid-cols-1 gap-3 border-t border-border/50 px-3 py-2 md:grid-cols-2">
         {children}
       </CollapsibleContent>
     </Collapsible>
@@ -79,11 +65,7 @@ export const StatusTrackerGroupSkeleton = ({
 }) => {
   return (
     <div
-      className={cn(
-        '-mx-3',
-        'border border-border/50 bg-muted/50',
-        className,
-      )}
+      className={cn('-mx-3', 'border border-border/50 bg-muted/50', className)}
     >
       {/* Header */}
       <div className="flex w-full items-center justify-between gap-2 px-3 py-2">

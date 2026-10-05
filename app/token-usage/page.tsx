@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import {
   DocsPage,
   DocsBody,
@@ -19,41 +19,46 @@ import { RangeSelector } from '@/components/token-usage/range-selector';
 import type { TokenUsageResponse } from '@/lib/token-usage/types';
 import { formatCost, formatTokens } from '@/lib/token-usage/format';
 
+async function fetchUsage(range: string): Promise<TokenUsageResponse> {
+  const response = await fetch(`/api/token-usage?range=${range}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch: ${response.statusText}`);
+  }
+  return response.json();
+}
+
 export default function TokenUsagePage() {
-  const [data, setData] = useState<TokenUsageResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
   const [range, setRange] = useState('30d');
-
-  const fetchData = useCallback(async (r: string) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/token-usage?range=${r}`);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.statusText}`);
-      }
-
-      const result: TokenUsageResponse = await response.json();
-      setData(result);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const [data, setData] = useState<TokenUsageResponse | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  // The range whose request last settled; the page is loading until it
+  // matches the selected one.
+  const [settledRange, setSettledRange] = useState<string | null>(null);
+  const isLoading = settledRange !== range;
 
   useEffect(() => {
-    fetchData(range);
-  }, [range, fetchData]);
+    let ignore = false;
+    fetchUsage(range).then(
+      (result) => {
+        if (ignore) return;
+        setData(result);
+        setError(null);
+        setSettledRange(range);
+      },
+      (err) => {
+        if (ignore) return;
+        setError(err instanceof Error ? err : new Error('Unknown error'));
+        setSettledRange(range);
+      },
+    );
+    return () => {
+      ignore = true;
+    };
+  }, [range]);
 
   return (
     <>
-      <DocsPage
-        tableOfContent={{ enabled: false }}
-        className="!max-w-[1124px]"
-      >
+      <DocsPage tableOfContent={{ enabled: false }} className="!max-w-[1124px]">
         <DocsTitle className="font-medium">Token 用量</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           AI Token 使用量和成本的实时统计与趋势分析

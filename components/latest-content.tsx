@@ -9,20 +9,15 @@ import { MotionEffect } from '@/components/motion-effect';
 import Link from 'next/link';
 import { SendHorizontalIcon } from '@/components/animate-ui/icons/send-horizontal';
 import { PartyPopper } from '@/components/animate-ui/icons/party-popper';
-import { useEffect, useState } from 'react';
 import type { LatestEntry } from '@/lib/source';
 
 const SyncedSendIcon = () => {
   const { currentText } = useRotatingText();
-  const [animateKey, setAnimateKey] = useState(0);
 
-  useEffect(() => {
-    setAnimateKey((prev) => prev + 1);
-  }, [currentText]);
-
+  // Remounting replays the icon's animation each time the title changes.
   return (
     <SendHorizontalIcon
-      key={animateKey}
+      key={currentText}
       animation="default"
       animate
       className="size-5 flex-shrink-0"

@@ -36,7 +36,6 @@ export default function StatusPage() {
   useEffect(() => {
     async function fetchStatus() {
       try {
-        setIsLoading(true);
         const response = await fetch('/api/status');
 
         if (!response.ok) {
