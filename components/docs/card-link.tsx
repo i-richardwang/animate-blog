@@ -52,6 +52,9 @@ export function CoverImage({
 }) {
   return (
     <div className={cn('relative overflow-hidden bg-muted', className)}>
+      {/* Covers come from whatever host the frontmatter names, which
+          next/image would need listed in advance. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={alt}

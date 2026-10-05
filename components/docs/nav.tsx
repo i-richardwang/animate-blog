@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import React from 'react';
 import { IconLogo } from '@/components/icon-logo';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/utils';

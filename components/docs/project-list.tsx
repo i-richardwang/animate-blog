@@ -28,6 +28,8 @@ export function ProjectList({ projects }: ProjectListProps) {
           <div className="p-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="flex-shrink-0 size-6 flex items-center justify-center">
+                {/* SVG and remote logos would need extra next/image config. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={project.logo}
                   alt={`${project.title} logo`}

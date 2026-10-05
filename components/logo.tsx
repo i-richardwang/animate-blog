@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { SITE } from '@/lib/site';
 
 const pathVariants = {
   hidden: {
@@ -48,7 +49,7 @@ export const Logo = ({
         ></motion.path>
       </motion.svg>
 
-      <span className="sr-only">Richard's Page</span>
+      <span className="sr-only">{SITE.name}</span>
     </div>
   );
 };
