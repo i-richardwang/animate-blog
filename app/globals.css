@@ -1,0 +1,316 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+@plugin 'tailwind-scrollbar';
+
+@custom-variant dark (&:is(.dark *));
+
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+
+:root {
+  /* New warm color palette - Light mode */
+  --background: #fcf9f0;
+
+  --foreground: #2b3328;
+
+  --card: #f0edde;
+
+  --card-foreground: #2b3328;
+
+  --popover: #fcf9f0;
+
+  --popover-foreground: #2b3328;
+
+  --primary: #526b2d;
+
+  --primary-foreground: #fcf9f0;
+
+  --secondary: #f0edde;
+
+  --secondary-foreground: #2b3328;
+
+  --muted: #e6e3d4;
+
+  --muted-foreground: #515b4e;
+
+  --accent: #f0edde;
+
+  --accent-foreground: #2b3328;
+
+  --destructive: #c44536;
+
+  --destructive-foreground: #fcf9f0;
+
+  /* Status colors - GitHub (High Contrast) */
+  --success: oklch(60.81% 0.1567 142.5);
+
+  --success-foreground: #ffffff;
+
+  --warning: oklch(81.84% 0.1328 85.87);
+
+  --warning-foreground: #ffffff;
+
+  --info: oklch(45.2% 0.1445 252.03);
+
+  --info-foreground: #ffffff;
+
+  --border: #e0dccc;
+
+  --input: #e0dccc;
+
+  --ring: rgba(82, 107, 45, 0.4);
+
+  --chart-1: #526b2d;
+
+  --chart-2: #6b8e3a;
+
+  --chart-3: #3a5a40;
+
+  --chart-4: #b5c99a;
+
+  --chart-5: #8fb339;
+
+  /* Fumadocs UI color mappings */
+  --color-fd-background: #fcf9f0;
+  --color-fd-foreground: #2b3328;
+  --color-fd-primary: #0d8823;
+  --color-fd-accent: #f0edde;
+  --color-fd-accent-foreground: #2b3328;
+  --color-fd-card: #f0edde;
+  --color-fd-card-foreground: #2b3328;
+  --color-fd-muted: #e6e3d4;
+  --color-fd-muted-foreground: #3c4539;
+  --color-fd-secondary: #f0edde;
+  --color-fd-secondary-foreground: #2b3328;
+  --color-fd-popover: #fcf9f0;
+  --color-fd-popover-foreground: #2b3328;
+  --color-fd-border: #e0dccc;
+}
+
+.dark {
+  /* Dark mode - Monokai-inspired */
+  --background: #1c1c1c;
+
+  --foreground: #f8f8f2;
+
+  --card: #242424;
+
+  --card-foreground: #f8f8f2;
+
+  --popover: #1c1c1c;
+
+  --popover-foreground: #f8f8f2;
+
+  --primary: #ff6188;
+
+  --primary-foreground: #1c1c1c;
+
+  --secondary: #2a2a2a;
+
+  --secondary-foreground: #f8f8f2;
+
+  --muted: #3a3a3a;
+
+  --muted-foreground: #e2e2dc;
+
+  --accent: #2a2a2a;
+
+  --accent-foreground: #f8f8f2;
+
+  --destructive: #ff6188;
+
+  --destructive-foreground: #1c1c1c;
+
+  /* Status colors - GitHub (High Contrast) */
+  --success: oklch(54.34% 0.1634 145.98);
+
+  --success-foreground: #ffffff;
+
+  --warning: oklch(81.84% 0.1328 85.87);
+
+  --warning-foreground: #1c1c1c;
+
+  --info: oklch(46.96% 0.2957 264.51);
+
+  --info-foreground: #ffffff;
+
+  --border: #2f2f2f;
+
+  --input: #2f2f2f;
+
+  --ring: #ff6188;
+
+  --chart-1: #ff6188;
+
+  --chart-2: #a9dc76;
+
+  --chart-3: #ffd866;
+
+  --chart-4: #78dce8;
+
+  --chart-5: #ab9df2;
+
+  /* Fumadocs UI color mappings - Dark */
+  --color-fd-background: #1c1c1c;
+  --color-fd-foreground: #f8f8f2;
+  --color-fd-primary: #ff6188;
+  --color-fd-accent: #2a2a2a;
+  --color-fd-accent-foreground: #f8f8f2;
+  --color-fd-card: #242424;
+  --color-fd-card-foreground: #f8f8f2;
+  --color-fd-muted: #3a3a3a;
+  --color-fd-muted-foreground: #e2e2dc;
+  --color-fd-secondary: #2a2a2a;
+  --color-fd-secondary-foreground: #f8f8f2;
+  --color-fd-popover: #1c1c1c;
+  --color-fd-popover-foreground: #f8f8f2;
+  --color-fd-border: #2f2f2f;
+}
+
+@theme inline {
+  --breakpoint-xs: 30rem;
+
+  --color-background: var(--background);
+
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-success: var(--success);
+
+  --color-success-foreground: var(--success-foreground);
+
+  --color-warning: var(--warning);
+
+  --color-warning-foreground: var(--warning-foreground);
+
+  --color-info: var(--info);
+
+  --color-info-foreground: var(--info-foreground);
+
+  --color-border: var(--border);
+
+  --color-input: var(--input);
+
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+
+  --color-chart-2: var(--chart-2);
+
+  --color-chart-3: var(--chart-3);
+
+  --color-chart-4: var(--chart-4);
+
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: 2px;
+
+  --radius-md: 3px;
+
+  --radius-lg: 3px;
+
+  --radius-xl: 4px;
+
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    overscroll-behavior: none;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  html {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* The site navbar (components/docs/nav.tsx) is a fixed bar above the
+     Fumadocs layout. Publishing its height here keeps the sidebar and TOC
+     sticky below it; components/site-layout.tsx pads the layout by the same amount. */
+  :root {
+    --fd-banner-height: 3.5rem;
+  }
+  @media (min-width: 768px) {
+    :root {
+      --fd-banner-height: 4.25rem;
+    }
+  }
+
+  #nd-docs-layout {
+    @apply relative;
+  }
+
+  #nd-page article {
+    @apply !pt-23;
+  }
+
+  #nd-page {
+    @apply !pt-0;
+  }
+
+  #nd-toc {
+    @apply !pb-18 !pt-24 max-xl:!hidden;
+  }
+
+  #nd-toc div div {
+    @apply !pl-px;
+  }
+
+  #nd-toc div[role='none'] {
+    @apply !w-[3px] !rounded-full -ml-px;
+  }
+
+  #docs-body h1,
+  #docs-body h2,
+  #docs-body h3,
+  #docs-body h4,
+  #docs-body h5,
+  #docs-body h6 {
+    @apply !font-medium;
+  }
+
+  /* Larger prose text for blog/project/reading pages (desktop only) */
+  #docs-body.prose-lg-content {
+    @apply md:!text-lg;
+  }
+}
+
