@@ -179,6 +179,8 @@ const BRAND_PATTERNS: [RegExp, string][] = [
   [/^(spark|xunfei)/i, 'Spark'],
   [/^baichuan/i, 'Baichuan'],
   [/^nemotron/i, 'NVIDIA'],
+  [/^longcat/i, 'LongCat'],
+  [/^step-/i, 'Step'],
 ];
 
 export function getModelBrand(modelName: string): string {
