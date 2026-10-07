@@ -37,7 +37,6 @@ const MODEL_ALIASES: Record<string, string> = {
 
   // Qwen
   'umans-qwen3.6-35b-a3b': 'qwen3.6-35b-a3b',
-  'qwen3.8-max-preview': 'qwen3.8-max',
 
   // Qwen - umans routing labels
   'umans-flash': 'qwen3.6-35b-a3b',
@@ -58,9 +57,8 @@ const MODEL_ALIASES: Record<string, string> = {
   'gpt-oss-120b': 'gpt-oss:120b',
 
   // Gemini
-  'gemini-3-flash': 'gemini-3-flash-preview',
-  'gemini-3-pro-high': 'gemini-3-pro-preview',
-  'gemini-3-pro-low': 'gemini-3-pro-preview',
+  'gemini-3-pro-high': 'gemini-3-pro',
+  'gemini-3-pro-low': 'gemini-3-pro',
 };
 
 // OpenRouter-style provider prefixes auto-stripped before dictionary lookup,
@@ -134,6 +132,9 @@ export function normalizeModelName(name: string): string {
   // Meta's contributor tier is the same model bought by granting training
   // rights, so it charts as one series with the standard one.
   key = key.replace(/-contributor$/, '');
+  // A preview is charted under the name it ships as, so usage from before and
+  // after GA stays one series (gemini-3-pro-preview -> gemini-3-pro).
+  key = key.replace(/-preview$/, '');
   return MODEL_ALIASES[key] ?? key;
 }
 
