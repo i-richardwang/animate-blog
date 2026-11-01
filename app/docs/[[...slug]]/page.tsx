@@ -15,6 +15,15 @@ import { pageMetadata } from '@/lib/metadata';
 import { PageTitle } from '@/components/docs/page-title';
 import { ViewOptions, LLMCopyButton } from '@/components/docs/page-actions';
 import { SectionLabel } from '@/components/docs/section-label';
+import { TOC } from '@/components/docs/toc';
+import {
+  TOCPopover,
+  TOCProvider,
+} from 'fumadocs-ui/layouts/docs/page/slots/toc';
+
+// The TOC slot keeps Fumadocs' provider and popover; only the desktop list
+// is the site's own.
+const tocSlots = { provider: TOCProvider, main: TOC, popover: TOCPopover };
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -35,7 +44,7 @@ export default async function Page(props: {
       toc={page.data.toc}
       tableOfContentPopover={{ enabled: false }}
       className="!max-w-[860px]"
-      slots={{ breadcrumb: SectionLabel }}
+      slots={{ breadcrumb: SectionLabel, toc: tocSlots }}
       footer={{ items: { previous, next } }}
     >
       <PageTitle

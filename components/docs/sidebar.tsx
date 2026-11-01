@@ -28,20 +28,20 @@ import Link from 'fumadocs-core/link';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { usePathname } from 'next/navigation';
-import { AnimatePresence, motion } from 'motion/react';
 import { BookOpen, SquareMenu } from 'lucide-react';
-import { type ComponentProps, useState } from 'react';
+import type { ComponentProps } from 'react';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { flatSections } from '@/lib/navigation';
+import {
+  AnimatedNav,
+  NavItemContent,
+  NavSectionIcon,
+  NavSectionTitle,
+  useNavHover,
+} from './animated-nav';
 
-const indicatorTransition = {
-  type: 'spring',
-  stiffness: 500,
-  damping: 35,
-} as const;
-
-// A sidebar link with the site's vertical guide line and spring-animated
-// active / hover indicators. Both the page tree and the link list use it.
+// A sidebar link with the site's navigation look (see animated-nav.tsx).
+// Both the page tree and the link list use it.
 function AnimatedItem({
   href,
   active,
@@ -50,7 +50,7 @@ function AnimatedItem({
   children,
   ...props
 }: ComponentProps<typeof BaseSidebarItem>) {
-  const [hovered, setHovered] = useState(false);
+  const { hovered, hoverProps } = useNavHover(String(href));
 
   return (
     <BaseSidebarItem
@@ -61,48 +61,12 @@ function AnimatedItem({
         'relative flex items-center rounded-lg py-2 ml-2 pl-4 text-start',
         className,
       )}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      {...hoverProps}
       {...props}
     >
-      <span className="h-full w-px bg-border absolute left-[9px] inset-y-0" />
-
-      <AnimatePresence initial={false} mode="wait">
-        {active && (
-          <motion.span
-            layoutId="sidebar-item-active-indicator"
-            className="pointer-events-none absolute z-11 left-[8px] top-1/2 h-[56%] w-[3px] -translate-y-1/2 rounded-full bg-primary"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={indicatorTransition}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence initial={false} mode="wait">
-        {hovered && (
-          <motion.span
-            layoutId="sidebar-item-hover-indicator"
-            className="pointer-events-none absolute z-10 left-[8px] top-1/2 h-[56%] w-[3px] -translate-y-1/2 rounded-full dark:bg-neutral-600 bg-neutral-300"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={indicatorTransition}
-          />
-        )}
-      </AnimatePresence>
-
-      <motion.span
-        className={cn(
-          'text-sm w-full pl-[12px] text-neutral-700 dark:text-neutral-200',
-          (active || hovered) && 'text-black dark:text-white',
-        )}
-        animate={{ x: hovered || active ? 3 : 0 }}
-        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-      >
+      <NavItemContent active={Boolean(active)} hovered={hovered}>
         {children}
-      </motion.span>
+      </NavItemContent>
     </BaseSidebarItem>
   );
 }
@@ -169,32 +133,12 @@ function PageTreeFolder({ item }: { item: PageTree.Folder }) {
   );
 }
 
-// The small boxed icon in front of a section heading.
-function SeparatorIcon({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="relative size-5 [&_svg]:size-[12px] flex items-center justify-center bg-border text-muted-foreground rounded-[5px]">
-      {children}
-      <span className="absolute left-1/2 translate-x-[calc(-50%-0.5px)] bg-border w-px h-[8px] top-full" />
-    </span>
-  );
-}
-
-// A heading the sidebar adds itself, outside the page tree.
-function Separator({ icon, name }: { icon: React.ReactNode; name: string }) {
-  return (
-    <span className="flex items-center gap-2">
-      <SeparatorIcon>{icon}</SeparatorIcon>
-      <span className="text-[13px] text-neutral-500">{name}</span>
-    </span>
-  );
-}
-
 // Separators come from meta.json (`---[Icon]Name---`); the loader resolves
 // the icon name to a Lucide icon.
 function PageTreeSeparator({ item }: { item: PageTree.Separator }) {
   return (
     <SectionSeparator>
-      {item.icon && <SeparatorIcon>{item.icon}</SeparatorIcon>}
+      {item.icon && <NavSectionIcon>{item.icon}</NavSectionIcon>}
       {item.name}
     </SectionSeparator>
   );
@@ -207,7 +151,7 @@ function SiteMenu() {
   return (
     <div className="my-4">
       <SectionSeparator className="mb-2 mt-0 pl-0">
-        <Separator icon={<SquareMenu />} name="Menu" />
+        <NavSectionTitle icon={<SquareMenu />}>Menu</NavSectionTitle>
       </SectionSeparator>
       {flatSections.map((section) => (
         <AnimatedItem
@@ -260,10 +204,11 @@ export function DocsSidebar() {
     <>
       {links.length > 0 && (
         <SectionSeparator>
-          <Separator
+          <NavSectionTitle
             icon={<BookOpen fill="currentColor" strokeWidth={2.5} />}
-            name="指南"
-          />
+          >
+            指南
+          </NavSectionTitle>
         </SectionSeparator>
       )}
       {links.map((item, i, list) => (
@@ -300,7 +245,7 @@ export function DocsSidebar() {
                 className="absolute flex flex-col w-full inset-s-0 inset-y-0 items-end bg-fd-background text-sm *:w-(--fd-sidebar-width)"
               >
                 <SidebarViewport viewport={viewportProps}>
-                  {pageTree}
+                  <AnimatedNav>{pageTree}</AnimatedNav>
                 </SidebarViewport>
               </aside>
             </div>
@@ -312,8 +257,10 @@ export function DocsSidebar() {
       <SidebarDrawerOverlay className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out" />
       <SidebarDrawerContent className="fixed flex flex-col shadow-lg border-s inset-e-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out">
         <SidebarViewport viewport={viewportProps}>
-          <SiteMenu />
-          {pageTree}
+          <AnimatedNav>
+            <SiteMenu />
+            {pageTree}
+          </AnimatedNav>
         </SidebarViewport>
         <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
           <IconLinks items={menuItems} />

@@ -239,7 +239,6 @@
   --radius-lg: 3px;
 
   --radius-xl: 4px;
-
 }
 
 @layer base {
@@ -286,18 +285,6 @@
     @apply !pt-0;
   }
 
-  #nd-toc {
-    @apply !pb-18 !pt-24 max-xl:!hidden;
-  }
-
-  #nd-toc div div {
-    @apply !pl-px;
-  }
-
-  #nd-toc div[role='none'] {
-    @apply !w-[3px] !rounded-full -ml-px;
-  }
-
   #docs-body h1,
   #docs-body h2,
   #docs-body h3,
@@ -312,4 +299,3 @@
     @apply md:!text-lg;
   }
 }
-
