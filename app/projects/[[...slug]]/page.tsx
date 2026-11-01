@@ -93,13 +93,7 @@ export default async function Page(props: {
       className="!max-w-[860px]"
       footer={{ items: { previous, next } }}
     >
-      <PageTitle
-        title={page.data.title}
-        url={page.url}
-        previous={previous}
-        next={next}
-        emptyLabels={{ previous: '没有上一个项目', next: '没有下一个项目' }}
-      />
+      <PageTitle title={page.data.title} previous={previous} next={next} />
       <DocsDescription className="mb-1 font-normal">
         {page.data.description}
       </DocsDescription>

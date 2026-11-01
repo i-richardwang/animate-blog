@@ -70,13 +70,7 @@ export default async function Page(props: {
       footer={{ items: { previous, next } }}
     >
       <CategoryLabel category={page.data.category} />
-      <PageTitle
-        title={page.data.title}
-        url={page.url}
-        previous={previous}
-        next={next}
-        emptyLabels={{ previous: '没有更新的播客', next: '没有更早的播客' }}
-      />
+      <PageTitle title={page.data.title} previous={previous} next={next} />
 
       <div className="text-sm text-muted-foreground mb-2">
         {page.data.podcastName}
