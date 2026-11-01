@@ -4,7 +4,7 @@
 // moment after the click.
 
 import { Button } from '@animate-ui/react/primitives/buttons/button';
-import { Check, Copy } from 'lucide-react';
+import { Copy01Icon, Tick02Icon } from '@hugeicons/core-free-icons';
 import { useCopied } from '@/hooks/use-copied';
 import { cn } from '@/lib/utils';
 import { IconSwap } from './icon-swap';
@@ -32,7 +32,12 @@ export function CopyButton({
         className,
       )}
     >
-      <IconSwap active={copied} icon={Copy} activeIcon={Check} size={14} />
+      <IconSwap
+        active={copied}
+        icon={Copy01Icon}
+        activeIcon={Tick02Icon}
+        size={14}
+      />
     </Button>
   );
 }

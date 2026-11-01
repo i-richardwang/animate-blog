@@ -28,7 +28,8 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { useScrollFade } from '@animate-ui/react/primitives/effects/scroll-fade';
 import { usePathname } from 'next/navigation';
-import { BookOpen, SquareMenu } from 'lucide-react';
+import { BookOpen02Icon, Menu01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useRef, type ComponentProps, type ReactNode } from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { flatSections } from '@/lib/navigation';
@@ -134,7 +135,7 @@ function PageTreeFolder({ item }: { item: PageTree.Folder }) {
 }
 
 // Separators come from meta.json (`---[Icon]Name---`); the loader resolves
-// the icon name to a Lucide icon.
+// the icon name to a Hugeicons icon.
 function PageTreeSeparator({ item }: { item: PageTree.Separator }) {
   return (
     <SectionSeparator>
@@ -167,7 +168,11 @@ function SiteMenu() {
   return (
     <div className="my-4">
       <SectionSeparator className="mb-2 mt-0 pl-0">
-        <NavSectionTitle icon={<SquareMenu />}>Menu</NavSectionTitle>
+        <NavSectionTitle
+          icon={<HugeiconsIcon icon={Menu01Icon} strokeWidth={2} />}
+        >
+          Menu
+        </NavSectionTitle>
       </SectionSeparator>
       {flatSections.map((section) => (
         <AnimatedItem
@@ -221,7 +226,7 @@ export function DocsSidebar() {
       {links.length > 0 && (
         <SectionSeparator>
           <NavSectionTitle
-            icon={<BookOpen fill="currentColor" strokeWidth={2.5} />}
+            icon={<HugeiconsIcon icon={BookOpen02Icon} strokeWidth={2} />}
           >
             指南
           </NavSectionTitle>

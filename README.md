@@ -61,10 +61,10 @@ hooks/, lib/  shared hooks and helpers
 
 ## Animate UI
 
-The site is on Animate UI v2 and follows its docs site's look: the intro and hero on the home page, the navbar, sidebar and TOC, the title row with "Copy page", the code blocks and cards. The primitives (`Effect`, `SplittingText`, `Highlight`, `ScrollFade`, the animated Radix `Tooltip`, `HoverCard` and `DropdownMenu`…) come from the `@animate-ui/react` package, and `AnimateUIProvider` in `app/layout.tsx` paces them all. Only the animated icons, the Page Transition (the `stack` effect between pages, wired in `components/site-layout.tsx`) and the Theme Toggler are files, added from the registry with the shadcn CLI:
+The site is on Animate UI v2 and follows its docs site's look: the intro and hero on the home page, the navbar, sidebar and TOC, the title row with "Copy page", the code blocks and cards. The primitives (`Effect`, `SplittingText`, `Highlight`, `ScrollFade`, the animated Radix `Tooltip`, `HoverCard` and `DropdownMenu`…) come from the `@animate-ui/react` package, and `AnimateUIProvider` in `app/layout.tsx` paces them all. Icons are [Hugeicons](https://hugeicons.com), like on the docs site: the static ones straight from `@hugeicons/core-free-icons`, the animated ones from Animate UI's Hugeicons registry. Only the animated icons, the Page Transition (the `stack` effect between pages, wired in `components/site-layout.tsx`) and the Theme Toggler are files, added from the registry with the shadcn CLI:
 
 ```bash
-pnpm dlx shadcn@latest add @animate-ui/icons-lucide-bell
+pnpm dlx shadcn@latest add @animate-ui/icons-hugeicons-notification-01
 pnpm dlx shadcn@latest add @animate-ui/components-page-transition
 pnpm dlx shadcn@latest add @animate-ui/buttons-theme-toggler
 ```

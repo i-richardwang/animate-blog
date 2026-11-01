@@ -2,7 +2,12 @@
 
 import { formatDate } from '@/lib/utils';
 import { CardLink, CoverImage } from '@/components/docs/card-link';
-import { Headphones, Clock, Mic } from 'lucide-react';
+import {
+  Clock01Icon,
+  HeadphonesIcon,
+  Mic01Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 
 interface Podcast {
   url: string;
@@ -37,11 +42,19 @@ function FeaturedCard({ podcast }: { podcast: Podcast }) {
         <div className="flex-1 p-6 md:p-8 flex flex-col justify-center">
           <div className="flex items-center gap-2 mb-4">
             <span className="h-6 px-2 bg-primary text-primary-foreground text-xs rounded flex gap-1 items-center justify-center">
-              <Headphones className="size-3" />
+              <HugeiconsIcon
+                icon={HeadphonesIcon}
+                strokeWidth={2}
+                className="size-3"
+              />
               本周推荐
             </span>
             <span className="h-6 px-2 bg-muted text-muted-foreground text-xs rounded flex gap-1 items-center justify-center">
-              <Clock className="size-3" />
+              <HugeiconsIcon
+                icon={Clock01Icon}
+                strokeWidth={2}
+                className="size-3"
+              />
               {podcast.duration}
             </span>
           </div>
@@ -63,7 +76,11 @@ function FeaturedCard({ podcast }: { podcast: Podcast }) {
           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             {podcast.hosts.length > 0 && (
               <div className="flex items-center gap-1">
-                <Mic className="size-3" />
+                <HugeiconsIcon
+                  icon={Mic01Icon}
+                  strokeWidth={2}
+                  className="size-3"
+                />
                 <span>{podcast.hosts.join(', ')}</span>
               </div>
             )}
@@ -103,7 +120,11 @@ function PodcastCard({ podcast, index }: { podcast: Podcast; index: number }) {
             <span className="truncate">{podcast.podcastName}</span>
             <span className="text-muted-foreground/50">·</span>
             <span className="flex items-center gap-1 flex-shrink-0">
-              <Clock className="size-3" />
+              <HugeiconsIcon
+                icon={Clock01Icon}
+                strokeWidth={2}
+                className="size-3"
+              />
               {podcast.duration}
             </span>
           </div>

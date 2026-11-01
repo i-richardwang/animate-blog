@@ -3,18 +3,22 @@ title: 开发实践
 description: 独立开发与自托管
 ---
 
-import { HardDrive, Hammer } from 'lucide-react';
+import {
+  Hammer01Icon,
+  HardDriveIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 
 <Cards>
   <Card
-    icon={<HardDrive strokeWidth={2} />}
+    icon={<HugeiconsIcon icon={HardDriveIcon} strokeWidth={2} />}
     href="/docs/development/self-hosted/pve-installation-pcie-passthrough"
     title="Self Hosted"
     description="自建服务与基础设施部署"
     accent
   />
   <Card
-    icon={<Hammer strokeWidth={2} />}
+    icon={<HugeiconsIcon icon={Hammer01Icon} strokeWidth={2} />}
     href="/docs/development/indie-hacking/simplelogin-custom-domain-email"
     title="独立开发"
     description="独立开发者工具与实践"

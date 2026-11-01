@@ -4,12 +4,13 @@ import Link from 'next/link';
 import { IconLogo } from '@/components/icon-logo';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/utils';
-import { CommandIcon } from 'lucide-react';
+import { CommandIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
 import { useSidebar } from 'fumadocs-ui/layouts/docs/slots/sidebar';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { SocialLinks } from '@/components/social-links';
-import { Menu } from '@/components/animate-ui/icons/menu';
+import { Menu01Icon } from '@/components/animate-ui/icons/hugeicons/menu-01';
 import { visibleSections } from '@/lib/navigation';
 import { NavItem } from './nav-item';
 import { NavSectionMenu } from './nav-section-menu';
@@ -58,7 +59,7 @@ export const Nav = () => {
 
               <div className="flex items-center gap-1">
                 <kbd className="size-5 leading-none flex items-center justify-center border rounded-[4px] bg-background">
-                  <CommandIcon className="size-2.5" />
+                  <HugeiconsIcon icon={CommandIcon} strokeWidth={2} size={10} />
                 </kbd>
                 <kbd className="size-5 flex items-center justify-center border rounded-[4px] bg-background">
                   <span className="leading-none text-[0.625rem] pt-px">K</span>
@@ -83,7 +84,7 @@ export const Nav = () => {
               )}
               onClick={() => setOpen((prev) => !prev)}
             >
-              <Menu animate={open} />
+              <Menu01Icon animate={open} />
             </button>
           </div>
         </div>

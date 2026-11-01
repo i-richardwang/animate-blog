@@ -10,7 +10,7 @@ import {
   type IconProps,
 } from '@animate-ui/react/icons';
 
-type PaperclipProps = IconProps<keyof typeof animations>;
+type Attachment01Props = IconProps<keyof typeof animations>;
 
 const animations = {
   default: {
@@ -27,10 +27,7 @@ const animations = {
       initial: { pathLength: 1 },
       animate: {
         pathLength: [0.02, 1],
-        transition: {
-          duration: 1.2,
-          ease: 'easeInOut',
-        },
+        transition: { duration: 1.2, ease: 'easeInOut' },
       },
     },
   } satisfies Record<string, Variants>,
@@ -39,16 +36,13 @@ const animations = {
       initial: { pathLength: 1 },
       animate: {
         pathLength: [1, 0.02, 1],
-        transition: {
-          duration: 2.4,
-          ease: 'easeInOut',
-        },
+        transition: { duration: 2.4, ease: 'easeInOut' },
       },
     },
   } satisfies Record<string, Variants>,
 } as const;
 
-function IconComponent({ size, ...props }: PaperclipProps) {
+function IconComponent({ size, ...props }: Attachment01Props) {
   const { controls } = useAnimateIconContext();
   const variants = getVariants(animations);
 
@@ -61,12 +55,12 @@ function IconComponent({ size, ...props }: PaperclipProps) {
       fill="none"
       stroke="currentColor"
       strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
       {...props}
     >
       <motion.path
-        d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"
+        d="M5.82338 12L4.27922 10.4558C2.57359 8.75022 2.57359 5.98485 4.27922 4.27922C5.98485 2.57359 8.75022 2.57359 10.4558 4.27922L19.7208 13.5442C21.4264 15.2498 21.4264 18.0152 19.7208 19.7208C18.0152 21.4264 15.2498 21.4264 13.5442 19.7208L10.0698 16.2464C9.00379 15.1804 9.00379 13.4521 10.0698 12.386C11.1358 11.32 12.8642 11.32 13.9302 12.386L15.8604 14.3162"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         variants={variants.path}
         initial="initial"
         animate={controls}
@@ -75,14 +69,14 @@ function IconComponent({ size, ...props }: PaperclipProps) {
   );
 }
 
-function Paperclip(props: PaperclipProps) {
+function Attachment01(props: Attachment01Props) {
   return <IconWrapper icon={IconComponent} {...props} />;
 }
 
 export {
   animations,
-  Paperclip,
-  Paperclip as PaperclipIcon,
-  type PaperclipProps,
-  type PaperclipProps as PaperclipIconProps,
+  Attachment01,
+  Attachment01 as Attachment01Icon,
+  type Attachment01Props,
+  type Attachment01Props as Attachment01IconProps,
 };

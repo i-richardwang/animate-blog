@@ -3,7 +3,13 @@
 import { useEffect, useState } from 'react';
 import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/page';
 import { SitePage } from '@/components/docs/page';
-import { Coins, Cpu, TrendingUp, Database } from 'lucide-react';
+import {
+  ChartIncreaseIcon,
+  Coins01Icon,
+  CpuIcon,
+  Database01Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { StatCard, StatCardSkeleton } from '@/components/token-usage/stat-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CostTrendChart } from '@/components/token-usage/cost-trend-chart';
@@ -95,17 +101,31 @@ export default function TokenUsagePage() {
                 <StatCard
                   title="总成本"
                   value={formatCost(data.summary.totalCost)}
-                  icon={<Coins className="size-4" />}
+                  icon={
+                    <HugeiconsIcon
+                      icon={Coins01Icon}
+                      strokeWidth={2}
+                      size={16}
+                    />
+                  }
                 />
                 <StatCard
                   title="总 Token"
                   value={formatTokens(data.summary.totalTokens)}
-                  icon={<Cpu className="size-4" />}
+                  icon={
+                    <HugeiconsIcon icon={CpuIcon} strokeWidth={2} size={16} />
+                  }
                 />
                 <StatCard
                   title="日均 Token"
                   value={formatTokens(data.summary.avgDailyTokens)}
-                  icon={<TrendingUp className="size-4" />}
+                  icon={
+                    <HugeiconsIcon
+                      icon={ChartIncreaseIcon}
+                      strokeWidth={2}
+                      size={16}
+                    />
+                  }
                 />
                 <StatCard
                   title="缓存命中率"
@@ -114,7 +134,13 @@ export default function TokenUsagePage() {
                       ? `${((data.summary.totalCacheReadTokens / data.summary.totalTokens) * 100).toFixed(1)}%`
                       : 'N/A'
                   }
-                  icon={<Database className="size-4" />}
+                  icon={
+                    <HugeiconsIcon
+                      icon={Database01Icon}
+                      strokeWidth={2}
+                      size={16}
+                    />
+                  }
                 />
               </>
             ) : null}

@@ -3,7 +3,17 @@ title: 欢迎
 description: 技术手札，记录探索的点滴
 ---
 
-import { Brain, BarChart3, Code2, FolderGit2, PenLine, BookMarked, Activity, Coins } from 'lucide-react';
+import {
+  Activity01Icon,
+  AiBrain01Icon,
+  Analytics01Icon,
+  BookBookmark02Icon,
+  Coins01Icon,
+  FolderLibraryIcon,
+  PencilEdit02Icon,
+  SourceCodeIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 
 这是一本技术手札，记录探索的点滴，分享见解，公开构建。
 
@@ -11,19 +21,19 @@ import { Brain, BarChart3, Code2, FolderGit2, PenLine, BookMarked, Activity, Coi
 
 <Cards>
   <Card
-    icon={<Brain />}
+    icon={<HugeiconsIcon icon={AiBrain01Icon} strokeWidth={2} />}
     href="/docs/ai"
     title="AI 探索"
     description="大语言模型的原理理解与应用开发"
   />
   <Card
-    icon={<BarChart3 />}
+    icon={<HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} />}
     href="/docs/data-science"
     title="数据科学"
     description="从预测建模到数据可视化的项目实践"
   />
   <Card
-    icon={<Code2 />}
+    icon={<HugeiconsIcon icon={SourceCodeIcon} strokeWidth={2} />}
     href="/docs/development"
     title="开发实践"
     description="Homelab 基础设施搭建与独立开发笔记"
@@ -34,31 +44,31 @@ import { Brain, BarChart3, Code2, FolderGit2, PenLine, BookMarked, Activity, Coi
 
 <Cards>
   <Card
-    icon={<FolderGit2 />}
+    icon={<HugeiconsIcon icon={FolderLibraryIcon} strokeWidth={2} />}
     href="/projects"
     title="项目"
     description="开源项目和个人作品"
   />
   <Card
-    icon={<PenLine />}
+    icon={<HugeiconsIcon icon={PencilEdit02Icon} strokeWidth={2} />}
     href="/blog"
     title="博客"
     description="技术文章和经验分享"
   />
   <Card
-    icon={<BookMarked />}
+    icon={<HugeiconsIcon icon={BookBookmark02Icon} strokeWidth={2} />}
     href="/reading"
     title="推荐阅读"
     description="值得一读的外部文章"
   />
   <Card
-    icon={<Coins />}
+    icon={<HugeiconsIcon icon={Coins01Icon} strokeWidth={2} />}
     href="/token-usage"
     title="Token 用量"
     description="各 AI 工具的 Token 消耗与成本趋势"
   />
   <Card
-    icon={<Activity />}
+    icon={<HugeiconsIcon icon={Activity01Icon} strokeWidth={2} />}
     href="/status"
     title="系统状态"
     description="Homelab 各服务的运行状态"

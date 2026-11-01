@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { Effect } from '@animate-ui/react/primitives/effects/effect';
 import { motion } from 'motion/react';
-import { ArrowRightIcon } from '@/components/animate-ui/icons/arrow-right';
-import { LightbulbIcon } from '@/components/animate-ui/icons/lightbulb';
+import { ArrowRight02Icon } from '@/components/animate-ui/icons/hugeicons/arrow-right-02';
+import { LightbulbIcon } from '@/components/animate-ui/icons/hugeicons/lightbulb';
 import { AnimateIcon } from '@animate-ui/react/icons';
 
 export function ExploreNotesCard() {
@@ -22,7 +22,7 @@ export function ExploreNotesCard() {
             <span className="text-[15px]">
               博客偏思考总结，更多实践内容在笔记中
             </span>
-            <ArrowRightIcon animation="out" className="size-4" />
+            <ArrowRight02Icon animation="out" className="size-4" />
           </motion.div>
         </Link>
       </AnimateIcon>

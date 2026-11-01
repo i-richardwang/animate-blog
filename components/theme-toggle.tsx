@@ -4,7 +4,8 @@
 // moon with a short spin, scale and blur (Animate UI's Theme Toggler). Until
 // hydration the theme is unknown, so a plain button shows the icon CSS picks.
 
-import { Moon, Sun } from 'lucide-react';
+import { Moon02Icon, SunMediumIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { useTheme } from 'next-themes';
 import { useSyncExternalStore } from 'react';
 import {
@@ -35,8 +36,18 @@ export function ThemeToggle({ className }: { className?: string }) {
         aria-label="Toggle theme"
         className={cn(iconButton, className)}
       >
-        <Sun className="size-[18px] dark:hidden" />
-        <Moon className="hidden size-[18px] dark:block" />
+        <HugeiconsIcon
+          icon={SunMediumIcon}
+          strokeWidth={2}
+          size={18}
+          className="dark:hidden"
+        />
+        <HugeiconsIcon
+          icon={Moon02Icon}
+          strokeWidth={2}
+          size={18}
+          className="hidden dark:block"
+        />
       </button>
     );
 
@@ -52,8 +63,8 @@ export function ThemeToggle({ className }: { className?: string }) {
       className={cn(iconButton, className)}
     >
       <ThemeTogglerButtonIcon
-        light={<Sun className="size-[18px]" />}
-        dark={<Moon className="size-[18px]" />}
+        light={<HugeiconsIcon icon={SunMediumIcon} strokeWidth={2} size={18} />}
+        dark={<HugeiconsIcon icon={Moon02Icon} strokeWidth={2} size={18} />}
       />
     </ThemeTogglerButton>
   );

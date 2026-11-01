@@ -1,4 +1,4 @@
-import { ChartColumnIncreasingIcon } from '@/components/animate-ui/icons/chart-column-increasing';
+import { ChartColumnIncreasingIcon } from '@/components/animate-ui/icons/hugeicons/chart-column-increasing';
 import { AnimateIcon } from '@animate-ui/react/icons';
 
 export const TokenUsage = () => {

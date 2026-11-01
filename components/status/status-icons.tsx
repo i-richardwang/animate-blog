@@ -2,11 +2,12 @@
 
 import { cn } from '@/lib/utils';
 import {
-  CheckIcon,
-  TriangleAlertIcon,
+  Alert02Icon,
   AlertCircleIcon,
-  WrenchIcon,
-} from 'lucide-react';
+  Tick02Icon,
+  Wrench01Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 export const StatusMonitorIcon = ({
   className,
   ...props
@@ -22,10 +23,26 @@ export const StatusMonitorIcon = ({
     )}
     {...props}
   >
-    <CheckIcon className="hidden group-data-[variant=success]/monitor:block" />
-    <TriangleAlertIcon className="hidden group-data-[variant=degraded]/monitor:block" />
-    <AlertCircleIcon className="hidden group-data-[variant=error]/monitor:block" />
-    <WrenchIcon className="hidden group-data-[variant=info]/monitor:block" />
+    <HugeiconsIcon
+      icon={Tick02Icon}
+      strokeWidth={2}
+      className="hidden group-data-[variant=success]/monitor:block"
+    />
+    <HugeiconsIcon
+      icon={Alert02Icon}
+      strokeWidth={2}
+      className="hidden group-data-[variant=degraded]/monitor:block"
+    />
+    <HugeiconsIcon
+      icon={AlertCircleIcon}
+      strokeWidth={2}
+      className="hidden group-data-[variant=error]/monitor:block"
+    />
+    <HugeiconsIcon
+      icon={Wrench01Icon}
+      strokeWidth={2}
+      className="hidden group-data-[variant=info]/monitor:block"
+    />
   </div>
 );
 
@@ -77,10 +94,26 @@ export const StatusBannerIcon = ({
     )}
     {...props}
   >
-    <CheckIcon className="hidden group-data-[status=success]/status-banner:block" />
-    <TriangleAlertIcon className="hidden group-data-[status=degraded]/status-banner:block" />
-    <AlertCircleIcon className="hidden group-data-[status=error]/status-banner:block" />
-    <WrenchIcon className="hidden group-data-[status=info]/status-banner:block" />
+    <HugeiconsIcon
+      icon={Tick02Icon}
+      strokeWidth={2}
+      className="hidden group-data-[status=success]/status-banner:block"
+    />
+    <HugeiconsIcon
+      icon={Alert02Icon}
+      strokeWidth={2}
+      className="hidden group-data-[status=degraded]/status-banner:block"
+    />
+    <HugeiconsIcon
+      icon={AlertCircleIcon}
+      strokeWidth={2}
+      className="hidden group-data-[status=error]/status-banner:block"
+    />
+    <HugeiconsIcon
+      icon={Wrench01Icon}
+      strokeWidth={2}
+      className="hidden group-data-[status=info]/status-banner:block"
+    />
   </div>
 );
 

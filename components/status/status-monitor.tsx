@@ -7,7 +7,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { InfoIcon } from 'lucide-react';
+import { InformationCircleIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import type { MonitorData } from './types';
@@ -71,7 +72,11 @@ const StatusMonitorDescription = ({ children }: { children?: string }) => {
         }}
         className="rounded-full"
       >
-        <InfoIcon className="size-4 text-muted-foreground" />
+        <HugeiconsIcon
+          icon={InformationCircleIcon}
+          strokeWidth={2}
+          className="size-4 text-muted-foreground"
+        />
       </TooltipTrigger>
       <TooltipContent>
         <p>{children}</p>

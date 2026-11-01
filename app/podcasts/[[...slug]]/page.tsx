@@ -4,7 +4,8 @@ import { SitePage } from '@/components/docs/page';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
-import { Mic } from 'lucide-react';
+import { Mic01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { PodcastList } from '@/components/docs/podcast-list';
 import { ApplePodcastEmbed } from '@/components/docs/apple-podcast-embed';
 import { CategoryLabel } from '@/components/docs/category-label';
@@ -79,7 +80,11 @@ export default async function Page(props: {
       <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-2">
         {page.data.hosts.length > 0 && (
           <div className="flex items-center gap-1">
-            <Mic className="size-3" />
+            <HugeiconsIcon
+              icon={Mic01Icon}
+              strokeWidth={2}
+              className="size-3"
+            />
             <span>主播: {page.data.hosts.join(', ')}</span>
           </div>
         )}

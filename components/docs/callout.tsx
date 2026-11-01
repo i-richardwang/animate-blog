@@ -1,13 +1,25 @@
-import { Info, TriangleAlert } from 'lucide-react';
+import { Alert02Icon, InformationCircleIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import type { ReactNode } from 'react';
 
-const iconClass = 'size-5 -me-0.5 fill-(--callout-color) text-fd-accent';
+const iconClass = '-me-0.5 size-5 shrink-0 text-(--callout-color)';
 
 const VARIANTS = {
-  info: { color: 'var(--color-fd-info)', icon: <Info className={iconClass} /> },
+  info: {
+    color: 'var(--color-fd-info)',
+    icon: (
+      <HugeiconsIcon
+        icon={InformationCircleIcon}
+        strokeWidth={2}
+        className={iconClass}
+      />
+    ),
+  },
   warn: {
     color: 'var(--color-fd-warning)',
-    icon: <TriangleAlert className={iconClass} />,
+    icon: (
+      <HugeiconsIcon icon={Alert02Icon} strokeWidth={2} className={iconClass} />
+    ),
   },
 };
 

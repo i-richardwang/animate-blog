@@ -80,20 +80,27 @@ const animations = {
   })() satisfies Record<string, Variants>,
   decreasing: {
     path1: {
-      initial: { d: 'M8 17V13' },
+      initial: { d: 'M8 17V14' },
       animate: {
         d: 'M8 17V5',
         transition: { duration: 0.5, ease: 'easeInOut' },
       },
     },
-    path2: {},
-    path3: {
-      initial: { d: 'M18 17V5' },
+    path2: {
+      initial: { d: 'M13 17V9' },
       animate: {
-        d: 'M18 17V13',
+        d: 'M13 17V9',
         transition: { duration: 0.5, ease: 'easeInOut' },
       },
     },
+    path3: {
+      initial: { d: 'M18 17V5' },
+      animate: {
+        d: 'M18 17V14',
+        transition: { duration: 0.5, ease: 'easeInOut' },
+      },
+    },
+    path4: {},
   } satisfies Record<string, Variants>,
 } as const;
 
@@ -110,30 +117,35 @@ function IconComponent({ size, ...props }: ChartColumnIncreasingProps) {
       fill="none"
       stroke="currentColor"
       strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
       {...props}
     >
       <motion.path
-        d="M8 17V13"
+        d="M8 17V14"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         variants={variants.path1}
         initial="initial"
         animate={controls}
       />
       <motion.path
         d="M13 17V9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         variants={variants.path2}
         initial="initial"
         animate={controls}
       />
       <motion.path
         d="M18 17V5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         variants={variants.path3}
         initial="initial"
         animate={controls}
       />
       <motion.path
-        d="M3 3v16a2 2 0 0 0 2 2h16"
+        d="M21 21H10C6.70017 21 5.05025 21 4.02513 19.9749C3 18.9497 3 17.2998 3 14V3"
+        strokeLinecap="round"
         variants={variants.path4}
         initial="initial"
         animate={controls}
