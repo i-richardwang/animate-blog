@@ -8,12 +8,21 @@ import {
   useAnimateIconContext,
   IconWrapper,
   type IconProps,
-} from '@/components/animate-ui/icons/icon';
+} from '@animate-ui/react/icons';
 
 type PaperclipProps = IconProps<keyof typeof animations>;
 
 const animations = {
   default: {
+    path: {
+      initial: { rotate: 0 },
+      animate: {
+        rotate: [0, -12, 8, -4, 0],
+        transition: { duration: 0.8, ease: 'easeInOut' },
+      },
+    },
+  } satisfies Record<string, Variants>,
+  draw: {
     path: {
       initial: { pathLength: 1 },
       animate: {
@@ -25,7 +34,7 @@ const animations = {
       },
     },
   } satisfies Record<string, Variants>,
-  'default-loop': {
+  'draw-loop': {
     path: {
       initial: { pathLength: 1 },
       animate: {

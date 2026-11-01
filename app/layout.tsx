@@ -1,3 +1,4 @@
+import { AnimateUIProvider } from '@animate-ui/react/provider';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { Outfit } from 'next/font/google';
@@ -89,7 +90,11 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       <body className="flex flex-col min-h-screen">
         <RootProvider theme={{ defaultTheme: 'system' }}>
-          <NuqsAdapter>{children}</NuqsAdapter>
+          {/* One place to pace every Animate UI animation: `tempo` scales
+              all of them, 0.8 crisper, 1.2 more relaxed. */}
+          <AnimateUIProvider>
+            <NuqsAdapter>{children}</NuqsAdapter>
+          </AnimateUIProvider>
         </RootProvider>
         <Analytics />
       </body>

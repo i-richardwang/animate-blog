@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from 'fumadocs-ui/components/ui/popover';
 import { cva } from 'class-variance-authority';
-import { Shine } from '@/components/animate-ui/primitives/effects/shine';
+import { Shine } from '@animate-ui/react/primitives/effects/shine';
 
 const cache = new Map<string, string>();
 

@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from 'react';
 
 import {
@@ -13,8 +15,12 @@ import {
   type TabsTriggerProps as TabsTriggerPrimitiveProps,
   type TabsContentProps as TabsContentPrimitiveProps,
   type TabsContentsProps as TabsContentsPrimitiveProps,
-} from '@/components/animate-ui/primitives/radix/tabs';
+} from '@animate-ui/react/primitives/tabs';
 import { cn } from '@/lib/utils';
+
+// Tabs for MDX content, styled like shadcn/ui's and built on Animate UI's own
+// Tabs primitive: a highlight glides between the triggers and the panels
+// slide, the height following the active one.
 
 type TabsProps = TabsPrimitiveProps;
 

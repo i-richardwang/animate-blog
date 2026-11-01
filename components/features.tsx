@@ -1,5 +1,5 @@
 import { Dancing_Script } from 'next/font/google';
-import { Effect } from '@/components/animate-ui/primitives/effects/effect';
+import { Effect } from '@animate-ui/react/primitives/effects/effect';
 import { cn } from '@/lib/utils';
 import { Projects } from './icons/projects';
 import { Blog } from './icons/blog';

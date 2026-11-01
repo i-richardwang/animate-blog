@@ -4,8 +4,8 @@ import {
   RotatingText,
   RotatingTextContainer,
   useRotatingText,
-} from '@/components/animate-ui/primitives/texts/rotating';
-import { Effect } from '@/components/animate-ui/primitives/effects/effect';
+} from '@animate-ui/react/primitives/texts/rotating';
+import { Effect } from '@animate-ui/react/primitives/effects/effect';
 import Link from 'next/link';
 import { SendHorizontalIcon } from '@/components/animate-ui/icons/send-horizontal';
 import { PartyPopper } from '@/components/animate-ui/icons/party-popper';

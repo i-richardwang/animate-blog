@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Effect } from '@/components/animate-ui/primitives/effects/effect';
+import { Effect } from '@animate-ui/react/primitives/effects/effect';
 import { SITE, SOCIAL } from '@/lib/site';
 
 type FooterProps = {

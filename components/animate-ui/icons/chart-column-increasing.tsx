@@ -8,7 +8,7 @@ import {
   useAnimateIconContext,
   IconWrapper,
   type IconProps,
-} from '@/components/animate-ui/icons/icon';
+} from '@animate-ui/react/icons';
 
 type ChartColumnIncreasingProps = IconProps<keyof typeof animations>;
 
@@ -20,7 +20,7 @@ const animations = {
 
     for (let i = 1; i <= 3; i++) {
       animation[`path${i}`] = {
-        initial: { opacity: 1 },
+        initial: { opacity: 1, pathLength: 1 },
         animate: {
           opacity: [0, 1],
           pathLength: [0, 1],

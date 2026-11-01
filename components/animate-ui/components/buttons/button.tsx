@@ -6,7 +6,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import {
   Button as ButtonPrimitive,
   type ButtonProps as ButtonPrimitiveProps,
-} from '@/components/animate-ui/primitives/buttons/button';
+} from '@animate-ui/react/primitives/buttons/button';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
@@ -45,10 +45,18 @@ const buttonVariants = cva(
 
 type ButtonProps = ButtonPrimitiveProps & VariantProps<typeof buttonVariants>;
 
-function Button({ className, variant, size, ...props }: ButtonProps) {
+// v2's button only answers the press; v1 also grew it on hover.
+function Button({
+  className,
+  variant,
+  size,
+  hoverScale = 1.05,
+  ...props
+}: ButtonProps) {
   return (
     <ButtonPrimitive
       className={cn(buttonVariants({ variant, size, className }))}
+      hoverScale={hoverScale}
       {...props}
     />
   );

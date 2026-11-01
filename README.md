@@ -54,15 +54,15 @@ content/      MDX content
 hooks/, lib/  shared hooks and helpers
 ```
 
-## Animate UI components
+## Animate UI
 
-Animate UI is distributed as source through the shadcn CLI rather than as a package. Add a component with:
+The site is on Animate UI v2: the primitives (`Effect`, `SplittingText`, `ScrollProgress`, the animated Radix `Tooltip` and `HoverCard`…) come from the `@animate-ui/react` package, and `AnimateUIProvider` in `app/layout.tsx` paces them all. Only the animated icons are files, added from the registry with the shadcn CLI:
 
 ```bash
-pnpm dlx shadcn@latest add @animate-ui/components-buttons-button
+pnpm dlx shadcn@latest add @animate-ui/icons-lucide-bell
 ```
 
-`components.json` points the CLI at this layout, so files land in `components/animate-ui`, `hooks` and `lib`. Code installed this way is kept as upstream ships it; ESLint only relaxes the React Compiler rules for it.
+`components.json` points the CLI at this layout, so icons land in `components/animate-ui/icons`. They are kept as upstream ships them; ESLint only relaxes the React Compiler rules for that folder. To animate another shadcn/ui component, run `pnpm dlx @animate-ui/cli@latest animate <component>`.
 
 ## Environment
 

@@ -1,5 +1,5 @@
 import { LayoutDashboardIcon } from '@/components/animate-ui/icons/layout-dashboard';
-import { AnimateIcon } from '@/components/animate-ui/icons/icon';
+import { AnimateIcon } from '@animate-ui/react/icons';
 
 export const Projects = () => {
   return (

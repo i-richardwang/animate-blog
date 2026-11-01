@@ -1,6 +1,6 @@
 import { ExternalLink } from 'lucide-react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { Shine } from '@/components/animate-ui/primitives/effects/shine';
+import { Shine } from '@animate-ui/react/primitives/effects/shine';
 import { cn } from '@/lib/utils';
 
 // The primary call to action on reading and podcast pages: open the
