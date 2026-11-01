@@ -44,9 +44,8 @@ export interface HeatmapDay {
   value: number;
 }
 
-// Token + cost per provider. CCusage has no provider field, so its whole usage
-// is bucketed as a single "Claude Code" provider alongside the LLMeter gateway
-// providers; only the LLMeter half is available at provider granularity.
+// Token + cost per provider: LLMeter's gateway providers alongside CCusage's
+// agent types (claude-code, codex, amp, ...), merged by normalizeProviderName.
 export interface ProviderUsage {
   provider: string;
   tokens: number;

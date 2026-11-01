@@ -1,6 +1,7 @@
-import { sql, gte, and } from 'drizzle-orm';
+import { sql, gte } from 'drizzle-orm';
+import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 import { getCCusageDb, getLLMeterDb } from './db';
-import { usageRecords, logs } from './schema';
+import { usageBuckets, logs } from './schema';
 import {
   normalizeModelName,
   getModelBrand,
@@ -80,112 +81,91 @@ function fillDailyGaps(
 }
 
 // ============================================================
+// Query building blocks
+// ============================================================
+
+// Sum of a token or cost column as a JSON number. pg returns sums of bigint,
+// integer and numeric columns as strings, so every sum is cast here and the
+// aggregation below never has to coerce.
+const total = (column: AnyPgColumn) =>
+  sql<number>`coalesce(sum(${column}), 0)::float8`;
+
+// usage_buckets is keyed by account-calendar day, logs_archive by instant.
+const ccusageSince = (since: Date | null) =>
+  since ? gte(usageBuckets.date, formatIsoDate(since)) : undefined;
+const llmeterSince = (since: Date | null) =>
+  since ? gte(logs.timestamp, since) : undefined;
+
+// ============================================================
 // CCusage queries
 // ============================================================
+//
+// usage_buckets is already split per (device, agent, day, hour?, model), so
+// every view here is a plain sum; the hour buckets fold into their day via
+// `date`.
 
 async function getCCusageSummary(since: Date | null) {
   const db = getCCusageDb();
-  const conditions = since
-    ? [gte(usageRecords.date, formatIsoDate(since))]
-    : [];
 
   const result = await db
     .select({
-      totalCost: sql<number>`coalesce(sum(${usageRecords.totalCost}::numeric), 0)`,
-      totalTokens: sql<number>`coalesce(sum(${usageRecords.totalTokens}), 0)`,
-      totalCacheReadTokens: sql<number>`coalesce(sum(${usageRecords.cacheReadTokens}), 0)`,
+      totalCost: total(usageBuckets.cost),
+      totalTokens: total(usageBuckets.totalTokens),
+      totalCacheReadTokens: total(usageBuckets.cacheReadTokens),
     })
-    .from(usageRecords)
-    .where(conditions.length ? and(...conditions) : undefined);
+    .from(usageBuckets)
+    .where(ccusageSince(since));
 
   return result[0];
 }
 
 async function getCCusageDaily(since: Date | null) {
   const db = getCCusageDb();
-  const conditions = since
-    ? [gte(usageRecords.date, formatIsoDate(since))]
-    : [];
 
   return db
     .select({
-      date: usageRecords.date,
-      cost: sql<number>`coalesce(sum(${usageRecords.totalCost}::numeric), 0)`,
-      tokens: sql<number>`coalesce(sum(${usageRecords.totalTokens}), 0)`,
+      date: usageBuckets.date,
+      cost: total(usageBuckets.cost),
+      tokens: total(usageBuckets.totalTokens),
     })
-    .from(usageRecords)
-    .where(conditions.length ? and(...conditions) : undefined)
-    .groupBy(usageRecords.date)
-    .orderBy(usageRecords.date);
+    .from(usageBuckets)
+    .where(ccusageSince(since))
+    .groupBy(usageBuckets.date)
+    .orderBy(usageBuckets.date);
 }
 
-// CCusage stores one row per (device, date, agent_type), so the CLI that
-// produced the usage survives into the provider breakdown instead of every
-// row being attributed to Claude Code.
+// agent_type is the CLI that produced the usage (claude-code, codex, amp,
+// opencode, ...); it feeds the provider breakdown next to the gateway's
+// providers.
 async function getCCusageProviders(since: Date | null) {
   const db = getCCusageDb();
-  const conditions = since
-    ? [gte(usageRecords.date, formatIsoDate(since))]
-    : [];
 
   return db
     .select({
-      provider: usageRecords.agentType,
-      cost: sql<number>`coalesce(sum(${usageRecords.totalCost}::numeric), 0)`,
-      tokens: sql<number>`coalesce(sum(${usageRecords.totalTokens}), 0)`,
+      provider: usageBuckets.agentType,
+      cost: total(usageBuckets.cost),
+      tokens: total(usageBuckets.totalTokens),
     })
-    .from(usageRecords)
-    .where(conditions.length ? and(...conditions) : undefined)
-    .groupBy(usageRecords.agentType);
+    .from(usageBuckets)
+    .where(ccusageSince(since))
+    .groupBy(usageBuckets.agentType);
 }
 
-// A row is one (device, date, agent) day that often spans several models, so
-// its total_tokens can't be credited to each entry of models_used — that
-// counts the day once per model. Split it by the per-model breakdown the
-// agent's raw report carries instead: Claude Code / Amp write
-// modelBreakdowns[], Codex writes a models{} map. Rows with neither (older
-// OpenCode days) split evenly — approximate, but the per-model figures still
-// sum to the row's real total.
-async function getCCusageModels(since: Date | null) {
+// Model "" (usage its source never attributed to a model) comes through as
+// well; normalizeModelName() maps it to 'unknown' and the model/brand merges
+// drop it, while the headline totals above still count it.
+async function getCCusageModels(since: Date | null): Promise<ModelUsage[]> {
   const db = getCCusageDb();
-  const sinceFilter = since ? sql`AND date >= ${formatIsoDate(since)}` : sql``;
 
-  const result = await db.execute(sql`
-    WITH per_model AS (
-      SELECT
-        b->>'modelName' AS model,
-        coalesce((b->>'inputTokens')::numeric, 0)
-          + coalesce((b->>'outputTokens')::numeric, 0)
-          + coalesce((b->>'cacheReadTokens')::numeric, 0)
-          + coalesce((b->>'cacheCreationTokens')::numeric, 0) AS tokens
-      FROM usage_records,
-        jsonb_array_elements(raw_data->'modelBreakdowns') AS b
-      WHERE jsonb_typeof(raw_data->'modelBreakdowns') = 'array' ${sinceFilter}
-      UNION ALL
-      SELECT m.key, (m.value->>'totalTokens')::numeric
-      FROM usage_records,
-        jsonb_each(raw_data->'models') AS m
-      WHERE jsonb_typeof(raw_data->'models') = 'object'
-        AND jsonb_typeof(raw_data->'modelBreakdowns') IS DISTINCT FROM 'array'
-        ${sinceFilter}
-      UNION ALL
-      SELECT m, total_tokens::numeric / jsonb_array_length(models_used)
-      FROM usage_records,
-        jsonb_array_elements_text(models_used) AS m
-      WHERE jsonb_typeof(raw_data->'modelBreakdowns') IS DISTINCT FROM 'array'
-        AND jsonb_typeof(raw_data->'models') IS DISTINCT FROM 'object'
-        ${sinceFilter}
-    )
-    SELECT model, sum(tokens) AS tokens
-    FROM per_model
-    GROUP BY model
-    ORDER BY tokens DESC
-  `);
-
-  return (result.rows as { model: string; tokens: string }[]).map((r) => ({
-    model: r.model,
-    tokens: Number(r.tokens),
-  }));
+  return db
+    .select({
+      model: usageBuckets.model,
+      tokens: total(usageBuckets.totalTokens),
+    })
+    .from(usageBuckets)
+    .where(ccusageSince(since))
+    .groupBy(usageBuckets.model)
+    .orderBy(sql`sum(${usageBuckets.totalTokens}) desc`);
 }
 
 // ============================================================
@@ -194,112 +174,97 @@ async function getCCusageModels(since: Date | null) {
 
 async function getLLMeterSummary(since: Date | null) {
   const db = getLLMeterDb();
-  const conditions = since ? [gte(logs.timestamp, since)] : [];
 
   const result = await db
     .select({
-      totalCost: sql<number>`coalesce(sum(${logs.costEffective}::numeric), 0)`,
-      totalTokens: sql<number>`coalesce(sum(${logs.totalTokens}), 0)`,
+      totalCost: total(logs.costEffective),
+      totalTokens: total(logs.totalTokens),
     })
     .from(logs)
-    .where(conditions.length ? and(...conditions) : undefined);
+    .where(llmeterSince(since));
 
   return result[0];
 }
 
 async function getLLMeterCacheTokens(since: Date | null) {
   const db = getLLMeterDb();
-  const conditions = since ? [gte(logs.timestamp, since)] : [];
 
   // Sum the native cached_read_tokens column directly. It is fully populated on
   // logs_archive and verified identical to the old token_usage JSON extraction
   // (prompt_tokens_details.cached_read_tokens), but avoids a per-row text→jsonb
   // parse of the large token_usage field.
   const result = await db
-    .select({
-      total: sql<number>`coalesce(sum(${logs.cachedReadTokens}), 0)`,
-    })
+    .select({ total: total(logs.cachedReadTokens) })
     .from(logs)
-    .where(conditions.length ? and(...conditions) : undefined);
+    .where(llmeterSince(since));
 
-  return Number(result[0].total);
+  return result[0].total;
 }
 
 async function getLLMeterDaily(since: Date | null) {
   const db = getLLMeterDb();
-  const conditions = since ? [gte(logs.timestamp, since)] : [];
 
   return db
     .select({
       date: sql<string>`date(${logs.timestamp})`,
-      cost: sql<number>`coalesce(sum(${logs.costEffective}::numeric), 0)`,
-      tokens: sql<number>`coalesce(sum(${logs.totalTokens}), 0)`,
+      cost: total(logs.costEffective),
+      tokens: total(logs.totalTokens),
     })
     .from(logs)
-    .where(conditions.length ? and(...conditions) : undefined)
+    .where(llmeterSince(since))
     .groupBy(sql`date(${logs.timestamp})`)
     .orderBy(sql`date(${logs.timestamp})`);
 }
 
 async function getLLMeterProviders(since: Date | null) {
   const db = getLLMeterDb();
-  const conditions = since ? [gte(logs.timestamp, since)] : [];
 
   return db
     .select({
       provider: logs.provider,
-      tokens: sql<number>`coalesce(sum(${logs.totalTokens}), 0)`,
-      cost: sql<number>`coalesce(sum(${logs.costEffective}::numeric), 0)`,
+      tokens: total(logs.totalTokens),
+      cost: total(logs.costEffective),
     })
     .from(logs)
-    .where(conditions.length ? and(...conditions) : undefined)
+    .where(llmeterSince(since))
     .groupBy(logs.provider);
 }
 
-async function getLLMeterModels(since: Date | null) {
+async function getLLMeterModels(since: Date | null): Promise<ModelUsage[]> {
   const db = getLLMeterDb();
-  const conditions = since ? [gte(logs.timestamp, since)] : [];
 
-  const result = await db
-    .select({
-      model: logs.model,
-      tokens: sql<number>`coalesce(sum(${logs.totalTokens}), 0)`,
-    })
-    .from(logs)
-    .where(conditions.length ? and(...conditions) : undefined)
-    // No LIMIT: one canonical model can be spread over a dozen raw names, so
-    // truncating here would drop tail aliases before normalizeModelName() gets
-    // to fold them back together. The consumers do their own top-N.
-    .groupBy(logs.model)
-    .orderBy(sql`sum(${logs.totalTokens}) desc`);
-
-  return result.map((r) => ({
-    model: r.model,
-    tokens: Number(r.tokens),
-  }));
+  return (
+    db
+      .select({
+        model: logs.model,
+        tokens: total(logs.totalTokens),
+      })
+      .from(logs)
+      .where(llmeterSince(since))
+      // No LIMIT: one canonical model can be spread over a dozen raw names, so
+      // truncating here would drop tail aliases before normalizeModelName() gets
+      // to fold them back together. The consumers do their own top-N.
+      .groupBy(logs.model)
+      .orderBy(sql`sum(${logs.totalTokens}) desc`)
+  );
 }
 
 // ============================================================
 // Aggregation
 // ============================================================
 
-function mergeDailyPoints(
-  ...sources: { date: string; cost: number; tokens: number }[][]
-): DailyPoint[] {
+function mergeDailyPoints(...sources: DailyPoint[][]): DailyPoint[] {
   const map = new Map<string, DailyPoint>();
 
-  for (const rows of sources) {
-    for (const row of rows) {
-      const dateStr = String(row.date);
-      const existing = map.get(dateStr) || {
-        date: dateStr,
-        cost: 0,
-        tokens: 0,
-      };
-      existing.cost += Number(row.cost);
-      existing.tokens += Number(row.tokens);
-      map.set(dateStr, existing);
-    }
+  for (const row of sources.flat()) {
+    const existing = map.get(row.date) ?? {
+      date: row.date,
+      cost: 0,
+      tokens: 0,
+    };
+    existing.cost += row.cost;
+    existing.tokens += row.tokens;
+    map.set(row.date, existing);
   }
 
   return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date));
@@ -349,16 +314,14 @@ function mergeBrands(...sources: ModelUsage[][]): BrandUsage[] {
 // double-counts nothing.
 const PROVIDER_TOP_N = 7;
 
-function mergeProviders(
-  ...sources: { provider: string; tokens: number; cost: number }[][]
-): ProviderUsage[] {
+function mergeProviders(...sources: ProviderUsage[][]): ProviderUsage[] {
   const map = new Map<string, { tokens: number; cost: number }>();
 
   for (const p of sources.flat()) {
     const name = normalizeProviderName(p.provider);
     const e = map.get(name) ?? { tokens: 0, cost: 0 };
-    e.tokens += Number(p.tokens);
-    e.cost += Number(p.cost);
+    e.tokens += p.tokens;
+    e.cost += p.cost;
     map.set(name, e);
   }
 
@@ -414,9 +377,8 @@ export async function fetchTokenUsage(
     getLLMeterDaily(since365),
   ]);
 
-  const totalCost = Number(ccSummary.totalCost) + Number(llSummary.totalCost);
-  const totalTokens =
-    Number(ccSummary.totalTokens) + Number(llSummary.totalTokens);
+  const totalCost = ccSummary.totalCost + llSummary.totalCost;
+  const totalTokens = ccSummary.totalTokens + llSummary.totalTokens;
 
   const mergedDaily = mergeDailyPoints(ccDaily, llDaily);
 
@@ -443,8 +405,7 @@ export async function fetchTokenUsage(
   const summary: TokenUsageSummary = {
     totalCost,
     totalTokens,
-    totalCacheReadTokens:
-      Number(ccSummary.totalCacheReadTokens) + llCacheTokens,
+    totalCacheReadTokens: ccSummary.totalCacheReadTokens + llCacheTokens,
     avgDailyTokens: totalTokens / periodDays,
   };
 
