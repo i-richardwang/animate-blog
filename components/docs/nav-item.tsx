@@ -15,9 +15,8 @@ export const navItemClassName = (active: boolean) =>
     className: cn(
       '!text-sm !font-normal !h-8 transition-colors duration-200 ease-in-out',
       'lg:!px-3 !px-2',
-      active
-        ? 'text-primary hover:text-primary !font-medium'
-        : 'text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white',
+      'text-neutral-700 dark:text-neutral-200 hover:text-black dark:hover:text-white',
+      active && 'text-black dark:text-white',
     ),
   });
 
@@ -35,7 +34,7 @@ export const NavItem = ({ section }: { section: NavSection }) => {
       <Icon
         className={cn(
           'size-4 lg:hidden',
-          active ? 'text-primary' : 'text-muted-foreground',
+          active ? 'text-foreground' : 'text-muted-foreground',
         )}
       />
       <span className="lg:inline hidden">{section.title}</span>

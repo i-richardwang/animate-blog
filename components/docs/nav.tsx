@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { CommandIcon } from 'lucide-react';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
 import { useSidebar } from 'fumadocs-ui/layouts/docs/slots/sidebar';
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { SocialLinks } from '@/components/social-links';
 import { Menu } from '@/components/animate-ui/icons/menu';
 import { visibleSections } from '@/lib/navigation';
@@ -21,7 +21,9 @@ export const Nav = () => {
   return (
     <header
       id="nd-subnav"
-      className="fixed top-0 inset-x-0 z-30 flex items-center px-4 h-(--fd-banner-height) bg-background"
+      // Its own view-transition group, so it stays still while the page
+      // underneath plays its transition.
+      className="fixed top-0 inset-x-0 z-30 flex items-center px-4 h-(--fd-banner-height) bg-background [view-transition-name:header]"
     >
       <div className="flex items-center gap-3 max-w-[1670px] w-full mx-auto md:px-5 px-3">
         <Link
@@ -68,7 +70,7 @@ export const Nav = () => {
               <SocialLinks linkClassName="size-8" />
             </div>
 
-            <ThemeSwitcher className="max-md:hidden" />
+            <ThemeToggle className="max-md:hidden" />
 
             <button
               className={cn(

@@ -29,7 +29,7 @@ export const NavSectionMenu = ({ section }: { section: NavSection }) => {
           <Icon
             className={cn(
               'size-4 lg:hidden',
-              active ? 'text-primary' : 'text-muted-foreground',
+              active ? 'text-foreground' : 'text-muted-foreground',
             )}
           />
           <span className="lg:inline hidden">{section.title}</span>

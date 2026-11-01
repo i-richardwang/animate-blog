@@ -30,7 +30,7 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import { usePathname } from 'next/navigation';
 import { BookOpen, SquareMenu } from 'lucide-react';
 import type { ComponentProps } from 'react';
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { flatSections } from '@/lib/navigation';
 import {
   AnimatedNav,
@@ -186,7 +186,7 @@ function IconLinks({ items }: { items: LinkItemType[] }) {
           {item.icon}
         </Link>
       ))}
-      <ThemeSwitcher />
+      <ThemeToggle />
     </div>
   );
 }

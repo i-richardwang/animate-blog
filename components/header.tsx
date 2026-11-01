@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { Logo } from '@/components/logo';
 import { SocialLinks } from '@/components/social-links';
 import { useIsMobile } from '@/hooks/use-media-query';
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const LOGO_WRAPPER_VARIANTS = {
   center: {
@@ -81,7 +81,7 @@ export const Header = ({ transition }: { transition: boolean }) => {
             <SocialLinks linkClassName="sm:mt-1 p-1.5 sm:[&_svg]:size-5.5" />
           </div>
 
-          <ThemeSwitcher className="mt-1 xs:mt-0 sm:mt-1" />
+          <ThemeToggle />
         </motion.div>
       </div>
     </motion.div>
