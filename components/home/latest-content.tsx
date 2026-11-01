@@ -4,8 +4,7 @@ import {
   RotatingText,
   RotatingTextContainer,
   useRotatingText,
-} from '@/components/animate-ui/primitives/texts/rotating';
-import { Effect } from '@/components/animate-ui/primitives/effects/effect';
+} from '@animate-ui/react/primitives/texts/rotating';
 import Link from 'next/link';
 import { SendHorizontalIcon } from '@/components/animate-ui/icons/send-horizontal';
 import { PartyPopper } from '@/components/animate-ui/icons/party-popper';
@@ -42,26 +41,24 @@ export const LatestContent = ({ entries }: { entries: LatestEntry[] }) => {
   if (entries.length === 0) return null;
 
   return (
-    <Effect slide fade zoom delay={750}>
-      <div className="bg-card rounded-md h-11 px-4 md:w-[576px] w-full max-w-full mx-auto">
-        <div className="flex items-center gap-3 h-full">
-          <span className="h-6 px-2 bg-primary text-xs text-primary-foreground rounded flex gap-1 items-center justify-center whitespace-nowrap">
-            Latest
-            <PartyPopper delay={500} className="size-3.5" animate />
-          </span>
+    <div className="bg-accent/50 rounded-xl h-11 px-4 md:w-[576px] w-full max-w-full mx-auto">
+      <div className="flex items-center gap-3 h-full">
+        <span className="h-6 px-2 bg-primary text-xs text-primary-foreground rounded flex gap-1 items-center justify-center whitespace-nowrap">
+          Latest
+          <PartyPopper delay={500} className="size-3.5" animate />
+        </span>
 
-          <RotatingTextContainer
-            text={entries.map((entry) => entry.title)}
-            duration={4000}
-            inView
-            inViewOnce={false}
-            className="flex-1 text-left flex items-center gap-3"
-          >
-            <SyncedSendIcon />
-            <CurrentEntryLink entries={entries} />
-          </RotatingTextContainer>
-        </div>
+        <RotatingTextContainer
+          text={entries.map((entry) => entry.title)}
+          duration={4000}
+          inView
+          inViewOnce={false}
+          className="flex-1 text-left flex items-center gap-3"
+        >
+          <SyncedSendIcon />
+          <CurrentEntryLink entries={entries} />
+        </RotatingTextContainer>
       </div>
-    </Effect>
+    </div>
   );
 };

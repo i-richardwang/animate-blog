@@ -1,5 +1,5 @@
 import { PaperclipIcon } from '@/components/animate-ui/icons/paperclip';
-import { AnimateIcon } from '@/components/animate-ui/icons/icon';
+import { AnimateIcon } from '@animate-ui/react/icons';
 
 export const Notes = () => {
   return (

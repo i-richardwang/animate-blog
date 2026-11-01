@@ -48,21 +48,28 @@ Commits follow Conventional Commits (checked by commitlint), and `git push` runs
 ```
 app/          routes, OG image routes, RSS, search and data APIs
 components/   site components; components/ui holds shadcn primitives
+components/home/
+              the home page: intro, header, hero, section cards, footer
+components/docs/
+              the page chrome of every section: navbar, sidebar, TOC,
+              title row and page actions, code blocks, cards, tabs
 components/animate-ui/
               Animate UI code installed by the shadcn CLI
 content/      MDX content
 hooks/, lib/  shared hooks and helpers
 ```
 
-## Animate UI components
+## Animate UI
 
-Animate UI is distributed as source through the shadcn CLI rather than as a package. Add a component with:
+The site is on Animate UI v2 and follows its docs site's look: the intro and hero on the home page, the navbar, sidebar and TOC, the title row with "Copy page", the code blocks and cards. The primitives (`Effect`, `SplittingText`, `Highlight`, `ScrollFade`, the animated Radix `Tooltip`, `HoverCard` and `DropdownMenu`…) come from the `@animate-ui/react` package, and `AnimateUIProvider` in `app/layout.tsx` paces them all. Only the animated icons, the Page Transition (the `stack` effect between pages, wired in `components/site-layout.tsx`) and the Theme Toggler are files, added from the registry with the shadcn CLI:
 
 ```bash
-pnpm dlx shadcn@latest add @animate-ui/components-buttons-button
+pnpm dlx shadcn@latest add @animate-ui/icons-lucide-bell
+pnpm dlx shadcn@latest add @animate-ui/components-page-transition
+pnpm dlx shadcn@latest add @animate-ui/buttons-theme-toggler
 ```
 
-`components.json` points the CLI at this layout, so files land in `components/animate-ui`, `hooks` and `lib`. Code installed this way is kept as upstream ships it; ESLint only relaxes the React Compiler rules for it.
+`components.json` points the CLI at this layout, so they land in `components/animate-ui`. They are kept as upstream ships them; ESLint only relaxes the React Compiler rules for that folder. To animate another shadcn/ui component, run `pnpm dlx @animate-ui/cli@latest animate <component>`.
 
 ## Environment
 

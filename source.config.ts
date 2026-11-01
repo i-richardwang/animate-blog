@@ -11,7 +11,10 @@ export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
     schema: frontmatterSchema.extend({
+      // Either date within the last 30 days puts a badge on the note in the
+      // sidebar (see lib/attach-file.tsx).
       releaseDate: z.coerce.date().optional(),
+      updatedDate: z.coerce.date().optional(),
     }),
   },
   meta: {

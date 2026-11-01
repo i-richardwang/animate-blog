@@ -1,3 +1,4 @@
+import { AnimateUIProvider } from '@animate-ui/react/provider';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { Outfit } from 'next/font/google';
@@ -8,6 +9,7 @@ import './globals.css';
 import { SITE, SITE_AUTHOR } from '@/lib/site';
 import { jsonLd } from '@/lib/json-ld';
 import { Analytics } from '@/components/analytics';
+import { ReducedMotionConfig } from '@animate-ui/react/utils/motion';
 
 const OG_IMAGE = { url: SITE.image, width: 1200, height: 630, alt: SITE.name };
 
@@ -89,7 +91,14 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       <body className="flex flex-col min-h-screen">
         <RootProvider theme={{ defaultTheme: 'system' }}>
-          <NuqsAdapter>{children}</NuqsAdapter>
+          {/* Animate UI's components read their pace and reduced-motion
+              setting from the provider; ReducedMotionConfig passes the same
+              setting to the site's own Motion animations. */}
+          <AnimateUIProvider>
+            <ReducedMotionConfig>
+              <NuqsAdapter>{children}</NuqsAdapter>
+            </ReducedMotionConfig>
+          </AnimateUIProvider>
         </RootProvider>
         <Analytics />
       </body>

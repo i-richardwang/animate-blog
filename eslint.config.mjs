@@ -37,13 +37,10 @@ export default [
     },
   },
   {
-    // Animate UI code is installed by the shadcn CLI and kept as upstream
-    // ships it. It predates the React Compiler rules.
-    files: [
-      'components/animate-ui/**',
-      'hooks/use-auto-height.tsx',
-      'hooks/use-controlled-state.tsx',
-    ],
+    // Animate UI's registry files (icons, Page Transition, Theme Toggler) are
+    // installed by the shadcn CLI and kept as upstream ships them. They
+    // predate the React Compiler rules.
+    files: ['components/animate-ui/**'],
     rules: {
       'react-hooks/immutability': 'off',
       'react-hooks/refs': 'off',

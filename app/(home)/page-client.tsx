@@ -1,65 +1,27 @@
 'use client';
 
-import { Features } from '@/components/features';
-import { Footer } from '@/components/footer';
-import { Header } from '@/components/header';
-import { Hero } from '@/components/hero';
-import { cn } from '@/lib/utils';
-import { motion } from 'motion/react';
-import { useEffect, useState } from 'react';
+import { Features } from '@/components/home/features';
+import { Hero } from '@/components/home/hero';
+import { HomeFooter } from '@/components/home/home-footer';
+import { HomeHeader } from '@/components/home/home-header';
+import { IntroProvider } from '@/components/home/intro';
 import type { LatestEntry } from '@/lib/source';
 
-const CONTENT_VARIANTS = {
-  hidden: {
-    opacity: 0,
-  },
-  visible: {
-    opacity: 1,
-    transition: { type: 'spring', stiffness: 100, damping: 30 },
-  },
-} as const;
-
-type HomePageClientProps = {
+// The intro plays over the page (see components/home/intro.tsx); the header
+// receives the logo at its end and the sections below rise in after it.
+export function HomePageClient({
+  latestContent,
+}: {
   latestContent: LatestEntry[];
-};
-
-export function HomePageClient({ latestContent }: HomePageClientProps) {
-  const [transition, setTransition] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setTransition(true), 1250);
-    const timer2 = setTimeout(() => setIsLoaded(true), 2500);
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(timer2);
-    };
-  }, []);
-
+}) {
   return (
-    <main className={cn('relative h-dvh', !isLoaded && 'overflow-y-hidden')}>
-      <Header transition={transition} />
-
-      <div className="h-dvh w-full flex flex-col justify-between">
-        {transition && (
-          <>
-            <div>
-              <motion.div
-                variants={CONTENT_VARIANTS}
-                initial="hidden"
-                animate="visible"
-                className="w-full"
-              >
-                <Hero latestContent={latestContent} />
-              </motion.div>
-
-              <Features />
-            </div>
-
-            <Footer animated />
-          </>
-        )}
-      </div>
-    </main>
+    <IntroProvider>
+      <HomeHeader />
+      <main className="flex min-h-dvh flex-col">
+        <Hero latestContent={latestContent} />
+        <Features />
+        <HomeFooter />
+      </main>
+    </IntroProvider>
   );
 }

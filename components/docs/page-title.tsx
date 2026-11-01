@@ -1,66 +1,28 @@
-import Link from 'next/link';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { DocsTitle } from 'fumadocs-ui/page';
-import { Button } from '@/components/animate-ui/components/buttons/button';
+import type { ReactNode } from 'react';
 import type { PageLink } from '@/lib/source';
+import { PageNavigation } from './page-actions';
 
-// A page's title with buttons to its previous and next pages. `emptyLabels`
-// name the missing neighbour for screen readers, e.g. "没有更早的文章".
+// A page's title, with its actions (children, e.g. CopyPage) and the arrows
+// to its previous and next pages at the right.
 export function PageTitle({
   title,
-  url,
   previous,
   next,
-  emptyLabels,
-}: {
-  title: string;
-  url: string;
-  previous?: PageLink;
-  next?: PageLink;
-  emptyLabels: { previous: string; next: string };
-}) {
-  return (
-    <div className="flex flex-row gap-2 items-start w-full justify-between">
-      <DocsTitle className="font-medium">{title}</DocsTitle>
-      {(previous || next) && (
-        <div className="flex flex-row gap-1.5 items-center pt-0.5">
-          <NavButton
-            link={previous}
-            url={url}
-            emptyLabel={emptyLabels.previous}
-          >
-            <ArrowLeft />
-          </NavButton>
-          <NavButton link={next} url={url} emptyLabel={emptyLabels.next}>
-            <ArrowRight />
-          </NavButton>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function NavButton({
-  link,
-  url,
-  emptyLabel,
   children,
 }: {
-  link?: PageLink;
-  url: string;
-  emptyLabel: string;
-  children: React.ReactNode;
+  title: string;
+  previous?: PageLink;
+  next?: PageLink;
+  children?: ReactNode;
 }) {
   return (
-    <Button variant="accent" size="icon-sm" asChild>
-      <Link
-        href={link?.url ?? url}
-        aria-disabled={!link}
-        className={!link ? 'pointer-events-none opacity-50' : undefined}
-        aria-label={link ? `前往 ${link.name}` : emptyLabel}
-      >
+    <div className="flex items-start justify-between gap-4">
+      <DocsTitle className="font-medium">{title}</DocsTitle>
+      <div className="flex shrink-0 items-center gap-2 pt-0.5">
         {children}
-      </Link>
-    </Button>
+        <PageNavigation previous={previous} next={next} />
+      </div>
+    </div>
   );
 }

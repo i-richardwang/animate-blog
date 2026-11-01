@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { Effect } from '@/components/animate-ui/primitives/effects/effect';
+import { Effect } from '@animate-ui/react/primitives/effects/effect';
 import { cn } from '@/lib/utils';
 
 // A list entry that slides in `delay` ms after it scrolls into view and moves

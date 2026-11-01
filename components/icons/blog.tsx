@@ -1,5 +1,5 @@
 import { MessageSquareQuoteIcon } from '@/components/animate-ui/icons/message-square-quote';
-import { AnimateIcon } from '@/components/animate-ui/icons/icon';
+import { AnimateIcon } from '@animate-ui/react/icons';
 
 export const Blog = () => {
   return (

@@ -1,0 +1,74 @@
+'use client';
+
+// Tabs for MDX content, styled like shadcn/ui's and built on Animate UI's own
+// Tabs primitive: a highlight glides between the triggers and the panels
+// slide, the height following the active one.
+
+import {
+  Tabs as TabsPrimitive,
+  TabsList as TabsListPrimitive,
+  TabsTrigger as TabsTriggerPrimitive,
+  TabsContent as TabsContentPrimitive,
+  TabsContents as TabsContentsPrimitive,
+  TabsHighlight as TabsHighlightPrimitive,
+  TabsHighlightItem as TabsHighlightItemPrimitive,
+  type TabsProps,
+  type TabsListProps,
+  type TabsTriggerProps,
+  type TabsContentProps,
+  type TabsContentsProps,
+} from '@animate-ui/react/primitives/tabs';
+import { cn } from '@/lib/utils';
+
+export function Tabs({ className, ...props }: TabsProps) {
+  return (
+    <TabsPrimitive
+      className={cn('flex flex-col gap-2', className)}
+      {...props}
+    />
+  );
+}
+
+export function TabsList({ className, ...props }: TabsListProps) {
+  return (
+    <TabsHighlightPrimitive className="absolute z-0 inset-0 border border-transparent rounded-lg bg-accent">
+      <TabsListPrimitive
+        className={cn(
+          'text-muted-foreground inline-flex h-9 w-fit items-center justify-center',
+          className,
+        )}
+        {...props}
+      />
+    </TabsHighlightPrimitive>
+  );
+}
+
+export function TabsTrigger({ className, ...props }: TabsTriggerProps) {
+  return (
+    <TabsHighlightItemPrimitive
+      value={props.value}
+      className="flex-1 size-full"
+    >
+      <TabsTriggerPrimitive
+        className={cn(
+          "data-[state=active]:text-foreground data-[state=inactive]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md w-full px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+          className,
+        )}
+        {...props}
+      />
+    </TabsHighlightItemPrimitive>
+  );
+}
+
+export function TabsContents(props: TabsContentsProps) {
+  return <TabsContentsPrimitive {...props} />;
+}
+
+export function TabsContent({ className, ...props }: TabsContentProps) {
+  return (
+    <TabsContentPrimitive
+      className={cn('flex-1 outline-none', className)}
+      {...props}
+    />
+  );
+}

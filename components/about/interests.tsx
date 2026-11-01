@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Effect } from '@/components/animate-ui/primitives/effects/effect';
+import { Effect } from '@animate-ui/react/primitives/effects/effect';
 import { Sparkles, Camera, Server, Headphones, Film } from 'lucide-react';
 import {
   Carousel,
