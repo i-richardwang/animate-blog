@@ -10,6 +10,7 @@ import {
   SparklesIcon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
+import { CarouselDots } from '@animate-ui/react/primitives/carousel';
 import {
   Carousel,
   CarouselContent,
@@ -163,6 +164,7 @@ const InterestCard = ({ interest }: { interest: Interest }) => {
             </CarouselContent>
             <CarouselPrevious />
             <CarouselNext />
+            <CarouselDots className="mt-4 text-muted-foreground" />
           </Carousel>
         </div>
       </div>

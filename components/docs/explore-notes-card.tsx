@@ -13,7 +13,6 @@ export function ExploreNotesCard() {
       <AnimateIcon animateOnHover asChild>
         <Link href="/docs">
           <motion.div
-            whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             className="inline-flex items-center gap-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md h-11 px-4 transition-colors"

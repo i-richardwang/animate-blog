@@ -3,7 +3,7 @@
 import * as React from 'react';
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
-} from 'embla-carousel-react';
+} from '@animate-ui/react/primitives/carousel';
 import { ArrowLeft02Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 
