@@ -1,135 +1,113 @@
 'use client';
 
-import {
-  type HTMLAttributes,
-  type MouseEventHandler,
-  type ReactNode,
-  useCallback,
-  useRef,
-  useState,
-} from 'react';
-import { AnimatePresence, motion } from 'motion/react';
-import { CheckIcon, CopyIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import {
-  ScrollArea,
-  ScrollBar,
-  ScrollViewport,
-} from '@/components/ui/scroll-area';
+// Code blocks in MDX content: an accent frame with the code on its own
+// background inside, scrolling natively, the copy button floating at the
+// top right (or in the title bar when the block has one). `title`, `icon`
+// and the line-number flags arrive on <pre> from Fumadocs' rehype-code.
 
-export function Pre({ className, ...props }: HTMLAttributes<HTMLPreElement>) {
+import {
+  useRef,
+  type ComponentProps,
+  type CSSProperties,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react';
+import { cn } from '@/lib/utils';
+import { CopyButton, getPreText } from './copy-button';
+
+export type CodeBlockProps = Omit<HTMLAttributes<HTMLElement>, 'title'> & {
+  title?: ReactNode;
+  icon?: ReactNode;
+  allowCopy?: boolean | 'true' | 'false';
+  viewportClassName?: string;
+  'data-line-numbers'?: boolean;
+  'data-line-numbers-start'?: number;
+};
+
+export function Pre({ className, ...props }: ComponentProps<'pre'>) {
   return (
-    <pre className={cn('p-4 focus-visible:outline-none', className)} {...props}>
-      {props.children}
-    </pre>
+    <pre
+      {...props}
+      className={cn(
+        'w-max min-w-full focus-visible:outline-none *:flex *:flex-col',
+        className,
+      )}
+    />
   );
 }
 
-// `title` and `icon` arrive on <pre> from Fumadocs' rehype-code.
 export function CodeBlock({
   title,
   icon,
+  allowCopy = true,
+  viewportClassName,
+  className,
+  style,
+  children,
   ...props
-}: HTMLAttributes<HTMLElement> & { icon?: ReactNode }) {
-  const [isCopied, setIsCopied] = useState(false);
+}: CodeBlockProps) {
   const areaRef = useRef<HTMLDivElement>(null);
-
-  const onCopy = useCallback(() => {
-    const pre = areaRef.current?.getElementsByTagName('pre').item(0);
-
-    if (!pre) return;
-
-    const clone = pre.cloneNode(true) as HTMLElement;
-    clone.querySelectorAll('.nd-copy-ignore').forEach((node) => {
-      node.remove();
-    });
-
-    void navigator.clipboard.writeText(clone.textContent ?? '').then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 3000);
-    });
-  }, []);
+  const copy = allowCopy !== false && allowCopy !== 'false';
 
   return (
     <figure
       {...props}
+      dir="ltr"
+      tabIndex={-1}
+      data-slot="codeblock"
       className={cn(
-        'not-prose group fd-codeblock relative my-6 overflow-hidden rounded-xl text-sm [&.shiki]:!bg-accent',
-        props.className,
-      )}
-    >
-      {title ? (
-        <div className="flex flex-row items-center gap-2 pl-4 pr-4 h-10">
-          {icon ? (
-            <div
-              className="text-muted-foreground [&_svg]:size-3.5"
-              dangerouslySetInnerHTML={
-                typeof icon === 'string' ? { __html: icon } : undefined
-              }
-            >
-              {typeof icon !== 'string' ? icon : null}
-            </div>
-          ) : null}
-          <figcaption className="flex-1 truncate text-muted-foreground">
-            {title}
-          </figcaption>
-          <CopyButton className="-me-2" onClick={onCopy} isCopied={isCopied} />
-        </div>
-      ) : (
-        <div className="absolute right-0 top-0 z-[2] bg-accent p-1.5 rounded-bl-xl">
-          <CopyButton onClick={onCopy} isCopied={isCopied} />
-        </div>
-      )}
-      <div className={cn('p-1.5', title && 'pt-0')}>
-        <ScrollArea ref={areaRef} dir="ltr">
-          <ScrollViewport
-            data-slot="codeblock-viewport"
-            className="max-h-[600px] bg-background rounded-md [&_code]:!text-[13px] [&_code_.line]:!px-0"
-          >
-            {props.children}
-          </ScrollViewport>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
-    </figure>
-  );
-}
-
-function CopyButton({
-  className,
-  isCopied,
-  onClick,
-}: {
-  className?: string;
-  isCopied: boolean;
-  onClick: MouseEventHandler<HTMLButtonElement>;
-}) {
-  const Icon = isCopied ? CheckIcon : CopyIcon;
-
-  return (
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      className={cn(
-        "flex items-center justify-center rounded-md transition-[box-shadow,_color,_background-color,_border-color,_outline-color,_text-decoration-color,_fill,_stroke] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-        'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
-        "size-7 [&_svg:not([class*='size-'])]:size-3.5 rounded-md",
-        'bg-transparent hover:bg-black/5 dark:hover:bg-white/10',
+        'shiki group not-prose relative my-6 overflow-hidden rounded-xl bg-accent text-sm',
         className,
       )}
-      onClick={isCopied ? undefined : onClick}
+      style={style}
     >
-      <AnimatePresence mode="popLayout">
-        <motion.span
-          key={isCopied ? 'check' : 'copy'}
-          initial={{ scale: 0, opacity: 0.4, filter: 'blur(4px)' }}
-          animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-          exit={{ scale: 0, opacity: 0.4, filter: 'blur(4px)' }}
-          transition={{ duration: 0.25 }}
-        >
-          <Icon />
-        </motion.span>
-      </AnimatePresence>
-    </motion.button>
+      {title ? (
+        <div className="flex h-10 items-center gap-2 pr-2.5 pl-4 text-muted-foreground">
+          {typeof icon === 'string' ? (
+            <div
+              className="[&_svg]:size-3.5"
+              dangerouslySetInnerHTML={{ __html: icon }}
+            />
+          ) : (
+            icon && <div className="[&_svg]:size-3.5">{icon}</div>
+          )}
+          <figcaption className="flex-1 truncate">{title}</figcaption>
+          {copy && <CopyButton getText={() => getPreText(areaRef.current)} />}
+        </div>
+      ) : (
+        copy && (
+          <div className="absolute top-3 right-3 z-2">
+            <CopyButton getText={() => getPreText(areaRef.current)} />
+          </div>
+        )
+      )}
+      <div className={cn('p-1', title && 'pt-0')}>
+        <div className="overflow-hidden rounded-lg bg-background">
+          <div
+            ref={areaRef}
+            role="region"
+            tabIndex={0}
+            data-slot="codeblock-viewport"
+            className={cn(
+              'fd-scroll-container max-h-[600px] overflow-auto overscroll-x-none py-3.5 text-[13px] leading-relaxed focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none focus-visible:ring-inset',
+              viewportClassName,
+            )}
+            style={
+              {
+                // Room for the floating copy button on the first line.
+                ...(!title && copy
+                  ? { '--padding-right': 'calc(var(--spacing) * 10)' }
+                  : {}),
+                counterSet: props['data-line-numbers']
+                  ? `line ${Number(props['data-line-numbers-start'] ?? 1) - 1}`
+                  : undefined,
+              } as CSSProperties
+            }
+          >
+            {children}
+          </div>
+        </div>
+      </div>
+    </figure>
   );
 }
