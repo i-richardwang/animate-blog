@@ -80,11 +80,7 @@ export default async function Page(props: {
       <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-2">
         {page.data.hosts.length > 0 && (
           <div className="flex items-center gap-1">
-            <HugeiconsIcon
-              icon={Mic01Icon}
-              strokeWidth={2}
-              className="size-3"
-            />
+            <HugeiconsIcon icon={Mic01Icon} strokeWidth={2} size={12} />
             <span>主播: {page.data.hosts.join(', ')}</span>
           </div>
         )}

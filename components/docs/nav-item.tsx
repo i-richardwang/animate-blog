@@ -34,8 +34,9 @@ export const NavItem = ({ section }: { section: NavSection }) => {
       <HugeiconsIcon
         icon={section.icon}
         strokeWidth={2}
+        size={16}
         className={cn(
-          'size-4 lg:hidden',
+          'lg:hidden',
           active ? 'text-foreground' : 'text-muted-foreground',
         )}
       />

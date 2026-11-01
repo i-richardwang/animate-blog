@@ -2,7 +2,7 @@ import { Alert02Icon, InformationCircleIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import type { ReactNode } from 'react';
 
-const iconClass = '-me-0.5 size-5 shrink-0 text-(--callout-color)';
+const iconClass = '-me-0.5 shrink-0 text-(--callout-color)';
 
 const VARIANTS = {
   info: {
@@ -11,6 +11,7 @@ const VARIANTS = {
       <HugeiconsIcon
         icon={InformationCircleIcon}
         strokeWidth={2}
+        size={20}
         className={iconClass}
       />
     ),
@@ -18,7 +19,12 @@ const VARIANTS = {
   warn: {
     color: 'var(--color-fd-warning)',
     icon: (
-      <HugeiconsIcon icon={Alert02Icon} strokeWidth={2} className={iconClass} />
+      <HugeiconsIcon
+        icon={Alert02Icon}
+        strokeWidth={2}
+        size={20}
+        className={iconClass}
+      />
     ),
   },
 };

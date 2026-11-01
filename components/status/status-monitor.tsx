@@ -75,7 +75,8 @@ const StatusMonitorDescription = ({ children }: { children?: string }) => {
         <HugeiconsIcon
           icon={InformationCircleIcon}
           strokeWidth={2}
-          className="size-4 text-muted-foreground"
+          size={16}
+          className="text-muted-foreground"
         />
       </TooltipTrigger>
       <TooltipContent>
