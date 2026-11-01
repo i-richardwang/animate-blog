@@ -238,7 +238,7 @@ export const StatusTracker = ({ data }: StatusTrackerProps) => {
                 {item.bar.map((segment, segmentIndex) => (
                   <div
                     key={`${item.day}-${segment.status}-${segmentIndex}`}
-                    className="w-full transition-all"
+                    className="w-full transition-[height,background-color]"
                     style={{
                       height: `${segment.height}%`,
                       backgroundColor: STATUS_META[segment.status].color,

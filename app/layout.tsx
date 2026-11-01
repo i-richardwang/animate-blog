@@ -9,6 +9,7 @@ import './globals.css';
 import { SITE, SITE_AUTHOR } from '@/lib/site';
 import { jsonLd } from '@/lib/json-ld';
 import { Analytics } from '@/components/analytics';
+import { ReducedMotion } from '@/components/reduced-motion';
 
 const OG_IMAGE = { url: SITE.image, width: 1200, height: 630, alt: SITE.name };
 
@@ -93,7 +94,9 @@ export default function Layout({ children }: { children: ReactNode }) {
           {/* One place to pace every Animate UI animation: `tempo` scales
               all of them, 0.8 crisper, 1.2 more relaxed. */}
           <AnimateUIProvider>
-            <NuqsAdapter>{children}</NuqsAdapter>
+            <ReducedMotion>
+              <NuqsAdapter>{children}</NuqsAdapter>
+            </ReducedMotion>
           </AnimateUIProvider>
         </RootProvider>
         <Analytics />

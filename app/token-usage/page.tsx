@@ -162,18 +162,18 @@ export default function TokenUsagePage() {
           {/* Loading Charts */}
           {isLoading && (
             <>
-              <div className="mt-6 h-[280px] animate-pulse border bg-card" />
+              <div className="mt-6 h-[280px] animate-pulse motion-reduce:animate-none border bg-card" />
               <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div className="h-[370px] animate-pulse border bg-card" />
-                <div className="h-[370px] animate-pulse border bg-card" />
+                <div className="h-[370px] animate-pulse motion-reduce:animate-none border bg-card" />
+                <div className="h-[370px] animate-pulse motion-reduce:animate-none border bg-card" />
               </div>
               <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div className="h-[370px] animate-pulse border bg-card" />
-                <div className="h-[370px] animate-pulse border bg-card" />
+                <div className="h-[370px] animate-pulse motion-reduce:animate-none border bg-card" />
+                <div className="h-[370px] animate-pulse motion-reduce:animate-none border bg-card" />
               </div>
               <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div className="h-[440px] animate-pulse border bg-card" />
-                <div className="h-[440px] animate-pulse border bg-card" />
+                <div className="h-[440px] animate-pulse motion-reduce:animate-none border bg-card" />
+                <div className="h-[440px] animate-pulse motion-reduce:animate-none border bg-card" />
               </div>
             </>
           )}

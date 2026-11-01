@@ -38,7 +38,7 @@ export const Footer = ({ animated = false }: FooterProps) => {
           >
             All operational
             <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping bg-success opacity-75" />
+              <span className="absolute inline-flex size-full animate-ping motion-reduce:hidden bg-success opacity-75" />
               <span className="relative inline-flex size-2 bg-success" />
             </span>
           </Link>
