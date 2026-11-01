@@ -74,6 +74,8 @@ export const Nav = () => {
             <ThemeToggle className="max-md:hidden" />
 
             <button
+              type="button"
+              aria-label={open ? 'Close menu' : 'Open menu'}
               className={cn(
                 buttonVariants({
                   color: 'ghost',

@@ -155,6 +155,7 @@ const InterestCard = ({ interest }: { interest: Interest }) => {
                         src={item.image}
                         alt={item.caption}
                         fill
+                        sizes="(min-width: 896px) 400px, 50vw"
                         className="object-cover"
                       />
                     </div>
@@ -164,7 +165,8 @@ const InterestCard = ({ interest }: { interest: Interest }) => {
             </CarouselContent>
             <CarouselPrevious />
             <CarouselNext />
-            <CarouselDots className="mt-4 text-muted-foreground" />
+            {/* A lone dot says nothing: hide the dots when the slides all fit. */}
+            <CarouselDots className="mt-4 text-muted-foreground [&:has([data-slot=carousel-dot]:only-of-type)]:hidden" />
           </Carousel>
         </div>
       </div>
