@@ -18,7 +18,6 @@
     "@animate-ui/react": "^2.4.1",
     "@orama/tokenizers": "^3.1.16",
     "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
     "cn": "^0.5.1",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.2",
@@ -38,7 +37,6 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "recharts": "^3.8.0",
-    "tailwind-merge": "^3.3.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {

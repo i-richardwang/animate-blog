@@ -277,14 +277,6 @@
     @apply relative;
   }
 
-  #nd-page article {
-    @apply !pt-23;
-  }
-
-  #nd-page {
-    @apply !pt-0;
-  }
-
   #docs-body h1,
   #docs-body h2,
   #docs-body h3,

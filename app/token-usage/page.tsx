@@ -1,12 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  DocsPage,
-  DocsBody,
-  DocsDescription,
-  DocsTitle,
-} from 'fumadocs-ui/page';
+import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/page';
+import { SitePage } from '@/components/docs/page';
 import { Coins, Cpu, TrendingUp, Database } from 'lucide-react';
 import { StatCard, StatCardSkeleton } from '@/components/token-usage/stat-card';
 import { CostTrendChart } from '@/components/token-usage/cost-trend-chart';
@@ -58,7 +54,7 @@ export default function TokenUsagePage() {
 
   return (
     <>
-      <DocsPage tableOfContent={{ enabled: false }} className="!max-w-[1124px]">
+      <SitePage tableOfContent={{ enabled: false }} className="max-w-[1124px]">
         <DocsTitle className="font-medium">Token 用量</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           AI Token 使用量和成本的实时统计与趋势分析
@@ -178,7 +174,7 @@ export default function TokenUsagePage() {
             </>
           )}
         </DocsBody>
-      </DocsPage>
+      </SitePage>
     </>
   );
 }

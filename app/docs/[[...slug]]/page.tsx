@@ -1,5 +1,6 @@
 import { source, getNoteNeighbours } from '@/lib/source';
-import { DocsPage, DocsBody, DocsDescription } from 'fumadocs-ui/page';
+import { DocsBody, DocsDescription } from 'fumadocs-ui/page';
+import { SitePage } from '@/components/docs/page';
 import { notFound } from 'next/navigation';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { getMDXComponents } from '@/mdx-components';
@@ -35,10 +36,10 @@ export default async function Page(props: {
   const githubUrl = `${SITE.repo}/blob/main/content/docs/${page.path}`;
 
   return (
-    <DocsPage
+    <SitePage
       toc={page.data.toc}
       tableOfContentPopover={{ enabled: false }}
-      className="!max-w-[860px]"
+      className="max-w-[860px]"
       slots={{ breadcrumb: SectionLabel, toc: tocSlots }}
       footer={{ items: { previous, next } }}
     >
@@ -57,7 +58,7 @@ export default async function Page(props: {
           })}
         />
       </DocsBody>
-    </DocsPage>
+    </SitePage>
   );
 }
 

@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'motion/react';
 import { SplittingText } from '@animate-ui/react/primitives/texts/splitting';
 import { Effect } from '@animate-ui/react/primitives/effects/effect';
 import Image from 'next/image';
@@ -45,11 +44,7 @@ export const AboutHero = () => {
         {/* Avatar */}
         <Effect slide fade zoom delay={450}>
           <div className="mt-12 relative">
-            <motion.div
-              className="size-32 rounded-full overflow-hidden"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            >
+            <div className="size-32 rounded-full overflow-hidden">
               <Image
                 src="/about/header-round.png"
                 alt="Richard Wang"
@@ -57,7 +52,7 @@ export const AboutHero = () => {
                 height={128}
                 className="size-full object-cover"
               />
-            </motion.div>
+            </div>
           </div>
         </Effect>
       </div>

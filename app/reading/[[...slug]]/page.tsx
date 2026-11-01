@@ -1,10 +1,6 @@
 import { reading, getNeighbours, getSortedReadingPosts } from '@/lib/source';
-import {
-  DocsPage,
-  DocsBody,
-  DocsDescription,
-  DocsTitle,
-} from 'fumadocs-ui/page';
+import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/page';
+import { SitePage } from '@/components/docs/page';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
@@ -39,7 +35,7 @@ export default async function Page(props: {
     }));
 
     return (
-      <DocsPage tableOfContent={{ enabled: false }} className="!max-w-[1124px]">
+      <SitePage tableOfContent={{ enabled: false }} className="max-w-[1124px]">
         <DocsTitle className="font-medium">{SECTION.title}</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           {SECTION.description}
@@ -48,7 +44,7 @@ export default async function Page(props: {
         <DocsBody id="docs-body" className="pb-10 pt-4">
           <ReadingList readings={posts} />
         </DocsBody>
-      </DocsPage>
+      </SitePage>
     );
   }
 
@@ -61,9 +57,9 @@ export default async function Page(props: {
   const { previous, next } = getNeighbours(getSortedReadingPosts(), page.url);
 
   return (
-    <DocsPage
+    <SitePage
       tableOfContent={{ enabled: false }}
-      className="!max-w-[860px]"
+      className="max-w-[860px]"
       footer={{ items: { previous, next } }}
     >
       <CategoryLabel category={page.data.category} />
@@ -92,7 +88,7 @@ export default async function Page(props: {
       <DocsBody id="docs-body" className="prose-lg-content pb-10 pt-4">
         <MDXContent components={getMDXComponents()} />
       </DocsBody>
-    </DocsPage>
+    </SitePage>
   );
 }
 

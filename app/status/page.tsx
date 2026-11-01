@@ -1,12 +1,8 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import {
-  DocsPage,
-  DocsBody,
-  DocsDescription,
-  DocsTitle,
-} from 'fumadocs-ui/page';
+import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/page';
+import { SitePage } from '@/components/docs/page';
 import { StatusBanner } from '@/components/status/status-banner';
 import { StatusMonitor } from '@/components/status/status-monitor';
 import {
@@ -73,7 +69,7 @@ export default function StatusPage() {
 
   return (
     <>
-      <DocsPage tableOfContent={{ enabled: false }} className="!max-w-[1124px]">
+      <SitePage tableOfContent={{ enabled: false }} className="max-w-[1124px]">
         <DocsTitle className="font-medium">系统状态</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           所有服务的实时状态和运行时间信息
@@ -135,7 +131,7 @@ export default function StatusPage() {
             )}
           </div>
         </DocsBody>
-      </DocsPage>
+      </SitePage>
     </>
   );
 }

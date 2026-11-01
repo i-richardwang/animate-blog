@@ -3,7 +3,6 @@
 import { CardLink } from '@/components/docs/card-link';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 
 interface Post {
@@ -44,13 +43,9 @@ export function BlogList({ posts }: BlogListProps) {
               </p>
             )}
           </div>
-          <motion.div
-            className="flex-shrink-0 size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <div className="flex-shrink-0 size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
             <ArrowRight className="size-4" />
-          </motion.div>
+          </div>
         </CardLink>
       ))}
     </div>

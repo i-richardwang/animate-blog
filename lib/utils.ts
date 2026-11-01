@@ -1,11 +1,8 @@
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+// Tailwind class merging, the same `cn` the Animate UI registry files use.
+export { cn } from 'cn';
 
 export function formatDate(date: Date) {
   return format(date, 'MMM d, yyyy', { locale: enUS });
