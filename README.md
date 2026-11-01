@@ -10,7 +10,7 @@
 
 ![hero](https://richardwang.me/og-image.png)
 
-A single Next.js app built with [Fumadocs](https://fumadocs.dev), Tailwind CSS, [Motion](https://motion.dev) and components from [Animate UI](https://animate-ui.com). The story of how it started is in [Building a personal site with Animate UI](https://richardwang.me/blog/building-personal-site-with-animate-ui).
+A single Next.js app built with [Fumadocs](https://fumadocs.dev) (its Base UI flavour, `@fumadocs/base-ui`), Tailwind CSS, [Motion](https://motion.dev) and components from [Animate UI](https://animate-ui.com). The story of how it started is in [Building a personal site with Animate UI](https://richardwang.me/blog/building-personal-site-with-animate-ui).
 
 ## Sections
 

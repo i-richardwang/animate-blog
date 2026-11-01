@@ -17,7 +17,6 @@ import {
   SidebarFolderTrigger,
   SidebarItem as BaseSidebarItem,
   SidebarSeparator as BaseSidebarSeparator,
-  SidebarViewport,
 } from 'fumadocs-ui/components/sidebar/base';
 import { createLinkItemRenderer } from 'fumadocs-ui/components/sidebar/link-item';
 import { createPageTreeRenderer } from 'fumadocs-ui/components/sidebar/page-tree';
@@ -27,9 +26,10 @@ import type { LinkItemType } from 'fumadocs-ui/layouts/shared';
 import Link from 'fumadocs-core/link';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import type * as PageTree from 'fumadocs-core/page-tree';
+import { useScrollFade } from '@animate-ui/react/primitives/effects/scroll-fade';
 import { usePathname } from 'next/navigation';
 import { BookOpen, SquareMenu } from 'lucide-react';
-import type { ComponentProps } from 'react';
+import { useRef, type ComponentProps, type ReactNode } from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { flatSections } from '@/lib/navigation';
 import {
@@ -144,6 +144,22 @@ function PageTreeSeparator({ item }: { item: PageTree.Separator }) {
   );
 }
 
+// The scrolling part of the sidebar: no scrollbar, the content fading out at
+// the edges instead (the TOC scrolls the same way).
+function SidebarScroll({ children }: { children: ReactNode }) {
+  const scroll = useRef<HTMLDivElement>(null);
+  useScrollFade(scroll, { size: 24, blur: 0 });
+  return (
+    <div
+      ref={scroll}
+      data-slot="sidebar-scroll"
+      className="min-h-0 flex-1 overflow-y-auto overscroll-none px-2 pb-4 [scrollbar-width:none] max-md:pt-2 md:pb-14"
+    >
+      {children}
+    </div>
+  );
+}
+
 // The navbar's hover menus have no mobile equivalent, so the drawer lists
 // sections and their sub-sections flat, in navbar order.
 function SiteMenu() {
@@ -225,8 +241,6 @@ export function DocsSidebar() {
       />
     </>
   );
-  const viewportProps = { className: 'md:pb-14 pb-4 max-md:pt-2 px-2' };
-
   return (
     <>
       {/* Desktop: a sticky column in the layout grid. */}
@@ -244,9 +258,9 @@ export function DocsSidebar() {
                 ref={ref}
                 className="absolute flex flex-col w-full inset-s-0 inset-y-0 items-end bg-fd-background text-sm *:w-(--fd-sidebar-width)"
               >
-                <SidebarViewport viewport={viewportProps}>
+                <SidebarScroll>
                   <AnimatedNav>{pageTree}</AnimatedNav>
-                </SidebarViewport>
+                </SidebarScroll>
               </aside>
             </div>
           )}
@@ -256,12 +270,12 @@ export function DocsSidebar() {
       {/* Mobile: a drawer toggled from the navbar. */}
       <SidebarDrawerOverlay className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out" />
       <SidebarDrawerContent className="fixed flex flex-col shadow-lg border-s inset-e-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out">
-        <SidebarViewport viewport={viewportProps}>
+        <SidebarScroll>
           <AnimatedNav>
             <SiteMenu />
             {pageTree}
           </AnimatedNav>
-        </SidebarViewport>
+        </SidebarScroll>
         <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
           <IconLinks items={menuItems} />
         </div>
