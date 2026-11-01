@@ -9,6 +9,7 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import { baseOptions } from '@/app/layout.config';
 import { Nav } from '@/components/docs/nav';
 import { DocsSidebar } from '@/components/docs/sidebar';
+import { PageTransition } from '@/components/animate-ui/components/page-transition';
 import { Footer } from '@/components/footer';
 import { ScrollProgressBar } from '@/components/scroll-progress-bar';
 import { SITE } from '@/lib/site';
@@ -24,6 +25,12 @@ import { SITE } from '@/lib/site';
 // A section gets a desktop sidebar only when it passes a page tree (the notes
 // do; the blog and the other flat sections don't). Without one, the mobile
 // drawer is just the site menu.
+//
+// Pages change inside a PageTransition, so the navbar, the sidebar and the
+// footer stay still while the page's own grid areas (main, TOC) animate. The
+// wrapper is a subgrid over those areas, so DocsPage keeps placing its parts
+// in the layout's grid. The home page has its own layout and opening
+// animation, so coming from it there is no transition.
 const EMPTY_TREE: PageTree.Root = { name: 'Site', children: [] };
 
 export function SiteLayout({
@@ -51,7 +58,12 @@ export function SiteLayout({
         }}
         containerProps={{ className: 'pt-(--fd-banner-height)' }}
       >
-        {children}
+        <PageTransition
+          effect="stack"
+          className="col-[main-start/toc-end] row-[1/-1] grid grid-cols-subgrid grid-rows-subgrid"
+        >
+          {children}
+        </PageTransition>
       </DocsLayout>
       <Footer />
     </>

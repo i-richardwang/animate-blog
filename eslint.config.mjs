@@ -37,8 +37,8 @@ export default [
     },
   },
   {
-    // Animate UI icons are installed by the shadcn CLI and kept as upstream
-    // ships them. They predate the React Compiler rules.
+    // Animate UI's icons and Page Transition are installed by the shadcn CLI
+    // and kept as upstream ships them. They predate the React Compiler rules.
     files: ['components/animate-ui/**'],
     rules: {
       'react-hooks/immutability': 'off',

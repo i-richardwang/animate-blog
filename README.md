@@ -56,13 +56,14 @@ hooks/, lib/  shared hooks and helpers
 
 ## Animate UI
 
-The site is on Animate UI v2: the primitives (`Effect`, `SplittingText`, `ScrollProgress`, the animated Radix `Tooltip` and `HoverCard`…) come from the `@animate-ui/react` package, and `AnimateUIProvider` in `app/layout.tsx` paces them all. Only the animated icons are files, added from the registry with the shadcn CLI:
+The site is on Animate UI v2: the primitives (`Effect`, `SplittingText`, `ScrollProgress`, the animated Radix `Tooltip` and `HoverCard`…) come from the `@animate-ui/react` package, and `AnimateUIProvider` in `app/layout.tsx` paces them all. Only the animated icons and the Page Transition (the `stack` effect between pages, wired in `components/site-layout.tsx`) are files, added from the registry with the shadcn CLI:
 
 ```bash
 pnpm dlx shadcn@latest add @animate-ui/icons-lucide-bell
+pnpm dlx shadcn@latest add @animate-ui/components-page-transition
 ```
 
-`components.json` points the CLI at this layout, so icons land in `components/animate-ui/icons`. They are kept as upstream ships them; ESLint only relaxes the React Compiler rules for that folder. To animate another shadcn/ui component, run `pnpm dlx @animate-ui/cli@latest animate <component>`.
+`components.json` points the CLI at this layout, so they land in `components/animate-ui`. They are kept as upstream ships them; ESLint only relaxes the React Compiler rules for that folder. To animate another shadcn/ui component, run `pnpm dlx @animate-ui/cli@latest animate <component>`.
 
 ## Environment
 
