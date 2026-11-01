@@ -2,7 +2,15 @@
 
 import * as React from 'react';
 import { Effect } from '@animate-ui/react/primitives/effects/effect';
-import { Sparkles, Camera, Server, Headphones, Film } from 'lucide-react';
+import {
+  Camera01Icon,
+  Film01Icon,
+  HeadphonesIcon,
+  ServerIcon,
+  SparklesIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
+import { CarouselDots } from '@animate-ui/react/primitives/carousel';
 import {
   Carousel,
   CarouselContent,
@@ -19,14 +27,14 @@ interface InterestItem {
 }
 
 interface Interest {
-  icon: React.ElementType;
+  icon: IconSvgElement;
   title: string;
   items: InterestItem[];
 }
 
 const INTERESTS: Interest[] = [
   {
-    icon: Sparkles,
+    icon: SparklesIcon,
     title: '科幻爱好者',
     items: [
       {
@@ -40,7 +48,7 @@ const INTERESTS: Interest[] = [
     ],
   },
   {
-    icon: Camera,
+    icon: Camera01Icon,
     title: '摄影器材党',
     items: [
       {
@@ -54,7 +62,7 @@ const INTERESTS: Interest[] = [
     ],
   },
   {
-    icon: Server,
+    icon: ServerIcon,
     title: 'Self-Hosted 爱好者',
     items: [
       {
@@ -72,7 +80,7 @@ const INTERESTS: Interest[] = [
     ],
   },
   {
-    icon: Headphones,
+    icon: HeadphonesIcon,
     title: '音乐发烧友',
     items: [
       {
@@ -94,7 +102,7 @@ const INTERESTS: Interest[] = [
     ],
   },
   {
-    icon: Film,
+    icon: Film01Icon,
     title: '电影爱好者',
     items: [
       {
@@ -110,15 +118,13 @@ const INTERESTS: Interest[] = [
 ];
 
 const InterestCard = ({ interest }: { interest: Interest }) => {
-  const Icon = interest.icon;
-
   return (
     <Effect slide={{ direction: 'down' }} fade zoom delay={200} inView>
       <div className="relative">
         {/* Icon and Title - Centered */}
         <div className="flex items-center justify-center gap-4 mb-12">
           <div className="size-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary">
-            <Icon className="size-6" />
+            <HugeiconsIcon icon={interest.icon} strokeWidth={2} size={24} />
           </div>
           <h3 className="text-2xl font-semibold text-foreground">
             {interest.title}
@@ -149,6 +155,7 @@ const InterestCard = ({ interest }: { interest: Interest }) => {
                         src={item.image}
                         alt={item.caption}
                         fill
+                        sizes="(min-width: 896px) 400px, 50vw"
                         className="object-cover"
                       />
                     </div>
@@ -158,6 +165,8 @@ const InterestCard = ({ interest }: { interest: Interest }) => {
             </CarouselContent>
             <CarouselPrevious />
             <CarouselNext />
+            {/* A lone dot says nothing: hide the dots when the slides all fit. */}
+            <CarouselDots className="mt-4 text-muted-foreground [&:has([data-slot=carousel-dot]:only-of-type)]:hidden" />
           </Carousel>
         </div>
       </div>

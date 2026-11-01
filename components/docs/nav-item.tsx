@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { HugeiconsIcon } from '@hugeicons/react';
 import type { NavSection } from '@/lib/navigation';
 
 // Shared by the plain navbar links and the hover-menu trigger, so a section
@@ -23,7 +24,6 @@ export const navItemClassName = (active: boolean) =>
 export const NavItem = ({ section }: { section: NavSection }) => {
   const pathname = usePathname();
   const active = pathname.startsWith(section.url);
-  const Icon = section.icon;
 
   return (
     <Link
@@ -31,9 +31,12 @@ export const NavItem = ({ section }: { section: NavSection }) => {
       title={section.title}
       className={navItemClassName(active)}
     >
-      <Icon
+      <HugeiconsIcon
+        icon={section.icon}
+        strokeWidth={2}
+        size={16}
         className={cn(
-          'size-4 lg:hidden',
+          'lg:hidden',
           active ? 'text-foreground' : 'text-muted-foreground',
         )}
       />

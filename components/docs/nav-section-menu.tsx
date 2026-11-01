@@ -8,6 +8,7 @@ import {
   HoverCardContent,
 } from '@/components/ui/hover-card';
 import { usePathname } from 'next/navigation';
+import { HugeiconsIcon } from '@hugeicons/react';
 import type { NavSection } from '@/lib/navigation';
 import { navItemClassName } from './nav-item';
 
@@ -16,7 +17,6 @@ import { navItemClassName } from './nav-item';
 export const NavSectionMenu = ({ section }: { section: NavSection }) => {
   const pathname = usePathname();
   const active = pathname.startsWith(section.url);
-  const Icon = section.icon;
 
   return (
     <HoverCard openDelay={150} closeDelay={200}>
@@ -26,9 +26,12 @@ export const NavSectionMenu = ({ section }: { section: NavSection }) => {
           title={section.title}
           className={navItemClassName(active)}
         >
-          <Icon
+          <HugeiconsIcon
+            icon={section.icon}
+            strokeWidth={2}
+            size={16}
             className={cn(
-              'size-4 lg:hidden',
+              'lg:hidden',
               active ? 'text-foreground' : 'text-muted-foreground',
             )}
           />

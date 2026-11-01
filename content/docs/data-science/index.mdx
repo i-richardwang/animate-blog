@@ -3,35 +3,37 @@ title: 数据科学
 description: 数据分析与可视化
 ---
 
-import { Database, Rocket, PieChart, LineChart } from 'lucide-react';
+import {
+  ChartLineData01Icon,
+  Database01Icon,
+  PieChart01Icon,
+  Rocket01Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 
 <Cards>
   <Card
-    icon={<Database strokeWidth={2} />}
+    icon={<HugeiconsIcon icon={Database01Icon} strokeWidth={2} />}
     href="/docs/data-science/analysis/mock-employee-promotion-data"
     title="数据集构造"
     description="构建模拟数据集与数据准备"
-    accent
   />
   <Card
-    icon={<Rocket strokeWidth={2} />}
+    icon={<HugeiconsIcon icon={Rocket01Icon} strokeWidth={2} />}
     href="/docs/data-science/analysis/employee-attrition-data-quality"
     title="员工流失预测项目实战"
     description="机器学习项目完整实践"
-    accent
   />
   <Card
-    icon={<LineChart strokeWidth={2} />}
+    icon={<HugeiconsIcon icon={ChartLineData01Icon} strokeWidth={2} />}
     href="/docs/data-science/visualization/python-plotly-sankey-diagram"
     title="进阶图表绘制"
     description="桑基图、玫瑰图等进阶图表技巧"
-    accent
   />
   <Card
-    icon={<PieChart strokeWidth={2} />}
+    icon={<HugeiconsIcon icon={PieChart01Icon} strokeWidth={2} />}
     href="/docs/data-science/visualization/tableau-structured-dashboard-containers"
     title="Tableau 仪表板"
     description="Tableau 仪表板设计与交互"
-    accent
   />
 </Cards>

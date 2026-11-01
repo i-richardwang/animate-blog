@@ -3,7 +3,8 @@
 import { CardLink } from '@/components/docs/card-link';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight02Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 
 interface Post {
   url: string;
@@ -44,7 +45,7 @@ export function BlogList({ posts }: BlogListProps) {
             )}
           </div>
           <div className="flex-shrink-0 size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-            <ArrowRight className="size-4" />
+            <HugeiconsIcon icon={ArrowRight02Icon} strokeWidth={2} size={16} />
           </div>
         </CardLink>
       ))}

@@ -1,18 +1,26 @@
-import XIcon from '@/components/icons/x-icon';
-import GithubIcon from '@/components/icons/github-icon';
-import MailIcon from '@/components/icons/mail-icon';
+import {
+  GithubIcon,
+  Mail01Icon,
+  NewTwitterIcon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
 import { SOCIAL } from '@/lib/site';
 import { cn } from '@/lib/utils';
 
-const LINKS = [
-  { label: 'GitHub', href: SOCIAL.github, Icon: GithubIcon, external: true },
-  { label: 'X', href: SOCIAL.x, Icon: XIcon, external: true },
-  { label: 'Email', href: `mailto:${SOCIAL.email}`, Icon: MailIcon },
+const LINKS: {
+  label: string;
+  href: string;
+  icon: IconSvgElement;
+  external?: boolean;
+}[] = [
+  { label: 'GitHub', href: SOCIAL.github, icon: GithubIcon, external: true },
+  { label: 'X', href: SOCIAL.x, icon: NewTwitterIcon, external: true },
+  { label: 'Email', href: `mailto:${SOCIAL.email}`, icon: Mail01Icon },
 ];
 
 // The icon links to GitHub, X and email shown in the navbars.
 export function SocialLinks({ linkClassName }: { linkClassName: string }) {
-  return LINKS.map(({ label, href, Icon, external }) => (
+  return LINKS.map(({ label, href, icon, external }) => (
     <a
       key={label}
       href={href}
@@ -23,7 +31,7 @@ export function SocialLinks({ linkClassName }: { linkClassName: string }) {
         linkClassName,
       )}
     >
-      <Icon />
+      <HugeiconsIcon icon={icon} strokeWidth={2} />
     </a>
   ));
 }

@@ -10,7 +10,7 @@ import { SplittingText } from '@animate-ui/react/primitives/texts/splitting';
 import { ease } from '@animate-ui/react/utils/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { ArrowRightIcon } from '@/components/animate-ui/icons/arrow-right';
+import { ArrowRight02Icon } from '@/components/animate-ui/icons/hugeicons/arrow-right-02';
 import type { LatestEntry } from '@/lib/source';
 import { rise, useIntroDone } from './intro';
 import { LatestContent } from './latest-content';
@@ -38,14 +38,14 @@ function CallsToAction() {
           className={`${button} bg-primary text-primary-foreground hover:bg-primary/85`}
         >
           <Link href="/blog">
-            探索博客 <ArrowRightIcon />
+            探索博客 <ArrowRight02Icon />
           </Link>
         </Button>
       </AnimateIcon>
       <AnimateIcon animateOnHover="out" completeOnStop asChild>
         <Button asChild className={`${button} bg-accent hover:bg-accent/70`}>
           <Link href="/projects">
-            项目展示 <ArrowRightIcon />
+            项目展示 <ArrowRight02Icon />
           </Link>
         </Button>
       </AnimateIcon>

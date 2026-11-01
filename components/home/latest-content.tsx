@@ -6,8 +6,8 @@ import {
   useRotatingText,
 } from '@animate-ui/react/primitives/texts/rotating';
 import Link from 'next/link';
-import { SendHorizontalIcon } from '@/components/animate-ui/icons/send-horizontal';
-import { PartyPopper } from '@/components/animate-ui/icons/party-popper';
+import { SendHorizontalIcon } from '@/components/animate-ui/icons/hugeicons/send-horizontal';
+import { PartyPopper } from '@/components/animate-ui/icons/hugeicons/party-popper';
 import type { LatestEntry } from '@/lib/source';
 
 const SyncedSendIcon = () => {

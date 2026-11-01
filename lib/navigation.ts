@@ -1,13 +1,13 @@
 import {
-  Activity,
-  BarChart3,
-  BookOpen,
-  BookText,
-  FolderKanban,
-  PenLine,
-  Podcast,
-  type LucideIcon,
-} from 'lucide-react';
+  Activity01Icon,
+  Analytics01Icon,
+  Book02Icon,
+  BookOpen02Icon,
+  FolderLibraryIcon,
+  PencilEdit02Icon,
+  PodcastIcon,
+} from '@hugeicons/core-free-icons';
+import type { IconSvgElement } from '@hugeicons/react';
 
 // The site's sections, declared once. The navbar, its hover menus and the
 // mobile sidebar all render from this list rather than each keeping their own
@@ -15,7 +15,7 @@ import {
 export interface NavSection {
   title: string;
   url: string;
-  icon: LucideIcon;
+  icon: IconSvgElement;
   // Sub-sections. A section with children opens as a menu in the navbar; the
   // section itself stays a link to its index page.
   children?: { title: string; url: string }[];
@@ -28,17 +28,17 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: '博客',
     url: '/blog',
-    icon: PenLine,
+    icon: PencilEdit02Icon,
   },
   {
     title: '项目',
     url: '/projects',
-    icon: FolderKanban,
+    icon: FolderLibraryIcon,
   },
   {
     title: '笔记',
     url: '/docs',
-    icon: BookText,
+    icon: Book02Icon,
     children: [
       { title: 'AI 探索', url: '/docs/ai' },
       { title: '数据科学', url: '/docs/data-science' },
@@ -48,23 +48,23 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: 'Token 用量',
     url: '/token-usage',
-    icon: BarChart3,
+    icon: Analytics01Icon,
   },
   {
     title: '系统状态',
     url: '/status',
-    icon: Activity,
+    icon: Activity01Icon,
   },
   {
     title: '推荐阅读',
     url: '/reading',
-    icon: BookOpen,
+    icon: BookOpen02Icon,
     hidden: true,
   },
   {
     title: '推荐播客',
     url: '/podcasts',
-    icon: Podcast,
+    icon: PodcastIcon,
     hidden: true,
   },
 ];

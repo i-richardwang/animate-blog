@@ -32,7 +32,7 @@ export const StatusTrackerGroup = ({
       className={cn(
         '-mx-3',
         'border border-transparent bg-muted/50',
-        'hover:border-border/50 data-[state=open]:border-border/50 data-[state=open]:bg-muted/50',
+        'hover:border-border/50 data-open:border-border/50 data-open:bg-muted/50',
         className,
       )}
     >

@@ -13,7 +13,8 @@ import {
   useTOCItems,
 } from 'fumadocs-ui/components/toc';
 import type { TOCProps } from 'fumadocs-ui/layouts/docs/page/slots/toc';
-import { Text } from 'lucide-react';
+import { TextAlignLeftIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { motion } from 'motion/react';
 import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import {
@@ -117,7 +118,11 @@ export function TOC({ container }: TOCProps) {
       className="sticky top-(--fd-docs-row-1) flex h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] w-(--fd-toc-width) flex-col pt-24 pe-4 pb-18 [grid-area:toc] max-xl:hidden xl:layout:[--fd-toc-width:268px]"
     >
       <p className="mb-2 px-2">
-        <NavSectionTitle icon={<Text />}>On this page</NavSectionTitle>
+        <NavSectionTitle
+          icon={<HugeiconsIcon icon={TextAlignLeftIcon} strokeWidth={2} />}
+        >
+          On this page
+        </NavSectionTitle>
       </p>
       <TOCScrollArea
         ref={scroll}

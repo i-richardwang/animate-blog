@@ -2,7 +2,8 @@
 
 import { formatDate } from '@/lib/utils';
 import { CardLink, CoverImage } from '@/components/docs/card-link';
-import { Sparkles } from 'lucide-react';
+import { SparklesIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 
 interface Reading {
   url: string;
@@ -37,7 +38,7 @@ function FeaturedCard({ reading }: { reading: Reading }) {
         <div className="flex-1 p-6 md:p-8 flex flex-col justify-center">
           <div className="flex items-center gap-2 mb-4">
             <span className="h-6 px-2 bg-primary text-primary-foreground text-xs rounded flex gap-1 items-center justify-center">
-              <Sparkles className="size-3" />
+              <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} size={12} />
               本周推荐
             </span>
           </div>

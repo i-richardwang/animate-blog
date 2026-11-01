@@ -50,6 +50,7 @@ export const AboutHero = () => {
                 alt="Richard Wang"
                 width={128}
                 height={128}
+                priority
                 className="size-full object-cover"
               />
             </div>

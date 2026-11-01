@@ -1,4 +1,5 @@
-import { ExternalLink } from 'lucide-react';
+import { LinkSquare02Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Shine } from '@animate-ui/react/primitives/effects/shine';
 import { cn } from '@/lib/utils';
@@ -27,7 +28,7 @@ export function ExternalLinkButton({
           }),
         )}
       >
-        <ExternalLink />
+        <HugeiconsIcon icon={LinkSquare02Icon} strokeWidth={2} />
         {children}
       </a>
     </Shine>

@@ -1,4 +1,4 @@
-import { LayoutDashboardIcon } from '@/components/animate-ui/icons/layout-dashboard';
+import { LayoutDashboardIcon } from '@/components/animate-ui/icons/hugeicons/layout-dashboard';
 import { AnimateIcon } from '@animate-ui/react/icons';
 
 export const Projects = () => {

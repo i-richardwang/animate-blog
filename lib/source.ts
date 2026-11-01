@@ -9,16 +9,17 @@ import { attachFile } from '@/lib/attach-file';
 import { loader, type InferPageType } from 'fumadocs-core/source';
 import { findNeighbour } from 'fumadocs-core/page-tree';
 import type * as PageTree from 'fumadocs-core/page-tree';
-import { icons } from 'lucide-react';
+import * as hugeicons from '@hugeicons/core-free-icons';
+import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { createElement } from 'react';
 
 // Resolves the icon names of meta.json separators (`---[Icon]Name---`)
-// to Lucide icons.
+// to Hugeicons icons: `[Rocket01]` is `Rocket01Icon`.
+const iconSet = hugeicons as Record<string, IconSvgElement | undefined>;
 function resolveIcon(icon: string | undefined) {
-  if (icon && icon in icons) {
-    return createElement(icons[icon as keyof typeof icons]);
-  }
+  const svg = icon && iconSet[`${icon}Icon`];
+  if (svg) return createElement(HugeiconsIcon, { icon: svg, strokeWidth: 2 });
 }
 
 export const source = loader({

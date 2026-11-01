@@ -1,5 +1,6 @@
 import { AnimateUIProvider } from '@animate-ui/react/provider';
 import { RootProvider } from 'fumadocs-ui/provider/next';
+import { SearchDialog } from '@/components/search-dialog';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { Outfit } from 'next/font/google';
 import type { ReactNode } from 'react';
@@ -90,15 +91,18 @@ export default function Layout({ children }: { children: ReactNode }) {
       </head>
 
       <body className="flex flex-col min-h-screen">
-        <RootProvider theme={{ defaultTheme: 'system' }}>
+        <RootProvider
+          theme={{ defaultTheme: 'system' }}
+          search={{ SearchDialog }}
+        >
           {/* Animate UI's components read their pace and reduced-motion
               setting from the provider; ReducedMotionConfig passes the same
               setting to the site's own Motion animations. */}
-          <AnimateUIProvider>
-            <ReducedMotionConfig>
-              <NuqsAdapter>{children}</NuqsAdapter>
-            </ReducedMotionConfig>
-          </AnimateUIProvider>
+          <NuqsAdapter>
+            <AnimateUIProvider>
+              <ReducedMotionConfig>{children}</ReducedMotionConfig>
+            </AnimateUIProvider>
+          </NuqsAdapter>
         </RootProvider>
         <Analytics />
       </body>
