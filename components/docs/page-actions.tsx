@@ -14,11 +14,11 @@ import {
   Copy,
   ExternalLinkIcon,
   FileText,
-  Github,
   MessageCircleIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, type ComponentProps, type ReactNode } from 'react';
+import GithubIcon from '@/components/icons/github-icon';
 import { SITE } from '@/lib/site';
 import type { PageLink } from '@/lib/source';
 import { cn } from '@/lib/utils';
@@ -96,7 +96,7 @@ export function CopyPage({
     {
       title: 'Edit on GitHub',
       href: githubUrl,
-      icon: <Github className={icon} />,
+      icon: <GithubIcon className={icon} />,
     },
   ];
 
@@ -228,7 +228,7 @@ export function ProjectActions({
             rel="noreferrer noopener"
             className={className}
           >
-            <Github />
+            <GithubIcon />
             View Code on GitHub
           </a>
         </Shine>
