@@ -4,28 +4,17 @@ import { cn } from '@/lib/utils';
 
 const dancing = Dancing_Script({ subsets: ['latin'] });
 
-export type PageBadge = 'new' | 'updated';
+type PageBadge = 'new' | 'updated';
 
-const BADGE_COLORS: Record<PageBadge, string> = {
-  new: '',
-  updated: 'text-muted-foreground',
-};
-
-export function BadgeLabel({
-  badge,
-  className,
-}: {
-  badge: PageBadge;
-  className?: string;
-}) {
+// "new" in the foreground colour, "updated" quieter.
+function BadgeLabel({ badge }: { badge: PageBadge }) {
   return (
     <span
       data-slot="badge"
       className={cn(
         dancing.className,
-        'text-[15px] leading-1 font-black text-nowrap text-foreground',
-        BADGE_COLORS[badge],
-        className,
+        'text-[15px] leading-1 font-black text-nowrap',
+        badge === 'new' ? 'text-foreground' : 'text-muted-foreground',
       )}
     >
       {badge}
@@ -40,7 +29,7 @@ const isRecent = (date: unknown) =>
 
 // A note released in the last 30 days is "new"; one updated in the last 30
 // days (`updatedDate` in the frontmatter) is "updated".
-export function pageBadge(data: Record<string, unknown>): PageBadge | null {
+function pageBadge(data: Record<string, unknown>): PageBadge | null {
   if (isRecent(data.releaseDate)) return 'new';
   if (isRecent(data.updatedDate)) return 'updated';
   return null;

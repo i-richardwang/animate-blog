@@ -15,7 +15,7 @@ import {
 } from '@/components/animate-ui/buttons/theme-toggler';
 import { cn } from '@/lib/utils';
 
-export const iconButton =
+const iconButton =
   'inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground';
 
 const subscribeNever = () => () => {};

@@ -6,7 +6,6 @@
 // AnimatedNav holds the hover state of its links, so a list has one hover
 // bar that glides between them.
 
-import { ReducedMotionConfig } from '@animate-ui/react/utils/motion';
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react';
 import {
   createContext,
@@ -38,11 +37,9 @@ const NavContext = createContext<{
 export function AnimatedNav({ children }: { children: ReactNode }) {
   const [hovered, setHovered] = useState<string | null>(null);
   return (
-    <ReducedMotionConfig>
-      <LayoutGroup id={useId()}>
-        <NavContext value={{ hovered, setHovered }}>{children}</NavContext>
-      </LayoutGroup>
-    </ReducedMotionConfig>
+    <LayoutGroup id={useId()}>
+      <NavContext value={{ hovered, setHovered }}>{children}</NavContext>
+    </LayoutGroup>
   );
 }
 

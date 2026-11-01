@@ -1,7 +1,8 @@
 'use client';
 
-// The buttons in a page's title row (see page-title.tsx): "Copy page" with a
-// menu of other ways to read the page, and the arrows to its neighbours.
+// The buttons on a page: "Copy page" with a menu of other ways to read the
+// page and the arrows to its neighbours in the title row (see page-title.tsx),
+// and the links to a project's site and repository under its description.
 
 import { DropdownMenu } from '@animate-ui/react/primitives/radix-ui';
 import { Shine } from '@animate-ui/react/primitives/effects/shine';
@@ -17,8 +18,9 @@ import {
   MessageCircleIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, type ComponentProps, type ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import GithubIcon from '@/components/icons/github-icon';
+import { useCopied } from '@/hooks/use-copied';
 import { SITE } from '@/lib/site';
 import type { PageLink } from '@/lib/source';
 import { cn } from '@/lib/utils';
@@ -54,18 +56,16 @@ export function CopyPage({
   /** The page's source on GitHub. */
   githubUrl: string;
 }) {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopied();
 
-  const copy = async () => {
+  const copyPage = async () => {
     let markdown = cache.get(markdownUrl);
     if (markdown === undefined) {
       const response = await fetch(markdownUrl);
       markdown = await response.text();
       cache.set(markdownUrl, markdown);
     }
-    await navigator.clipboard.writeText(markdown);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    await copy(markdown);
   };
 
   const prompt = new URLSearchParams({
@@ -104,7 +104,7 @@ export function CopyPage({
     <div className="flex items-center">
       <button
         type="button"
-        onClick={copy}
+        onClick={copyPage}
         className={cn(button, 'rounded-l-md pr-3 pl-2.5')}
       >
         <IconSwap active={copied} icon={Copy} activeIcon={Check} size={14} />

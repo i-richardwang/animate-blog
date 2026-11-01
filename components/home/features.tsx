@@ -8,6 +8,7 @@ import { Highlight } from '@animate-ui/react/primitives/effects/highlight';
 import { Dancing_Script } from 'next/font/google';
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { Projects } from '@/components/icons/projects';
 import { Blog } from '@/components/icons/blog';
@@ -21,7 +22,7 @@ type FeatureItem = {
   name: string;
   description: string;
   href: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 };
 
 const SECTIONS: FeatureItem[] = [
@@ -51,7 +52,7 @@ const SECTIONS: FeatureItem[] = [
   },
 ];
 
-const FeatureCard = ({ item }: { item: FeatureItem }) => {
+function FeatureCard({ item }: { item: FeatureItem }) {
   return (
     <Link
       href={item.href}
@@ -74,13 +75,13 @@ const FeatureCard = ({ item }: { item: FeatureItem }) => {
       {item.icon}
     </Link>
   );
-};
+}
 
-export const Features = () => {
+export function Features() {
   const done = useIntroDone();
   return (
     <motion.div
-      {...rise(6, done)}
+      {...rise(3, done)}
       className="relative mt-auto flex flex-col items-center justify-center px-5 pt-16 pb-10"
     >
       <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-3 xs:grid-cols-2 sm:max-lg:max-w-2xl lg:grid-cols-4">
@@ -96,4 +97,4 @@ export const Features = () => {
       </div>
     </motion.div>
   );
-};
+}

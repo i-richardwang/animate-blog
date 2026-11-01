@@ -15,7 +15,7 @@ import {
 import type { TOCProps } from 'fumadocs-ui/layouts/docs/page/slots/toc';
 import { Text } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import {
   AnimatedNav,
   indicatorTransition,
@@ -51,7 +51,7 @@ function RangeBar({
   list,
   active,
 }: {
-  list: React.RefObject<HTMLDivElement | null>;
+  list: RefObject<HTMLDivElement | null>;
   active: string[];
 }) {
   const reduce = useShouldReduceMotion();

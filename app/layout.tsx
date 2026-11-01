@@ -9,7 +9,7 @@ import './globals.css';
 import { SITE, SITE_AUTHOR } from '@/lib/site';
 import { jsonLd } from '@/lib/json-ld';
 import { Analytics } from '@/components/analytics';
-import { ReducedMotion } from '@/components/reduced-motion';
+import { ReducedMotionConfig } from '@animate-ui/react/utils/motion';
 
 const OG_IMAGE = { url: SITE.image, width: 1200, height: 630, alt: SITE.name };
 
@@ -91,12 +91,13 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       <body className="flex flex-col min-h-screen">
         <RootProvider theme={{ defaultTheme: 'system' }}>
-          {/* One place to pace every Animate UI animation: `tempo` scales
-              all of them, 0.8 crisper, 1.2 more relaxed. */}
+          {/* Animate UI's components read their pace and reduced-motion
+              setting from the provider; ReducedMotionConfig passes the same
+              setting to the site's own Motion animations. */}
           <AnimateUIProvider>
-            <ReducedMotion>
+            <ReducedMotionConfig>
               <NuqsAdapter>{children}</NuqsAdapter>
-            </ReducedMotion>
+            </ReducedMotionConfig>
           </AnimateUIProvider>
         </RootProvider>
         <Analytics />

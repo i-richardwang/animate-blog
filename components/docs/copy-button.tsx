@@ -5,23 +5,18 @@
 
 import { Button } from '@animate-ui/react/primitives/buttons/button';
 import { Check, Copy } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCopied } from '@/hooks/use-copied';
 import { cn } from '@/lib/utils';
 import { IconSwap } from './icon-swap';
 
 export function CopyButton({
   getText,
   className,
-  delay = 2000,
 }: {
   getText: () => string | undefined;
   className?: string;
-  delay?: number;
 }) {
-  const [copied, setCopied] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  useEffect(() => () => clearTimeout(timeoutRef.current), []);
+  const { copied, copy } = useCopied();
 
   return (
     <Button
@@ -30,12 +25,7 @@ export function CopyButton({
       aria-label={copied ? 'Copied' : 'Copy code'}
       onClick={() => {
         const text = getText();
-        if (text === undefined) return;
-        void navigator.clipboard.writeText(text).then(() => {
-          setCopied(true);
-          clearTimeout(timeoutRef.current);
-          timeoutRef.current = setTimeout(() => setCopied(false), delay);
-        });
+        if (text !== undefined) void copy(text);
       }}
       className={cn(
         'flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors outline-none hover:bg-black/5 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 dark:hover:bg-white/10',

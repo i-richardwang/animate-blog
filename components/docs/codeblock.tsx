@@ -42,7 +42,6 @@ export function CodeBlock({
   allowCopy = true,
   viewportClassName,
   className,
-  style,
   children,
   ...props
 }: CodeBlockProps) {
@@ -59,7 +58,6 @@ export function CodeBlock({
         'shiki group not-prose relative my-6 overflow-hidden rounded-xl bg-accent text-sm',
         className,
       )}
-      style={style}
     >
       {title ? (
         <div className="flex h-10 items-center gap-2 pr-2.5 pl-4 text-muted-foreground">

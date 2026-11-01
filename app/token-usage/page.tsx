@@ -5,6 +5,7 @@ import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/page';
 import { SitePage } from '@/components/docs/page';
 import { Coins, Cpu, TrendingUp, Database } from 'lucide-react';
 import { StatCard, StatCardSkeleton } from '@/components/token-usage/stat-card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { CostTrendChart } from '@/components/token-usage/cost-trend-chart';
 import { TokenTrendChart } from '@/components/token-usage/token-trend-chart';
 import { ModelUsageChart } from '@/components/token-usage/model-usage-chart';
@@ -14,6 +15,7 @@ import { ActivityHeatmap } from '@/components/token-usage/activity-heatmap';
 import { RangeSelector } from '@/components/token-usage/range-selector';
 import type { TokenUsageResponse } from '@/lib/token-usage/types';
 import { formatCost, formatTokens } from '@/lib/token-usage/format';
+import { cn } from '@/lib/utils';
 
 async function fetchUsage(range: string): Promise<TokenUsageResponse> {
   const response = await fetch(`/api/token-usage?range=${range}`);
@@ -21,6 +23,11 @@ async function fetchUsage(range: string): Promise<TokenUsageResponse> {
     throw new Error(`Failed to fetch: ${response.statusText}`);
   }
   return response.json();
+}
+
+// A chart's place while the data loads, the size of the chart.
+function ChartSkeleton({ className }: { className: string }) {
+  return <Skeleton className={cn('border bg-card', className)} />;
 }
 
 export default function TokenUsagePage() {
@@ -158,18 +165,18 @@ export default function TokenUsagePage() {
           {/* Loading Charts */}
           {isLoading && (
             <>
-              <div className="mt-6 h-[280px] animate-pulse motion-reduce:animate-none border bg-card" />
+              <ChartSkeleton className="mt-6 h-[280px]" />
               <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div className="h-[370px] animate-pulse motion-reduce:animate-none border bg-card" />
-                <div className="h-[370px] animate-pulse motion-reduce:animate-none border bg-card" />
+                <ChartSkeleton className="h-[370px]" />
+                <ChartSkeleton className="h-[370px]" />
               </div>
               <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div className="h-[370px] animate-pulse motion-reduce:animate-none border bg-card" />
-                <div className="h-[370px] animate-pulse motion-reduce:animate-none border bg-card" />
+                <ChartSkeleton className="h-[370px]" />
+                <ChartSkeleton className="h-[370px]" />
               </div>
               <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <div className="h-[440px] animate-pulse motion-reduce:animate-none border bg-card" />
-                <div className="h-[440px] animate-pulse motion-reduce:animate-none border bg-card" />
+                <ChartSkeleton className="h-[440px]" />
+                <ChartSkeleton className="h-[440px]" />
               </div>
             </>
           )}

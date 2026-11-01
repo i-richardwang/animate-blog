@@ -52,7 +52,7 @@ components/home/
               the home page: intro, header, hero, section cards, footer
 components/docs/
               the page chrome of every section: navbar, sidebar, TOC,
-              title row and page actions, code blocks, cards
+              title row and page actions, code blocks, cards, tabs
 components/animate-ui/
               Animate UI code installed by the shadcn CLI
 content/      MDX content

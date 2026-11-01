@@ -7,7 +7,7 @@
 import { AnimateIcon } from '@animate-ui/react/icons';
 import { Button } from '@animate-ui/react/primitives/buttons/button';
 import { SplittingText } from '@animate-ui/react/primitives/texts/splitting';
-import { ease, ReducedMotionConfig } from '@animate-ui/react/utils/motion';
+import { ease } from '@animate-ui/react/utils/motion';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { ArrowRightIcon } from '@/components/animate-ui/icons/arrow-right';
@@ -56,36 +56,34 @@ function CallsToAction() {
 export function Hero({ latestContent }: { latestContent: LatestEntry[] }) {
   const done = useIntroDone();
   return (
-    <ReducedMotionConfig>
-      <section className="flex flex-col items-center px-5 pt-36 text-center md:pt-44">
-        <h1 className="max-w-[860px] text-4xl font-medium text-balance md:text-6xl">
-          {done ? (
-            <SplittingText
-              type="words"
-              text={TITLE}
-              className="inline"
-              {...WORD_IN}
-            />
-          ) : (
-            <span className="invisible">{TITLE}</span>
-          )}
-        </h1>
+    <section className="flex flex-col items-center px-5 pt-36 text-center md:pt-44">
+      <h1 className="max-w-[860px] text-4xl font-medium text-balance md:text-6xl">
+        {done ? (
+          <SplittingText
+            type="words"
+            text={TITLE}
+            className="inline"
+            {...WORD_IN}
+          />
+        ) : (
+          <span className="invisible">{TITLE}</span>
+        )}
+      </h1>
 
-        <motion.p
-          {...rise(3, done)}
-          className="mt-5 max-w-[620px] text-sm text-balance text-muted-foreground sm:text-base md:text-lg"
-        >
-          {SUBTITLE}
-        </motion.p>
+      <motion.p
+        {...rise(1, done)}
+        className="mt-5 max-w-[620px] text-sm text-balance text-muted-foreground sm:text-base md:text-lg"
+      >
+        {SUBTITLE}
+      </motion.p>
 
-        <motion.div
-          {...rise(4, done)}
-          className="mt-8 flex w-full max-w-full flex-col items-center gap-4"
-        >
-          <CallsToAction />
-          <LatestContent entries={latestContent} />
-        </motion.div>
-      </section>
-    </ReducedMotionConfig>
+      <motion.div
+        {...rise(2, done)}
+        className="mt-8 flex w-full max-w-full flex-col items-center gap-4"
+      >
+        <CallsToAction />
+        <LatestContent entries={latestContent} />
+      </motion.div>
+    </section>
   );
 }

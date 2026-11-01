@@ -1,6 +1,8 @@
 'use client';
 
-import * as React from 'react';
+// Tabs for MDX content, styled like shadcn/ui's and built on Animate UI's own
+// Tabs primitive: a highlight glides between the triggers and the panels
+// slide, the height following the active one.
 
 import {
   Tabs as TabsPrimitive,
@@ -10,21 +12,15 @@ import {
   TabsContents as TabsContentsPrimitive,
   TabsHighlight as TabsHighlightPrimitive,
   TabsHighlightItem as TabsHighlightItemPrimitive,
-  type TabsProps as TabsPrimitiveProps,
-  type TabsListProps as TabsListPrimitiveProps,
-  type TabsTriggerProps as TabsTriggerPrimitiveProps,
-  type TabsContentProps as TabsContentPrimitiveProps,
-  type TabsContentsProps as TabsContentsPrimitiveProps,
+  type TabsProps,
+  type TabsListProps,
+  type TabsTriggerProps,
+  type TabsContentProps,
+  type TabsContentsProps,
 } from '@animate-ui/react/primitives/tabs';
 import { cn } from '@/lib/utils';
 
-// Tabs for MDX content, styled like shadcn/ui's and built on Animate UI's own
-// Tabs primitive: a highlight glides between the triggers and the panels
-// slide, the height following the active one.
-
-type TabsProps = TabsPrimitiveProps;
-
-function Tabs({ className, ...props }: TabsProps) {
+export function Tabs({ className, ...props }: TabsProps) {
   return (
     <TabsPrimitive
       className={cn('flex flex-col gap-2', className)}
@@ -33,9 +29,7 @@ function Tabs({ className, ...props }: TabsProps) {
   );
 }
 
-type TabsListProps = TabsListPrimitiveProps;
-
-function TabsList({ className, ...props }: TabsListProps) {
+export function TabsList({ className, ...props }: TabsListProps) {
   return (
     <TabsHighlightPrimitive className="absolute z-0 inset-0 border border-transparent rounded-lg bg-accent">
       <TabsListPrimitive
@@ -49,9 +43,7 @@ function TabsList({ className, ...props }: TabsListProps) {
   );
 }
 
-type TabsTriggerProps = TabsTriggerPrimitiveProps;
-
-function TabsTrigger({ className, ...props }: TabsTriggerProps) {
+export function TabsTrigger({ className, ...props }: TabsTriggerProps) {
   return (
     <TabsHighlightItemPrimitive
       value={props.value}
@@ -68,15 +60,11 @@ function TabsTrigger({ className, ...props }: TabsTriggerProps) {
   );
 }
 
-type TabsContentsProps = TabsContentsPrimitiveProps;
-
-function TabsContents(props: TabsContentsProps) {
+export function TabsContents(props: TabsContentsProps) {
   return <TabsContentsPrimitive {...props} />;
 }
 
-type TabsContentProps = TabsContentPrimitiveProps;
-
-function TabsContent({ className, ...props }: TabsContentProps) {
+export function TabsContent({ className, ...props }: TabsContentProps) {
   return (
     <TabsContentPrimitive
       className={cn('flex-1 outline-none', className)}
@@ -84,16 +72,3 @@ function TabsContent({ className, ...props }: TabsContentProps) {
     />
   );
 }
-
-export {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContents,
-  TabsContent,
-  type TabsProps,
-  type TabsListProps,
-  type TabsTriggerProps,
-  type TabsContentsProps,
-  type TabsContentProps,
-};

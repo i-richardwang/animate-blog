@@ -68,32 +68,18 @@ export function FullLogo({
   );
 }
 
-// Motion props for a block that rises into place once the intro is done,
-// `index` places later in the stagger.
+// Motion props for a block that rises into place once the intro is done.
+// The blocks rise top to bottom, `index` counting from the title; the title
+// itself is the hero's word-by-word SplittingText.
+const RISE_STAGGER = 0.18;
+
 export const rise = (index: number, done: boolean) => ({
   initial: { opacity: 0, y: 20, filter: 'blur(10px)' },
   animate: done
     ? { opacity: 1, y: 0, filter: 'blur(0px)' }
     : { opacity: 0, y: 20, filter: 'blur(10px)' },
-  transition: { duration: 0.7, ease: ease.out, delay: index * 0.09 },
+  transition: { duration: 0.7, ease: ease.out, delay: index * RISE_STAGGER },
 });
-
-export function Rise({
-  index,
-  className,
-  children,
-}: {
-  index: number;
-  className?: string;
-  children: ReactNode;
-}) {
-  const done = useIntroDone();
-  return (
-    <motion.div {...rise(index, done)} className={className}>
-      {children}
-    </motion.div>
-  );
-}
 
 export function IntroProvider({ children }: { children: ReactNode }) {
   const reduce = useShouldReduceMotion();
@@ -132,7 +118,7 @@ export function IntroProvider({ children }: { children: ReactNode }) {
             key="intro"
             data-slot="home-intro"
             aria-hidden="true"
-            className="fixed inset-0 z-60 flex items-center justify-center bg-background motion-reduce:hidden"
+            className="fixed inset-0 z-60 flex items-center justify-center bg-background"
             exit={{
               opacity: 0,
               transition: { duration: GLIDE * 0.8, ease: ease.out },
@@ -154,7 +140,7 @@ export function IntroProvider({ children }: { children: ReactNode }) {
       {intro && (
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed inset-0 z-61 flex items-center justify-center motion-reduce:hidden"
+          className="pointer-events-none fixed inset-0 z-61 flex items-center justify-center"
         >
           <motion.div
             layoutId="home-logo"
