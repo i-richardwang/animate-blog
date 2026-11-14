@@ -276,18 +276,4 @@
   #nd-docs-layout {
     @apply relative;
   }
-
-  #docs-body h1,
-  #docs-body h2,
-  #docs-body h3,
-  #docs-body h4,
-  #docs-body h5,
-  #docs-body h6 {
-    @apply !font-medium;
-  }
-
-  /* Larger prose text for blog/project/reading pages (desktop only) */
-  #docs-body.prose-lg-content {
-    @apply md:!text-lg;
-  }
 }

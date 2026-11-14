@@ -1,6 +1,7 @@
 import { podcasts, getNeighbours, getSortedPodcastPosts } from '@/lib/source';
-import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/page';
+import { DocsDescription, DocsTitle } from 'fumadocs-ui/page';
 import { SitePage } from '@/components/docs/page';
+import { SiteBody } from '@/components/docs/site-body';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
@@ -20,9 +21,7 @@ const SECTION = {
   description: '每周一期精选播客，聆听深度对话与思想碰撞。',
 };
 
-export default async function Page(props: {
-  params: Promise<{ slug?: string[] }>;
-}) {
+export default async function Page(props: PageProps<'/podcasts/[[...slug]]'>) {
   const { slug = [] } = await props.params;
 
   if (slug.length === 0) {
@@ -45,9 +44,9 @@ export default async function Page(props: {
           {SECTION.description}
         </DocsDescription>
 
-        <DocsBody id="docs-body" className="pb-10 pt-4">
+        <SiteBody>
           <PodcastList podcasts={posts} />
-        </DocsBody>
+        </SiteBody>
       </SitePage>
     );
   }
@@ -118,9 +117,9 @@ export default async function Page(props: {
         />
       </div>
 
-      <DocsBody id="docs-body" className="prose-lg-content pb-10 pt-4">
+      <SiteBody article>
         <MDXContent components={getMDXComponents()} />
-      </DocsBody>
+      </SiteBody>
     </SitePage>
   );
 }
@@ -129,9 +128,9 @@ export async function generateStaticParams() {
   return podcasts.generateParams();
 }
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug?: string[] }>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<'/podcasts/[[...slug]]'>,
+): Promise<Metadata> {
   const { slug = [] } = await props.params;
   if (slug.length === 0) {
     return sectionMetadata({ ...SECTION, path: '/podcasts' });

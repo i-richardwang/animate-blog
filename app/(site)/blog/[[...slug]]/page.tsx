@@ -1,6 +1,7 @@
 import { blogs, getNeighbours, getSortedBlogPosts } from '@/lib/source';
-import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/page';
+import { DocsDescription, DocsTitle } from 'fumadocs-ui/page';
 import { SitePage } from '@/components/docs/page';
+import { SiteBody } from '@/components/docs/site-body';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
@@ -14,9 +15,7 @@ import { formatDate } from '@/lib/utils';
 
 const SECTION = { title: '博客', description: '记录思考与探索的足迹' };
 
-export default async function Page(props: {
-  params: Promise<{ slug?: string[] }>;
-}) {
+export default async function Page(props: PageProps<'/blog/[[...slug]]'>) {
   const { slug = [] } = await props.params;
 
   if (slug.length === 0) {
@@ -34,12 +33,12 @@ export default async function Page(props: {
           {SECTION.description}
         </DocsDescription>
 
-        <DocsBody id="docs-body" className="pb-10 pt-4">
+        <SiteBody>
           <ExploreNotesCard />
           <div className="mt-6">
             <BlogList posts={posts} />
           </div>
-        </DocsBody>
+        </SiteBody>
       </SitePage>
     );
   }
@@ -72,9 +71,9 @@ export default async function Page(props: {
         {formatDate(date)}
       </time>
 
-      <DocsBody id="docs-body" className="prose-lg-content pb-10 pt-4">
+      <SiteBody article>
         <MDXContent components={getMDXComponents()} />
-      </DocsBody>
+      </SiteBody>
     </SitePage>
   );
 }
@@ -83,9 +82,9 @@ export async function generateStaticParams() {
   return blogs.generateParams();
 }
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug?: string[] }>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<'/blog/[[...slug]]'>,
+): Promise<Metadata> {
   const { slug = [] } = await props.params;
   if (slug.length === 0) return sectionMetadata({ ...SECTION, path: '/blog' });
 

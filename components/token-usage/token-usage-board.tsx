@@ -1,0 +1,196 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import {
+  ChartIncreaseIcon,
+  Coins01Icon,
+  CpuIcon,
+  Database01Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { StatCard, StatCardSkeleton } from '@/components/token-usage/stat-card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { CostTrendChart } from '@/components/token-usage/cost-trend-chart';
+import { TokenTrendChart } from '@/components/token-usage/token-trend-chart';
+import { ModelUsageChart } from '@/components/token-usage/model-usage-chart';
+import { BrandUsageChart } from '@/components/token-usage/brand-usage-chart';
+import { ProviderUsageChart } from '@/components/token-usage/provider-usage-chart';
+import { ActivityHeatmap } from '@/components/token-usage/activity-heatmap';
+import { RangeSelector } from '@/components/token-usage/range-selector';
+import type { TokenUsageResponse } from '@/lib/token-usage/types';
+import { formatCost, formatTokens } from '@/lib/token-usage/format';
+import { cn } from '@/lib/utils';
+
+async function fetchUsage(range: string): Promise<TokenUsageResponse> {
+  const response = await fetch(`/api/token-usage?range=${range}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// A chart's place while the data loads, the size of the chart.
+function ChartSkeleton({ className }: { className: string }) {
+  return <Skeleton className={cn('border bg-card', className)} />;
+}
+
+export function TokenUsageBoard() {
+  const [range, setRange] = useState('30d');
+  const [data, setData] = useState<TokenUsageResponse | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  // The range whose request last settled; the page is loading until it
+  // matches the selected one.
+  const [settledRange, setSettledRange] = useState<string | null>(null);
+  const isLoading = settledRange !== range;
+
+  useEffect(() => {
+    let ignore = false;
+    fetchUsage(range).then(
+      (result) => {
+        if (ignore) return;
+        setData(result);
+        setError(null);
+        setSettledRange(range);
+      },
+      (err) => {
+        if (ignore) return;
+        setError(err instanceof Error ? err : new Error('Unknown error'));
+        setSettledRange(range);
+      },
+    );
+    return () => {
+      ignore = true;
+    };
+  }, [range]);
+
+  return (
+    <>
+      {/* Range Selector */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <RangeSelector value={range} onChange={setRange} />
+      </div>
+
+      {/* Error State */}
+      {error && (
+        <div className="mt-4 border border-destructive bg-destructive/10 p-4 text-destructive">
+          <p className="font-medium">加载失败</p>
+          <p className="text-sm">{error.message}</p>
+        </div>
+      )}
+
+      {/* Summary Stats */}
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {isLoading ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : data ? (
+          <>
+            <StatCard
+              title="总成本"
+              value={formatCost(data.summary.totalCost)}
+              icon={
+                <HugeiconsIcon icon={Coins01Icon} strokeWidth={2} size={16} />
+              }
+            />
+            <StatCard
+              title="总 Token"
+              value={formatTokens(data.summary.totalTokens)}
+              icon={<HugeiconsIcon icon={CpuIcon} strokeWidth={2} size={16} />}
+            />
+            <StatCard
+              title="日均 Token"
+              value={formatTokens(data.summary.avgDailyTokens)}
+              icon={
+                <HugeiconsIcon
+                  icon={ChartIncreaseIcon}
+                  strokeWidth={2}
+                  size={16}
+                />
+              }
+            />
+            <StatCard
+              title="缓存命中率"
+              value={
+                data.summary.totalTokens > 0
+                  ? `${((data.summary.totalCacheReadTokens / data.summary.totalTokens) * 100).toFixed(1)}%`
+                  : 'N/A'
+              }
+              icon={
+                <HugeiconsIcon
+                  icon={Database01Icon}
+                  strokeWidth={2}
+                  size={16}
+                />
+              }
+            />
+          </>
+        ) : null}
+      </div>
+
+      {/* Charts */}
+      {!isLoading && data && (
+        <>
+          <div className="mt-6">
+            <ActivityHeatmap data={data.heatmap} />
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <CostTrendChart
+              data={data.trend}
+              granularity={data.trendGranularity}
+            />
+            <TokenTrendChart
+              data={data.trend}
+              granularity={data.trendGranularity}
+            />
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <ModelUsageChart data={data.byModel} />
+            <BrandUsageChart data={data.byBrand} />
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <ProviderUsageChart
+              data={data.byProvider}
+              metric="tokens"
+              title="服务商 Token 占比"
+              description="按服务商统计的 Token 使用量"
+              colorOrder={data.byProvider.map((p) => p.provider)}
+            />
+            <ProviderUsageChart
+              data={data.byProvider}
+              metric="cost"
+              title="服务商成本占比"
+              description="按服务商统计的成本"
+              colorOrder={data.byProvider.map((p) => p.provider)}
+            />
+          </div>
+        </>
+      )}
+
+      {/* Loading Charts */}
+      {isLoading && (
+        <>
+          <ChartSkeleton className="mt-6 h-[280px]" />
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <ChartSkeleton className="h-[370px]" />
+            <ChartSkeleton className="h-[370px]" />
+          </div>
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <ChartSkeleton className="h-[370px]" />
+            <ChartSkeleton className="h-[370px]" />
+          </div>
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <ChartSkeleton className="h-[440px]" />
+            <ChartSkeleton className="h-[440px]" />
+          </div>
+        </>
+      )}
+    </>
+  );
+}

@@ -1,6 +1,7 @@
 import { source, getNoteNeighbours } from '@/lib/source';
-import { DocsBody, DocsDescription } from 'fumadocs-ui/page';
+import { DocsDescription } from 'fumadocs-ui/page';
 import { SitePage } from '@/components/docs/page';
+import { SiteBody } from '@/components/docs/site-body';
 import { notFound } from 'next/navigation';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { getMDXComponents } from '@/mdx-components';
@@ -21,9 +22,7 @@ import {
 // is the site's own.
 const tocSlots = { provider: TOCProvider, main: TOC, popover: TOCPopover };
 
-export default async function Page(props: {
-  params: Promise<{ slug?: string[] }>;
-}) {
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const { slug } = await props.params;
   const page = source.getPage(slug);
   if (!page) notFound();
@@ -51,13 +50,13 @@ export default async function Page(props: {
       </DocsDescription>
       {!isSectionIndex && <DocsAuthor {...SITE_AUTHOR} />}
 
-      <DocsBody id="docs-body" className="pb-10 pt-4">
+      <SiteBody>
         <MDXContent
           components={getMDXComponents({
             a: createRelativeLink(source, page),
           })}
         />
-      </DocsBody>
+      </SiteBody>
     </SitePage>
   );
 }
@@ -66,9 +65,9 @@ export async function generateStaticParams() {
   return source.generateParams();
 }
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug?: string[] }>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<'/docs/[[...slug]]'>,
+): Promise<Metadata> {
   const { slug = [] } = await props.params;
   const page = source.getPage(slug);
   if (!page) notFound();
