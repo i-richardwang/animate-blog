@@ -10,7 +10,8 @@ import { SocialLinks } from '@/components/social-links';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { visibleSections } from '@/lib/navigation';
 import { SITE } from '@/lib/site';
-import { FullLogo, LOGO_GLIDE, useIntroPlaying } from './intro';
+import { LOGO_GLIDE, useIntroPlaying } from './intro';
+import { Logo } from './logo';
 
 export function HomeHeader() {
   const playing = useIntroPlaying();
@@ -28,7 +29,7 @@ export function HomeHeader() {
               transition={{ layout: LOGO_GLIDE }}
               className="h-6 text-foreground md:h-7"
             >
-              <FullLogo className="h-full w-auto" />
+              <Logo className="h-full w-auto" />
             </motion.div>
           )}
         </Link>
