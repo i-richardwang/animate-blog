@@ -49,7 +49,7 @@ Commits follow Conventional Commits (checked by commitlint), and `git push` runs
 app/          routes, OG image routes, RSS, search and data APIs
 components/   site components; components/ui holds shadcn primitives
 components/home/
-              the home page: intro, header, hero, section cards, footer
+              the home page: intro and logo, header, hero, section cards, footer
 components/docs/
               the page chrome of every section: navbar, sidebar, TOC,
               title row and page actions, code blocks, cards, tabs
@@ -61,7 +61,7 @@ hooks/, lib/  shared hooks and helpers
 
 ## Animate UI
 
-The site is on Animate UI v2 and follows its docs site's look: the intro and hero on the home page, the navbar, sidebar and TOC, the title row with "Copy page", the code blocks and cards. The primitives (`Effect`, `SplittingText`, `Highlight`, `ScrollFade`, the animated Radix `Tooltip`, `HoverCard` and `DropdownMenu`…) come from the `@animate-ui/react` package, and `AnimateUIProvider` in `app/layout.tsx` paces them all. Icons are [Hugeicons](https://hugeicons.com), like on the docs site: the static ones straight from `@hugeicons/core-free-icons`, the animated ones from Animate UI's Hugeicons registry. Only the animated icons, the Page Transition (the `stack` effect between pages, wired in `components/site-layout.tsx`) and the Theme Toggler are files, added from the registry with the shadcn CLI:
+The site is on Animate UI v2 and follows its docs site's look: the intro and hero on the home page, the navbar, sidebar and TOC, the title row with "Copy page", the code blocks and cards. The primitives (`Effect`, `SplittingText`, `Highlight`, `ScrollFade`, the animated Radix `Tooltip`, `HoverCard` and `DropdownMenu`…) come from the `@animate-ui/react` package. Icons are [Hugeicons](https://hugeicons.com), like on the docs site: the static ones straight from `@hugeicons/core-free-icons`, the animated ones from Animate UI's Hugeicons registry. Only the animated icons, the Page Transition (the `stack` effect between pages, wired in `components/site-layout.tsx`) and the Theme Toggler are files, added from the registry with the shadcn CLI:
 
 ```bash
 pnpm dlx shadcn@latest add @animate-ui/icons-hugeicons-notification-01

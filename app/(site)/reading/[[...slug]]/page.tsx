@@ -1,6 +1,7 @@
 import { reading, getNeighbours, getSortedReadingPosts } from '@/lib/source';
-import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/page';
+import { DocsDescription, DocsTitle } from 'fumadocs-ui/page';
 import { SitePage } from '@/components/docs/page';
+import { SiteBody } from '@/components/docs/site-body';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
@@ -19,9 +20,7 @@ const SECTION = {
   description: '每周一篇深度好文，扩展技术与认知边界。',
 };
 
-export default async function Page(props: {
-  params: Promise<{ slug?: string[] }>;
-}) {
+export default async function Page(props: PageProps<'/reading/[[...slug]]'>) {
   const { slug = [] } = await props.params;
 
   if (slug.length === 0) {
@@ -41,9 +40,9 @@ export default async function Page(props: {
           {SECTION.description}
         </DocsDescription>
 
-        <DocsBody id="docs-body" className="pb-10 pt-4">
+        <SiteBody>
           <ReadingList readings={posts} />
-        </DocsBody>
+        </SiteBody>
       </SitePage>
     );
   }
@@ -85,9 +84,9 @@ export default async function Page(props: {
         </ExternalLinkButton>
       </div>
 
-      <DocsBody id="docs-body" className="prose-lg-content pb-10 pt-4">
+      <SiteBody article>
         <MDXContent components={getMDXComponents()} />
-      </DocsBody>
+      </SiteBody>
     </SitePage>
   );
 }
@@ -96,9 +95,9 @@ export async function generateStaticParams() {
   return reading.generateParams();
 }
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug?: string[] }>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<'/reading/[[...slug]]'>,
+): Promise<Metadata> {
   const { slug = [] } = await props.params;
   if (slug.length === 0) {
     return sectionMetadata({ ...SECTION, path: '/reading' });

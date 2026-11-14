@@ -1,6 +1,7 @@
 import { projects, getNeighbours, getOrderedProjects } from '@/lib/source';
-import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/page';
+import { DocsDescription, DocsTitle } from 'fumadocs-ui/page';
 import { SitePage } from '@/components/docs/page';
+import { SiteBody } from '@/components/docs/site-body';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
@@ -20,9 +21,7 @@ const LAB_GROUPS = [
   { category: 'personal', title: '个人空间' },
 ] as const;
 
-export default async function Page(props: {
-  params: Promise<{ slug?: string[] }>;
-}) {
+export default async function Page(props: PageProps<'/projects/[[...slug]]'>) {
   const { slug = [] } = await props.params;
 
   if (slug.length === 0) {
@@ -50,7 +49,7 @@ export default async function Page(props: {
           {SECTION.description}
         </DocsDescription>
 
-        <DocsBody id="docs-body" className="pb-10 pt-4">
+        <SiteBody>
           {portfolio.length > 0 && (
             <section className="mb-12">
               <h2 className="text-2xl font-medium mb-6 text-foreground">
@@ -72,7 +71,7 @@ export default async function Page(props: {
               <ProjectList projects={group.projects} />
             </section>
           ))}
-        </DocsBody>
+        </SiteBody>
       </SitePage>
     );
   }
@@ -114,9 +113,9 @@ export default async function Page(props: {
         />
       </div>
 
-      <DocsBody id="docs-body" className="prose-lg-content pb-10 pt-4">
+      <SiteBody article>
         <MDXContent components={getMDXComponents()} />
-      </DocsBody>
+      </SiteBody>
     </SitePage>
   );
 }
@@ -125,9 +124,9 @@ export async function generateStaticParams() {
   return projects.generateParams();
 }
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug?: string[] }>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<'/projects/[[...slug]]'>,
+): Promise<Metadata> {
   const { slug = [] } = await props.params;
   if (slug.length === 0) {
     return sectionMetadata({ ...SECTION, path: '/projects' });

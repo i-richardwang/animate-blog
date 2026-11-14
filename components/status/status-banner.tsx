@@ -7,11 +7,14 @@ import { StatusBannerIcon, StatusBannerMessage } from './status-icons';
 
 interface StatusBannerProps extends React.ComponentProps<'div'> {
   status: StatusVariant;
+  // When the status was read; left out until it has been.
+  updatedAt: Date | null;
 }
 
 export const StatusBanner = ({
   className,
   status,
+  updatedAt,
   ...props
 }: StatusBannerProps) => {
   return (
@@ -33,9 +36,11 @@ export const StatusBanner = ({
         <StatusBannerIcon />
         <div className="flex flex-1 flex-wrap items-center justify-between gap-2">
           <StatusBannerMessage className="font-semibold text-xl" />
-          <span className="font-mono text-muted-foreground text-xs">
-            {format(new Date(), 'LLL dd, y HH:mm')}
-          </span>
+          {updatedAt && (
+            <span className="font-mono text-muted-foreground text-xs">
+              {format(updatedAt, 'LLL dd, y HH:mm')}
+            </span>
+          )}
         </div>
       </div>
     </div>
