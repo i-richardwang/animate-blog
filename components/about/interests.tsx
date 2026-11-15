@@ -1,7 +1,8 @@
 'use client';
 
-import * as React from 'react';
-import { Effect } from '@animate-ui/react/primitives/effects/effect';
+// The About page's interests, each a titled carousel of photos that rises in
+// as it scrolls into view.
+
 import {
   Camera01Icon,
   Film01Icon,
@@ -18,8 +19,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import Image from 'next/image';
 import Autoplay from 'embla-carousel-autoplay';
+import { motion } from 'motion/react';
+import Image from 'next/image';
+import { riseInView } from '@/lib/motion';
 
 interface InterestItem {
   image: string;
@@ -117,73 +120,79 @@ const INTERESTS: Interest[] = [
   },
 ];
 
-const InterestCard = ({ interest }: { interest: Interest }) => {
-  return (
-    <Effect slide={{ direction: 'down' }} fade zoom delay={200} inView>
-      <div className="relative">
-        {/* Icon and Title - Centered */}
-        <div className="flex items-center justify-center gap-4 mb-12">
-          <div className="size-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary">
-            <HugeiconsIcon icon={interest.icon} strokeWidth={2} size={24} />
-          </div>
-          <h3 className="text-2xl font-semibold text-foreground">
-            {interest.title}
-          </h3>
-        </div>
+// The first interest shows as the page opens, so it takes its turn after the
+// hero's title, line and portrait; the rest rise as they are scrolled to.
+const AFTER_HERO = 3;
 
-        {/* Images Carousel */}
-        <div className="px-12">
-          <Carousel
-            plugins={[Autoplay({ delay: 3000, stopOnInteraction: false })]}
-            opts={{
-              align: 'start',
-              loop: true,
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {interest.items.map((item, idx) => (
-                <CarouselItem key={idx} className="pl-2 md:pl-4 basis-1/2">
-                  <div className="space-y-2">
-                    {/* Caption above image */}
-                    <p className="text-sm text-foreground/80 leading-relaxed min-h-[2.5rem] text-center">
-                      {item.caption}
-                    </p>
-                    {/* Image */}
-                    <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-neutral-200 dark:bg-neutral-700">
-                      <Image
-                        src={item.image}
-                        alt={item.caption}
-                        fill
-                        sizes="(min-width: 896px) 400px, 50vw"
-                        className="object-cover"
-                      />
-                    </div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-            {/* A lone dot says nothing: hide the dots when the slides all fit. */}
-            <CarouselDots className="mt-4 text-muted-foreground [&:has([data-slot=carousel-dot]:only-of-type)]:hidden" />
-          </Carousel>
+function InterestCard({
+  interest,
+  first,
+}: {
+  interest: Interest;
+  first: boolean;
+}) {
+  return (
+    <motion.section {...riseInView(first ? AFTER_HERO : 0)}>
+      <div className="mb-12 flex items-center justify-center gap-4">
+        <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20">
+          <HugeiconsIcon icon={interest.icon} strokeWidth={2} size={24} />
         </div>
+        <h2 className="text-2xl font-semibold text-foreground">
+          {interest.title}
+        </h2>
       </div>
-    </Effect>
-  );
-};
 
-export const AboutInterests = () => {
+      <div className="px-12">
+        <Carousel
+          plugins={[Autoplay({ delay: 3000, stopOnInteraction: false })]}
+          opts={{ align: 'start', loop: true }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-2 md:-ml-4">
+            {interest.items.map((item) => (
+              <CarouselItem
+                key={item.caption}
+                className="basis-1/2 pl-2 md:pl-4"
+              >
+                <div className="space-y-2">
+                  <p className="min-h-10 text-center text-sm leading-relaxed text-foreground/80">
+                    {item.caption}
+                  </p>
+                  <div className="relative aspect-4/3 overflow-hidden rounded-lg bg-neutral-200 dark:bg-neutral-700">
+                    <Image
+                      src={item.image}
+                      alt={item.caption}
+                      fill
+                      sizes="(min-width: 896px) 400px, 50vw"
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+          {/* A lone dot says nothing: hide the dots when the slides all fit. */}
+          <CarouselDots className="mt-4 text-muted-foreground [&:has([data-slot=carousel-dot]:only-of-type)]:hidden" />
+        </Carousel>
+      </div>
+    </motion.section>
+  );
+}
+
+export function AboutInterests() {
   return (
-    <div className="relative px-5 pb-20">
-      <div className="max-w-4xl mx-auto">
-        <div className="space-y-20">
-          {INTERESTS.map((interest) => (
-            <InterestCard key={interest.title} interest={interest} />
-          ))}
-        </div>
+    <div className="px-5 pb-20">
+      <div className="mx-auto max-w-4xl space-y-20">
+        {INTERESTS.map((interest, index) => (
+          <InterestCard
+            key={interest.title}
+            interest={interest}
+            first={index === 0}
+          />
+        ))}
       </div>
     </div>
   );
-};
+}

@@ -1,62 +1,48 @@
 'use client';
 
+// The About page's opening: the title rises word by word, then the line
+// under it and the portrait follow, in the same motion as the home page.
+
 import { SplittingText } from '@animate-ui/react/primitives/texts/splitting';
-import { Effect } from '@animate-ui/react/primitives/effects/effect';
+import { motion } from 'motion/react';
 import Image from 'next/image';
+import { RISE_WORDS, rise } from '@/lib/motion';
 
 const TITLE = 'About Me';
 const SUBTITLE = 'Learning, Building, Sharing.';
 
-export const AboutHero = () => {
+export function AboutHero() {
   return (
-    <div className="relative overflow-x-hidden flex flex-col items-center px-5 pt-40 pb-16">
-      <div className="relative z-10 flex flex-col items-center justify-center max-w-4xl mx-auto">
-        <Effect slide fade zoom inView delay={150}>
-          <div className="relative z-10">
-            <h1 className="md:max-w-[900px] max-w-[340px]">
-              <SplittingText
-                text={TITLE}
-                aria-hidden="true"
-                className="block md:text-6xl text-5xl font-medium text-center text-neutral-200 dark:text-neutral-800"
-                disableAnimation
-              />
-            </h1>
-            <div className="md:max-w-[900px] max-w-[340px] absolute inset-0 flex items-center justify-center">
-              <SplittingText
-                text={TITLE}
-                className="block md:text-6xl text-5xl font-medium text-center"
-                type="chars"
-                delay={400}
-                initial={{ y: 0, opacity: 0, x: 0, filter: 'blur(10px)' }}
-                animate={{ y: 0, opacity: 1, x: 0, filter: 'blur(0px)' }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-              />
-            </div>
-          </div>
-        </Effect>
+    <section className="flex flex-col items-center px-5 pt-40 pb-16 text-center">
+      <h1 className="text-5xl font-medium md:text-6xl">
+        <SplittingText
+          type="words"
+          text={TITLE}
+          className="inline"
+          {...RISE_WORDS}
+        />
+      </h1>
 
-        <Effect slide fade zoom inView delay={300}>
-          <p className="block font-normal md:text-lg sm:text-base text-sm text-center mt-6 text-muted-foreground md:max-w-[660px] sm:max-w-[450px] text-balance">
-            {SUBTITLE}
-          </p>
-        </Effect>
+      <motion.p
+        {...rise(1)}
+        className="mt-6 text-sm text-balance text-muted-foreground sm:text-base md:text-lg"
+      >
+        {SUBTITLE}
+      </motion.p>
 
-        {/* Avatar */}
-        <Effect slide fade zoom delay={450}>
-          <div className="mt-12 relative">
-            <div className="size-32 rounded-full overflow-hidden">
-              <Image
-                src="/about/header-round.png"
-                alt="Richard Wang"
-                width={128}
-                height={128}
-                priority
-                className="size-full object-cover"
-              />
-            </div>
-          </div>
-        </Effect>
-      </div>
-    </div>
+      <motion.div
+        {...rise(2)}
+        className="mt-12 size-32 overflow-hidden rounded-full"
+      >
+        <Image
+          src="/about/header-round.png"
+          alt="Richard Wang"
+          width={128}
+          height={128}
+          priority
+          className="size-full object-cover"
+        />
+      </motion.div>
+    </section>
   );
-};
+}
