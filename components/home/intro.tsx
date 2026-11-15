@@ -3,7 +3,7 @@
 // The home page's opening: the logo draws itself on a blank screen, fills,
 // holds a beat, then glides into the header while the page rises in beneath
 // it. Under reduced motion there is no intro and the page is simply there.
-// `useIntroDone` tells the rest of the page when to appear.
+// `useIntroDone` tells the rest of the page when to rise (see lib/motion.ts).
 
 import { ease, useShouldReduceMotion } from '@animate-ui/react/utils/motion';
 import { AnimatePresence, motion } from 'motion/react';
@@ -38,31 +38,6 @@ export function useIntroDone() {
 export function useIntroPlaying() {
   return use(IntroContext).playing;
 }
-
-const RISE_STAGGER = 0.18;
-
-// Motion props for a block that rises into place once the intro is done.
-// The blocks rise top to bottom, `index` counting from the title (the title
-// itself is the hero's word-by-word SplittingText); an index can be
-// fractional to space a row of blocks more tightly. `scale` is the size a
-// block grows from. The blur is dropped once it has settled, so a finished
-// block is not left as its own filter layer.
-export const rise = (index: number, done: boolean, scale = 1) => {
-  const hidden = { opacity: 0, y: 20, scale, filter: 'blur(10px)' };
-  return {
-    initial: hidden,
-    animate: done
-      ? {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          filter: 'blur(0px)',
-          transitionEnd: { filter: 'none' },
-        }
-      : hidden,
-    transition: { duration: 0.7, ease: ease.out, delay: index * RISE_STAGGER },
-  };
-};
 
 export function IntroProvider({ children }: { children: ReactNode }) {
   const reduce = useShouldReduceMotion();

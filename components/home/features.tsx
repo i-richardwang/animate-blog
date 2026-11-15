@@ -10,12 +10,13 @@ import { Dancing_Script } from 'next/font/google';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { rise } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import { Projects } from '@/components/icons/projects';
 import { Blog } from '@/components/icons/blog';
 import { Notes } from '@/components/icons/notes';
 import { TokenUsage } from '@/components/icons/token-usage';
-import { rise, useIntroDone } from './intro';
+import { useIntroDone } from './intro';
 
 const dancing = Dancing_Script({ subsets: ['latin'] });
 
@@ -65,7 +66,10 @@ function FeatureCard({ item, index }: { item: FeatureItem; index: number }) {
   const done = useIntroDone();
   return (
     <motion.div
-      {...rise(FIRST_CARD + index * CARD_STEP, done, CARD_FROM_SCALE)}
+      {...rise(FIRST_CARD + index * CARD_STEP, {
+        shown: done,
+        scale: CARD_FROM_SCALE,
+      })}
       className="h-full"
     >
       <motion.div
