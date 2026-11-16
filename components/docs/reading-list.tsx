@@ -32,6 +32,7 @@ function FeaturedCard({ reading }: { reading: Reading }) {
         <CoverImage
           src={reading.image}
           alt={reading.title}
+          sizes="(min-width: 768px) 50vw, 100vw"
           className="w-full md:w-1/2 aspect-[16/9]"
         />
 
@@ -76,6 +77,7 @@ function ReadingCard({ reading, index }: { reading: Reading; index: number }) {
       <CoverImage
         src={reading.image}
         alt={reading.title}
+        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
         className="w-full aspect-[16/9]"
       />
 

@@ -43,6 +43,17 @@ pnpm dev
 
 Commits follow Conventional Commits (checked by commitlint), and `git push` runs lint, the format check and a build first.
 
+## Deployment
+
+The site runs as one long-lived Node server on [Zeabur](https://zeabur.com), built from `main`. Memory is the scarce resource there, so the server is set up to stay small:
+
+- `zbpack.json` starts Next.js with Node directly. `pnpm start` is the same server, with pnpm's own processes left running beside it.
+- `next.config.mjs` loads a route's code on its first request, keeps prerendered pages on disk only, and never resizes an image on the server.
+
+Images are resized by Cloudflare instead, which the domain is proxied through. With [Transformations](https://developers.cloudflare.com/images/transform-images/) enabled for the zone and `CLOUDFLARE_IMAGE_TRANSFORMATIONS=true` set on the service, `lib/cloudflare-image-loader.ts` points every `next/image` at `/cdn-cgi/image/…`, and Cloudflare sends each reader a size and format that fits their screen. Without the variable, as in local development, images are sent as stored.
+
+Images are files under `public/`. Covers and logos are named in frontmatter by their path from there (`image: /reading/covers/name.png`); a URL on another server is refused at build time, since it breaks the day that server moves the file.
+
 ## Layout
 
 ```
@@ -80,6 +91,7 @@ Copy `.env.example` to `.env.local`. The site builds and runs without them; each
 | `UPTIME_KUMA_URL`, `UPTIME_KUMA_SLUG`                      | `/status`; defaults to the homelab instance    |
 | `CCUSAGE_DATABASE_URL`, `LLMETER_DATABASE_URL`             | `/token-usage`; it shows an error without them |
 | `NEXT_PUBLIC_UMAMI_SCRIPT`, `NEXT_PUBLIC_UMAMI_WEBSITE_ID` | Umami analytics; unset means no script         |
+| `CLOUDFLARE_IMAGE_TRANSFORMATIONS`                         | Cloudflare image resizing; see Deployment      |
 
 ## Credits
 

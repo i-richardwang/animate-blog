@@ -36,6 +36,7 @@ function FeaturedCard({ podcast }: { podcast: Podcast }) {
         <CoverImage
           src={podcast.image}
           alt={podcast.title}
+          sizes="(min-width: 768px) 280px, 100vw"
           className="w-full md:w-[280px] md:h-[280px] aspect-square md:aspect-auto flex-shrink-0"
         />
 
@@ -100,6 +101,7 @@ function PodcastCard({ podcast, index }: { podcast: Podcast; index: number }) {
         <CoverImage
           src={podcast.image}
           alt={podcast.title}
+          sizes="160px"
           className="w-[160px] h-[160px] flex-shrink-0"
         />
 

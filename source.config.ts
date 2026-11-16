@@ -30,6 +30,16 @@ export const blog = defineCollections({
   }),
 });
 
+// A cover or logo: a file in `public/`, named by its path from there
+// (`/reading/covers/name.png`). Not a URL on someone else's server, which
+// stops working the day they move the file.
+const publicFile = z
+  .string()
+  .startsWith(
+    '/',
+    'Must be a file in public/, such as /reading/covers/name.png',
+  );
+
 export const projects = defineDocs({
   dir: 'content/projects',
   docs: {
@@ -37,7 +47,7 @@ export const projects = defineDocs({
       date: z.coerce.date(),
       category: z.enum(['portfolio', 'business', 'exploration', 'personal']),
       tech: z.array(z.string()),
-      logo: z.string(),
+      logo: publicFile,
       links: z.object({
         github: z.string().optional(),
         url: z.string().optional(),
@@ -57,7 +67,7 @@ export const reading = defineCollections({
   schema: frontmatterSchema.extend({
     date: z.coerce.date(),
     category,
-    image: z.string(),
+    image: publicFile,
     subtitle: z.string().optional(),
     originalTitle: z.string(),
     originalUrl: z.string(),
@@ -75,7 +85,7 @@ export const podcasts = defineCollections({
   schema: frontmatterSchema.extend({
     date: z.coerce.date(),
     category,
-    image: z.string(),
+    image: publicFile,
     podcastName: z.string(),
     hosts: z.array(z.string()),
     guests: z.array(z.string()),

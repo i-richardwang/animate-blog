@@ -9,17 +9,46 @@ import { attachFile } from '@/lib/attach-file';
 import { loader, type InferPageType } from 'fumadocs-core/source';
 import { findNeighbour } from 'fumadocs-core/page-tree';
 import type * as PageTree from 'fumadocs-core/page-tree';
-import * as hugeicons from '@hugeicons/core-free-icons';
+import {
+  ChartLineData01Icon,
+  CpuIcon,
+  Database01Icon,
+  FlashIcon,
+  Hammer01Icon,
+  HardDriveIcon,
+  Idea01Icon,
+  PieChart01Icon,
+  Rocket01Icon,
+  TestTube01Icon,
+} from '@hugeicons/core-free-icons';
 import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { createElement } from 'react';
 
-// Resolves the icon names of meta.json separators (`---[Icon]Name---`)
-// to Hugeicons icons: `[Rocket01]` is `Rocket01Icon`.
-const iconSet = hugeicons as Record<string, IconSvgElement | undefined>;
+// The icons meta.json separators can name (`---[Rocket01]Name---`). They are
+// listed because looking a name up in the whole icon set makes the server
+// load all of it, 8 MB of code, and keep it in memory.
+const SEPARATOR_ICONS: Record<string, IconSvgElement | undefined> = {
+  ChartLineData01: ChartLineData01Icon,
+  Cpu: CpuIcon,
+  Database01: Database01Icon,
+  Flash: FlashIcon,
+  Hammer01: Hammer01Icon,
+  HardDrive: HardDriveIcon,
+  Idea01: Idea01Icon,
+  PieChart01: PieChart01Icon,
+  Rocket01: Rocket01Icon,
+  TestTube01: TestTube01Icon,
+};
 function resolveIcon(icon: string | undefined) {
-  const svg = icon && iconSet[`${icon}Icon`];
-  if (svg) return createElement(HugeiconsIcon, { icon: svg, strokeWidth: 2 });
+  if (!icon) return;
+  const svg = SEPARATOR_ICONS[icon];
+  if (!svg) {
+    throw new Error(
+      `Unknown separator icon "${icon}": add it to SEPARATOR_ICONS in lib/source.ts.`,
+    );
+  }
+  return createElement(HugeiconsIcon, { icon: svg, strokeWidth: 2 });
 }
 
 export const source = loader({

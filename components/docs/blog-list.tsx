@@ -1,8 +1,7 @@
 'use client';
 
+import { formatDate } from '@/lib/utils';
 import { CardLink } from '@/components/docs/card-link';
-import { format } from 'date-fns';
-import { enUS } from 'date-fns/locale';
 import { ArrowRight02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 
@@ -33,7 +32,7 @@ export function BlogList({ posts }: BlogListProps) {
               dateTime={post.date.toISOString()}
               className="text-sm text-muted-foreground mb-2 block"
             >
-              {format(post.date, 'MMMM d, yyyy', { locale: enUS })}
+              {formatDate(post.date, 'long')}
             </time>
             <h2 className="text-lg md:text-xl font-medium mb-1 group-hover:text-primary transition-colors">
               {post.title}
