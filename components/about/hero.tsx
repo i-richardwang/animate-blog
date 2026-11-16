@@ -39,7 +39,7 @@ export function AboutHero() {
           alt="Richard Wang"
           width={128}
           height={128}
-          priority
+          loading="eager"
           className="size-full object-cover"
         />
       </motion.div>
