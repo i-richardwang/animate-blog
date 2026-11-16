@@ -18,7 +18,7 @@ export function getRSS() {
     language: 'en',
     description:
       'A personal blog and knowledge base for learning, exploration, and sharing insights.',
-    image: `${SITE.url}/og-image.png`,
+    image: SITE.image,
     favicon: `${SITE.url}/favicon-32x32.png`,
     copyright: `All rights reserved ${new Date().getFullYear()}, Richard Wang`,
     feedLinks: {
