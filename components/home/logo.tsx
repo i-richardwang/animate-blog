@@ -10,14 +10,19 @@
 // for the whole of STROKES_END, and the fill starts as the last letter closes.
 //
 // The fill is a single path for the whole logo. Some outlines are holes (the
-// inside of an "a", of the mark), and a hole is only cut out when it is part
+// inside of an "a", the mark's "R"), and a hole is only cut out when it is part
 // of the same path as the shape around it; filled on its own it is solid.
 
 import { ease } from '@animate-ui/react/utils/motion';
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
+import { LOGO_MARK } from '@/components/logo-mark';
+import {
+  LOGO_LETTERS,
+  LOGO_PATH,
+  LOGO_VIEW_BOX,
+} from '@/components/logo-paths';
 import { cn } from '@/lib/utils';
-import { LOGO_LETTERS, LOGO_MARK, LOGO_VIEW_BOX } from './logo-paths';
 
 // Seconds from the first stroke. The intro's own timings (see intro.tsx) are
 // counted from LOGO_END, when the filled logo is complete.
@@ -35,10 +40,9 @@ const letterDelay = (letter: number) =>
   FIRST_LETTER_AT +
   (letter / (LOGO_LETTERS.length - 1)) * (LAST_LETTER_AT - FIRST_LETTER_AT);
 
-const LOGO_PATH = [...LOGO_MARK, ...LOGO_LETTERS.flat()].join('');
-
 // The outlines are stroked as well as filled, which is what keeps the logo's
-// letters from thinning at the end of the drawing.
+// letters from thinning at the end of the drawing. The outer half of a stroke
+// on the logo's edge lies outside the view box, so the frame does not clip.
 const STROKE = { stroke: 'currentColor', strokeWidth: 10 } as const;
 
 function LogoFrame({
@@ -52,7 +56,7 @@ function LogoFrame({
     <svg
       viewBox={LOGO_VIEW_BOX}
       aria-hidden="true"
-      className={cn('block', className)}
+      className={cn('block overflow-visible', className)}
     >
       {children}
     </svg>

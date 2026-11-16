@@ -7,7 +7,7 @@ export const revalidate = false;
 
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<{ slug: string[] }> },
+  { params }: RouteContext<'/blog-og/[...slug]'>,
 ) {
   const { slug } = await params;
   const page = blogs.getPage(slug.slice(0, -1));

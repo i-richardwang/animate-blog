@@ -11,13 +11,13 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import { ArrowRight02Icon } from '@/components/animate-ui/icons/hugeicons/arrow-right-02';
 import { RISE_WORDS, rise } from '@/lib/motion';
+import { SITE } from '@/lib/site';
 import type { LatestEntry } from '@/lib/source';
 import { useIntroDone } from './intro';
 import { LatestContent } from './latest-content';
 
 const TITLE = "👋 Hi, I'm Richard Wang.";
-const SUBTITLE =
-  '求知，践行，分享。关于人工智能、数据科学、软件开发与自托管服务的实践笔记。';
+const SUBTITLE = `${SITE.motto}关于人工智能、数据科学、软件开发与自托管服务的实践笔记。`;
 
 const button =
   'inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-medium transition-colors [&_svg]:size-4';
