@@ -71,11 +71,14 @@ function getIntensityClass(value: number, q: Quartiles): string {
   return INTENSITY_LEVELS[4];
 }
 
+// `dateStr` is a calendar day (`2025-10-15`), read as midnight UTC, so it is
+// formatted in UTC: a reader west of UTC would otherwise see the day before.
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: 'UTC',
   });
 }
 
