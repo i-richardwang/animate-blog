@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Effect } from '@animate-ui/react/primitives/effects/effect';
@@ -35,25 +36,27 @@ export function CardLink({
   );
 }
 
-// A cover image that zooms in while its `group` card is hovered.
+// A cover image that zooms in while its `group` card is hovered. It fills
+// the box `className` sizes; `sizes` tells the browser how wide that is.
 export function CoverImage({
   src,
   alt,
+  sizes,
   className,
 }: {
   src: string;
   alt: string;
+  sizes: string;
   className: string;
 }) {
   return (
     <div className={cn('relative overflow-hidden bg-muted', className)}>
-      {/* Covers come from whatever host the frontmatter names, which
-          next/image would need listed in advance. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={src}
         alt={alt}
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        fill
+        sizes={sizes}
+        className="object-cover group-hover:scale-105 transition-transform duration-300"
       />
     </div>
   );

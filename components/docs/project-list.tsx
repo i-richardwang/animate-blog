@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { CardLink } from '@/components/docs/card-link';
 import { TechStackIcons } from '@/components/tech-stack-icons';
 
@@ -27,13 +28,13 @@ export function ProjectList({ projects }: ProjectListProps) {
         >
           <div className="p-6">
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex-shrink-0 size-6 flex items-center justify-center">
-                {/* SVG and remote logos would need extra next/image config. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+              <div className="relative flex-shrink-0 size-6">
+                <Image
                   src={project.logo}
                   alt={`${project.title} logo`}
-                  className="size-full object-contain"
+                  fill
+                  sizes="24px"
+                  className="object-contain"
                 />
               </div>
               <h2 className="flex-1 text-lg md:text-xl font-medium group-hover:text-primary transition-colors line-clamp-2">
