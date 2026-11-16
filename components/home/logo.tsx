@@ -8,6 +8,10 @@
 // compound path would all be finished long before the animation is. The mark
 // draws first and the letters follow left to right, so a stroke is being drawn
 // for the whole of STROKES_END, and the fill starts as the last letter closes.
+//
+// The fill is a single path for the whole logo. Some outlines are holes (the
+// inside of an "a", of the mark), and a hole is only cut out when it is part
+// of the same path as the shape around it; filled on its own it is solid.
 
 import { ease } from '@animate-ui/react/utils/motion';
 import { motion } from 'motion/react';
@@ -30,6 +34,8 @@ const LAST_LETTER_AT = STROKES_END - LETTER_DURATION;
 const letterDelay = (letter: number) =>
   FIRST_LETTER_AT +
   (letter / (LOGO_LETTERS.length - 1)) * (LAST_LETTER_AT - FIRST_LETTER_AT);
+
+const LOGO_PATH = [...LOGO_MARK, ...LOGO_LETTERS.flat()].join('');
 
 // The outlines are stroked as well as filled, which is what keeps the logo's
 // letters from thinning at the end of the drawing.
@@ -56,11 +62,7 @@ function LogoFrame({
 export function Logo({ className }: { className?: string }) {
   return (
     <LogoFrame className={className}>
-      <path
-        d={[...LOGO_MARK, ...LOGO_LETTERS.flat()].join('')}
-        fill="currentColor"
-        {...STROKE}
-      />
+      <path d={LOGO_PATH} fill="currentColor" {...STROKE} />
     </LogoFrame>
   );
 }
@@ -77,7 +79,6 @@ function Outline({
   return (
     <motion.path
       d={d}
-      {...STROKE}
       initial={{ pathLength: 0 }}
       animate={{ pathLength: 1 }}
       transition={{ duration, delay, ease: 'easeInOut' }}
@@ -88,7 +89,8 @@ function Outline({
 export function DrawingLogo({ className }: { className?: string }) {
   return (
     <LogoFrame className={className}>
-      <motion.g
+      <motion.path
+        d={LOGO_PATH}
         fill="currentColor"
         initial={{ fillOpacity: 0 }}
         animate={{ fillOpacity: 1 }}
@@ -97,7 +99,8 @@ export function DrawingLogo({ className }: { className?: string }) {
           delay: STROKES_END - FILL_LEAD,
           ease: ease.out,
         }}
-      >
+      />
+      <g fill="none" {...STROKE}>
         {LOGO_MARK.map((d) => (
           <Outline key={d} d={d} delay={0} duration={MARK_DURATION} />
         ))}
@@ -111,7 +114,7 @@ export function DrawingLogo({ className }: { className?: string }) {
             />
           )),
         )}
-      </motion.g>
+      </g>
     </LogoFrame>
   );
 }
