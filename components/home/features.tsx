@@ -1,16 +1,16 @@
 'use client';
 
-// The site's four sections as cards under the hero. They rise in one after
-// the other once the intro is done, each growing in a little as it arrives,
-// and an accent background slides to the card under the pointer. A press
-// shrinks the card slightly, like the other cards on the site.
+// The site's four sections as cards under the hero. They spring up one after
+// the other once the intro is done, and an accent background slides to the
+// card under the pointer. A press shrinks the card slightly, like the other
+// cards on the site.
 
 import { Highlight } from '@animate-ui/react/primitives/effects/highlight';
 import { Dancing_Script } from 'next/font/google';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { rise } from '@/lib/motion';
+import { riseCard } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import { Projects } from '@/components/icons/projects';
 import { Blog } from '@/components/icons/blog';
@@ -54,24 +54,15 @@ const SECTIONS: FeatureItem[] = [
   },
 ];
 
-// The cards follow the hero's blocks (title 0, subtitle 1, actions 2) and
-// arrive half a step apart, each growing in from a little smaller.
-const FIRST_CARD = 3;
-const CARD_STEP = 0.5;
-const CARD_FROM_SCALE = 0.94;
+// The row follows the hero's blocks (title 0, subtitle 1, actions 2).
+const ROW = 3;
 
 // The entrance and the press sit on separate elements: the entrance carries a
 // delay that a press must not wait for.
 function FeatureCard({ item, index }: { item: FeatureItem; index: number }) {
   const done = useIntroDone();
   return (
-    <motion.div
-      {...rise(FIRST_CARD + index * CARD_STEP, {
-        shown: done,
-        scale: CARD_FROM_SCALE,
-      })}
-      className="h-full"
-    >
+    <motion.div {...riseCard(ROW, index, { shown: done })} className="h-full">
       <motion.div
         whileTap={{ scale: 0.97 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
