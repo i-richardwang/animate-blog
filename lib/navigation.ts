@@ -55,6 +55,6 @@ export const visibleSections = NAV_SECTIONS.filter((s) => !s.hidden);
 // Section titles and urls in the order the mobile sidebar lists them: each
 // section followed by its sub-sections.
 export const flatSections = visibleSections.flatMap((section) => [
-  { title: section.title, url: section.url },
-  ...(section.children ?? []),
+  { title: section.title, url: section.url, depth: 0 },
+  ...(section.children ?? []).map((child) => ({ ...child, depth: 1 })),
 ]);

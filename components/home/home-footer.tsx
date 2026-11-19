@@ -12,7 +12,7 @@ export function HomeFooter() {
   return (
     <motion.footer
       {...rise(6, { shown: done })}
-      className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-8 text-sm text-muted-foreground"
+      className="page-frame flex flex-wrap items-center justify-between gap-4 py-8 text-sm text-muted-foreground"
     >
       <FooterCredit className="min-w-0" />
       <StatusLink />

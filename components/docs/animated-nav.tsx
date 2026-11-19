@@ -126,12 +126,12 @@ export function NavSectionTitle({
   icon,
   children,
 }: {
-  icon: ReactNode;
+  icon?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <span className="flex items-center gap-2">
-      <NavSectionIcon>{icon}</NavSectionIcon>
+      {icon && <NavSectionIcon>{icon}</NavSectionIcon>}
       <span className="text-[13px] text-neutral-500">{children}</span>
     </span>
   );

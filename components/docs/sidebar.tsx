@@ -22,9 +22,6 @@ import { createLinkItemRenderer } from 'fumadocs-ui/components/sidebar/link-item
 import { createPageTreeRenderer } from 'fumadocs-ui/components/sidebar/page-tree';
 import { useDocsLayout } from 'fumadocs-ui/layouts/docs';
 import { useTreeContext } from 'fumadocs-ui/contexts/tree';
-import type { LinkItemType } from 'fumadocs-ui/layouts/shared';
-import Link from 'fumadocs-core/link';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { useScrollFade } from '@animate-ui/react/primitives/effects/scroll-fade';
 import { usePathname } from 'next/navigation';
@@ -32,11 +29,11 @@ import { BookOpen02Icon, Menu01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { useRef, type ComponentProps, type ReactNode } from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { SocialLinks } from '@/components/social-links';
 import { flatSections } from '@/lib/navigation';
 import {
   AnimatedNav,
   NavItemContent,
-  NavSectionIcon,
   NavSectionTitle,
   useNavHover,
 } from './animated-nav';
@@ -47,10 +44,11 @@ function AnimatedItem({
   href,
   active,
   external,
+  depth,
   className,
   children,
   ...props
-}: ComponentProps<typeof BaseSidebarItem>) {
+}: ComponentProps<typeof BaseSidebarItem> & { depth?: number }) {
   const { hovered, hoverProps } = useNavHover(String(href));
 
   return (
@@ -65,25 +63,27 @@ function AnimatedItem({
       {...hoverProps}
       {...props}
     >
-      <NavItemContent active={Boolean(active)} hovered={hovered}>
+      <NavItemContent active={Boolean(active)} hovered={hovered} depth={depth}>
         {children}
       </NavItemContent>
     </BaseSidebarItem>
   );
 }
 
+// The heading of a group of links. Every group in the sidebar and the
+// drawer starts with one, and only headings space the groups apart: 24px
+// above each but the first, as on Animate UI's docs.
 function SectionSeparator({
-  className,
-  ...props
-}: ComponentProps<typeof BaseSidebarSeparator>) {
+  icon,
+  children,
+}: {
+  icon?: ReactNode;
+  children: ReactNode;
+}) {
   return (
-    <BaseSidebarSeparator
-      className={cn(
-        'inline-flex items-center gap-2 mb-2 mt-6 first:mt-0 px-2 [&_svg]:shrink-0',
-        className,
-      )}
-      {...props}
-    />
+    <BaseSidebarSeparator className="mt-6 mb-2 px-2 first:mt-0">
+      <NavSectionTitle icon={icon}>{children}</NavSectionTitle>
+    </BaseSidebarSeparator>
   );
 }
 
@@ -93,7 +93,8 @@ const SidebarPageTree = createPageTreeRenderer({
   SidebarFolderLink,
   SidebarFolderTrigger,
   SidebarItem: BaseSidebarItem,
-  SidebarSeparator: SectionSeparator,
+  // Unused: separators render through PageTreeSeparator below.
+  SidebarSeparator: BaseSidebarSeparator,
 });
 
 const SidebarLinkItem = createLinkItemRenderer({
@@ -137,20 +138,15 @@ function PageTreeFolder({ item }: { item: PageTree.Folder }) {
 // Separators come from meta.json (`---[Icon]Name---`); the loader resolves
 // the icon name to a Hugeicons icon.
 function PageTreeSeparator({ item }: { item: PageTree.Separator }) {
-  return (
-    <SectionSeparator>
-      {item.icon && <NavSectionIcon>{item.icon}</NavSectionIcon>}
-      {item.name}
-    </SectionSeparator>
-  );
+  return <SectionSeparator icon={item.icon}>{item.name}</SectionSeparator>;
 }
 
-// The scrolling part of the sidebar: no scrollbar, the content fading out at
-// the edges instead (the TOC scrolls the same way). On desktop it keeps the
-// same 24px gap under the navbar as the page, so the first entry lines up
-// with the title, and Animate UI's 24px left inset, so the section icons line
-// up with the navbar logo. The right inset stays small: note titles run to
-// 14 Chinese characters and should not wrap.
+// The scrolling part of the sidebar and of the drawer: no scrollbar, the
+// content fading out at the edges instead (the TOC scrolls the same way).
+// Its content starts at --sidebar-inset (see globals.css), the inset the
+// navbar's row shares, and 24px down, the gap the page keeps under the
+// navbar. The right inset stays small: note titles run to 14 Chinese
+// characters and should not wrap.
 function SidebarScroll({ children }: { children: ReactNode }) {
   const scroll = useRef<HTMLDivElement>(null);
   useScrollFade(scroll, { size: 24, blur: 0 });
@@ -158,7 +154,7 @@ function SidebarScroll({ children }: { children: ReactNode }) {
     <div
       ref={scroll}
       data-slot="sidebar-scroll"
-      className="min-h-0 flex-1 overflow-y-auto overscroll-none px-2 pb-4 [scrollbar-width:none] max-md:pt-2 md:pt-6 md:pl-6 md:pb-14"
+      className="min-h-0 flex-1 overflow-y-auto overscroll-none ps-(--sidebar-inset) pe-2 pt-6 pb-4 [scrollbar-width:none] md:pb-14"
     >
       {children}
     </div>
@@ -166,82 +162,53 @@ function SidebarScroll({ children }: { children: ReactNode }) {
 }
 
 // The navbar's hover menus have no mobile equivalent, so the drawer lists
-// sections and their sub-sections flat, in navbar order.
+// the sections in navbar order, each one's sub-sections indented under it.
 function SiteMenu() {
   const pathname = usePathname();
   return (
-    <div className="my-4">
-      <SectionSeparator className="mb-2 mt-0 pl-0">
-        <NavSectionTitle
-          icon={<HugeiconsIcon icon={Menu01Icon} strokeWidth={2} />}
-        >
-          Menu
-        </NavSectionTitle>
+    <>
+      <SectionSeparator
+        icon={<HugeiconsIcon icon={Menu01Icon} strokeWidth={2} />}
+      >
+        Menu
       </SectionSeparator>
       {flatSections.map((section) => (
         <AnimatedItem
           key={section.url}
           href={section.url}
           active={pathname === section.url}
+          depth={section.depth}
         >
           {section.title}
         </AnimatedItem>
       ))}
-    </div>
-  );
-}
-
-function IconLinks({ items }: { items: LinkItemType[] }) {
-  const icons = items.filter((item) => item.type === 'icon');
-  if (icons.length === 0) return null;
-  return (
-    <div className="flex items-center justify-end">
-      {icons.map((item, i, arr) => (
-        <Link
-          key={i}
-          href={item.url}
-          external={item.external}
-          className={cn(
-            buttonVariants({ size: 'icon', color: 'ghost' }),
-            'text-fd-muted-foreground md:[&_svg]:size-4.5',
-            i === arr.length - 1 && 'me-auto',
-          )}
-          aria-label={item.label}
-        >
-          {item.icon}
-        </Link>
-      ))}
-      <ThemeToggle />
-    </div>
+    </>
   );
 }
 
 // Rendered through DocsLayout's sidebar slot. The site sets no sidebar
 // options, so the slot passes no props.
 export function DocsSidebar() {
-  const { menuItems } = useDocsLayout();
+  // The baseOptions links (see app/layout.config.tsx), listed under 指南.
+  // The site passes no icon links, but the type allows them.
+  const links = useDocsLayout().menuItems.filter(
+    (item) => item.type !== 'icon',
+  );
   const { full: tree } = useTreeContext();
   // Only sections that pass a page tree get a desktop sidebar.
   const hasPageTree = tree.children.length > 0;
-  const links = menuItems.filter((item) => item.type !== 'icon');
 
   const pageTree = hasPageTree && (
     <>
       {links.length > 0 && (
-        <SectionSeparator>
-          <NavSectionTitle
-            icon={<HugeiconsIcon icon={BookOpen02Icon} strokeWidth={2} />}
-          >
-            指南
-          </NavSectionTitle>
+        <SectionSeparator
+          icon={<HugeiconsIcon icon={BookOpen02Icon} strokeWidth={2} />}
+        >
+          指南
         </SectionSeparator>
       )}
-      {links.map((item, i, list) => (
-        <SidebarLinkItem
-          key={i}
-          item={item}
-          className={cn(i === list.length - 1 && 'mb-4')}
-        />
+      {links.map((item, i) => (
+        <SidebarLinkItem key={i} item={item} />
       ))}
       <SidebarPageTree
         Item={PageTreeItem}
@@ -285,8 +252,13 @@ export function DocsSidebar() {
             {pageTree}
           </AnimatedNav>
         </SidebarScroll>
-        <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
-          <IconLinks items={menuItems} />
+        {/* The navbar's links and theme toggle, which the drawer replaces on
+            a phone, centred in a bar as on Animate UI's docs. */}
+        <div className="flex items-center justify-between border-t p-3">
+          <div className="flex items-center gap-1">
+            <SocialLinks linkClassName="size-8" />
+          </div>
+          <ThemeToggle />
         </div>
       </SidebarDrawerContent>
     </>

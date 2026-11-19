@@ -26,17 +26,18 @@ export const Nav = () => {
       // underneath plays its transition.
       className="fixed top-0 inset-x-0 z-30 flex items-center h-(--fd-banner-height) bg-background [view-transition-name:header]"
     >
-      {/* As wide as the layout's grid, with the sidebar's 24px inset, so the
-          logo stays over the sidebar's section icons at any width; on a phone
-          it lines up with the page's text edge instead. */}
-      <div className="flex items-center gap-3 max-w-(--fd-layout-width,97rem) w-full mx-auto px-2.5 md:px-6">
+      {/* As wide as the layout's grid and inset like the sidebar, so the
+          logo stays over the sidebar's section icons at any width. On a
+          phone the row takes the page's text edge, and the icon buttons at
+          its ends are pulled out by their padding so their glyphs sit on it. */}
+      <div className="flex items-center gap-3 max-w-(--fd-layout-width,97rem) w-full mx-auto px-4 md:px-(--sidebar-inset)">
         <Link
           href="/"
           className={buttonVariants({
             color: 'ghost',
             size: 'icon-sm',
             className:
-              '[&_svg]:!size-5 md:[&_svg]:!size-4.5 !p-0 !size-8 transition-colors duration-200 ease-in-out',
+              '[&_svg]:!size-5 md:[&_svg]:!size-4.5 !p-0 !size-8 max-md:-ms-1.5 transition-colors duration-200 ease-in-out',
           })}
         >
           <IconLogo />
@@ -84,7 +85,7 @@ export const Nav = () => {
                   color: 'ghost',
                   size: 'icon-sm',
                   className:
-                    '!size-8 [&_svg]:!size-5 text-fd-muted-foreground md:hidden',
+                    '!size-8 [&_svg]:!size-5 -me-1.5 text-fd-muted-foreground md:hidden',
                 }),
               )}
               onClick={() => setOpen((prev) => !prev)}

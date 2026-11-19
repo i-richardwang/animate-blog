@@ -241,6 +241,24 @@
   --radius-xl: 4px;
 }
 
+/* Layout rules that several components share, so they line up by
+   construction rather than by matching numbers. */
+:root {
+  /* Where the sidebar's content starts, in the desktop sidebar and in the
+     mobile drawer. The navbar's row uses the same inset from the md
+     breakpoint, so the logo sits over the sidebar's section icons. */
+  --sidebar-inset: 1.5rem;
+}
+
+/* The frame of the home page's header, section cards and footer, and of
+   the section pages' footer: one width and side padding for all of them. */
+@utility page-frame {
+  width: 100%;
+  max-width: var(--container-7xl);
+  margin-inline: auto;
+  padding-inline: calc(var(--spacing) * 5);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

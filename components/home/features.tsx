@@ -95,7 +95,7 @@ function FeatureCard({ item, index }: { item: FeatureItem; index: number }) {
 
 export function Features() {
   return (
-    <div className="relative mx-auto mt-auto flex w-full max-w-7xl flex-col items-center justify-center px-5 pt-16 pb-10">
+    <div className="page-frame relative mt-auto flex flex-col items-center justify-center pt-16 pb-10">
       <div className="grid w-full grid-cols-1 gap-3 xs:grid-cols-2 sm:max-lg:max-w-2xl lg:grid-cols-4">
         <Highlight
           hover

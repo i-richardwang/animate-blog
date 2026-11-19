@@ -21,7 +21,7 @@ export function HomeHeader() {
       data-slot="home-header"
       className="fixed inset-x-0 top-0 z-70 h-20 bg-background/80 backdrop-blur-md"
     >
-      <div className="mx-auto flex h-full max-w-7xl items-center gap-3 px-5">
+      <div className="page-frame flex h-full items-center gap-3">
         <Link href="/" aria-label={SITE.name} className="flex items-center">
           {!playing && (
             <motion.div
