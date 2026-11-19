@@ -5,6 +5,7 @@ import {
   frontmatterSchema,
   metaSchema,
 } from 'fumadocs-mdx/config';
+import remarkCjkFriendly from 'remark-cjk-friendly';
 import { z } from 'zod';
 
 export const docs = defineDocs({
@@ -96,4 +97,12 @@ export const podcasts = defineCollections({
   }),
 });
 
-export default defineConfig();
+export default defineConfig({
+  mdxOptions: {
+    // CommonMark only opens `**` when the character inside isn't punctuation
+    // or the one outside is space or punctuation, so Chinese like
+    // 这套**"手动 RAG"**的 kept its asterisks, on the page and in search.
+    // remark-cjk-friendly applies the proposed CJK amendment to that rule.
+    remarkPlugins: (plugins) => [remarkCjkFriendly, ...plugins],
+  },
+});
