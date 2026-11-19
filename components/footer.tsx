@@ -50,7 +50,7 @@ export function StatusLink({ className }: { className?: string }) {
 // The footer under every section's layout (see components/site-layout.tsx).
 export function Footer() {
   return (
-    <footer className="mx-auto flex h-16 w-full max-w-7xl items-center justify-center gap-4 px-4 text-sm text-muted-foreground md:px-6">
+    <footer className="mx-auto flex h-16 w-full max-w-7xl items-center justify-center gap-4 px-5 text-sm text-muted-foreground">
       <FooterCredit className="truncate text-center" />
       <StatusLink />
     </footer>
