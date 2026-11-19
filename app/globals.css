@@ -251,6 +251,17 @@
     overscroll-behavior: none;
   }
 
+  /* Chinese breaks between any two characters, so a heading can split a
+     word across lines and a paragraph can end on a single character.
+     Balanced headings and pretty paragraphs keep lines even. */
+  :is(h1, h2, h3, h4) {
+    text-wrap: balance;
+  }
+
+  :is(p, li, dd, figcaption, blockquote) {
+    text-wrap: pretty;
+  }
+
   /* Hide scrollbar but keep functionality */
   html {
     scrollbar-width: none; /* Firefox */
