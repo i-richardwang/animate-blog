@@ -250,7 +250,7 @@ export const StatusTracker = ({ data }: StatusTrackerProps) => {
             <HoverCardContent
               side="top"
               align="center"
-              className="![animation-duration:0ms] ![transition-duration:0ms] w-auto min-w-40 p-0"
+              className="[animation-duration:0ms]! [transition-duration:0ms]! w-auto min-w-40 p-0"
               onMouseEnter={handleHoverCardMouseEnter}
               onMouseLeave={handleHoverCardMouseLeave}
             >

@@ -38,7 +38,7 @@ function FeaturedCard({ podcast }: { podcast: Podcast }) {
           alt={podcast.title}
           sizes="(min-width: 768px) 280px, 100vw"
           eager
-          className="w-full md:w-[280px] md:h-[280px] aspect-square md:aspect-auto flex-shrink-0"
+          className="w-full md:w-[280px] md:h-[280px] aspect-square md:aspect-auto shrink-0"
         />
 
         <div className="flex-1 p-6 md:p-8 flex flex-col justify-center">
@@ -103,14 +103,14 @@ function PodcastCard({ podcast, index }: { podcast: Podcast; index: number }) {
           src={podcast.image}
           alt={podcast.title}
           sizes="160px"
-          className="w-[160px] h-[160px] flex-shrink-0"
+          className="w-[160px] h-[160px] shrink-0"
         />
 
         <div className="flex-1 p-4 flex flex-col justify-center min-w-0">
           <div className="flex items-center gap-2 mb-1.5 text-xs text-muted-foreground">
             <span className="truncate">{podcast.podcastName}</span>
             <span className="text-muted-foreground/50">·</span>
-            <span className="flex items-center gap-1 flex-shrink-0">
+            <span className="flex items-center gap-1 shrink-0">
               <HugeiconsIcon icon={Clock01Icon} strokeWidth={2} size={12} />
               {podcast.duration}
             </span>
@@ -137,10 +137,7 @@ function PodcastCard({ podcast, index }: { podcast: Podcast; index: number }) {
               )}
             </div>
             <span className="text-muted-foreground/50">·</span>
-            <time
-              dateTime={podcast.date.toISOString()}
-              className="flex-shrink-0"
-            >
+            <time dateTime={podcast.date.toISOString()} className="shrink-0">
               {formatDate(podcast.date)}
             </time>
           </div>

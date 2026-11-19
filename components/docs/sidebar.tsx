@@ -15,11 +15,10 @@ import {
   SidebarFolderContent,
   SidebarFolderLink,
   SidebarFolderTrigger,
-  SidebarItem as BaseSidebarItem,
-  SidebarSeparator as BaseSidebarSeparator,
+  SidebarItem,
+  SidebarSeparator,
 } from 'fumadocs-ui/components/sidebar/base';
 import { createLinkItemRenderer } from 'fumadocs-ui/components/sidebar/link-item';
-import { createPageTreeRenderer } from 'fumadocs-ui/components/sidebar/page-tree';
 import { useDocsLayout } from 'fumadocs-ui/layouts/docs';
 import { useTreeContext } from 'fumadocs-ui/contexts/tree';
 import type * as PageTree from 'fumadocs-core/page-tree';
@@ -48,11 +47,11 @@ function AnimatedItem({
   className,
   children,
   ...props
-}: ComponentProps<typeof BaseSidebarItem> & { depth?: number }) {
+}: ComponentProps<typeof SidebarItem> & { depth?: number }) {
   const { hovered, hoverProps } = useNavHover(String(href));
 
   return (
-    <BaseSidebarItem
+    <SidebarItem
       href={href}
       external={external}
       active={active}
@@ -66,7 +65,7 @@ function AnimatedItem({
       <NavItemContent active={Boolean(active)} hovered={hovered} depth={depth}>
         {children}
       </NavItemContent>
-    </BaseSidebarItem>
+    </SidebarItem>
   );
 }
 
@@ -81,21 +80,11 @@ function SectionSeparator({
   children: ReactNode;
 }) {
   return (
-    <BaseSidebarSeparator className="mt-6 mb-2 px-2 first:mt-0">
+    <SidebarSeparator className="mt-6 mb-2 px-2 first:mt-0">
       <NavSectionTitle icon={icon}>{children}</NavSectionTitle>
-    </BaseSidebarSeparator>
+    </SidebarSeparator>
   );
 }
-
-const SidebarPageTree = createPageTreeRenderer({
-  SidebarFolder,
-  SidebarFolderContent,
-  SidebarFolderLink,
-  SidebarFolderTrigger,
-  SidebarItem: BaseSidebarItem,
-  // Unused: separators render through PageTreeSeparator below.
-  SidebarSeparator: BaseSidebarSeparator,
-});
 
 const SidebarLinkItem = createLinkItemRenderer({
   SidebarFolder,
@@ -105,40 +94,40 @@ const SidebarLinkItem = createLinkItemRenderer({
   SidebarItem: AnimatedItem,
 });
 
-function PageTreeItem({ item }: { item: PageTree.Item }) {
+// The current section's page tree. Every folder in the notes tree is a root
+// folder, a section with its own sidebar once you are inside it, so here it
+// is a single link to its landing page and the list stays flat. Separators
+// come from meta.json (`---[Icon]Name---`), their icon resolved by the
+// loader (see lib/source.ts).
+function PageTreeList() {
+  const { root } = useTreeContext();
   const pathname = usePathname();
-  return (
+  const link = (key: string, item: PageTree.Item, name: ReactNode) => (
     <AnimatedItem
+      key={key}
       href={item.url}
       external={item.external}
       active={pathname === item.url}
     >
-      {item.name}
+      {name}
     </AnimatedItem>
   );
-}
 
-// Every folder in the notes tree is a root folder — its own section, with its
-// own sidebar once you are inside it. So the folder is listed as a single link
-// to its landing page; its pages are not spilled into the parent list.
-function PageTreeFolder({ item }: { item: PageTree.Folder }) {
-  const pathname = usePathname();
-  if (!item.index) return null;
-  return (
-    <AnimatedItem
-      href={item.index.url}
-      external={item.index.external}
-      active={pathname === item.index.url}
-    >
-      {item.name}
-    </AnimatedItem>
-  );
-}
-
-// Separators come from meta.json (`---[Icon]Name---`); the loader resolves
-// the icon name to a Hugeicons icon.
-function PageTreeSeparator({ item }: { item: PageTree.Separator }) {
-  return <SectionSeparator icon={item.icon}>{item.name}</SectionSeparator>;
+  return root.children.map((node, i) => {
+    const key = node.$id ?? String(i);
+    switch (node.type) {
+      case 'page':
+        return link(key, node, node.name);
+      case 'folder':
+        return node.index ? link(key, node.index, node.name) : null;
+      case 'separator':
+        return (
+          <SectionSeparator key={key} icon={node.icon}>
+            {node.name}
+          </SectionSeparator>
+        );
+    }
+  });
 }
 
 // The scrolling part of the sidebar and of the drawer: no scrollbar, the
@@ -210,11 +199,7 @@ export function DocsSidebar() {
       {links.map((item, i) => (
         <SidebarLinkItem key={i} item={item} />
       ))}
-      <SidebarPageTree
-        Item={PageTreeItem}
-        Folder={PageTreeFolder}
-        Separator={PageTreeSeparator}
-      />
+      <PageTreeList />
     </>
   );
   return (

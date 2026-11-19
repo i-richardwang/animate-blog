@@ -9,6 +9,7 @@ import { Button } from '@animate-ui/react/primitives/buttons/button';
 import { SplittingText } from '@animate-ui/react/primitives/texts/splitting';
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { actionLinkClassName } from '@/components/action-link';
 import { ArrowRight02Icon } from '@/components/animate-ui/icons/hugeicons/arrow-right-02';
 import { RISE_WORDS, rise } from '@/lib/motion';
 import { SITE } from '@/lib/site';
@@ -26,24 +27,18 @@ const SUBTITLE = [
   '软件开发与自托管服务的实践笔记。',
 ];
 
-const button =
-  'inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-medium transition-colors [&_svg]:size-4';
-
 function CallsToAction() {
   return (
     <div className="flex gap-3 max-sm:w-full max-sm:flex-col">
       <AnimateIcon animateOnHover="out" completeOnStop asChild>
-        <Button
-          asChild
-          className={`${button} bg-primary text-primary-foreground hover:bg-primary/85`}
-        >
+        <Button asChild className={actionLinkClassName('primary')}>
           <Link href="/blog">
             探索博客 <ArrowRight02Icon />
           </Link>
         </Button>
       </AnimateIcon>
       <AnimateIcon animateOnHover="out" completeOnStop asChild>
-        <Button asChild className={`${button} bg-accent hover:bg-accent/70`}>
+        <Button asChild className={actionLinkClassName('secondary')}>
           <Link href="/projects">
             项目展示 <ArrowRight02Icon />
           </Link>

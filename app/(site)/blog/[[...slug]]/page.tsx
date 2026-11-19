@@ -1,6 +1,6 @@
 import { blogs, getNeighbours, getSortedBlogPosts } from '@/lib/source';
 import { DocsDescription, DocsTitle } from 'fumadocs-ui/page';
-import { SitePage } from '@/components/docs/page';
+import { ArticlePage, SectionPage } from '@/components/docs/page';
 import { SiteBody } from '@/components/docs/site-body';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
@@ -27,7 +27,7 @@ export default async function Page(props: PageProps<'/blog/[[...slug]]'>) {
     }));
 
     return (
-      <SitePage tableOfContent={{ enabled: false }} className="max-w-[1124px]">
+      <SectionPage>
         <DocsTitle className="font-medium">{SECTION.title}</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           {SECTION.description}
@@ -39,7 +39,7 @@ export default async function Page(props: PageProps<'/blog/[[...slug]]'>) {
             <BlogList posts={posts} />
           </div>
         </SiteBody>
-      </SitePage>
+      </SectionPage>
     );
   }
 
@@ -52,12 +52,7 @@ export default async function Page(props: PageProps<'/blog/[[...slug]]'>) {
   const { previous, next } = getNeighbours(getSortedBlogPosts(), page.url);
 
   return (
-    <SitePage
-      toc={page.data.toc}
-      tableOfContentPopover={{ enabled: false }}
-      className="max-w-[860px]"
-      footer={{ items: { previous, next } }}
-    >
+    <ArticlePage toc={page.data.toc} footer={{ items: { previous, next } }}>
       <PageTitle title={page.data.title} previous={previous} next={next} />
       <DocsDescription className="mb-1 font-normal">
         {page.data.description}
@@ -74,7 +69,7 @@ export default async function Page(props: PageProps<'/blog/[[...slug]]'>) {
       <SiteBody article>
         <MDXContent components={getMDXComponents()} />
       </SiteBody>
-    </SitePage>
+    </ArticlePage>
   );
 }
 

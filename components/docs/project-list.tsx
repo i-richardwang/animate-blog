@@ -32,7 +32,7 @@ export function ProjectList({ projects }: ProjectListProps) {
         >
           <div className="p-6">
             <div className="flex items-center gap-3 mb-3">
-              <div className="relative flex-shrink-0 size-6">
+              <div className="relative shrink-0 size-6">
                 {MONOCHROME_LOGOS.has(project.logo) ? (
                   <span
                     role="img"

@@ -1,14 +1,12 @@
-// The site's sections, declared once. The navbar, its hover menus and the
-// mobile sidebar all render from this list rather than each keeping their own
-// copy — which is how the navbar ended up with two 笔记 entries.
+// The site's sections, declared once: the navbar, its hover menus and the
+// mobile drawer all render from this list.
 export interface NavSection {
   title: string;
   url: string;
   // Sub-sections. A section with children opens as a menu in the navbar; the
   // section itself stays a link to its index page.
   children?: { title: string; url: string }[];
-  // Kept here, rather than commented out, so the section is one flag away from
-  // coming back and can't silently drift from the pages that exist.
+  // A section whose pages are built but not linked from the navigation.
   hidden?: boolean;
 }
 

@@ -1,6 +1,6 @@
 import { projects, getNeighbours, getOrderedProjects } from '@/lib/source';
 import { DocsDescription, DocsTitle } from 'fumadocs-ui/page';
-import { SitePage } from '@/components/docs/page';
+import { ArticlePage, SectionPage } from '@/components/docs/page';
 import { SiteBody } from '@/components/docs/site-body';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
@@ -43,7 +43,7 @@ export default async function Page(props: PageProps<'/projects/[[...slug]]'>) {
     })).filter((group) => group.projects.length > 0);
 
     return (
-      <SitePage tableOfContent={{ enabled: false }} className="max-w-[1124px]">
+      <SectionPage>
         <DocsTitle className="font-medium">{SECTION.title}</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           {SECTION.description}
@@ -52,18 +52,14 @@ export default async function Page(props: PageProps<'/projects/[[...slug]]'>) {
         <SiteBody>
           {portfolio.length > 0 && (
             <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-6 text-foreground">
-                作品集
-              </h2>
+              <h2 className="text-2xl mb-6 text-foreground">作品集</h2>
               <ProjectList projects={portfolio} />
             </section>
           )}
 
           <div className="mt-4 mb-8 border-t border-border" />
 
-          <h2 className="text-2xl font-semibold mb-8 text-foreground">
-            实验室
-          </h2>
+          <h2 className="text-2xl mb-8 text-foreground">实验室</h2>
 
           {labGroups.map((group) => (
             <section key={group.category} className="mb-12 last:mb-0">
@@ -74,7 +70,7 @@ export default async function Page(props: PageProps<'/projects/[[...slug]]'>) {
             </section>
           ))}
         </SiteBody>
-      </SitePage>
+      </SectionPage>
     );
   }
 
@@ -85,12 +81,7 @@ export default async function Page(props: PageProps<'/projects/[[...slug]]'>) {
   const { previous, next } = getNeighbours(getOrderedProjects(), page.url);
 
   return (
-    <SitePage
-      toc={page.data.toc}
-      tableOfContentPopover={{ enabled: false }}
-      className="max-w-[860px]"
-      footer={{ items: { previous, next } }}
-    >
+    <ArticlePage toc={page.data.toc} footer={{ items: { previous, next } }}>
       <PageTitle title={page.data.title} previous={previous} next={next} />
       <DocsDescription className="mb-1 font-normal">
         {page.data.description}
@@ -119,7 +110,7 @@ export default async function Page(props: PageProps<'/projects/[[...slug]]'>) {
       <SiteBody article>
         <MDXContent components={getMDXComponents()} />
       </SiteBody>
-    </SitePage>
+    </ArticlePage>
   );
 }
 

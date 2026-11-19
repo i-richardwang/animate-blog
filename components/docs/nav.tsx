@@ -33,12 +33,10 @@ export const Nav = () => {
       <div className="flex items-center gap-3 max-w-(--fd-layout-width,97rem) w-full mx-auto px-4 md:px-(--sidebar-inset)">
         <Link
           href="/"
-          className={buttonVariants({
-            color: 'ghost',
-            size: 'icon-sm',
-            className:
-              '[&_svg]:!size-5 md:[&_svg]:!size-4.5 !p-0 !size-8 max-md:-ms-1.5 transition-colors duration-200 ease-in-out',
-          })}
+          className={cn(
+            buttonVariants({ color: 'ghost', size: 'icon-sm' }),
+            'size-8 p-0 max-md:-ms-1.5 [&_svg]:size-5 md:[&_svg]:size-4.5 transition-colors duration-200 ease-in-out',
+          )}
         >
           <IconLogo />
         </Link>
@@ -81,12 +79,8 @@ export const Nav = () => {
               type="button"
               aria-label={open ? 'Close menu' : 'Open menu'}
               className={cn(
-                buttonVariants({
-                  color: 'ghost',
-                  size: 'icon-sm',
-                  className:
-                    '!size-8 [&_svg]:!size-5 -me-1.5 text-fd-muted-foreground md:hidden',
-                }),
+                buttonVariants({ color: 'ghost', size: 'icon-sm' }),
+                'size-8 -me-1.5 text-fd-muted-foreground md:hidden [&_svg]:size-5',
               )}
               onClick={() => setOpen((prev) => !prev)}
             >

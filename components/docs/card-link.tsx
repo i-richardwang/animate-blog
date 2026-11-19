@@ -38,8 +38,7 @@ export function CardLink({
 
 // A card's cover image. It fills the box `className` sizes; `sizes` tells
 // the browser how wide that is. `eager` loads it at once, for a cover that
-// is the first thing on the page. Like every card on the site, it doesn't
-// grow on hover.
+// is the first thing on the page.
 export function CoverImage({
   src,
   alt,

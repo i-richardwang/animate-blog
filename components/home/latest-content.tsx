@@ -19,7 +19,7 @@ const SyncedSendIcon = () => {
       key={currentText}
       animation="default"
       animate
-      className="size-5 flex-shrink-0"
+      className="size-5 shrink-0"
     />
   );
 };
