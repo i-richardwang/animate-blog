@@ -33,6 +33,7 @@ function FeaturedCard({ reading }: { reading: Reading }) {
           src={reading.image}
           alt={reading.title}
           sizes="(min-width: 768px) 50vw, 100vw"
+          eager
           className="w-full md:w-1/2 aspect-[16/9]"
         />
 

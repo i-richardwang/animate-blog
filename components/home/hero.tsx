@@ -17,7 +17,14 @@ import { useIntroDone } from './intro';
 import { LatestContent } from './latest-content';
 
 const TITLE = "👋 Hi, I'm Richard Wang.";
-const SUBTITLE = `${SITE.motto}关于人工智能、数据科学、软件开发与自托管服务的实践笔记。`;
+// The subtitle breaks only between these phrases, never inside a word: it
+// reads as two lines on desktop and three on a phone.
+const SUBTITLE = [
+  SITE.motto,
+  '关于人工智能、',
+  '数据科学、',
+  '软件开发与自托管服务的实践笔记。',
+];
 
 const button =
   'inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-medium transition-colors [&_svg]:size-4';
@@ -67,7 +74,11 @@ export function Hero({ latestContent }: { latestContent: LatestEntry[] }) {
         {...rise(1, { shown: done })}
         className="mt-5 max-w-[620px] text-sm text-balance text-muted-foreground sm:text-base md:text-lg"
       >
-        {SUBTITLE}
+        {SUBTITLE.map((phrase) => (
+          <span key={phrase} className="inline-block">
+            {phrase}
+          </span>
+        ))}
       </motion.p>
 
       <motion.div

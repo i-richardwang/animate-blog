@@ -99,7 +99,7 @@ export function NavItemContent({
       </AnimatePresence>
       <motion.span
         className={cn(
-          'w-full text-sm text-neutral-700 transition-colors dark:text-neutral-200',
+          'w-full text-sm text-pretty text-neutral-700 transition-colors dark:text-neutral-200',
           (active || hovered) && 'text-black dark:text-white',
         )}
         style={{ paddingInlineStart: 12 + depth * 12 }}
@@ -126,12 +126,12 @@ export function NavSectionTitle({
   icon,
   children,
 }: {
-  icon: ReactNode;
+  icon?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <span className="flex items-center gap-2">
-      <NavSectionIcon>{icon}</NavSectionIcon>
+      {icon && <NavSectionIcon>{icon}</NavSectionIcon>}
       <span className="text-[13px] text-neutral-500">{children}</span>
     </span>
   );

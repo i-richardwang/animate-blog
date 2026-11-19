@@ -52,7 +52,7 @@ export default async function Page(props: PageProps<'/projects/[[...slug]]'>) {
         <SiteBody>
           {portfolio.length > 0 && (
             <section className="mb-12">
-              <h2 className="text-2xl font-medium mb-6 text-foreground">
+              <h2 className="text-2xl font-semibold mb-6 text-foreground">
                 作品集
               </h2>
               <ProjectList projects={portfolio} />
@@ -61,7 +61,9 @@ export default async function Page(props: PageProps<'/projects/[[...slug]]'>) {
 
           <div className="mt-4 mb-8 border-t border-border" />
 
-          <h2 className="text-2xl font-medium mb-8 text-foreground">实验室</h2>
+          <h2 className="text-2xl font-semibold mb-8 text-foreground">
+            实验室
+          </h2>
 
           {labGroups.map((group) => (
             <section key={group.category} className="mb-12 last:mb-0">
@@ -84,7 +86,8 @@ export default async function Page(props: PageProps<'/projects/[[...slug]]'>) {
 
   return (
     <SitePage
-      tableOfContent={{ enabled: false }}
+      toc={page.data.toc}
+      tableOfContentPopover={{ enabled: false }}
       className="max-w-[860px]"
       footer={{ items: { previous, next } }}
     >

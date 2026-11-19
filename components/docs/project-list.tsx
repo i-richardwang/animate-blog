@@ -4,6 +4,10 @@ import Image from 'next/image';
 import { CardLink } from '@/components/docs/card-link';
 import { TechStackIcons } from '@/components/tech-stack-icons';
 
+// The shared one-colour marks are black in their files. Drawn as a mask over
+// the text colour, they follow the theme instead of vanishing on dark cards.
+const MONOCHROME_LOGOS = new Set(['/projects/github.svg', '/projects/mcp.svg']);
+
 interface Project {
   url: string;
   title: string;
@@ -29,13 +33,22 @@ export function ProjectList({ projects }: ProjectListProps) {
           <div className="p-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="relative flex-shrink-0 size-6">
-                <Image
-                  src={project.logo}
-                  alt={`${project.title} logo`}
-                  fill
-                  sizes="24px"
-                  className="object-contain"
-                />
+                {MONOCHROME_LOGOS.has(project.logo) ? (
+                  <span
+                    role="img"
+                    aria-label={`${project.title} logo`}
+                    className="absolute inset-0 bg-foreground mask-contain mask-center mask-no-repeat"
+                    style={{ maskImage: `url(${project.logo})` }}
+                  />
+                ) : (
+                  <Image
+                    src={project.logo}
+                    alt={`${project.title} logo`}
+                    fill
+                    sizes="24px"
+                    className="object-contain"
+                  />
+                )}
               </div>
               <h2 className="flex-1 text-lg md:text-xl font-medium group-hover:text-primary transition-colors line-clamp-2">
                 {project.title}

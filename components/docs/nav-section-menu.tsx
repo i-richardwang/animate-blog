@@ -1,14 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 import {
   HoverCard,
   HoverCardTrigger,
   HoverCardContent,
 } from '@/components/ui/hover-card';
 import { usePathname } from 'next/navigation';
-import { HugeiconsIcon } from '@hugeicons/react';
 import type { NavSection } from '@/lib/navigation';
 import { navItemClassName } from './nav-item';
 
@@ -21,21 +19,8 @@ export const NavSectionMenu = ({ section }: { section: NavSection }) => {
   return (
     <HoverCard openDelay={150} closeDelay={200}>
       <HoverCardTrigger asChild>
-        <Link
-          href={section.url}
-          title={section.title}
-          className={navItemClassName(active)}
-        >
-          <HugeiconsIcon
-            icon={section.icon}
-            strokeWidth={2}
-            size={16}
-            className={cn(
-              'lg:hidden',
-              active ? 'text-foreground' : 'text-muted-foreground',
-            )}
-          />
-          <span className="lg:inline hidden">{section.title}</span>
+        <Link href={section.url} className={navItemClassName(active)}>
+          {section.title}
         </Link>
       </HoverCardTrigger>
       <HoverCardContent align="start" sideOffset={8} className="w-48 p-2">
