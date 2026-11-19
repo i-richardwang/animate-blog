@@ -81,7 +81,7 @@
   --color-fd-card: #f0edde;
   --color-fd-card-foreground: #2b3328;
   --color-fd-muted: #e6e3d4;
-  --color-fd-muted-foreground: #3c4539;
+  --color-fd-muted-foreground: var(--muted-foreground);
   --color-fd-secondary: #f0edde;
   --color-fd-secondary-foreground: #2b3328;
   --color-fd-popover: #fcf9f0;
@@ -113,7 +113,7 @@
 
   --muted: #3a3a3a;
 
-  --muted-foreground: #e2e2dc;
+  --muted-foreground: #a8a8a0;
 
   --accent: #2a2a2a;
 
@@ -161,7 +161,7 @@
   --color-fd-card: #242424;
   --color-fd-card-foreground: #f8f8f2;
   --color-fd-muted: #3a3a3a;
-  --color-fd-muted-foreground: #e2e2dc;
+  --color-fd-muted-foreground: var(--muted-foreground);
   --color-fd-secondary: #2a2a2a;
   --color-fd-secondary-foreground: #f8f8f2;
   --color-fd-popover: #1c1c1c;
