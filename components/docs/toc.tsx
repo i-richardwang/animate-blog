@@ -115,7 +115,7 @@ export function TOC({ container }: TOCProps) {
     <div
       id="nd-toc"
       {...container}
-      className="sticky top-(--fd-docs-row-1) flex h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] w-(--fd-toc-width) flex-col pt-24 pe-4 pb-18 [grid-area:toc] max-xl:hidden xl:layout:[--fd-toc-width:268px]"
+      className="sticky top-(--fd-docs-row-1) flex h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] w-(--fd-toc-width) flex-col pt-7 pe-4 pb-18 [grid-area:toc] max-xl:hidden xl:layout:[--fd-toc-width:268px]"
     >
       <p className="mb-2 px-2">
         <NavSectionTitle
