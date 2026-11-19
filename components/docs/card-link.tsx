@@ -36,17 +36,21 @@ export function CardLink({
   );
 }
 
-// A cover image that zooms in while its `group` card is hovered. It fills
-// the box `className` sizes; `sizes` tells the browser how wide that is.
+// A card's cover image. It fills the box `className` sizes; `sizes` tells
+// the browser how wide that is. `eager` loads it at once, for a cover that
+// is the first thing on the page. Like every card on the site, it doesn't
+// grow on hover.
 export function CoverImage({
   src,
   alt,
   sizes,
+  eager = false,
   className,
 }: {
   src: string;
   alt: string;
   sizes: string;
+  eager?: boolean;
   className: string;
 }) {
   return (
@@ -56,7 +60,8 @@ export function CoverImage({
         alt={alt}
         fill
         sizes={sizes}
-        className="object-cover group-hover:scale-105 transition-transform duration-300"
+        loading={eager ? 'eager' : 'lazy'}
+        className="object-cover"
       />
     </div>
   );

@@ -37,6 +37,7 @@ function FeaturedCard({ podcast }: { podcast: Podcast }) {
           src={podcast.image}
           alt={podcast.title}
           sizes="(min-width: 768px) 280px, 100vw"
+          eager
           className="w-full md:w-[280px] md:h-[280px] aspect-square md:aspect-auto flex-shrink-0"
         />
 
