@@ -59,7 +59,7 @@ function AnimatedItem({
       external={external}
       active={active}
       className={cn(
-        'relative flex items-center rounded-lg py-2 ml-2 pl-4 text-start',
+        'relative flex items-center rounded-lg py-1.5 ml-2 pl-4 text-start font-medium',
         className,
       )}
       {...hoverProps}
@@ -79,7 +79,7 @@ function SectionSeparator({
   return (
     <BaseSidebarSeparator
       className={cn(
-        'inline-flex items-center gap-2 mb-2 mt-8 first:mt-0 px-2 [&_svg]:shrink-0',
+        'inline-flex items-center gap-2 mb-2 mt-6 first:mt-0 px-2 [&_svg]:shrink-0',
         className,
       )}
       {...props}
@@ -148,7 +148,9 @@ function PageTreeSeparator({ item }: { item: PageTree.Separator }) {
 // The scrolling part of the sidebar: no scrollbar, the content fading out at
 // the edges instead (the TOC scrolls the same way). On desktop it keeps the
 // same 24px gap under the navbar as the page, so the first entry lines up
-// with the title.
+// with the title, and Animate UI's 24px left inset, so the section icons line
+// up with the navbar logo. The right inset stays small: note titles run to
+// 14 Chinese characters and should not wrap.
 function SidebarScroll({ children }: { children: ReactNode }) {
   const scroll = useRef<HTMLDivElement>(null);
   useScrollFade(scroll, { size: 24, blur: 0 });
@@ -156,7 +158,7 @@ function SidebarScroll({ children }: { children: ReactNode }) {
     <div
       ref={scroll}
       data-slot="sidebar-scroll"
-      className="min-h-0 flex-1 overflow-y-auto overscroll-none px-2 pb-4 [scrollbar-width:none] max-md:pt-2 md:pt-6 md:pb-14"
+      className="min-h-0 flex-1 overflow-y-auto overscroll-none px-2 pb-4 [scrollbar-width:none] max-md:pt-2 md:pt-6 md:pl-6 md:pb-14"
     >
       {children}
     </div>

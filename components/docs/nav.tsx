@@ -24,9 +24,12 @@ export const Nav = () => {
       id="nd-subnav"
       // Its own view-transition group, so it stays still while the page
       // underneath plays its transition.
-      className="fixed top-0 inset-x-0 z-30 flex items-center px-4 h-(--fd-banner-height) bg-background [view-transition-name:header]"
+      className="fixed top-0 inset-x-0 z-30 flex items-center h-(--fd-banner-height) bg-background [view-transition-name:header]"
     >
-      <div className="flex items-center gap-3 max-w-[1670px] w-full mx-auto md:px-5 px-3">
+      {/* As wide as the layout's grid, with the sidebar's 24px inset, so the
+          logo stays over the sidebar's section icons at any width; on a phone
+          it lines up with the page's text edge instead. */}
+      <div className="flex items-center gap-3 max-w-(--fd-layout-width,97rem) w-full mx-auto px-2.5 md:px-6">
         <Link
           href="/"
           className={buttonVariants({
@@ -52,7 +55,7 @@ export const Nav = () => {
 
           <div className="flex items-center md:gap-3 gap-2">
             <button
-              className="pl-3 pr-1.5 h-8 w-48 lg:w-56 xl:w-64 bg-accent hover:bg-accent/70 transition-colors duration-200 ease-in-out text-sm text-muted-foreground rounded-md flex items-center justify-between"
+              className="pl-3 pr-1.5 h-8 w-48 md:w-40 lg:w-56 xl:w-64 bg-accent hover:bg-accent/70 transition-colors duration-200 ease-in-out text-sm text-muted-foreground rounded-md flex items-center justify-between"
               onClick={() => setOpenSearch(true)}
             >
               <span className="font-normal">Search...</span>
