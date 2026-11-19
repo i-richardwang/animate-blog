@@ -43,7 +43,7 @@ export function BlogList({ posts }: BlogListProps) {
               </p>
             )}
           </div>
-          <div className="flex-shrink-0 size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+          <div className="shrink-0 size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
             <HugeiconsIcon icon={ArrowRight02Icon} strokeWidth={2} size={16} />
           </div>
         </CardLink>

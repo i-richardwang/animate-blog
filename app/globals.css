@@ -259,6 +259,20 @@
   padding-inline: calc(var(--spacing) * 5);
 }
 
+/* Heading weights in content, on top of Fumadocs' prose styles: those make
+   an h1 extra bold, where the site's page titles are medium, and stop at h4,
+   which leaves h5 and h6 at body weight. Like the prose styles, these skip
+   anything inside .not-prose, such as cards, whose titles set their own. */
+@layer utilities {
+  .prose h1:not(:where(.not-prose, .not-prose *)) {
+    font-weight: 500;
+  }
+
+  .prose :is(h5, h6):not(:where(.not-prose, .not-prose *)) {
+    font-weight: 600;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -113,7 +113,7 @@ export function NavItemContent({
 }
 
 // The small boxed icon in front of a section heading.
-export function NavSectionIcon({ children }: { children: ReactNode }) {
+function NavSectionIcon({ children }: { children: ReactNode }) {
   return (
     <span className="relative flex size-5 items-center justify-center rounded-[5px] bg-border text-muted-foreground [&_svg]:size-[12px]">
       {children}

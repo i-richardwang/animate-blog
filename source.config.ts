@@ -100,9 +100,9 @@ export const podcasts = defineCollections({
 export default defineConfig({
   mdxOptions: {
     // CommonMark only opens `**` when the character inside isn't punctuation
-    // or the one outside is space or punctuation, so Chinese like
-    // 这套**"手动 RAG"**的 kept its asterisks, on the page and in search.
-    // remark-cjk-friendly applies the proposed CJK amendment to that rule.
+    // or the one outside is space or punctuation, so in Chinese such as
+    // 这套**"手动 RAG"**的 the asterisks would stay literal. remark-cjk-friendly
+    // applies the proposed CJK amendment to that rule.
     remarkPlugins: (plugins) => [remarkCjkFriendly, ...plugins],
   },
 });

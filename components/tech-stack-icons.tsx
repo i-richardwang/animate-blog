@@ -50,7 +50,7 @@ export function TechStackIcons({ tech }: { tech: string[] }) {
         return (
           <div
             key={techName}
-            className="flex-shrink-0 size-5 text-muted-foreground"
+            className="shrink-0 size-5 text-muted-foreground"
             title={techName}
           >
             <Icon className="size-full" />

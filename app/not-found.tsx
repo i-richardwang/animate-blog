@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { DocsDescription, DocsTitle } from 'fumadocs-ui/page';
 import { SiteLayout } from '@/components/site-layout';
-import { SitePage } from '@/components/docs/page';
+import { actionLinkClassName } from '@/components/action-link';
+import { SectionPage } from '@/components/docs/page';
 import { SiteBody } from '@/components/docs/site-body';
 import { visibleSections } from '@/lib/navigation';
 
@@ -14,7 +15,7 @@ export const metadata: Metadata = { title: '页面不存在' };
 export default function NotFound() {
   return (
     <SiteLayout>
-      <SitePage tableOfContent={{ enabled: false }} className="max-w-[1124px]">
+      <SectionPage>
         <DocsTitle className="font-medium">页面不存在</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           链接可能已经失效，或者页面换了地址。
@@ -27,11 +28,9 @@ export default function NotFound() {
                 <Link
                   key={section.url}
                   href={section.url}
-                  className={
-                    i === 0
-                      ? 'inline-flex h-10 items-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/85'
-                      : 'inline-flex h-10 items-center rounded-lg bg-accent px-5 text-sm font-medium transition-colors hover:bg-accent/70'
-                  }
+                  className={actionLinkClassName(
+                    i === 0 ? 'primary' : 'secondary',
+                  )}
                 >
                   {section.title}
                 </Link>
@@ -39,7 +38,7 @@ export default function NotFound() {
             )}
           </nav>
         </SiteBody>
-      </SitePage>
+      </SectionPage>
     </SiteLayout>
   );
 }

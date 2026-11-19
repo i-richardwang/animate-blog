@@ -1,6 +1,6 @@
 import { podcasts, getNeighbours, getSortedPodcastPosts } from '@/lib/source';
 import { DocsDescription, DocsTitle } from 'fumadocs-ui/page';
-import { SitePage } from '@/components/docs/page';
+import { ArticlePage, SectionPage } from '@/components/docs/page';
 import { SiteBody } from '@/components/docs/site-body';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
@@ -38,7 +38,7 @@ export default async function Page(props: PageProps<'/podcasts/[[...slug]]'>) {
     }));
 
     return (
-      <SitePage tableOfContent={{ enabled: false }} className="max-w-[1124px]">
+      <SectionPage>
         <DocsTitle className="font-medium">{SECTION.title}</DocsTitle>
         <DocsDescription className="mb-1 font-normal">
           {SECTION.description}
@@ -47,7 +47,7 @@ export default async function Page(props: PageProps<'/podcasts/[[...slug]]'>) {
         <SiteBody>
           <PodcastList podcasts={posts} />
         </SiteBody>
-      </SitePage>
+      </SectionPage>
     );
   }
 
@@ -60,11 +60,7 @@ export default async function Page(props: PageProps<'/podcasts/[[...slug]]'>) {
   const { previous, next } = getNeighbours(getSortedPodcastPosts(), page.url);
 
   return (
-    <SitePage
-      tableOfContent={{ enabled: false }}
-      className="max-w-[860px]"
-      footer={{ items: { previous, next } }}
-    >
+    <ArticlePage toc={page.data.toc} footer={{ items: { previous, next } }}>
       <CategoryLabel category={page.data.category} />
       <PageTitle title={page.data.title} previous={previous} next={next} />
 
@@ -120,7 +116,7 @@ export default async function Page(props: PageProps<'/podcasts/[[...slug]]'>) {
       <SiteBody article>
         <MDXContent components={getMDXComponents()} />
       </SiteBody>
-    </SitePage>
+    </ArticlePage>
   );
 }
 
